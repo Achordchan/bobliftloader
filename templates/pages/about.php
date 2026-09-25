@@ -64,7 +64,7 @@ foreach (['skid-steer-loaders' => 'Mini skid steer loaders', 'mini-dumpers' => '
     <ol class="bl-about-promises">
       <li class="bl-reveal"><span>01</span><h3>One company, start to finish.</h3><p>You deal directly with Xuzhou BOB-LIFT Construction Machinery Co., Ltd., the company that builds the machines, from the first quote to delivery.</p></li>
       <li class="bl-reveal"><span>02</span><h3>Built to your order.</h3><p>Engine, running gear and operator position are set per order, and loaders are painted in the colour you specify.</p></li>
-      <li class="bl-reveal"><span>03</span><h3>One team to talk to.</h3><p><a href="mailto:info@boblift.com">info@boblift.com</a> reaches the same team for loaders, dumpers, parts and service questions.</p></li>
+      <li class="bl-reveal"><span>03</span><h3>One team to talk to.</h3><p><a href="mailto:info@boblift.com">info@boblift.com</a> reaches the same team for loaders, dumpers, <a href="<?= bl_escape(bl_url('/support/') . '#after-delivery') ?>">parts and service</a> questions.</p></li>
     </ol>
   </div>
 </section>
@@ -83,7 +83,7 @@ foreach (['skid-steer-loaders' => 'Mini skid steer loaders', 'mini-dumpers' => '
   </div>
 </section>
 
-<section class="bl-about-certs bl-shell" aria-labelledby="certificates-title">
+<section class="bl-about-certs bl-shell" id="certificates" aria-labelledby="certificates-title">
   <div class="bl-about-certs-head bl-reveal"><p class="bl-eyebrow">03 / PAPERWORK</p><h2 id="certificates-title">CERTIFIED<br>TO EXPORT.</h2><p>Certificates held by Xuzhou BOB-LIFT Construction Machinery Co., Ltd. Ask which documents cover your model, and request current copies with your enquiry.</p></div>
   <ul class="bl-about-cert-list"><?php foreach ($certificates as $cert): ?><li class="bl-reveal"><img src="<?= bl_escape(bl_asset('images/company/' . $cert['file'] . '.webp')) ?>" alt="<?= bl_escape($cert['label']) ?> certificate" width="452" height="640" loading="lazy"><span><?= bl_escape($cert['label']) ?></span></li><?php endforeach; ?></ul>
 </section>

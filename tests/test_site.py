@@ -161,7 +161,7 @@ class WebsiteTests(unittest.TestCase):
         _, html, _ = fetch('/products/')
         self.assertEqual(html.count('class="bl-catalog-group-head"'), 2)
         self.assertNotIn('data-section-nav', html)
-        for path, expected in [('/products/skid-steer-loaders/', 5), ('/products/mini-dumpers/', 3)]:
+        for path, expected in [('/products/skid-steer-loaders/', 6), ('/products/mini-dumpers/', 3)]:
             _, html, _ = fetch(path)
             targets = re.findall(r'href="#([\w-]+)" data-section-link', html)
             self.assertEqual(len(targets), expected, path)

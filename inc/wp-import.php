@@ -24,7 +24,7 @@ function bl_import_initial_content(): array
         $counts['news']++;
     }
     $parents = [];
-    foreach (['home' => 'Home', 'about' => 'About BOB-LIFT', 'applications' => 'Applications', 'contact' => 'Contact BOB-LIFT', 'privacy' => 'Privacy', 'applications/landscaping' => 'Landscaping', 'applications/site-preparation' => 'Site preparation', 'applications/material-transport' => 'Material transport'] as $path => $title) {
+    foreach (['home' => 'Home', 'about' => 'About BOB-LIFT', 'applications' => 'Applications', 'contact' => 'Contact BOB-LIFT', 'support' => 'Buying & support', 'privacy' => 'Privacy', 'applications/landscaping' => 'Landscaping', 'applications/site-preparation' => 'Site preparation', 'applications/material-transport' => 'Material transport'] as $path => $title) {
         $existing = get_page_by_path($path);
         if ($existing) { $parents[$path] = $existing->ID; continue; }
         $segments = explode('/', $path);
@@ -42,7 +42,7 @@ function bl_import_initial_content(): array
 
 add_action('admin_menu', static function (): void {
     add_management_page('BOB-LIFT 站点初始化', 'BOB-LIFT 站点初始化', 'manage_options', 'bl-site-setup', static function (): void {
-        echo '<div class="wrap"><h1>BOB-LIFT 站点初始化</h1><p>导入已核实的 ' . count(bl_read_data('products')) . ' 款产品、3 篇主站新闻摘要和 8 个页面。已有同路径内容会跳过，不会覆盖。</p><p>初始化会将 Home 设为静态首页；未设置固定链接时启用文章名形式。不会改变搜索引擎可见性，也不会发送邮件。</p>';
+        echo '<div class="wrap"><h1>BOB-LIFT 站点初始化</h1><p>导入已核实的 ' . count(bl_read_data('products')) . ' 款产品、3 篇主站新闻摘要和 9 个页面。已有同路径内容会跳过，不会覆盖。</p><p>初始化会将 Home 设为静态首页；未设置固定链接时启用文章名形式。不会改变搜索引擎可见性，也不会发送邮件。</p>';
         if (isset($_GET['imported'])) echo '<div class="notice notice-success"><p>初始化已完成，请前往设备产品、企业新闻和页面检查内容。</p></div>';
         echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="bl_import_sources">';
         wp_nonce_field('bl_import_sources');

@@ -53,6 +53,7 @@ $heading = $category === 'mini-dumpers' ? 'KEEP MATERIALS<br>MOVING.' : ($catego
   <div class="bl-empty" data-catalog-empty<?= $visible ? ' hidden' : '' ?>><h2>No matching equipment.</h2><p>Try another model name, or remove a filter.</p><a class="bl-text-link" href="<?= bl_escape(bl_url($route['path'])) ?>" data-catalog-clear>Clear filters <?= bl_icon('arrow-up-right') ?></a></div>
 </section>
 <?php if ($category) { $storyCategory = $category; require __DIR__ . '/../partials/range-story.php'; } // what the family is for, before the model-by-model comparison ?>
+<?php if ($category === 'skid-steer-loaders') require __DIR__ . '/../partials/attachments.php'; // tools belong to the machine, so they sit with the range, not in a catalogue of their own ?>
 <?php if ($category === 'skid-steer-loaders') require __DIR__ . '/../partials/making-story.php'; // loader production photography only; none supplied for dumpers yet ?>
 <?php if ($category) { $compareCategory = $category; require __DIR__ . '/../partials/compare-table.php'; } ?>
 <?php if ($category === 'skid-steer-loaders') require __DIR__ . '/../partials/model-key.php'; // after the comparison: the names are read once the models are known ?>

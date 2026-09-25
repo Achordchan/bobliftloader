@@ -101,6 +101,8 @@
 .bl-site .bl-approach-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(28px,3vw,80px);margin:clamp(40px,3vw,72px) 0 0;padding:0;list-style:none}
 .bl-site .bl-approach-steps li{padding-top:clamp(18px,1.3vw,30px);border-top:1px solid var(--ink)}
 .bl-site .bl-approach-steps span{font-size:var(--fs-small);font-weight:700;color:var(--blue)}
+.bl-site .bl-approach-steps p a{border-bottom:1px solid currentColor;transition:color .2s}
+.bl-site .bl-approach-steps p a:hover{color:var(--blue)}
 .bl-site .bl-approach-steps h3{margin:clamp(12px,.9vw,22px) 0 10px;font:600 var(--fs-h4)/1.05 var(--display)}
 .bl-site .bl-approach-steps p{max-width:32em;font-size:var(--fs-small);line-height:1.85;color:var(--muted)}
 /* The photograph drifts slightly as it passes through the viewport, where scroll timelines are supported. */

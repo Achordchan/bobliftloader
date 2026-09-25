@@ -74,7 +74,7 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
   <ol class="bl-approach-steps">
     <li class="bl-reveal"><span>01</span><h3>Start with the right fit.</h3><p>Your site, your materials, your priorities. Tell us what you need to do and we’ll discuss the equipment options with you.</p></li>
     <li class="bl-reveal"><span>02</span><h3>Know what you’re choosing.</h3><p>Ask for model specifications, configuration options and product documentation before you decide, and confirm the details that matter to your work.</p></li>
-    <li class="bl-reveal"><span>03</span><h3>Keep the conversation going.</h3><p>Contact the same team for equipment questions, parts and service. Have a machine already? Include its model and serial number.</p></li>
+    <li class="bl-reveal"><span>03</span><h3>Keep the conversation going.</h3><p>Contact the same team for equipment questions, <a href="<?= bl_escape(bl_url('/support/') . '#after-delivery') ?>">parts and service</a>, with a 12-month warranty on the whole machine. Have a machine already? Include its model and serial number.</p></li>
   </ol>
 </section>
 
