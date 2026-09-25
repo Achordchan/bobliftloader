@@ -11,9 +11,7 @@
 .bl-site .bl-page-heading>p{max-width:clamp(295px,17vw,420px);font-size:var(--fs-body);line-height:1.85;color:var(--muted);padding-bottom:7px}
 .bl-site .bl-page-cta{display:flex;justify-content:space-between;align-items:center;gap:clamp(24px,calc(18.4px + 0.80vw),39px);background:#e4e9ef;padding-top:clamp(48px,calc(36.9px + 1.61vw),78px);padding-bottom:clamp(48px,calc(36.9px + 1.61vw),78px)}
 .bl-site .bl-page-cta h2{font-family:var(--display);font-size:var(--fs-h2);line-height:.95;font-weight:600;margin-top:18px}
-.bl-site .bl-application-wide{margin:0;position:relative;background:var(--ink)}
-.bl-site .bl-application-wide figcaption{background:var(--ink);color:#c5d2da;font-size:var(--fs-label);padding:14px var(--gutter);letter-spacing:.3px}
-.bl-site .bl-product-overview h2,.bl-site .bl-specifications h2,.bl-site .bl-application-requirements h2{font:600 clamp(42px,calc(19.4px + 2.85vw),92px)/.95 var(--display);letter-spacing:-.5px;margin-top:clamp(20px,calc(15.4px + 0.67vw),32px)}
+.bl-site .bl-product-overview h2,.bl-site .bl-specifications h2{font:600 clamp(42px,calc(19.4px + 2.85vw),92px)/.95 var(--display);letter-spacing:-.5px;margin-top:clamp(20px,calc(15.4px + 0.67vw),32px)}
 .bl-site .bl-prose{font-size:var(--fs-body);line-height:1.95;color:var(--muted)}
 .bl-site .bl-prose p+p{margin-top:clamp(19px,calc(14.7px + 0.64vw),31px)}
 .bl-site .bl-prose .bl-lead{font-size:var(--fs-lead);line-height:1.65;color:var(--ink)}
@@ -27,7 +25,7 @@
 .bl-site .bl-empty{padding:85px 0;text-align:center}
 .bl-site .bl-empty h2{font:600 var(--fs-h3)/1 var(--display)}
 .bl-site .bl-empty p{font-size:var(--fs-body);margin:20px 0;color:var(--muted)}
-.bl-site .bl-product-overview,.bl-site .bl-specifications,.bl-site .bl-application-requirements{display:grid;grid-template-columns:1fr 1.1fr;gap:9%;padding-block:clamp(64px,calc(49.1px + 2.14vw),104px)}
+.bl-site .bl-product-overview,.bl-site .bl-specifications{display:grid;grid-template-columns:1fr 1.1fr;gap:9%;padding-block:clamp(64px,calc(49.1px + 2.14vw),104px)}
 .bl-site .bl-specifications{background:#e7ecef}
 .bl-site .bl-specifications>div>p{font-size:var(--fs-body);line-height:1.9;color:var(--muted)}
 /* Specification sheet: heading and notes share the top row; the groups sit side by side beneath, so a 24-row sheet
@@ -101,17 +99,6 @@
 .bl-site .bl-contact-parent{background:var(--ink);color:white;display:grid;grid-template-columns:1fr 2fr;gap:clamp(48px,calc(36.9px + 1.61vw),78px);padding-block:clamp(38px,calc(29.5px + 1.29vw),62px)}
 .bl-site .bl-contact-parent p{font-size:var(--fs-body);color:#b7cbd8;line-height:1.9}
 .bl-site .bl-contact-parent a{color:white;text-decoration:underline;text-underline-offset:4px}
-.bl-site .bl-application-directory{padding-bottom:clamp(64px,calc(49.1px + 2.14vw),104px)}
-.bl-site .bl-application-directory>article{display:grid;grid-template-columns:1.25fr 1fr;gap:8%;align-items:center;padding:35px 0;border-top:1px solid var(--line)}
-.bl-site .bl-application-directory-image{display:block;aspect-ratio:1.7;background:white;overflow:hidden}
-.bl-site .bl-application-directory-image img{width:100%;height:100%;object-fit:cover}
-.bl-site .bl-application-directory h2{font:600 var(--fs-h2)/.98 var(--display);margin:20px 0}
-.bl-site .bl-application-directory article>div>p:not(.bl-eyebrow){font-size:var(--fs-body);line-height:1.9;color:var(--muted);max-width:390px}
-.bl-site .bl-application-directory .bl-text-link{margin-top:clamp(20px,calc(15.4px + 0.67vw),32px)}
-.bl-site .bl-application-wide>img{width:100%;max-width:var(--frame-width);height:auto;object-fit:cover;background:var(--ink);margin-inline:auto}
-.bl-site .bl-application-requirements article{padding-bottom:clamp(20px,calc(15.4px + 0.67vw),32px);margin-bottom:clamp(20px,calc(15.4px + 0.67vw),32px);border-bottom:1px solid var(--line)}
-.bl-site .bl-application-requirements article h3{font:600 var(--fs-h4)/1.1 var(--display);margin-bottom:12px}
-.bl-site .bl-application-requirements article p{font-size:var(--fs-body);color:var(--muted);line-height:1.9}
 .bl-site .bl-privacy-content{max-width:850px;margin:auto;padding:0 30px 80px}
 .bl-site .bl-privacy-content h2{font:600 var(--fs-h4)/1.1 var(--display);color:var(--ink);margin:35px 0 18px}
 .bl-site .bl-privacy-content a{text-decoration:underline;text-underline-offset:4px}
@@ -303,7 +290,29 @@
 .bl-site .bl-ruler-model{padding-left:clamp(4px,.4vw,10px);font:700 clamp(19px,1.2vw,30px)/1 var(--display);white-space:nowrap}
 .bl-site .bl-ruler-rows a:hover .bl-ruler-model{color:var(--blue)}
 .bl-site .bl-ruler-track{position:relative;align-self:stretch}
-.bl-site .bl-ruler-marked .bl-ruler-track::after{content:'';position:absolute;left:var(--marker);top:0;bottom:-1px;border-left:1.5px dashed var(--ink)}
+.bl-site .bl-ruler-marked .bl-ruler-track::after{content:'';position:absolute;left:var(--marker);top:0;bottom:-1px;border-left:1.5px dashed var(--ink);transition:left .15s ease-out}
+.bl-site .bl-ruler:not(.bl-ruler-marked) .bl-ruler-key-marker{display:none}
+/* A loader whose body fits but whose bucket is wider than the opening. */
+.bl-site .bl-ruler-over .bl-ruler-sub{background:#d0632e}
+.bl-site .bl-ruler-over .bl-ruler-sub::after{border-right-color:#d0632e}
+.bl-site .bl-ruler-over .bl-ruler-value small{color:#b44a1c;font-weight:600;white-space:pre-line}
+/* The visitor's own number, beside the chart it moves. */
+.bl-site .bl-ruler-control{margin-top:clamp(28px,2.2vw,52px);padding:clamp(20px,1.6vw,36px);background:#fff;border:1px solid var(--line)}
+.bl-site .bl-ruler-control-label{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+.bl-site .bl-ruler-control-label label{font-size:var(--fs-micro);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.bl-site .bl-ruler-control-label output{font:700 clamp(32px,2.2vw,58px)/1 var(--display);color:var(--blue);font-variant-numeric:tabular-nums}
+.bl-site .bl-ruler-range{--p:50%;width:100%;height:32px;margin:8px 0 0;background:transparent;cursor:pointer;-webkit-appearance:none;appearance:none}
+.bl-site .bl-ruler-range::-webkit-slider-runnable-track{height:3px;background:linear-gradient(90deg,var(--blue) var(--p),var(--line) var(--p))}
+.bl-site .bl-ruler-range::-moz-range-track{height:3px;background:var(--line)}
+.bl-site .bl-ruler-range::-moz-range-progress{height:3px;background:var(--blue)}
+.bl-site .bl-ruler-range::-webkit-slider-thumb{width:22px;height:22px;margin-top:-9.5px;border:3px solid #fff;border-radius:50%;background:var(--blue);box-shadow:0 0 0 1.5px var(--blue);-webkit-appearance:none;appearance:none;transition:transform .15s}
+.bl-site .bl-ruler-range::-moz-range-thumb{width:16px;height:16px;border:3px solid #fff;border-radius:50%;background:var(--blue);box-shadow:0 0 0 1.5px var(--blue)}
+.bl-site .bl-ruler-range:hover::-webkit-slider-thumb,.bl-site .bl-ruler-range:active::-webkit-slider-thumb{transform:scale(1.18)}
+.bl-site .bl-range-story-copy p.bl-ruler-control-hint{display:flex;justify-content:space-between;gap:12px;font-size:var(--fs-micro);color:var(--muted)}
+.bl-site .bl-ruler-control-hint span{font-weight:700;color:var(--ink)}
+.bl-site .bl-range-story-copy p.bl-ruler-summary{margin-top:clamp(16px,1.2vw,26px);padding-top:clamp(14px,1vw,22px);border-top:1px solid var(--line);font-size:var(--fs-small);font-weight:700;line-height:1.5;color:var(--ink)}
+.bl-site .bl-ruler-control .bl-text-link{margin-top:clamp(14px,1vw,22px);color:var(--ink)}
+.bl-site .bl-ruler-control .bl-button{margin-top:16px}
 .bl-site .bl-ruler-bar,.bl-site .bl-ruler-sub{position:absolute;left:0;width:var(--w);transform-origin:left}
 .bl-site .bl-ruler-bar{top:calc(50% - 9px);height:clamp(10px,.7vw,16px);background:var(--blue)}
 .bl-site .bl-ruler-miss .bl-ruler-bar{background:var(--ink)}

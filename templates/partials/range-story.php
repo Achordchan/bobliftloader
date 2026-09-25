@@ -32,8 +32,9 @@ if ($storyCategory === 'skid-steer-loaders') {
         'chartEyebrow' => 'MACHINE WIDTH',
         'chartTitle' => 'NARROW BY DESIGN.',
         'chartText' => ($under === count($rows) ? 'Every one of our ' . $inWords(count($rows)) . ' loaders is' : ucfirst($inWords($under)) . ' of our ' . $inWords(count($rows)) . ' loaders ' . ($under === 1 ? 'is' : 'are')) . ' under one metre wide across the body' . ($widest >= 1000 ? ', and the widest is ' . number_format($widest) . ' mm' : '') . '.' . ($narrowest && $narrowest['sub'] && $narrowest['sub'] < 1000 ? ' The narrowest, ' . $narrowest['model'] . ', stays under a metre with its bucket fitted too.' : ''),
-        'chartNote' => 'Bucket widths vary by model, so check the spec sheet against your narrowest opening.',
-        'legend' => ['Body width', 'Bucket width', '1 metre'],
+        'chartNote' => 'Widths from each model’s published specifications. Where a bucket is wider than your opening, its line turns orange.',
+        'legend' => ['bar' => 'Body width', 'sub' => 'Bucket width', 'marker' => 'Your opening'],
+        'control' => ['name' => 'opening', 'label' => 'Your narrowest opening', 'hint' => 'Gate, path or doorway', 'step' => 10, 'default' => 1000, 'unit' => 'mm'],
         'options' => [
             ['big' => 'TRACKS <i>/</i> TIRES', 'title' => 'Running gear.', 'text' => 'Rubber tracks for soft ground and slopes, rubber tires for concrete and asphalt.'],
             ['big' => 'STAND-ON <i>/</i> SEATED', 'title' => 'Operator position.', 'text' => 'Step on the platform for quick on-and-off work, or take the seat for longer shifts. The model name tells you which.', 'link' => ['#model-names', 'How our model names work']],
@@ -63,7 +64,8 @@ if ($storyCategory === 'skid-steer-loaders') {
         'chartTitle' => 'PICK YOUR PAYLOAD.',
         'chartText' => ucfirst($inWords(count($rows))) . ' models' . ($lightest && $heaviest ? ' from ' . ($lightest['value'] < 1000 ? $lightest['value'] . ' kg' : ($lightest['value'] / 1000) . ' t') . ' to ' . ($heaviest['value'] / 1000) . ' t' : '') . '.' . ($buckets ? ' Bucket capacity runs from ' . min($buckets) . ' m³ to ' . max($buckets) . ' m³ on the wheeled dumpers.' : '') . ($mixer ? ' The ' . $mixer['model'] . ' carries a ' . $mixer['specs']['Drum capacity'] . ' drum instead of a hopper.' : ''),
         'chartNote' => 'Rated loads from each model’s published specifications. Confirm your material and typical load with our team.',
-        'legend' => ['Rated load'],
+        'legend' => ['bar' => 'Rated load', 'marker' => 'Your load'],
+        'control' => ['name' => 'payload', 'label' => 'Your load per trip', 'hint' => 'Per trip, not per day', 'step' => 100, 'default' => 0, 'unit' => 'kg'],
         'options' => [
             ['big' => 'WHEELS <i>/</i> TRACKS', 'title' => 'Running gear.', 'text' => 'Wheeled site dumpers for firm ground and heavier loads; tracked models for soft ground and narrow access.'],
             ['big' => 'OPEN <i>/</i> ROOF <i>/</i> CAB', 'title' => 'Operator cover.', 'text' => 'Wheeled models come open or with a roof or cab. Each spec sheet lists the height with roof / cab.'],
@@ -73,6 +75,28 @@ if ($storyCategory === 'skid-steer-loaders') {
     ];
 }
 if (!$rows) return;
+/*
+ * The marker is the visitor's own number: the narrowest opening for loaders (default one metre), the load per trip for
+ * dumpers (default none). A loader passes on its body width; a bucket wider than the opening is flagged, not failed,
+ * since the body is what has to get through. assets/js/ruler.js moves the marker live; without it the form submits.
+ */
+$control = $story['control'] + ['min' => $scale['from'], 'max' => $scale['to']];
+$requested = bl_query($control['name']);
+$limit = $requested === '' ? $control['default'] : min(max((int) $requested, $control['min']), $control['max']);
+$widthMode = $control['name'] === 'opening';
+foreach ($rows as &$row) {
+    $row['hit'] = $widthMode ? $row['value'] <= $limit : (!$limit || $row['value'] >= $limit);
+    $row['over'] = $widthMode && $row['hit'] && $row['sub'] > $limit;
+    if ($widthMode && $row['sub']) $row['note'] = 'Bucket ' . number_format($row['sub']) . ' mm' . ($row['over'] ? "\n" . number_format($row['sub'] - $limit) . ' mm over' : '');
+}
+unset($row);
+$scale['marker'] = $widthMode || $limit ? $limit : null;
+$hits = count(array_filter($rows, static fn($r) => $r['hit']));
+$noun = $widthMode ? 'loaders' : 'dumpers';
+$summary = $widthMode
+    ? $hits . ' of ' . count($rows) . ' ' . $noun . ' fit through ' . number_format($limit) . ' mm · ' . count(array_filter($rows, static fn($r) => $r['hit'] && !$r['over'])) . ' with the bucket fitted'
+    : ($limit ? $hits . ' of ' . count($rows) . ' ' . $noun . ' are rated for ' . number_format($limit) . ' kg or more' : 'Move the slider to the load you carry per trip.');
+$ask = bl_contact_url(null, '', $widthMode ? ['width' => $limit] : ['load' => $limit, 'equipment' => 'dumper']);
 $at = static fn(int $v): string => rtrim(rtrim(number_format(($v - $scale['from']) / ($scale['to'] - $scale['from']) * 100, 2, '.', ''), '0'), '.') . '%';
 ?>
 <section class="bl-range-story bl-shell" id="about-the-range" aria-labelledby="range-story-title">
@@ -85,16 +109,24 @@ $at = static fn(int $v): string => rtrim(rtrim(number_format(($v - $scale['from'
       <p class="bl-eyebrow"><?= $story['chartEyebrow'] ?></p>
       <h3><?= $story['chartTitle'] ?></h3>
       <p><?= bl_escape($story['chartText']) ?></p>
+      <form class="bl-ruler-control" action="#about-the-range" method="get" data-ruler-control data-unit="<?= $control['unit'] ?>" data-noun="<?= $noun ?>" data-contact="<?= bl_escape(bl_url('/contact/')) ?>">
+        <div class="bl-ruler-control-label"><label for="ruler-<?= $control['name'] ?>"><?= bl_escape($control['label']) ?></label><output for="ruler-<?= $control['name'] ?>" data-ruler-out><?= $limit ? number_format($limit) . ' ' . $control['unit'] : 'Any' ?></output></div>
+        <input class="bl-ruler-range" type="range" id="ruler-<?= $control['name'] ?>" name="<?= $control['name'] ?>" min="<?= $control['min'] ?>" max="<?= $control['max'] ?>" step="<?= $control['step'] ?>" value="<?= $limit ?>" style="--p:<?= round(($limit - $control['min']) / ($control['max'] - $control['min']) * 100, 2) ?>%" aria-describedby="ruler-summary">
+        <p class="bl-ruler-control-hint"><span><?= bl_escape($scale['tick']($control['min'])) ?><?= $widthMode ? ' mm' : '' ?></span><?= bl_escape($control['hint']) ?><span><?= bl_escape($scale['tick']($control['max'])) ?><?= $widthMode ? ' mm' : '' ?></span></p>
+        <p class="bl-ruler-summary" id="ruler-summary" aria-live="polite" data-ruler-summary><?= bl_escape($summary) ?></p>
+        <a class="bl-text-link" href="<?= bl_escape($ask) ?>" data-ruler-ask>Ask about your site <?= bl_icon('arrow-up-right') ?></a>
+        <noscript><button class="bl-button bl-button-blue" type="submit">Check <?= bl_icon('arrow-down') ?></button></noscript>
+      </form>
       <p class="bl-range-story-note"><?= bl_escape($story['chartNote']) ?></p>
     </div>
-    <figure class="bl-ruler bl-reveal<?= $scale['marker'] ? ' bl-ruler-marked' : '' ?>"<?= $scale['marker'] ? ' style="--marker:' . $at($scale['marker']) . '"' : '' ?>>
-      <figcaption class="bl-ruler-legend"><?php foreach ($story['legend'] as $i => $label): ?><span class="bl-ruler-key-<?= ['bar', 'sub', 'marker'][$i] ?>"><?= bl_escape($label) ?></span><?php endforeach; ?></figcaption>
+    <figure class="bl-ruler bl-reveal<?= $scale['marker'] ? ' bl-ruler-marked' : '' ?>" data-ruler data-from="<?= $scale['from'] ?>" data-to="<?= $scale['to'] ?>"<?= $scale['marker'] ? ' style="--marker:' . $at($scale['marker']) . '"' : '' ?>>
+      <figcaption class="bl-ruler-legend"><?php foreach ($story['legend'] as $key => $label): ?><span class="bl-ruler-key-<?= $key ?>"><?= bl_escape($label) ?></span><?php endforeach; ?></figcaption>
       <ol class="bl-ruler-rows">
         <?php foreach ($rows as $i => $row): ?>
-        <li class="<?= $row['hit'] ? 'bl-ruler-hit' : 'bl-ruler-miss' ?>" style="--i:<?= $i ?>"><a href="<?= bl_escape($row['url']) ?>">
+        <li class="<?= $row['hit'] ? 'bl-ruler-hit' : 'bl-ruler-miss' ?><?= $row['over'] ? ' bl-ruler-over' : '' ?>" style="--i:<?= $i ?>" data-ruler-row data-value="<?= $row['value'] ?>" data-sub="<?= $row['sub'] ?>"><a href="<?= bl_escape($row['url']) ?>">
           <span class="bl-ruler-model"><?= bl_escape($row['model']) ?></span>
           <span class="bl-ruler-track" aria-hidden="true"><i class="bl-ruler-bar" style="--w:<?= $at($row['value']) ?>"></i><?php if ($row['sub']): ?><i class="bl-ruler-sub" style="--w:<?= $at(min($row['sub'], $scale['to'])) ?>"></i><?php endif; ?></span>
-          <span class="bl-ruler-value"><b><?= bl_escape($row['label']) ?></b><?php if ($row['note']): ?><small><?= bl_escape($row['note']) ?></small><?php endif; ?></span>
+          <span class="bl-ruler-value"><b><?= bl_escape($row['label']) ?></b><?php if ($row['note']): ?><small data-ruler-note><?= bl_escape($row['note']) ?></small><?php endif; ?></span>
         </a></li>
         <?php endforeach; ?>
       </ol>

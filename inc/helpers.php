@@ -108,7 +108,6 @@ function bl_catalog_filters(string $category): array
         'gear' => $gear,
         'operator' => ['label' => 'Operator', 'options' => ['stand-on' => 'Stand-on', 'seated' => 'Seated']],
         'load' => ['label' => 'Rated load', 'options' => ['light' => 'Up to 250 kg', 'mid' => '251–400 kg', 'heavy' => 'Over 400 kg']],
-        'width' => ['label' => 'Machine width', 'options' => ['narrow' => 'Under 1 m']],
     ];
     return [
         'load' => ['label' => 'Rated load', 'options' => ['light' => 'Up to 1 t', 'mid' => '1–2 t', 'heavy' => 'Over 2 t']],
@@ -123,14 +122,12 @@ function bl_product_facets(array $product, string $category): array
     $gear = strtolower($product['specs']['Running gear'] ?? '');
     $station = strtolower($product['specs']['Operator station'] ?? '');
     $load = (int) $product['load'];
-    $width = preg_match('/^([\d,]+)\s*mm$/', $product['specs']['Machine width'] ?? '', $m) ? (int) str_replace(',', '', $m[1]) : 0;
     $bands = $category === 'skid-steer-loaders' ? [250, 400] : [1000, 2000];
     return [
         // Every tracked model says so; the wheeled site dumpers publish no running-gear row at all.
         'gear' => str_contains($gear, 'track') ? 'tracked' : (str_contains($gear, 'tire') || str_contains($gear, 'wheel') || !$loader ? 'wheeled' : ''),
         'operator' => str_contains($station, 'stand') ? 'stand-on' : (str_contains($station, 'seat') ? 'seated' : ''),
         'load' => !$load ? '' : ($load <= $bands[0] ? 'light' : ($load <= $bands[1] ? 'mid' : 'heavy')),
-        'width' => $width && $width < 1000 ? 'narrow' : '',
     ];
 }
 
@@ -192,11 +189,16 @@ function bl_article_url(array $article): string
     return $article['url'] ?? bl_url('/news/' . $article['slug'] . '/');
 }
 
-function bl_contact_url(?array $product = null, string $application = ''): string
+/** $fit carries a visitor's site numbers (width, load, ground) so the enquiry opens with them already written. */
+function bl_contact_url(?array $product = null, string $application = '', array $fit = []): string
 {
     $query = [];
     if ($product) $query['product'] = $product['slug'];
     if ($application !== '') $query['application'] = $application;
+    if (!empty($fit['width'])) $query['width'] = $fit['width'];
+    if (!empty($fit['load'])) $query['load'] = $fit['load'];
+    if (($fit['ground'] ?? '') === 'soft') $query['ground'] = 'soft';
+    if (($fit['equipment'] ?? '') === 'dumper') $query['equipment'] = 'dumper';
     return bl_url('/contact/') . ($query ? '?' . http_build_query($query) : '') . '#enquiry';
 }
 
@@ -222,4 +224,77 @@ function bl_news_card(array $article): void
 function bl_application_slug(array $application): string
 {
     return strtolower(str_replace(' ', '-', $application['title']));
+}
+
+/**
+ * Every model with a published width, with the dimensions the application pages quote. A loader's width is its widest
+ * point with the bucket fitted (several buckets are wider than the body); a dumper's comes from its standard L × W × H.
+ */
+function bl_model_dimensions(): array
+{
+    $mm = static fn(string $value): int => preg_match('/([\d,]+)/', $value, $m) ? (int) str_replace(',', '', $m[1]) : 0;
+    $models = [];
+    foreach (bl_products() as $product) {
+        $specs = $product['specs'];
+        $loader = $product['category'] === 'skid-steer-loaders';
+        if ($loader) {
+            [$body, $bucket, $height] = [$mm($specs['Machine width'] ?? ''), $mm($specs['Bucket width'] ?? ''), $mm($specs['Overall height'] ?? '')];
+        } else {
+            $dimensions = array_map($mm, explode('×', $specs['Standard dimensions'] ?? ''));
+            [$body, $bucket, $height] = [$dimensions[1] ?? 0, 0, $dimensions[2] ?? 0];
+        }
+        if (!$body) continue;
+        $models[] = [
+            'model' => $product['model'],
+            'slug' => $product['slug'],
+            'url' => bl_product_url($product),
+            'image' => $product['image'],
+            'line' => trim(preg_replace('/^' . preg_quote($product['model'], '/') . '\s*/', '', $product['name'])) ?: $product['name'],
+            'family' => $loader ? 'loader' : 'dumper',
+            'width' => max($body, $bucket),
+            'body' => $body,
+            'bucket' => $bucket,
+            'height' => $height,
+            'load' => (int) $product['load'],
+            'extra' => !empty($specs['Drum capacity']) ? $specs['Drum capacity'] . ' drum' : '',
+            'tracked' => bl_product_facets($product, '')['gear'] === 'tracked',
+        ];
+    }
+    return $models;
+}
+
+/** Published ranges for one family ('loader' or 'dumper'). */
+function bl_family_ranges(string $family): array
+{
+    $models = array_values(array_filter(bl_model_dimensions(), static fn($m) => $m['family'] === $family));
+    $loads = array_filter(array_column($models, 'load'));
+    $widths = array_column($models, 'width');
+    $tracked = count(array_filter($models, static fn($m) => $m['tracked']));
+    return [
+        'count' => count($models),
+        'width' => $widths ? [min($widths), max($widths)] : [0, 0],
+        'load' => $loads ? [min($loads), max($loads)] : [0, 0],
+        'loaded' => count($loads),
+        'gear' => $tracked === count($models) ? 'Tracks' : ($tracked ? ($family === 'loader' ? 'Tracks / tires' : 'Wheels / tracks') : ($family === 'loader' ? 'Tires' : 'Wheels')),
+    ];
+}
+
+/** "200–500 kg", or tonnes once both ends reach a tonne ("1–5 t"); a mixed range reads "0.5–5 t". */
+function bl_load_range(array $range): string
+{
+    [$low, $high] = $range;
+    if ($high < 1000) return number_format($low) . '–' . number_format($high) . ' kg';
+    $t = static fn(int $kg): string => rtrim(rtrim(number_format($kg / 1000, 1), '0'), '.');
+    return $t($low) . '–' . $t($high) . ' t';
+}
+
+/** The one published figure that decides an application ($application['focus']), as value, unit and what it measures. */
+function bl_application_focus(array $application): array
+{
+    $ranges = bl_family_ranges($application['product']);
+    return match ($application['focus']) {
+        'width' => ['value' => number_format($ranges['width'][0]), 'unit' => 'mm', 'label' => 'Narrowest loader, bucket fitted'],
+        'load' => ['value' => str_replace(' kg', '', bl_load_range($ranges['load'])), 'unit' => 'kg', 'label' => 'Rated load across ' . $ranges['count'] . ' loaders'],
+        default => ['value' => str_replace(' t', '', bl_load_range($ranges['load'])), 'unit' => 't', 'label' => 'Rated load across ' . $ranges['loaded'] . ' dumpers'],
+    };
 }

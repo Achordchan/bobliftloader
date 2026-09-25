@@ -140,12 +140,12 @@ class WebsiteTests(unittest.TestCase):
         self.assertIn('id="compare-skid-steer-loaders"', html)
         self.assertNotIn('id="compare-mini-dumpers"', html)
         self.assertEqual(re.search(r'<table class="bl-compare-table">.*?</thead>', html, re.S).group(0).count('<th scope="col">'), 9)
-        # Loader filters: running gear, operator position, load band and body width, combinable, with counts per chip.
+        # Loader filters: running gear, operator position and load band, combinable, with counts per chip. Width is the range chart's job.
         _, html, _ = fetch('/products/skid-steer-loaders/?gear=tracked&operator=seated')
         self.assertEqual(len(visible_cards(html)), 2)
         self.assertIn('data-result-count>2<', html)
-        _, html, _ = fetch('/products/skid-steer-loaders/?width=narrow')
-        self.assertEqual(len(visible_cards(html)), 5)
+        _, html, _ = fetch('/products/skid-steer-loaders/')
+        self.assertNotIn('name="width"', html)
         _, html, _ = fetch('/products/skid-steer-loaders/?gear=wheeled&operator=stand-on')
         self.assertEqual(len(visible_cards(html)), 0)
         self.assertRegex(html, r'<div class="bl-empty" data-catalog-empty>')
@@ -219,6 +219,57 @@ class WebsiteTests(unittest.TestCase):
         for asset in set(re.findall(r'/assets/images/about/[\w-]+\.webp', html)):
             with OPENER.open(BASE + asset, timeout=30) as response:
                 self.assertEqual(response.status, 200, asset)
+
+    def test_range_charts_take_the_visitors_number(self):
+        def mm(value): return int(re.search(r'([\d,]+)', value).group(1).replace(',', ''))
+        def rows(html): return re.findall(r'<li class="bl-ruler-(hit|miss)( bl-ruler-over)?"[^>]*data-value="(\d+)" data-sub="(\d+)"', html)
+        loaders = [p for p in self.products if p['category'] == 'skid-steer-loaders']
+        # Loaders: the marker is the narrowest opening, one metre by default. The body has to fit; a wider bucket is flagged.
+        for query, opening in (('', 1000), ('?opening=950', 950), ('?opening=99999', 1300)):
+            _, html, _ = fetch('/products/skid-steer-loaders/' + query)
+            found = rows(html)
+            self.assertEqual(len(found), len(loaders))
+            for state, over, body, bucket in found:
+                self.assertEqual(state == 'hit', int(body) <= opening)
+                self.assertEqual(bool(over), state == 'hit' and int(bucket) > opening)
+            self.assertIn(f'fit through {opening:,} mm', html)
+        self.assertEqual(sum(mm(p['specs']['Machine width']) <= 950 for p in loaders), sum(s == 'hit' for s, *_ in rows(fetch('/products/skid-steer-loaders/?opening=950')[1])))
+        # Dumpers: no marker until a load is given; then models rated below it drop out.
+        _, html, _ = fetch('/products/mini-dumpers/')
+        self.assertNotIn('bl-ruler-marked', html)
+        self.assertTrue(all(s == 'hit' for s, *_ in rows(html)))
+        _, html, _ = fetch('/products/mini-dumpers/?payload=2000')
+        self.assertIn('bl-ruler-marked', html)
+        for state, _, load, _ in rows(html): self.assertEqual(state == 'hit', int(load) >= 2000)
+        self.assertIn('load=2000&amp;equipment=dumper', html)
+        # The enquiry opens with the site numbers written in; implausible values are ignored.
+        _, html, _ = fetch('/contact/?product=bl-t360-h-mini-skid-steer-loader&application=Landscaping&width=1000&load=200&ground=soft')
+        self.assertIn('The narrowest opening on my site is 1,000 mm. My heaviest load is about 200 kg. The ground is soft or sloped.', html)
+        _, html, _ = fetch('/contact/?width=99999&load=-1')
+        self.assertNotIn('narrowest opening on my site', html)
+
+    def test_applications_describe_the_job_and_point_to_the_range(self):
+        def mm(value): return int(re.search(r'([\d,]+)', value).group(1).replace(',', ''))
+        loaders = [p for p in self.products if p['category'] == 'skid-steer-loaders']
+        widest = min(max(mm(p['specs']['Machine width']), mm(p['specs']['Bucket width'])) for p in loaders)
+        _, html, _ = fetch('/applications/')
+        main = html.split('<main', 1)[1].split('</main>', 1)[0]
+        # Headline figures come from the specifications; model selection lives on the family pages, not here.
+        self.assertIn(f'{widest:,}<small>mm', main)
+        self.assertNotIn('type="range"', main)
+        self.assertNotIn('boblift.com/', main)
+        self.assertIn('/css/applications.css', html)
+        _, home, _ = fetch('/')
+        self.assertNotIn('/css/applications.css', home)
+        # Each job lists its machines in the order that matters to it and hands over to the family page.
+        _, html, _ = fetch('/applications/landscaping/')
+        cards = re.findall(r'<article class="bl-product-card">\s*<a class="bl-product-card-image" href="/product/([^/]+)/', html)
+        by_width = sorted(loaders, key=lambda p: (max(mm(p['specs']['Machine width']), mm(p['specs']['Bucket width'])), p['model']))
+        self.assertEqual(cards, [p['slug'] for p in by_width[:3]])
+        self.assertIn('/products/skid-steer-loaders/#about-the-range', html)
+        self.assertNotIn('type="range"', html.split('<main', 1)[1].split('</main>', 1)[0])
+        _, html, _ = fetch('/applications/material-transport/')
+        self.assertIn('/products/mini-dumpers/#about-the-range', html)
 
     def test_family_pages_introduce_their_range(self):
         loaders = [p for p in self.products if p['category'] == 'skid-steer-loaders']

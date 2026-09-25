@@ -78,3 +78,21 @@
 样式在 `assets/css/about.css`，只在 `/about/` 加载；旧关于页的样式已从 `pages.css` 和 `page-responsive.css` 删除。
 
 同日调整：产品相关的三块（系列索引、宽度标尺、按单配置）从 About 页移出，About 页改为四段：首屏（公司信息条）→ 01 关系 → 02 车间流程 → 03 证书。分类页在产品列表和对比表之间新增“系列介绍”板块（`range-story.php`，样式在 `pages.css` 的 `.bl-range-story` / `.bl-ruler`）。
+
+## 2026-09-25：应用中心重做，选型并入系列介绍图
+
+范围：`/applications/`、三个应用详情页，以及两个系列页的“系列介绍”图。场景仍是三个，没有新增场景或图片。
+
+**先做后撤的方案**：最初在应用页做了一个独立选型工具（门宽 / 载荷 / 地面三个输入，加一张按比例画的门柱图）。用户指出了两个问题：一是列表页和详情页放了同一个工具；二是挑型号本来是产品页的活，系列页的宽度图（MADE FOR THE TIGHT SPOTS）已经在讲同一件事。所以这个工具已整体删除，不再保留。
+
+- **系列介绍图改成可拖动**（`templates/partials/range-story.php`、`assets/js/ruler.js`，样式在 `pages.css` 的 `.bl-ruler-control`、`.bl-ruler-over`）：
+  - 装载机图：原来固定在 1 米的虚线改成“你的最窄通道宽度”，可在 800–1,300 mm 之间拖动，默认 1,000 mm。机身能过的行显示蓝色，过不去的显示深色；机身能过、但铲斗比门宽的，铲斗线变橙，并写明宽出多少。
+  - 翻斗车图：新增“每趟载荷”标记，默认不显示；拖动后，额定载荷低于这个值的型号变深色。
+  - 两张图下方都有汇总行（比如“5 of 8 loaders fit through 1,000 mm · 1 with the bucket fitted”），还有一个带着数字进入联系表单的链接。
+  - 不开 JS 时表单提交，由 PHP 算出同样的结果（参数为 `?opening=`、`?payload=`）。
+- **应用列表页**：顶部三行标题；三张场景图全出血并排，鼠标悬停的一张会变宽。每张图上压着这个活最看重的数字，由产品数据实时计算：最窄装载机（含铲斗）930 mm，装载机额定载荷 200–500 kg，翻斗车 0.5–5 t。下面是“询盘前准备的四样信息”。
+- **应用详情页**：大图下压参数条，最能决定这个活的一项标蓝；然后是三项询盘前检查。“适合这个活的机型”区块按这个活最看重的指标排序，列出 3 张产品卡：园林绿化按含铲斗的最窄宽度，场地平整按额定载荷从高到低，物料运输按额定载荷从低到高，并链接到系列页的宽度图、载荷图或对比表。最后是另外两个应用的入口和通用 CTA。
+- 联系表单支持 `width`、`load`、`ground` 参数，会自动写进留言（只接受合理范围内的数值）。
+- 应用页的样式在 `assets/css/applications.css`，只在应用页加载。旧版 `.bl-application-directory`、`.bl-application-wide`、`.bl-application-requirements` 已从 `pages.css` 和 `page-responsive.css` 删除。各应用的检查项已挪到 `inc/content.php`。
+- 验证：`tests/test_site.py` 13 项全部通过（新增 `test_range_charts_take_the_visitors_number` 和 `test_applications_describe_the_job_and_point_to_the_range`）。在 1440 宽下截图检查；375 宽下 `scrollWidth` 等于视口宽度。WordPress Playground 本轮没有重跑。
+- 注意：物料运输“路线”检查项里写的“轮式 1.5–1.8 m、履带式不到 0.9 m”是手写文案，翻斗车参数变了要同步改。

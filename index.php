@@ -23,7 +23,7 @@ http_response_code($route['status']);
   <link rel="preload" href="<?= bl_escape(bl_asset('fonts/barlow-condensed-700.ttf')) ?>" as="font" type="font/ttf" crossorigin>
   <?php if ($route['type'] === 'home'): ?><link rel="preload" href="<?= bl_escape(bl_asset('images/hero-banner-2k.webp')) ?>" as="image" media="(min-width: 801px)" fetchpriority="high"><link rel="preload" href="<?= bl_escape(bl_asset('images/hero-real-loader.webp')) ?>" as="image" media="(max-width: 800px)" fetchpriority="high"><?php endif; ?>
   <?php if ($route['type'] === 'about'): ?><link rel="preload" as="image" imagesrcset="<?= bl_escape(bl_asset('images/about/hall-1200.webp')) ?> 1200w, <?= bl_escape(bl_asset('images/about/hall-2560.webp')) ?> 2560w" imagesizes="100vw" fetchpriority="high"><?php endif; ?>
-  <?php foreach (['base', 'home', 'components', 'responsive', 'pages', 'page-responsive', ...($route['type'] === 'about' ? ['about'] : [])] as $stylesheet): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset('css/' . $stylesheet . '.css')) ?>"><?php endforeach; ?>
+  <?php foreach (['base', 'home', 'components', 'responsive', 'pages', 'page-responsive', ...($route['type'] === 'about' ? ['about'] : []), ...(in_array($route['type'], ['applications', 'application'], true) ? ['applications'] : [])] as $stylesheet): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset('css/' . $stylesheet . '.css')) ?>"><?php endforeach; ?>
   <script type="module" src="<?= bl_escape(bl_asset('js/main.js')) ?>"></script>
   <?php if (bl_is_wordpress()) wp_head(); ?>
 </head>

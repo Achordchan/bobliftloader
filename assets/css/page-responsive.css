@@ -12,7 +12,7 @@
   .bl-site .bl-page-heading>p{max-width:500px;font-size:14px}
   .bl-site .bl-page-heading h1{font-size:83px}
   .bl-site .bl-page-hero{padding-bottom:48px}
-  .bl-site .bl-product-overview,.bl-site .bl-specifications,.bl-site .bl-application-requirements{grid-template-columns:1fr;gap:35px;padding-block:55px}
+  .bl-site .bl-product-overview,.bl-site .bl-specifications{grid-template-columns:1fr;gap:35px;padding-block:55px}
   .bl-site .bl-news-grid{gap:25px;grid-template-columns:repeat(2,minmax(0,1fr))}
   .bl-site .bl-news-card h2{font-size:31px}
   .bl-site .bl-contact-page-grid{grid-template-columns:1fr;gap:25px}
@@ -20,9 +20,6 @@
   .bl-site .bl-contact-details>div:last-child{grid-column:1/-1}
   .bl-site .bl-contact-parent{grid-template-columns:1fr;gap:25px}
   .bl-site .bl-article-cover>img{height:410px}
-  .bl-site .bl-application-directory h2{font-size:45px}
-  .bl-site .bl-application-directory>article{gap:30px}
-  .bl-site .bl-application-wide>img{height:auto}
 }
 @media(max-width:600px){
   .bl-site .bl-nav>a{font-size:34px}
@@ -46,8 +43,7 @@
   .bl-site .bl-catalog,.bl-site .bl-journal{padding-bottom:55px}
   .bl-site .bl-page-cta{align-items:flex-start;flex-direction:column;padding-block:45px}
   .bl-site .bl-page-cta h2{font-size:48px}
-  .bl-site .bl-application-wide figcaption{font-size:11px}
-  .bl-site .bl-product-overview h2,.bl-site .bl-specifications h2,.bl-site .bl-application-requirements h2{font-size:47px}
+  .bl-site .bl-product-overview h2,.bl-site .bl-specifications h2{font-size:47px}
   .bl-site .bl-prose{font-size:14px}
   .bl-site .bl-prose .bl-lead{font-size:17px}
   .bl-site .bl-product-main-image>img{padding:15px}
@@ -79,13 +75,6 @@
   .bl-site .bl-contact-form-panel>h2{font-size:38px}
   .bl-site .bl-contact-parent{padding-block:35px}
   .bl-site .bl-contact-parent p{font-size:13px}
-  .bl-site .bl-application-directory>article{grid-template-columns:1fr;gap:25px;padding-block:28px}
-  .bl-site .bl-application-directory-image{aspect-ratio:1.25}
-  .bl-site .bl-application-directory h2{font-size:47px;margin-block:17px}
-  .bl-site .bl-application-directory article>div>p:not(.bl-eyebrow){font-size:13px}
-  .bl-site .bl-application-directory{padding-bottom:35px}
-  .bl-site .bl-application-wide>img{height:auto}
-  .bl-site .bl-application-requirements article p{font-size:13px}
   .bl-site .bl-not-found{padding-block:70px}
   .bl-site .bl-not-found>div{flex-direction:column;align-items:flex-start}
 }
