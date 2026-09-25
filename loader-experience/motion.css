@@ -1,0 +1,29 @@
+.exp-motion-panel { border-radius: 18px; background: #ececef; }
+.exp-motion-panel video { display: block; width: 100%; height: 100%; object-fit: contain; }
+.exp-motion-panel.exp-hydraulic-media { background: #121314; border: 1px solid #ffffff12; }
+.exp-chassis-zoom { height: calc(100% - 56px); transform-origin: 50% 72%; }
+.exp-motion-tools { position: absolute; left: 14px; right: 14px; bottom: 12px; display: flex; align-items: center; gap: 14px; z-index: 6; padding: 10px 12px; border-radius: 12px; background: #ffffffed; color: #222; }
+.exp-motion-tools button { display: flex; align-items: center; gap: 8px; background: transparent; padding: 5px 0; white-space: nowrap; font-size: 11px; }
+.exp-motion-tools button[aria-pressed="true"] .exp-play-symbol { width: 7px; height: 9px; border-left: 2px solid; border-right: 2px solid; border-top: 0; border-bottom: 0; }
+.exp-motion-tools input { min-width: 20px; width: 100%; accent-color: #ef492f; cursor: pointer; }
+.exp-motion-tag { font-size: 10px; white-space: nowrap; color: #777; }
+.exp-hydraulics .exp-motion-tools { background: #252629ed; color: #fff; }
+.exp-hydraulics .exp-motion-tag { color: #b9b9bd; }
+.exp-motion-status { position: absolute; left: 5%; right: 5%; top: 5%; font-size: 12px; text-align: center; z-index: 6; }
+.exp-motion-status button { background: transparent; text-decoration: underline; padding: 10px; }
+.exp-reference-button { position: absolute; left: 7%; bottom: 10%; z-index: 5; padding: 12px 0; font-size: 12px !important; background: transparent; text-decoration: underline; text-underline-offset: 5px; }
+.exp-hydraulic-points li { transition: border-color .2s; }
+.exp-hydraulic-points li.is-current { border-top-color: #ef492f; }
+.exp-hydraulic-points li.is-current h3 { color: #ff795e; }
+.exp-sr { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }
+.exp-real-video { display: block; width: 100%; max-height: 65svh; background: #111; margin-bottom: 20px; }
+.exp-real-dialog { width: min(1000px, calc(100vw - 32px)); }
+@media(max-width:700px) {
+  .exp-motion-panel { border-radius: 12px; }
+  .exp-motion-tools { left: 7px; right: 7px; bottom: 7px; gap: 8px; padding: 8px; }
+  .exp-motion-tools button { font-size: 10px; }
+  .exp-motion-tag { display: none; }
+  .exp-reference-button { bottom: 0; font-size: 10px !important; padding: 8px 0; }
+  .exp-detail-caption { display: none; }
+  .exp-motion-status { font-size: 10px; }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "preferredVersions": {
+    "php": "8.3",
+    "wp": "latest"
+  },
+  "landingPage": "/",
+  "steps": [
+    {
+      "step": "activateTheme",
+      "themeFolderName": "bobliftloader"
+    },
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "BOB-LIFT Compact Equipment",
+        "blog_public": "0",
+        "timezone_string": "Asia/Shanghai"
+      }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require '/wordpress/wp-load.php'; define('BL_TEST_CONTEXT', true); require get_template_directory() . '/tests/wp-smoke.php';"
+    }
+  ]
+}

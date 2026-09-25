@@ -1,0 +1,20 @@
+[
+  {
+    "file": "operation.mp4",
+    "bytes": 3235588,
+    "width": 960,
+    "height": 720,
+    "r_frame_rate": "24/1",
+    "duration": "6.666667",
+    "nb_frames": "160"
+  },
+  {
+    "file": "tracks.mp4",
+    "bytes": 1770684,
+    "width": 960,
+    "height": 720,
+    "r_frame_rate": "24/1",
+    "duration": "2.666667",
+    "nb_frames": "64"
+  }
+]

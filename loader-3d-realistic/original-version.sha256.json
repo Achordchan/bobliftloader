@@ -1,0 +1,19 @@
+{
+  "preview.png": "98c0c819192ab2cd727414dcdb65a2437557579ee479fa33ec64cf973efb48bc",
+  "index.html": "efca797ba6d2b4b5797de0f27d0d4f4a5a0d65d19855f36f233abd793ee8e5d4",
+  ".DS_Store": "a45c6e46fd9a6fec1c58a19a53dfc06c09edf7bff846241d3e2a2a7d2dc1817f",
+  "mobile-preview.png": "7f14602c342189aaed1d31f3091a4cd3f80be49c0cb5f6c0b00a003084ccc449",
+  "tracks.js": "ef1af8731a9933d02ed843c7d21382faf7e13012f01b31928d5a82cd1330b3b0",
+  "side-preview.png": "94ea5bd2d2ff2befcbb6b61fafe9849e1a837e855d6efa65f5de4e6641952336",
+  "body.js": "92d330348280fc111130cdbfcc0323708a324f4eebf2ae1d704adb12f087cb23",
+  "viewer.js": "0c303b322a98a0ee8677ec7cff4b10665ab0108d4be01d40d12cf740f860a982",
+  "README.md": "f90ff3b80069cc0c4c168da533602f90adab34083d143e20d5d82be72c64ecbd",
+  "style.css": "27670fa15e51e891856b59dc45753347628e980198d6cd6f0f15eaf1bf1d954b",
+  "back-preview.png": "2399f997ebbf6d82101bd5f8b2112050cf6bfd2fc90b90db7120fa944af680c2",
+  "attachment.js": "08fcfffcb940524b18fc359434b68115ae8e716aa918ac3fa9046051e724afb9",
+  "articulation-preview.png": "995966306fd740d538d07690a537d84a7159fec113fb9636094378039be9a47d",
+  "model.js": "aab738a436e1fddb0b3d4619d8b516a5dc562723882332fe6ae65ad89cecd1d3",
+  "geometry.js": "de69ea0f2563f572085dbc5dbfdb1f29de63e8ec594e2d6bbdb8a831725d9e86",
+  "vendor/THREE-LICENSE.txt": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d",
+  "vendor/three.min.js": "170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa"
+}

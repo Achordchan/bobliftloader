@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "site",
+      "runtimeExecutable": "php",
+      "runtimeArgs": ["-S", "127.0.0.1:4173", "-t", ".", "router.php"],
+      "port": 4173
+    },
+    {
+      "name": "loader-experience",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["loader-experience/scripts/serve.py", "--host", "127.0.0.1", "--port", "4175"],
+      "port": 4175
+    }
+  ]
+}

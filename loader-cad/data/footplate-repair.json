@@ -1,0 +1,19 @@
+{
+  "tread_count": 48,
+  "evaluated_bottom_gap_mm": [
+    -0.4000440239906311,
+    -0.39996206760406494
+  ],
+  "floating_treads": 0,
+  "surface_alignment_verified": true,
+  "before_bottom_gap_mm": [
+    24.66972917318344,
+    55.58522045612335
+  ],
+  "platform_tilt_degrees": 6.6741775135650325,
+  "source": "/Users/a1234/Desktop/项目/bobliftloader/loader-cad/loader-cad-restored.blend",
+  "backup": "/Users/a1234/Desktop/项目/bobliftloader/loader-cad/backups/before-footplate-20260922-104632-853791.blend",
+  "output": "/Users/a1234/Desktop/项目/bobliftloader/loader-cad/loader-cad-restored.blend",
+  "unchanged_other_objects": 898,
+  "original_cad_geometry_unchanged": true
+}

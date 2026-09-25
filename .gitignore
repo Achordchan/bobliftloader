@@ -1,0 +1,21 @@
+# Tencent Cloud EdgeOne
+.env
+.edgeone/*
+.tef_dist/*
+
+# System / editor
+.DS_Store
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# Blender autosave backups
+*.blend1
+
+# Logs
+*.log

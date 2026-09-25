@@ -1,0 +1,2 @@
+<section class="bl-page-hero bl-shell"><?php bl_breadcrumbs([['label' => $route['title']]]); ?><div class="bl-page-heading"><div><p class="bl-eyebrow">BOB-LIFT COMPACT EQUIPMENT</p><h1><?= bl_escape($route['title']) ?></h1></div></div></section>
+<article class="bl-privacy-content bl-prose"><?php if (bl_is_wordpress()): $post = get_queried_object(); echo wp_kses_post(apply_filters('the_content', $post->post_content)); endif; ?></article>

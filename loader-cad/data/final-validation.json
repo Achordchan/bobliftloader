@@ -1,0 +1,22 @@
+{
+  "blend": "/Users/a1234/Desktop/项目/bobliftloader/loader-cad/loader-cad-restored.blend",
+  "cad_parts": 160,
+  "photo_derived_objects": 779,
+  "meshes": 898,
+  "cad_local_bounds_max_error_m": 5.8238782907338305e-08,
+  "source_sha256_unchanged": true,
+  "empty_meshes": 0,
+  "non_finite_coordinates": 0,
+  "unpacked_images": [],
+  "cameras": [
+    "整机 · 前侧",
+    "整机 · 侧面",
+    "整机 · 后侧"
+  ],
+  "limitations": [
+    "照片补充件未获工程尺寸校准",
+    "未做运动学绑定或动态碰撞验收",
+    "侧面开孔以原始 CAD 为准，照片局部结构可能属于不同批次",
+    "未复刻不可辨认的标签文字与制造商标识"
+  ]
+}

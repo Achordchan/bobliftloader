@@ -1,0 +1,19 @@
+{
+  "wordpress": "7.1.1",
+  "php": "8.3.33",
+  "theme": "bobliftloader",
+  "import": {
+    "products": 13,
+    "news": 3,
+    "pages": 8
+  },
+  "idempotent_import": true,
+  "admin_save_and_frontend_read": true,
+  "news_editor_read": true,
+  "nonce_rejection": true,
+  "anonymous_rejection": true,
+  "draft_visibility": true,
+  "restored": true,
+  "published_products": 13,
+  "published_news": 3
+}

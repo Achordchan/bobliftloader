@@ -1,0 +1,48 @@
+{
+  "model": "gpt-image-2.5-sunburst",
+  "quality": "high",
+  "images": [
+    {
+      "file": "/Users/a1234/Desktop/项目/bobliftloader/assets/images/app-landscaping.webp",
+      "requested_size": [
+        2560,
+        1600
+      ],
+      "actual_size": [
+        1586,
+        992
+      ],
+      "bytes": 552548,
+      "native_resolution_target_met": false,
+      "upscaled": false
+    },
+    {
+      "file": "/Users/a1234/Desktop/项目/bobliftloader/assets/images/app-site-prep.webp",
+      "requested_size": [
+        2560,
+        1600
+      ],
+      "actual_size": [
+        1586,
+        992
+      ],
+      "bytes": 503824,
+      "native_resolution_target_met": false,
+      "upscaled": false
+    },
+    {
+      "file": "/Users/a1234/Desktop/项目/bobliftloader/assets/images/app-transport.webp",
+      "requested_size": [
+        2560,
+        1600
+      ],
+      "actual_size": [
+        1586,
+        992
+      ],
+      "bytes": 408588,
+      "native_resolution_target_met": false,
+      "upscaled": false
+    }
+  ]
+}

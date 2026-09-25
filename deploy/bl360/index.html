@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#121314">
+  <meta name="robots" content="noindex,nofollow">
+  <title>BOB-LIFT BL-T360 / BL-T460 · 从整机，深入每个细节</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preload" as="image" href="assets/details/hero-line.webp">
+  <link rel="preload" as="image" href="assets/details/hero.webp">
+  <script>
+  // Opening. Until the live 3D is on screen the page is held at the top (explore.js calls __heroHold.release(); 10 s at
+  // most), so the drive-out that starts on the first scroll is not missed; the machine, drawn in line, fills with
+  // colour as the model loads (__heroLoad sets --load, 0…1). Not for a link to a section or reduced motion; the colour
+  // fill is skipped once the model has loaded before (it comes from the cache). In-page links and the tour button let go.
+  // The model and sky downloads start here, before any page script, so the meter moves from the first moment:
+  // viewer.js picks them up from __packed (url → { promise, loaded, total, listeners }).
+  (function () {
+    var root = document.documentElement;
+    window.__packed = {};
+    if ('DecompressionStream' in window && window.ReadableStream) ['assets/model/loader.glb.gz', 'assets/env/sky.hdr.gz'].forEach(function (url) {
+      var e = window.__packed[url] = { loaded: 0, total: 0, listeners: [] };
+      e.promise = fetch(url).then(function (res) {
+        if (!res.ok || !res.body) throw new Error(res.status + ' ' + url);
+        e.total = +res.headers.get('content-length') || 0;
+        var reader = res.body.getReader(), chunks = [];
+        return (function pump() {
+          return reader.read().then(function (r) {
+            if (r.done) return new Blob(chunks).arrayBuffer();
+            chunks.push(r.value); e.loaded += r.value.byteLength;
+            e.listeners.forEach(function (f) { f(); }); early();
+            return pump();
+          });
+        })();
+      });
+      e.promise.catch(function () {});
+    });
+    // Progress before viewer.js takes over, on the same scale as its report (model + sky + AO estimate, × .92).
+    function early() {
+      var m = window.__packed['assets/model/loader.glb.gz'], k = window.__packed['assets/env/sky.hdr.gz'];
+      var total = (m.total || 1.8e6) + (k.total || .58e6) + 1.05e6;
+      window.__heroLoad((Math.min(m.loaded, m.total || 1.8e6) + Math.min(k.loaded, k.total || .58e6)) / total * .92);
+    }
+    var shown = 0;
+    window.__heroLoad = function (f) { // never backwards
+      if (f <= shown && f < 1) return; shown = f;
+      root.style.setProperty('--load', f.toFixed(3));
+      var meter = document.querySelector('.exp-hero-meter span'), n = Math.round(f * 100);
+      if (meter) meter.textContent = window.I18N ? I18N.t('正在载入三维模型 {n}%', { n: n }) : '正在载入三维模型 ' + n + '%';
+    };
+    if (location.hash || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var seen = false; try { seen = localStorage.getItem('boblift-3d') === '1'; } catch (err) {}
+    if (!seen || /[?&]intro\b/.test(location.search)) root.classList.add('hero-loading'); // ?intro: replay it (demos)
+    var keys = { ' ': 1, PageDown: 1, PageUp: 1, ArrowDown: 1, ArrowUp: 1, End: 1, Home: 1 };
+    var stop = function (e) { e.preventDefault(); };
+    var key = function (e) { if (keys[e.key] && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) e.preventDefault(); };
+    var top = function () { if (scrollY) scrollTo(0, 0); };
+    var click = function (e) { if (e.target.closest && e.target.closest('a[href^="#"], #play')) release(); };
+    var opts = { passive: false };
+    addEventListener('wheel', stop, opts); addEventListener('touchmove', stop, opts); addEventListener('keydown', key); addEventListener('scroll', top);
+    document.addEventListener('click', click, true);
+    var timer = setTimeout(release, 10000);
+    addEventListener('load', function () { if (!window.__loaderViewers) { root.classList.remove('hero-loading'); release(); } }); // every script has run and the page script did not start: show the photo
+    function release() {
+      removeEventListener('wheel', stop, opts); removeEventListener('touchmove', stop, opts); removeEventListener('keydown', key); removeEventListener('scroll', top);
+      document.removeEventListener('click', click, true); clearTimeout(timer); window.__heroHold = null;
+    }
+    window.__heroHold = { release: release };
+  })();
+  </script>
+  <link rel="stylesheet" href="styles.css?v=34">
+    <link rel="stylesheet" href="gallery.css?v=23">
+    <link rel="stylesheet" href="viewer.css?v=49">
+  <link rel="stylesheet" href="specs.css?v=4">
+  <link rel="stylesheet" href="responsive.css?v=36">
+  <script src="i18n/strings.js?v=9"></script>
+  <script src="i18n/i18n.js?v=1"></script>
+  <script type="importmap">{"imports":{"three":"./assets/vendor/three/three.module.js","three/addons/":"./assets/vendor/three/addons/"}}</script>
+  <script defer src="assets/vendor/gsap.min.js"></script>
+  <script defer src="assets/vendor/ScrollTrigger.min.js"></script>
+  <script type="module" src="app.js?v=37"></script>
+  <script type="module" src="explore.js?v=83"></script>
+</head>
+<body class="experience">
+  <a class="exp-skip" href="#explode">跳到产品细节</a>
+  <header class="exp-header">
+    <a class="exp-brand" href="#overview" aria-label="BOB-LIFT 返回开场"><picture><source srcset="assets/brand/logo.webp" type="image/webp"><img src="assets/brand/logo.png" alt="BOB-LIFT" width="224" height="91"></picture></a>
+    <nav aria-label="产品章节">
+      <a href="#explode">结构拆解</a><a href="#parts">逐个部件</a><a href="#motion">机械动作</a><a href="#scenes">应用场景</a><a href="#specs">技术参数</a><a href="#contact">联系我们</a>
+      <button class="exp-play" id="play" type="button" aria-pressed="false"><span class="exp-play-symbol" aria-hidden="true"></span><span>播放导览</span></button>
+      <div class="exp-lang" id="lang"><button class="exp-lang-toggle" type="button" aria-expanded="false" aria-controls="lang-menu" aria-label="切换语言"><svg class="exp-icon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.12,104.12,0,0,0,128,24Zm87.62,96H175.79c-1.41-28.46-10.28-55.47-25.29-77.1A88.16,88.16,0,0,1,215.62,120ZM128,215.55c-17.14-18.54-27.54-45-29.61-79.55h59.22C155.54,170.56,145.14,197,128,215.55ZM98.39,120c2.07-34.55,12.47-61,29.61-79.55,17.14,18.54,27.54,45,29.61,79.55Zm7.11-77.1C90.49,64.53,81.62,91.54,80.21,120H40.38A88.16,88.16,0,0,1,105.5,42.9ZM40.38,136H80.21c1.41,28.46,10.28,55.47,25.29,77.1A88.16,88.16,0,0,1,40.38,136Zm110.12,77.1c15-21.63,23.88-48.64,25.29-77.1h39.83A88.16,88.16,0,0,1,150.5,213.1Z"/></svg><span class="exp-lang-current">中文</span></button><ul class="exp-lang-menu" id="lang-menu" hidden></ul></div>
+    </nav>
+    <span class="exp-reading-progress" aria-hidden="true"></span>
+  </header>
+  <main>
+    <section class="exp-hero" id="overview" aria-labelledby="hero-title">
+      <div class="exp-hero-stage">
+        <div class="exp-hero-glow" aria-hidden="true"></div>
+        <div class="exp-hero-heading"><h1 id="hero-title">小身形。<br><span>大有作为。</span></h1><p>BL-T360 / BL-T460 站驾式滑移装载机</p></div>
+        <div class="exp-3d exp-hero-3d" id="hero-3d" role="img" aria-label="可拖动旋转的装载机实时三维模型"></div>
+        <div class="exp-hero-product">
+          <img class="exp-hero-line" src="assets/details/hero-line.webp" width="2200" height="1800" alt="" fetchpriority="high">
+          <img src="assets/details/hero.webp" width="2200" height="1800" alt="红色站驾式履带装载机整机" fetchpriority="high">
+          <span class="exp-hero-sweep" aria-hidden="true"></span>
+          <p class="exp-hero-meter" aria-hidden="true"><i></i><span>正在载入三维模型 0%</span></p>
+          <div class="exp-hero-frame" aria-hidden="true"></div>
+          <div class="exp-3d-hint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg>拖动旋转 · 实时三维</div>
+        </div>
+        <div class="exp-hero-caption"><p>不止看外观。<br>向下，走进每个细节。</p><a class="exp-scroll-link" href="#intro">开始探索<span aria-hidden="true">↓</span></a></div>
+        <span class="exp-hero-index" aria-hidden="true">滚动探索</span>
+      </div>
+    </section>
+
+    <section class="exp-intro" id="intro" aria-labelledby="intro-title">
+      <div class="exp-intro-copy">
+        <span class="exp-section-number">模型 × 实拍</span>
+        <h2 id="intro-title"><span>把复杂的作业，</span><br><span>收进紧凑的身形。</span></h2>
+        <p>三维模型来自原厂结构图，<br>实拍照片来自同一台机器。</p>
+        <div class="exp-intro-meta">
+          <span class="exp-slide-count" aria-hidden="true"><b id="slide-number">01</b><i>/ 11</i></span>
+          <div><b id="slide-label">正前</b><p>同一台机器 · 现场实拍</p></div>
+        </div>
+      </div>
+      <div class="exp-slides-wrap">
+        <div class="exp-slides" id="slides" tabindex="0" role="region" aria-roledescription="carousel" aria-label="装载机实拍照片，可用左右方向键切换">
+          <div class="exp-slides-track">
+            <figure class="exp-slide is-active"><img src="assets/turn/IMG_2724.webp" width="1600" height="1067" alt="装载机实拍 · 正前" loading="lazy" decoding="async"></figure>
+          </div>
+          <button type="button" class="exp-slide-nav" data-slide-step="-1" aria-label="上一张"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m15 5-7 7 7 7"/></svg></button>
+          <button type="button" class="exp-slide-nav exp-slide-nav-next" data-slide-step="1" aria-label="下一张"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 5 7 7-7 7"/></svg></button>
+        </div>
+        <div class="exp-slides-dots"></div>
+      </div>
+      <span class="exp-intro-rule" aria-hidden="true"></span>
+    </section>
+
+    <section class="exp-explode" id="explode" aria-labelledby="explode-title">
+      <div class="exp-explode-stage">
+        <div class="exp-3d exp-explode-3d" id="explode-3d" role="img" aria-label="装载机爆炸拆解三维视图，可拖动旋转"></div>
+        <div class="exp-explode-fallback" aria-hidden="true"><img src="assets/details/hero.webp" alt=""></div>
+        <div class="exp-explode-copy"><span class="exp-section-number">00 / 结构拆解</span><h2 id="explode-title"><span>拆开看。</span><br><span>每一个总成。</span></h2><p>向下滚动，十三个装配组沿原厂装配方向分离。<br>点击部件标签，对照同一位置的实拍照片。</p></div>
+        <div class="exp-explode-tip" aria-hidden="true">拖动旋转<br>点击部件看实拍</div>
+        <div class="exp-explode-status" id="explode-status" role="status">正在载入三维模型</div>
+        <div class="exp-explode-tools"><label for="explode-range">拆解程度</label><input id="explode-range" type="range" min="0" max="1000" value="0" step="1" disabled><button type="button" id="explode-open">全部拆开</button><button type="button" id="explode-reset">复位整机</button></div>
+      </div>
+    </section>
+
+    <section class="exp-parts" id="parts" aria-labelledby="parts-title">
+      <div class="exp-parts-heading"><span class="exp-section-number">部件 × 实拍</span><h2 id="parts-title">逐个部件，<br>模型与实物对照。</h2><p>左侧滚动到某个部件，右侧模型自动聚焦并淡出其余结构；缩略图打开该部件的实拍照片。</p></div>
+      <ol class="exp-parts-list">
+          <li class="exp-part-card" data-part="bucket"><span class="exp-section-number">01 / 08</span><h3>铲斗</h3><p>焊接钢制斗体，经快换架与举升臂相连，由前端油缸驱动翻转。</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="查看铲斗实拍 1"><img src="assets/site/thumb/IMG_2810.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="查看铲斗实拍 2"><img src="assets/site/thumb/IMG_2836.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="查看铲斗实拍 3"><img src="assets/site/thumb/IMG_2850.webp" width="88" height="66" alt="" loading="lazy"></button></div></li>
+          <li class="exp-part-card" data-part="quickattach"><span class="exp-section-number">02 / 08</span><h3>快换架与液压快接</h3><p>快换架把铲斗锁在臂架前端，旁边布置液压快接头，便于更换附具。</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="查看快换架与液压快接实拍 1"><img src="assets/site/thumb/IMG_2812.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="查看快换架与液压快接实拍 2"><img src="assets/site/thumb/IMG_2840.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="查看快换架与液压快接实拍 3"><img src="assets/site/thumb/IMG_2962.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="3" aria-label="查看快换架与液压快接实拍 4"><img src="assets/site/thumb/IMG_2999.webp" width="88" height="66" alt="" loading="lazy"></button></div></li>
+          <li class="exp-part-card" data-part="arm"><span class="exp-section-number">03 / 08</span><h3>举升臂与油缸</h3><p>臂架绕车架后铰点抬升，两侧举升油缸随铰点伸展，管路沿臂架走线。</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="查看举升臂与油缸实拍 1"><img src="assets/site/thumb/IMG_2787.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="查看举升臂与油缸实拍 2"><img src="assets/site/thumb/IMG_2789.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="查看举升臂与油缸实拍 3"><img src="assets/site/thumb/IMG_2791.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="3" aria-label="查看举升臂与油缸实拍 4"><img src="assets/site/thumb/IMG_2806.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" class="exp-part-more" data-photo-index="4">+2 张</button></div></li>
+          <li class="exp-part-card" data-part="controls"><span class="exp-section-number">04 / 08</span><h3>操纵台</h3><p>双侧操纵杆左右布局，握持位置清晰；仪表、钥匙与总电源开关集中在站驾视线内，环形扶手沿操纵区布置。</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="查看操纵台实拍 1"><img src="assets/site/thumb/IMG_2768.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="查看操纵台实拍 2"><img src="assets/site/thumb/IMG_2767.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="查看操纵台实拍 3"><img src="assets/site/thumb/IMG_2804.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="3" aria-label="查看操纵台实拍 4"><img src="assets/site/thumb/IMG_2824.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" class="exp-part-more" data-photo-index="4">+3 张</button></div></li>
+          <li class="exp-part-card" data-part="engine"><span class="exp-section-number">05 / 08</span><h3>发动机与散热</h3><p>发动机位于机身后部，风罩、空气滤清器与油冷却器布置在机罩之下。</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="查看发动机与散热实拍 1"><img src="assets/site/thumb/IMG_2771.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="查看发动机与散热实拍 2"><img src="assets/site/thumb/IMG_2775.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="查看发动机与散热实拍 3"><img src="assets/site/thumb/IMG_2830.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="3" aria-label="查看发动机与散热实拍 4"><img src="assets/site/thumb/IMG_2863.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" class="exp-part-more" data-photo-index="4">+4 张</button></div></li>
+          <li class="exp-part-card" data-part="tanks"><span class="exp-section-number">06 / 08</span><h3>油箱与电瓶</h3><p>汽油箱、液压油箱和电瓶安装在车架内部，液压油箱侧面设有油位观察窗。</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="查看油箱与电瓶实拍 1"><img src="assets/site/thumb/IMG_2814.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="查看油箱与电瓶实拍 2"><img src="assets/site/thumb/IMG_2779.webp" width="88" height="66" alt="" loading="lazy"></button></div></li>
+          <li class="exp-part-card" data-part="frame"><span class="exp-section-number">07 / 08</span><h3>车架、机罩与踏板</h3><p>焊接车架承载全部总成，开槽机罩可掀开检修；后部站立踏板带防滑凸纹，从表面到两侧边缘都为日常站立而设。</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="查看车架、机罩与踏板实拍 1"><img src="assets/site/thumb/IMG_2808.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="查看车架、机罩与踏板实拍 2"><img src="assets/site/thumb/IMG_2838.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="查看车架、机罩与踏板实拍 3"><img src="assets/site/thumb/IMG_2834.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="3" aria-label="查看车架、机罩与踏板实拍 4"><img src="assets/site/thumb/IMG_2860.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" class="exp-part-more" data-photo-index="4">+2 张</button></div></li>
+          <li class="exp-part-card" data-part="tracks"><span class="exp-section-number">08 / 08</span><h3>履带底盘</h3><p>钢制履带架安装在车架下方，橡胶履带包覆驱动轮与承重轮。</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="查看履带底盘实拍 1"><img src="assets/site/thumb/IMG_2797.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="查看履带底盘实拍 2"><img src="assets/site/thumb/IMG_2842.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="查看履带底盘实拍 3"><img src="assets/site/thumb/IMG_2740.webp" width="88" height="66" alt="" loading="lazy"></button></div></li>
+      </ol>
+      <div class="exp-parts-viewer">
+        <div class="exp-3d exp-parts-3d" id="parts-3d" role="img" aria-label="聚焦到当前部件的三维模型，可拖动旋转"></div>
+        <div class="exp-parts-viewer-head"><span>当前聚焦：<b id="parts-current">整机</b></span><button type="button" id="parts-all">显示整机</button></div>
+        <div class="exp-parts-viewer-foot">拖动旋转 · 三维模型基于原厂 STEP 结构图</div>
+      </div>
+    </section>
+
+    <section class="exp-motion" id="motion" aria-labelledby="motion-title">
+      <div class="exp-motion-stage">
+        <div class="exp-3d exp-motion-3d" id="motion-3d" role="img" aria-label="举升与翻斗实时三维动作，可拖动旋转"></div>
+        <div class="exp-motion-side"><div class="exp-motion-copy"><span class="exp-section-number">03 / 机械动作</span><h2 id="motion-title">把力量，<br>送到前端。</h2><p>臂架绕后铰点抬升，油缸随铰点伸缩，<br>铲斗在前端翻转。滚动或拖动滑杆，看完整一轮动作。</p></div>
+        <ol class="exp-motion-points"><li><span>01</span><div><h3>举升</h3><p>臂架抬升，举升油缸伸出。</p></div></li><li><span>02</span><div><h3>翻斗</h3><p>翻斗油缸推出，铲斗绕前端铰点倾倒。</p></div></li><li><span>03</span><div><h3>回落</h3><p>收回铲斗，臂架回到起始位置。</p></div></li></ol></div>
+        <div class="exp-motion-tools"><button type="button" id="motion-play" aria-pressed="false"><span class="exp-play-symbol" aria-hidden="true"></span><span>播放动作</span></button><label class="exp-sr" for="motion-range">举升与翻斗动作进度</label><input id="motion-range" type="range" min="0" max="1000" value="0" step="1" disabled><span class="exp-motion-tag">实时三维 · 拖动可换视角</span></div>
+        <div class="exp-motion-real"><span>实机对照</span><button type="button" data-real="lift">举升回落 ↗</button><button type="button" data-real="bucket">铲斗翻转 ↗</button><button type="button" data-real="drive">行驶转向 ↗</button></div>
+      </div>
+    </section>
+
+    <section class="exp-scenes" id="scenes" aria-labelledby="scenes-title">
+      <div class="exp-scenes-stage" data-scene="garden">
+        <div class="exp-scenes-wash" aria-hidden="true"></div>
+        <div class="exp-scene-plate" data-plate="garden" aria-hidden="true"></div><div class="exp-scene-plate" data-plate="site" aria-hidden="true"></div><div class="exp-scene-plate" data-plate="farm" aria-hidden="true"></div>
+        <div class="exp-scenes-heading"><span class="exp-section-number">04 / 应用场景</span><h2 id="scenes-title">去它该去的地方。</h2></div>
+        <video class="exp-scene-video" muted playsinline loop preload="none" aria-label="装载机在园林、工地、农牧场景中的循环作业演示"></video>
+        <div class="exp-scene-veil" aria-hidden="true"></div>
+        <div class="exp-3d exp-scenes-3d" id="scenes-3d" aria-hidden="true"></div><div class="exp-scenes-grain" aria-hidden="true"></div>
+        <div class="exp-scene-cards">
+          <article class="exp-scene-card is-active" data-scene="garden"><span class="exp-scene-index">01</span><h3>园林与庭院</h3><p>紧凑车身走进侧巷和庭院，<br>贴着地面推平、回填、搬运铺装材料。</p><ul><li>土方与碎石短途运送</li><li>基层整平与回填</li><li>石材、砌块搬运</li><li>橡胶履带减少对草坪的压痕</li></ul></article>
+          <article class="exp-scene-card" data-scene="site"><span class="exp-scene-index">02</span><h3>工地与改造</h3><p>楼间、地下室和围挡之内，<br>把散料和建筑垃圾装上车。</p><ul><li>建筑垃圾清运装车</li><li>砂石、混凝土骨料装卸</li><li>与小型翻斗车配合转运</li><li>站驾式，上下机快</li></ul><button class="exp-scene-photo" type="button" data-scene-photo="scene-earthwork" aria-label="查看实拍：土方作业"><img src="assets/site/scene-earthwork.webp" width="800" height="800" alt="" loading="lazy"><span>实拍 · 土方作业 ↗</span></button></article>
+          <article class="exp-scene-card" data-scene="farm"><span class="exp-scene-index">03</span><h3>农场与牧场</h3><p>棚舍、畜栏和场院之间，<br>铲斗收起，把饲料和垫料送到位。</p><ul><li>棚舍粪污与垫料清理</li><li>饲料、草捆短驳</li><li>场院与通道平整</li><li>软地面上的行走稳定性</li></ul></article>
+        </div>
+        <div class="exp-scene-tabs" role="tablist" aria-label="切换作业场景"><button class="exp-scene-tab" role="tab" type="button" aria-selected="true">园林与庭院</button><button class="exp-scene-tab" role="tab" type="button" aria-selected="false">工地与改造</button><button class="exp-scene-tab" role="tab" type="button" aria-selected="false">农场与牧场</button></div>
+        <p class="exp-scenes-note">场景与任务按小型站驾式履带装载机的通用用途整理，非具体客户案例；姿态为演示示意。</p>
+      </div>
+    </section>
+
+    <section class="exp-specs" id="specs" aria-labelledby="specs-title">
+      <div class="exp-specs-inner">
+        <div class="exp-specs-heading">
+          <div><span class="exp-section-number">05 / 技术参数</span><h2 id="specs-title">同一套设计，<br>两档动力。</h2></div>
+          <p>BL-T360 搭载单缸发动机，BL-T460 换装双缸发动机，功率翻倍；机身随之加宽 15 厘米，额定负载和提升力同步提高。</p>
+        </div>
+        <dl class="exp-specs-key">
+          <div><dt>额定功率</dt><dd><span>BL-T360<b>7.6<small>kW</small></b></span><span>BL-T460<b>16.8<small>kW</small></b></span></dd></div>
+          <div><dt>额定负载</dt><dd><span>BL-T360<b>200<small>kg</small></b></span><span>BL-T460<b>300<small>kg</small></b></span></dd></div>
+          <div><dt>提升力</dt><dd><span>BL-T360<b>320<small>kg</small></b></span><span>BL-T460<b>375<small>kg</small></b></span></dd></div>
+        </dl>
+        <div class="exp-specs-bar"><h3>完整参数</h3><button class="exp-specs-filter" id="specs-filter" type="button" aria-pressed="false" aria-controls="specs-table"><i aria-hidden="true"></i>仅看差异</button></div>
+        <table class="exp-specs-table" id="specs-table">
+          <caption class="exp-sr">BL-T360 与 BL-T460 站驾式滑移装载机技术参数对照</caption>
+          <colgroup><col class="label"><col><col></colgroup>
+          <thead><tr><th scope="col">型号</th><th scope="col">BL-T360<small>单缸</small></th><th scope="col">BL-T460<small>双缸</small></th></tr></thead>
+          <tbody>
+            <tr><th scope="rowgroup" colspan="3">性能</th></tr>
+            <tr class="is-diff"><th scope="row">额定负载</th><td>200 kg</td><td>300 kg</td></tr>
+            <tr class="is-diff"><th scope="row">提升力</th><td>320 kg</td><td>375 kg</td></tr>
+            <tr class="is-same"><th scope="row">铲斗容量</th><td colspan="2">0.15 m³</td></tr>
+            <tr class="is-same"><th scope="row">行驶速度</th><td colspan="2">0–6 km/h</td></tr>
+            <tr class="is-same"><th scope="row">液压系统压力</th><td colspan="2">17 MPa</td></tr>
+            <tr class="is-same"><th scope="row">爬坡能力</th><td colspan="2">30°</td></tr>
+            <tr class="is-diff"><th scope="row">整机重量</th><td>650 kg</td><td>730 kg</td></tr>
+          </tbody>
+          <tbody>
+            <tr><th scope="rowgroup" colspan="3">发动机</th></tr>
+            <tr class="is-diff"><th scope="row">发动机类型</th><td>单缸 · 四冲程</td><td>双缸 · 四冲程</td></tr>
+            <tr class="is-diff"><th scope="row">额定功率</th><td>7.6 kW</td><td>16.8 kW</td></tr>
+            <tr class="is-same"><th scope="row">燃料</th><td colspan="2">汽油 / 柴油</td></tr>
+            <tr class="is-same"><th scope="row">排放标准</th><td colspan="2">EPA &amp; EURO 5</td></tr>
+            <tr class="is-same"><th scope="row">启动方式</th><td colspan="2">电启动</td></tr>
+            <tr class="is-same"><th scope="row">动力品牌可选</th><td colspan="2">宗申 / 润通 / 百利通 / 科普 / 电动</td></tr>
+          </tbody>
+          <tbody>
+            <tr><th scope="rowgroup" colspan="3">尺寸</th></tr>
+            <tr class="is-same"><th scope="row">工作高度</th><td colspan="2">1640 mm</td></tr>
+            <tr class="is-diff"><th scope="row">带铲斗长度</th><td>1906 mm</td><td>1876 mm</td></tr>
+            <tr class="is-diff"><th scope="row">不带铲斗长度</th><td>1466 mm</td><td>1445 mm</td></tr>
+            <tr class="is-diff"><th scope="row">机器宽度</th><td>930 mm</td><td>1082 mm</td></tr>
+            <tr class="is-diff"><th scope="row">铲斗宽度</th><td>906 mm</td><td>1106 mm</td></tr>
+            <tr class="is-diff"><th scope="row">总高度</th><td>1226 mm</td><td>1267 mm</td></tr>
+          </tbody>
+        </table>
+        <p class="exp-specs-note">参数来自原厂参数表，发动机品牌与燃料按配置选装，以实际出厂配置为准。</p>
+      </div>
+    </section>
+
+    <section class="exp-finale" id="finale" aria-labelledby="finale-title">
+      <div class="exp-finale-track">
+        <div class="exp-finale-stage">
+          <div class="exp-finale-heading"><p>看过细节，再看整体。</p><h2 id="finale-title">BL-T360 / BL-T460</h2></div>
+          <div class="exp-finale-product">
+            <img src="assets/details/hero.webp" width="2200" height="1800" alt="BOB-LIFT BL-T360 / BL-T460 站驾式滑移装载机整机" loading="lazy">
+            <div class="exp-finale-frame" aria-hidden="true"></div>
+            <div class="exp-3d-hint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg>拖动旋转</div>
+          </div>
+          <div class="exp-finale-paint" role="group" aria-label="车身颜色" hidden>
+            <button type="button" data-paint="b8220f" aria-pressed="true" style="--swatch:#c42a14"><span class="exp-sr">朱红</span></button><button type="button" data-paint="ffbe00" aria-pressed="false" style="--swatch:#f5b800"><span class="exp-sr">工程黄</span></button><button type="button" data-paint="1b4f94" aria-pressed="false" style="--swatch:#1f5aa6"><span class="exp-sr">海洋蓝</span></button><button type="button" data-paint="141517" aria-pressed="false" style="--swatch:#18191b"><span class="exp-sr">曜石黑</span></button>
+            <b id="finale-paint-name" aria-live="polite">朱红</b>
+            <p class="exp-finale-paint-note">颜色可按需定制</p>
+          </div>
+          <div class="exp-3d exp-finale-3d" id="finale-3d" role="img" aria-label="可拖动旋转的装载机三维模型，车身颜色可切换"></div>
+        </div>
+      </div>
+      <div class="exp-finale-bottom"><div><h3>同一套设计。两档动力。</h3><p>BL-T360 单缸，更窄更轻；BL-T460 双缸，更宽载得更多。</p></div><div class="exp-actions"><button class="exp-primary" id="photos-open" type="button" data-lightbox="overview">查看实物照片<span aria-hidden="true">↗</span></button><a class="exp-text-link" href="#overview">回到开场 ↑</a></div></div>
+    </section>
+
+    <section class="exp-contact" id="contact" aria-labelledby="contact-title">
+      <div class="exp-contact-copy"><span class="exp-section-number">联系我们</span><h2 id="contact-title">询价与定制，<br>直接找我们。</h2><p>报价、配置、颜色定制或代理合作，选一种方便的方式联系。</p></div>
+      <ul class="exp-contact-list">
+        <li><a class="exp-contact-item" href="https://wa.me/8615852499415" target="_blank" rel="noopener"><span class="exp-contact-label">WhatsApp</span><b>+86 158 5249 9415</b><span class="exp-contact-action">发消息 ↗</span></a></li>
+        <li><button class="exp-contact-item" type="button" data-copy="+86 158 5249 9415"><span class="exp-contact-label">微信</span><b>+86 158 5249 9415</b><span class="exp-contact-action">复制号码</span><i class="exp-contact-hint" aria-live="polite"></i></button></li>
+        <li><a class="exp-contact-item" href="mailto:info@boblift.com"><span class="exp-contact-label">邮箱</span><b>info@boblift.com</b><span class="exp-contact-action">写邮件 ↗</span></a></li>
+      </ul>
+    </section>
+  </main>
+  <footer class="exp-page-footer"><span>BOB-LIFT · BL-T360 / BL-T460</span><p>外观展示样片。三维模型基于原厂 STEP 结构图并按照片补充外观件，拆解方向为展示示意；动作行程为展示示意，非实机参数标定。</p></footer>
+  <dialog class="exp-lightbox" id="lightbox" aria-labelledby="lightbox-title">
+    <div class="exp-lightbox-head"><div><h2 id="lightbox-title">实拍</h2><p id="lightbox-count">1 / 1</p></div><button class="exp-close" type="button" aria-label="关闭照片"><svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+    <div class="exp-lightbox-stage"><img src="" alt="" decoding="async"><button class="exp-lightbox-nav" type="button" data-prev aria-label="上一张">‹</button><button class="exp-lightbox-nav" type="button" data-next aria-label="下一张">›</button></div>
+    <div class="exp-lightbox-thumbs" role="group" aria-label="选择照片"></div>
+  </dialog>
+  <dialog class="exp-gallery exp-real-dialog" id="real-dialog" aria-labelledby="real-title">
+    <div class="exp-gallery-head"><div><h2 id="real-title">实机，动起来。</h2><p id="real-caption">用户提供的实际运行视频</p></div><button class="exp-close" id="real-close" type="button" aria-label="关闭实机视频">×</button></div>
+    <video class="exp-real-video" id="real-video" controls playsinline preload="none" aria-label="实机操作视频"></video>
+    <div class="exp-gallery-tabs" role="group" aria-label="选择实机动作"><button type="button" data-real-choice="drive" aria-pressed="false">行驶转向</button><button type="button" data-real-choice="lift" aria-pressed="false">举升回落</button><button type="button" data-real-choice="bucket" aria-pressed="false">铲斗翻转</button></div>
+    <p class="exp-gallery-note">实拍参考；三维演示中的行程、速比和管路变形尚未完成工程标定。</p>
+  </dialog>
+  <script>I18N.apply();</script>
+</body>
+</html>

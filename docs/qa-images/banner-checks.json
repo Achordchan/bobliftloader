@@ -1,0 +1,28 @@
+[
+  {
+    "currentImage": "http://127.0.0.1:9402/wp-content/themes/bobliftloader/assets/images/hero-banner-wide.webp",
+    "heroHeight": 800,
+    "logoLeft": 400.5,
+    "mediaWidth": 1920,
+    "natural": [
+      1942,
+      809
+    ],
+    "overflow": false,
+    "titleLeft": 400.5,
+    "width": 2560
+  },
+  {
+    "currentImage": "http://127.0.0.1:9402/wp-content/themes/bobliftloader/assets/images/hero-banner-wide.webp",
+    "heroHeight": 800,
+    "logoLeft": 1040.5,
+    "mediaWidth": 1920,
+    "natural": [
+      1942,
+      809
+    ],
+    "overflow": false,
+    "titleLeft": 1040.5,
+    "width": 3840
+  }
+]

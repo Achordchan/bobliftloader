@@ -1,0 +1,98 @@
+[
+  {
+    "contentLeft": 313,
+    "imageMax": 1920,
+    "logoLeft": 401,
+    "overflow": false,
+    "path": "/about/",
+    "width": 2560
+  },
+  {
+    "contentLeft": 313,
+    "imageMax": 562.671875,
+    "logoLeft": 401,
+    "overflow": false,
+    "path": "/products/",
+    "width": 2560
+  },
+  {
+    "contentLeft": 313,
+    "imageMax": 884.6796875,
+    "logoLeft": 401,
+    "overflow": false,
+    "path": "/product/bl-1000-mini-skid-steer-loader/",
+    "width": 2560
+  },
+  {
+    "contentLeft": 313,
+    "imageMax": 558,
+    "logoLeft": 401,
+    "overflow": false,
+    "path": "/news/",
+    "width": 2560
+  },
+  {
+    "contentLeft": 313,
+    "imageMax": 22,
+    "logoLeft": 401,
+    "overflow": false,
+    "path": "/contact/",
+    "width": 2560
+  },
+  {
+    "contentLeft": 313,
+    "imageMax": 1920,
+    "logoLeft": 401,
+    "overflow": false,
+    "path": "/applications/landscaping/",
+    "width": 2560
+  },
+  {
+    "contentLeft": 953,
+    "imageMax": 1920,
+    "logoLeft": 1041,
+    "overflow": false,
+    "path": "/about/",
+    "width": 3840
+  },
+  {
+    "contentLeft": 953,
+    "imageMax": 562.671875,
+    "logoLeft": 1041,
+    "overflow": false,
+    "path": "/products/",
+    "width": 3840
+  },
+  {
+    "contentLeft": 953,
+    "imageMax": 884.6796875,
+    "logoLeft": 1041,
+    "overflow": false,
+    "path": "/product/bl-1000-mini-skid-steer-loader/",
+    "width": 3840
+  },
+  {
+    "contentLeft": 960,
+    "imageMax": 558,
+    "logoLeft": 1048,
+    "overflow": false,
+    "path": "/news/",
+    "width": 3840
+  },
+  {
+    "contentLeft": 960,
+    "imageMax": 22,
+    "logoLeft": 1048,
+    "overflow": false,
+    "path": "/contact/",
+    "width": 3840
+  },
+  {
+    "contentLeft": 953,
+    "imageMax": 1920,
+    "logoLeft": 1041,
+    "overflow": false,
+    "path": "/applications/landscaping/",
+    "width": 3840
+  }
+]

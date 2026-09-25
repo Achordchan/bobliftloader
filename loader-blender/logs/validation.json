@@ -1,0 +1,57 @@
+{
+  "hood_overlap_m2": {
+    "base": {
+      "机罩上面折板 / 机罩上面折板.001": 0,
+      "机罩上面折板 / 机罩下端面": 0.0,
+      "机罩上面折板 / 机罩上端面": 0.0,
+      "机罩上面折板.001 / 机罩下端面": 0.0,
+      "机罩上面折板.001 / 机罩上端面": 0.0,
+      "机罩下端面 / 机罩上端面": 0
+    },
+    "evaluated": {
+      "机罩上面折板 / 机罩上面折板.001": 0,
+      "机罩上面折板 / 机罩下端面": 0,
+      "机罩上面折板 / 机罩上端面": 0,
+      "机罩上面折板.001 / 机罩下端面": 0,
+      "机罩上面折板.001 / 机罩上端面": 0,
+      "机罩下端面 / 机罩上端面": 0
+    }
+  },
+  "relationship_lines_disabled": true,
+  "blender": "5.2.2 LTS",
+  "render_engine": "CYCLES",
+  "visible_product_meshes": 950,
+  "empty_meshes": [],
+  "invalid_meshes": [],
+  "packed_images": [
+    "studio-small-09.hdr"
+  ],
+  "cameras": [
+    "相机 · 整机三分之四",
+    "相机 · 低角度侧面",
+    "相机 · 机罩与液压细节"
+  ],
+  "dimensions_m": [
+    1.82,
+    3.5957,
+    2.5498
+  ],
+  "image_size": [
+    1800,
+    1600
+  ],
+  "max_samples": 160,
+  "grille_polygons": 455,
+  "embedded_scripts": [
+    "attachment.py",
+    "body.py",
+    "build.py",
+    "geometry.py",
+    "hood_checks.py",
+    "materials.py",
+    "render.py",
+    "repair_hood.py",
+    "tracks.py",
+    "validate.py"
+  ]
+}

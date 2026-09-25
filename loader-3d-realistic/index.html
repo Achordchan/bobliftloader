@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>履带装载机 · 写实展示</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="studio">
+<header class="studio-header"><a class="brand" href="./index.html"><span class="brand-mark"></span>BOBLIFT<span class="brand-divider">/</span><span class="brand-sub">产品展示</span></a><div class="header-actions"><a class="original-link" href="../loader-3d/index.html">查看保留版 ↗</a><span class="status"><i></i>写实版</span></div></header>
+<section class="intro"><p class="eyebrow">履带式迷你装载机</p><h1>履带式<br>迷你装载机</h1><p class="intro-note">旋转模型，查看机械细节</p></section>
+<div id="viewport" role="img" aria-label="可拖拽旋转的橙色履带装载机三维模型"></div>
+<div id="error" class="error" hidden>无法启动 3D 渲染。请使用支持 WebGL 的浏览器，并开启硬件加速。</div>
+<aside class="controls" aria-label="模型控制"><div class="panel-heading"><span>模型控制</span><span class="panel-index">写实展示</span></div>
+<div class="view-buttons" aria-label="预设视角"><button data-view="perspective" class="active">透视</button><button data-view="side">侧面</button><button data-view="front">正面</button><button data-view="back">背面</button></div>
+<label class="range-label" for="lift">举升臂 <output id="lift-value">0°</output></label><input id="lift" type="range" min="0" max="48" value="0">
+<label class="range-label" for="tilt">铲斗翻转 <output id="tilt-value">0°</output></label><input id="tilt" type="range" min="-12" max="45" value="0">
+<div class="toggles"><label><input id="rotate" type="checkbox">自动旋转</label><label><input id="wireframe" type="checkbox">线框</label></div>
+<button id="reset" class="reset">重置模型与视角 <span>↗</span></button>
+</aside>
+<footer class="studio-footer"><span>拖拽旋转 <b>·</b> 滚轮缩放 <b>·</b> 双指缩放</span><span class="model-note">照片重建 · 非工程模型</span></footer>
+</main>
+<script src="vendor/three-studio.min.js"></script><script src="assets/environment.js"></script><script src="studio.js"></script><script src="geometry.js"></script><script src="tracks.js"></script><script src="body.js"></script><script src="attachment.js"></script><script src="model.js"></script><script src="optimize.js"></script><script src="viewer.js"></script>
+</body></html>

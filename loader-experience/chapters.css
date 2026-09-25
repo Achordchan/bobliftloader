@@ -1,0 +1,45 @@
+/* Fixed media windows keep animated close-ups out of the copy column. */
+.exp-chapter { position: relative; height: 180svh; }
+.exp-chapter-stage { position: sticky; top: 72px; height: calc(100svh - 72px); overflow: hidden; isolation: isolate; }
+.exp-feature-copy { position: absolute; left: 7%; top: 23%; z-index: 4; width: 31%; }
+.exp-chassis { background: #f5f5f7; }
+.exp-chassis-media { position: absolute; width: 57%; height: 76%; right: 3%; top: 12%; overflow: hidden; z-index: 2; }
+.exp-chassis-zoom { width: 100%; height: 100%; transform-origin: 45% 77%; }
+.exp-chassis-zoom>img { width: 100%; height: 100%; object-fit: contain; }
+.exp-giant-word { position: absolute; right: 7%; top: 5%; color: #e9e9ec; font-size: 16vw; font-weight: 800; line-height: 1; letter-spacing: -.09em; z-index: 0; }
+.exp-chapter-note { position: absolute; left: 7%; top: 31%; width: 29%; z-index: 4; }
+.exp-chapter-note strong { font-size: clamp(22px, 2.3vw, 36px); font-weight: 650; line-height: 1.4; letter-spacing: -.03em; }
+.exp-chapter-note p { font-size: 14px; color: #737378; line-height: 1.8; margin-top: 22px; }
+.exp-callout { position: absolute; display: flex; align-items: center; gap: 8px; z-index: 3; font-size: 10px; color: #fff; white-space: nowrap; }
+.exp-callout i { display: block; width: 6px; height: 6px; border: 1px solid #fff; border-radius: 50%; box-shadow: 0 0 0 4px #ffffff30; }
+.exp-callout span { background: #151517e8; padding: 6px 10px; border-radius: 20px; }
+.exp-callout-drive { left: 32%; top: 68%; }
+.exp-callout-track { left: 63%; top: 79%; }
+.exp-hydraulics { height: 180svh; background: #121314; color: #f5f5f7; }
+.exp-hydraulic-media { position: absolute; width: 55%; height: 70%; right: 5%; top: 15%; overflow: hidden; border-radius: 18px; background: #1b1c1f; }
+.exp-hydraulic-media img { width: 100%; height: 100%; object-fit: cover; object-position: 55% 60%; transform-origin: 55% 60%; }
+.exp-hydraulic-shade { display: none; }
+.exp-hydraulics .exp-feature-copy { top: 24%; }
+.exp-hydraulics .exp-feature-copy p { color: #a2a3a7; }
+.exp-hydraulic-points { position: absolute; left: 7%; top: 27%; z-index: 4; padding: 0; margin: 0; list-style: none; width: 28%; }
+.exp-hydraulic-points li { display: flex; align-items: baseline; gap: 20px; padding: 20px 0; border-top: 1px solid #ffffff25; }
+.exp-hydraulic-points li>span { font-size: 11px; color: #f56b50; font-variant-numeric: tabular-nums; }
+.exp-hydraulic-points h3 { font-size: 20px; font-weight: 600; }
+.exp-hydraulic-points p { margin-top: 8px; font-size: 12px; color: #a3a4a8; line-height: 1.6; }
+.exp-detail-caption { position: absolute; right: 6%; bottom: 8%; font-size: 12px; letter-spacing: .03em; color: #a8a8ad; }
+.exp-controls { height: 145svh; position: relative; background: #fff; }
+.exp-controls-stage { position: sticky; top: 72px; height: calc(100svh - 72px); overflow: hidden; }
+.exp-controls-heading { position: absolute; left: 7%; top: 19%; width: 33%; z-index: 3; }
+.exp-controls-heading .exp-section-number { margin-bottom: 20px; }
+.exp-controls-heading h2 { font-size: clamp(36px, 3.65vw, 58px); line-height: 1.25; letter-spacing: -.065em; }
+.exp-controls-heading h2 span { color: #8b8b92; }
+.exp-controls-media { position: absolute; width: 55%; height: 60%; right: 4%; top: 9%; overflow: hidden; }
+.exp-controls-media img { width: 100%; height: 100%; object-fit: contain; }
+.exp-control-notes { position: absolute; left: 7%; right: 7%; bottom: 11%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6%; z-index: 4; }
+.exp-control-notes>div { border-top: 1px solid #d4d4d8; padding-top: 19px; }
+.exp-control-notes b { font-size: 17px; font-weight: 600; }
+.exp-control-notes p { font-size: 12px; color: #7b7b80; margin-top: 10px; line-height: 1.65; }
+.exp-footplate { background: #fff; padding: 110px 7%; display: grid; grid-template-columns: .9fr 1.5fr; gap: 8%; align-items: center; overflow: hidden; }
+.exp-footplate-copy .exp-small-copy { font-size: 13px; color: #949499; }
+.exp-footplate-window { overflow: hidden; border-radius: 10px; }
+.exp-footplate-window img { width: 100%; height: auto; transform-origin: 65% 58%; }

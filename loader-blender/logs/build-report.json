@@ -1,0 +1,13 @@
+{
+  "blender": "5.2.2 LTS",
+  "gpu": [
+    "Apple M1 Max (GPU - 24 cores)"
+  ],
+  "engine": "CYCLES",
+  "objects": 991,
+  "meshes": 961,
+  "materials": 14,
+  "build_seconds": 0.71,
+  "preview": false,
+  "camera": "none"
+}

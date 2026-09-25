@@ -1,0 +1,15 @@
+{
+  "samples_only": false,
+  "clips": [
+    {
+      "clip": "operation",
+      "frames": 160,
+      "fps": 24
+    }
+  ],
+  "moving_objects": 555,
+  "reference": [
+    "MVI_2897.MP4",
+    "MVI_2905.MP4"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "source": "/Users/a1234/Desktop/项目/bobliftloader/loader-cad/loader-cad-restored.blend",
+  "frames": 120,
+  "resolution": [
+    1080,
+    1080
+  ],
+  "samples": 20,
+  "engine": "Cycles Metal",
+  "camera_keys": [
+    [
+      0,
+      38,
+      2.3,
+      [
+        0,
+        0.1,
+        0.68
+      ],
+      2.85
+    ],
+    [
+      0.32,
+      100,
+      1.4,
+      [
+        0,
+        0.04,
+        0.46
+      ],
+      2.15
+    ],
+    [
+      0.66,
+      185,
+      2.4,
+      [
+        0,
+        -0.36,
+        1.02
+      ],
+      1.5
+    ],
+    [
+      1,
+      398,
+      2.3,
+      [
+        0,
+        0.1,
+        0.68
+      ],
+      2.85
+    ]
+  ]
+}
