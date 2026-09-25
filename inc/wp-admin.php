@@ -99,7 +99,9 @@ add_action('save_post', static function (int $postId): void {
         $record['caption'] = $text('caption');
         $event = [];
         foreach (['name', 'venue', 'address', 'booth', 'booth_note', 'source_label'] as $key) $event[$key] = $text('event_' . $key);
-        foreach (['start', 'end'] as $key) $event[$key] = preg_match('/^\d{4}-\d{2}-\d{2}$/', $text('event_' . $key)) ? $text('event_' . $key) : '';
+        // Only real dates are kept (the pages compute the status from them); an end before the start is dropped.
+        foreach (['start', 'end'] as $key) $event[$key] = bl_is_date($text('event_' . $key)) ? $text('event_' . $key) : '';
+        if ($event['end'] && $event['end'] < $event['start']) $event['end'] = '';
         $event['source'] = esc_url_raw($text('event_source'), ['http', 'https']);
         $record['event'] = $event['start'] ? $event : [];
     }

@@ -310,6 +310,11 @@ class WebsiteTests(unittest.TestCase):
                 self.assertTrue(error.headers['Location'].endswith('/products/skid-steer-loaders/'))
         _, html, _ = fetch('/products/?q=FY')
         self.assertTrue(visible_cards(html))
+        # Clearing that search leaves it for the loaders rather than for an address that no longer holds both families.
+        self.assertEqual(len(re.findall(r'href="/products/skid-steer-loaders/" data-catalog-leave', html)), 2)
+        self.assertNotIn('data-catalog-clear', html)
+        _, html, _ = fetch('/products/mini-dumpers/?q=FY')
+        self.assertEqual(len(re.findall(r'href="/products/mini-dumpers/" data-catalog-clear', html)), 2)
         # Every page's Equipment link opens the loaders and its panel names both families; the switch marks the current one.
         _, html, _ = fetch('/about/')
         self.assertIn('<a href="/products/skid-steer-loaders/" >Equipment', html)

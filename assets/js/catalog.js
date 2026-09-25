@@ -9,7 +9,7 @@ export function initializeCatalog() {
   const groups = [...form.querySelectorAll('[data-filter]')].map((fieldset) => fieldset.dataset.filter);
   const familyGroups = [...document.querySelectorAll('[data-catalog-group]')];
   const empty = document.querySelector('[data-catalog-empty]');
-  const clearLinks = [...document.querySelectorAll('[data-catalog-clear]')];
+  const clearLinks = [...document.querySelectorAll('[data-catalog-clear], [data-catalog-leave]')];
   const resultCount = form.querySelector('[data-result-count]');
   const resultNoun = form.querySelector('[data-result-noun]');
   const search = form.elements.q; // hidden: the term a header search (or shared link) brought to this page
@@ -65,7 +65,9 @@ export function initializeCatalog() {
 
   form.addEventListener('change', apply);
   form.addEventListener('submit', (event) => { event.preventDefault(); apply(); });
-  clearLinks.forEach((link) => link.addEventListener('click', (event) => {
+  // On a family page Clear resets in place. On /products/ (search only) it is a plain link to the loaders: an emptied
+  // search there has no address of its own to keep.
+  clearLinks.filter((link) => link.hasAttribute('data-catalog-clear')).forEach((link) => link.addEventListener('click', (event) => {
     event.preventDefault();
     search.value = '';
     query?.remove();

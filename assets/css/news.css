@@ -11,7 +11,8 @@
 .bl-site .bl-news-when-past{color:var(--muted)}
 
 /* Section tabs: the site's category bar, with a count beside each section. */
-.bl-site .bl-news-tabs{border-bottom:0}
+/* Wraps rather than widening the page once all three sections have stories. */
+.bl-site .bl-news-tabs{flex-wrap:wrap;row-gap:0;border-bottom:0}
 .bl-site .bl-news-tabs small{margin-left:4px;font-size:.8em;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
 .bl-site .bl-news-tabs a[aria-current=page] small{color:var(--blue)}
 

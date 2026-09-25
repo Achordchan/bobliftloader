@@ -2,6 +2,8 @@
 $category = $route['category'];
 $search = bl_query('q');
 $filters = bl_catalog_filters($category);
+// /products/ exists only for header searches, so clearing one there opens the loaders (the bare address redirects there anyway).
+$clear = $category ? ['url' => bl_url($route['path']), 'attr' => 'data-catalog-clear'] : ['url' => bl_url('/products/skid-steer-loaders/'), 'attr' => 'data-catalog-leave'];
 $active = [];
 foreach ($filters as $key => $group) if (isset($group['options'][bl_query($key)])) $active[$key] = bl_query($key);
 // Every model in scope is rendered; the ones outside the filters are hidden, so the catalogue script can refilter in place.
@@ -53,7 +55,7 @@ $heading = $category === 'mini-dumpers' ? 'KEEP MATERIALS<br>MOVING.' : ($catego
       </div></fieldset>
       <?php endforeach; ?>
     </div>
-    <div class="bl-catalog-status"><?php if ($search !== ''): ?><span class="bl-catalog-query" data-catalog-query>Search <b>“<?= bl_escape($search) ?>”</b></span><?php endif; ?><p aria-live="polite"><b data-result-count><?= $visible ?></b> <span data-result-noun><?= $visible === 1 ? 'result' : 'results' ?></span></p><a class="bl-catalog-clear" href="<?= bl_escape(bl_url($route['path'])) ?>" data-catalog-clear<?= $active || $search !== '' ? '' : ' hidden' ?>>Clear all</a></div>
+    <div class="bl-catalog-status"><?php if ($search !== ''): ?><span class="bl-catalog-query" data-catalog-query>Search <b>“<?= bl_escape($search) ?>”</b></span><?php endif; ?><p aria-live="polite"><b data-result-count><?= $visible ?></b> <span data-result-noun><?= $visible === 1 ? 'result' : 'results' ?></span></p><a class="bl-catalog-clear" href="<?= bl_escape($clear['url']) ?>" <?= $clear['attr'] ?><?= $active || $search !== '' ? '' : ' hidden' ?>>Clear all</a></div>
     <noscript><button class="bl-button bl-button-blue" type="submit">Apply filters <?= bl_icon('arrow-up-right') ?></button></noscript>
   </form>
   <?php
@@ -66,7 +68,7 @@ $heading = $category === 'mini-dumpers' ? 'KEEP MATERIALS<br>MOVING.' : ($catego
     <div class="bl-product-grid"><?php foreach ($items as $item) { $attributes = ' data-catalog-card data-search="' . bl_escape($item['search']) . '"'; foreach ($item['facets'] as $key => $value) $attributes .= ' data-' . $key . '="' . $value . '"'; bl_product_card($item['product'], $attributes . ($matches($item) ? '' : ' hidden')); } ?></div>
   </div>
   <?php endforeach; ?>
-  <div class="bl-empty" data-catalog-empty<?= $visible ? ' hidden' : '' ?>><h2>No matching equipment.</h2><p>Try another model name, or remove a filter.</p><a class="bl-text-link" href="<?= bl_escape(bl_url($route['path'])) ?>" data-catalog-clear>Clear filters <?= bl_icon('arrow-up-right') ?></a></div>
+  <div class="bl-empty" data-catalog-empty<?= $visible ? ' hidden' : '' ?>><h2>No matching equipment.</h2><p>Try another model name, or remove a filter.</p><a class="bl-text-link" href="<?= bl_escape($clear['url']) ?>" <?= $clear['attr'] ?>>Clear filters <?= bl_icon('arrow-up-right') ?></a></div>
 </section>
 <?php if ($category) { $storyCategory = $category; require __DIR__ . '/../partials/range-story.php'; } // what the family is for, before the model-by-model comparison ?>
 <?php if ($category === 'skid-steer-loaders') require __DIR__ . '/../partials/attachments.php'; // tools belong to the machine, so they sit with the range, not in a catalogue of their own ?>

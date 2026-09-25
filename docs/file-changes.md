@@ -19,7 +19,7 @@
 | --- | --- |
 | `inc/content.php` | 首页分类与应用图改为真实产品；统一资源路径 |
 | `inc/data/products.json` | 5 款装载机、8 款迷你翻斗车的真实记录、图片、来源和已核实资料 |
-| `inc/data/news.json` | 3 篇有原始日期与来源的新闻摘要 |
+| `inc/data/news.json` | 广交会 2026 产品新闻，及 3 篇有原始日期与来源的集团新闻摘要 |
 | `inc/wordpress.php` | 产品 / 新闻内容类型；从已发布 WordPress 内容读取展示数据 |
 | `inc/wp-admin.php` | 中文产品 / 新闻字段；nonce、权限、清洗；载荷筛选值从参数同步 |
 | `inc/wp-import.php` | 显式、幂等的初始导入；不覆盖已有同路径内容 |

@@ -180,6 +180,12 @@ function bl_event_dates(array $event): string
 }
 
 /** Where an event stands today: 'upcoming' with the days to go, 'live', or 'past'. Dates are the event's local days. */
+/** A real calendar date written YYYY-MM-DD (2026-13-15 and 2026-02-30 are not). */
+function bl_is_date(string $value): bool
+{
+    return (bool) preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value, $m) && checkdate((int) $m[2], (int) $m[3], (int) $m[1]);
+}
+
 function bl_event_status(array $event, ?string $today = null): array
 {
     $today = new DateTimeImmutable($today ?? 'today', new DateTimeZone('Asia/Shanghai'));
