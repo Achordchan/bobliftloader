@@ -17,7 +17,9 @@ $firstImport = bl_import_initial_content();
 $secondImport = bl_import_initial_content();
 bl_test_assert($secondImport === ['products' => 0, 'news' => 0, 'pages' => 0], 'Import is not idempotent');
 bl_test_assert(count(bl_wp_products()) === count(bl_read_data('products')), 'Expected every product record to be published');
-bl_test_assert(count(bl_wp_articles()) === 3, 'Expected 3 published news articles');
+$newsCount = count(bl_read_data('news'));
+$productCount = count(bl_read_data('products'));
+bl_test_assert(count(bl_wp_articles()) === $newsCount, 'Expected every news record to be published');
 $post = get_page_by_path('bl-t1000-h-mini-skid-steer-loader', OBJECT, 'bl_product');
 $original = get_post_meta($post->ID, '_bl_record', true);
 try {
@@ -37,14 +39,14 @@ try {
     $_POST = [];
     wp_set_current_user(1);
     wp_update_post(['ID' => $post->ID, 'post_status' => 'draft']);
-    bl_test_assert(count(bl_wp_products()) === 12, 'Draft product leaked into frontend');
+    bl_test_assert(count(bl_wp_products()) === $productCount - 1, 'Draft product leaked into frontend');
 } finally {
     $_POST = [];
     update_post_meta($post->ID, '_bl_record', $original);
     wp_update_post(['ID' => $post->ID, 'post_status' => 'publish']);
     wp_set_current_user(0);
 }
-bl_test_assert(count(bl_wp_products()) === 13, 'Product restore failed');
+bl_test_assert(count(bl_wp_products()) === $productCount, 'Product restore failed');
 $news = get_page_by_path('customer-visits-boblift-factory', OBJECT, 'bl_news');
 $originalContent = $news->post_content;
 try {
@@ -54,6 +56,6 @@ try {
 } finally {
     wp_update_post(['ID' => $news->ID, 'post_content' => $originalContent]);
 }
-$report = ['wordpress' => get_bloginfo('version'), 'php' => PHP_VERSION, 'theme' => get_stylesheet(), 'import' => $firstImport, 'idempotent_import' => true, 'admin_save_and_frontend_read' => true, 'news_editor_read' => true, 'nonce_rejection' => true, 'anonymous_rejection' => true, 'draft_visibility' => true, 'restored' => true, 'published_products' => 13, 'published_news' => 3];
+$report = ['wordpress' => get_bloginfo('version'), 'php' => PHP_VERSION, 'theme' => get_stylesheet(), 'import' => $firstImport, 'idempotent_import' => true, 'admin_save_and_frontend_read' => true, 'news_editor_read' => true, 'nonce_rejection' => true, 'anonymous_rejection' => true, 'draft_visibility' => true, 'restored' => true, 'published_products' => $productCount, 'published_news' => $newsCount];
 file_put_contents('/wordpress/wp-content/bl-verification.json', wp_json_encode($report));
 echo wp_json_encode($report);

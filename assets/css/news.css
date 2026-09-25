@@ -1,0 +1,114 @@
+/* ---------- News: loaded on /news/ and its stories only. One list, one story layout, the same parts throughout. ---------- */
+
+/* Tag, category and date on one line, shared by the list and the story. */
+.bl-site .bl-news-item-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;font-size:var(--fs-micro);font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.bl-site .bl-news-item-meta>*+*::before{content:'';display:inline-block;width:3px;height:3px;margin:0 12px;border-radius:50%;background:#a4adb1;vertical-align:middle}
+.bl-site .bl-news-item-meta time{font-variant-numeric:tabular-nums}
+.bl-site .bl-news-tag{font-weight:700;color:var(--blue)}
+.bl-site .bl-news-tag-group{color:var(--ink)}
+.bl-site .bl-news-when{font-weight:700;color:var(--blue)}
+.bl-site .bl-news-when-live{color:#c4521f}
+.bl-site .bl-news-when-past{color:var(--muted)}
+
+/* Section tabs: the site's category bar, with a count beside each section. */
+/* Wraps rather than widening the page once all three sections have stories. */
+.bl-site .bl-news-tabs{flex-wrap:wrap;row-gap:0;border-bottom:0}
+.bl-site .bl-news-tabs small{margin-left:4px;font-size:.8em;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.bl-site .bl-news-tabs a[aria-current=page] small{color:var(--blue)}
+
+/* List. */
+.bl-site .bl-news-head-row{display:flex;align-items:flex-end;justify-content:space-between;gap:24px 60px;padding:clamp(24px,2vw,48px) 0 clamp(8px,.6vw,14px)}
+.bl-site .bl-news-list{border-top:1px solid var(--ink)}
+.bl-site .bl-news-head h1{font:700 var(--fs-h2)/.95 var(--display);letter-spacing:-.01em}
+.bl-site .bl-news-head-row p{max-width:32em;font-size:var(--fs-body);line-height:1.75;color:var(--muted)}
+.bl-site .bl-news-list-section{padding-bottom:var(--sp-section)}
+.bl-site .bl-news-list{margin:0;padding:0;list-style:none}
+.bl-site .bl-news-list>li{border-bottom:1px solid var(--line)}
+.bl-site .bl-news-item{display:grid;grid-template-columns:clamp(220px,24vw,520px) minmax(0,1fr);gap:clamp(24px,2.8vw,72px);align-items:center;padding:clamp(24px,2vw,44px) 0}
+.bl-site .bl-news-item-image{overflow:hidden;aspect-ratio:3/2;background:#e3e6e1}
+.bl-site .bl-news-item-image img{width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.2,.6,.2,1)}
+.bl-site .bl-news-item-body{display:flex;flex-direction:column;align-items:flex-start;max-width:52em}
+.bl-site .bl-news-item-title{margin:clamp(10px,.8vw,16px) 0 clamp(8px,.6vw,12px);font:600 var(--fs-h4)/1.08 var(--display);transition:color .2s}
+.bl-site .bl-news-item-excerpt{font-size:var(--fs-small);line-height:1.75;color:var(--muted);text-wrap:pretty}
+.bl-site .bl-news-item-event{display:flex;flex-wrap:wrap;align-items:center;margin-top:clamp(12px,1vw,20px);font-size:var(--fs-label);font-weight:600}
+.bl-site .bl-news-item-event>*+*::before{content:'';display:inline-block;width:1px;height:.9em;margin:0 12px;background:var(--line);vertical-align:-1px}
+.bl-site .bl-news-item:hover .bl-news-item-title{color:var(--blue)}
+.bl-site .bl-news-item:hover img{transform:scale(1.03)}
+
+/* Story: text column and a side column of details. */
+.bl-site .bl-story{padding-bottom:clamp(40px,3vw,72px)}
+.bl-site .bl-story-head{max-width:60em;padding:clamp(28px,2.4vw,60px) 0 clamp(24px,2vw,44px)}
+.bl-site .bl-story-category{display:inline-block;padding-bottom:3px;border-bottom:2px solid currentColor;font-size:var(--fs-label);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--blue)}
+.bl-site a.bl-story-category:hover{color:var(--ink)}
+.bl-site .bl-story-category-group{color:var(--ink)}
+.bl-site .bl-story-head h1{margin:clamp(18px,1.4vw,30px) 0 clamp(14px,1.1vw,24px);font:700 clamp(40px,3.2vw,84px)/1 var(--display);letter-spacing:-.01em;text-wrap:balance}
+.bl-site .bl-story-lede{max-width:42em;font-size:var(--fs-lead);line-height:1.7;color:var(--muted);text-wrap:pretty}
+.bl-site .bl-story-layout{display:grid;grid-template-columns:minmax(0,1fr) clamp(280px,22vw,420px);gap:clamp(40px,5vw,120px);align-items:start;padding-top:clamp(28px,2.4vw,56px);border-top:1px solid var(--ink)}
+.bl-site .bl-story-figure{margin:0 0 clamp(28px,2.2vw,48px)}
+.bl-site .bl-story-figure img{width:100%;max-height:min(70vh,760px);object-fit:contain;background:#e7e9e3}
+.bl-site .bl-story-figure figcaption,.bl-site .bl-story-poster figcaption{padding-top:10px;font-size:var(--fs-label);color:var(--muted)}
+.bl-site .bl-story-text{max-width:44em}
+.bl-site .bl-story-text h2{margin:clamp(28px,2.2vw,48px) 0 clamp(8px,.6vw,14px);font:600 var(--fs-h5)/1.15 var(--display)}
+.bl-site .bl-story-text h2:first-child{margin-top:0}
+.bl-site .bl-story-text p{font-size:var(--fs-body);line-height:1.85;color:#3f4c57;text-wrap:pretty}
+.bl-site .bl-story-text a{color:var(--blue);border-bottom:1px solid #215bdb66}
+.bl-site .bl-story-text a:hover{border-bottom-color:var(--blue)}
+.bl-site .bl-story-text .bl-story-visit{margin-top:clamp(28px,2.2vw,48px);padding-top:clamp(16px,1.2vw,24px);border-top:1px solid var(--line)}
+
+.bl-site .bl-story-aside{display:flex;flex-direction:column;gap:clamp(20px,1.6vw,32px)}
+.bl-site .bl-story-box{padding:clamp(18px,1.4vw,28px);background:#fff;border:1px solid var(--line)}
+.bl-site .bl-story-box h2{margin-bottom:12px;font-size:var(--fs-micro);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.bl-site .bl-story-box p{font-size:var(--fs-small);line-height:1.7;color:#3f4c57}
+.bl-site .bl-story-box dl{margin:0}
+.bl-site .bl-story-box dl>div{display:grid;grid-template-columns:5.2em minmax(0,1fr);gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+.bl-site .bl-story-box dt{padding-top:.2em;font-size:var(--fs-micro);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.bl-site .bl-story-box dd{margin:0;font-size:var(--fs-small);font-weight:600;line-height:1.5}
+.bl-site .bl-story-box dd small{display:block;margin-top:2px;font-size:var(--fs-micro);font-weight:500;color:var(--muted)}
+.bl-site .bl-story-box dd strong{font:700 var(--fs-h5)/1 var(--display);color:var(--blue)}
+.bl-site .bl-story-box dd .bl-news-when{display:block;margin-top:2px;font-size:var(--fs-micro);letter-spacing:.5px;text-transform:uppercase}
+.bl-site .bl-story-box-link{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding-bottom:3px;border-bottom:1px solid var(--line);font-size:var(--fs-label);font-weight:600;line-height:1.5;color:var(--ink)}
+.bl-site .bl-story-box-link:hover{border-bottom-color:var(--ink)}
+.bl-site .bl-story-box-link .bl-icon{width:15px;height:15px;flex:0 0 auto}
+.bl-site .bl-story-poster{float:right;width:min(42%,340px);margin:6px 0 20px clamp(24px,2vw,44px)}
+.bl-site .bl-story-poster img{width:100%;border:1px solid var(--line);background:#fff}
+.bl-site .bl-story-text::after{content:'';display:block;clear:both}
+.bl-site .bl-story-text .bl-story-visit{clear:both}
+
+/* Written by: the person, then the dates. */
+.bl-site .bl-story-author-name{display:flex;align-items:center;gap:14px;padding-bottom:14px}
+.bl-site .bl-story-author-name img,.bl-site .bl-story-avatar{flex:0 0 auto;width:48px;height:48px;border-radius:50%;object-fit:cover}
+.bl-site .bl-story-avatar{display:grid;place-items:center;background:var(--ink);color:#fff;font:700 22px/1 var(--display)}
+.bl-site .bl-story-author-name b{display:block;font-size:var(--fs-small);font-weight:700}
+.bl-site .bl-story-author-name small{display:block;margin-top:2px;font-size:var(--fs-label);color:var(--muted)}
+
+/* Related products: a compact list into the catalogue. */
+.bl-site .bl-story-product-list{margin:0;padding:0;list-style:none}
+.bl-site .bl-story-product-list a{display:grid;grid-template-columns:72px minmax(0,1fr);gap:14px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.bl-site .bl-story-product-image{aspect-ratio:1.25;background:#f6f7f4}
+.bl-site .bl-story-product-image img{width:100%;height:100%;object-fit:contain;padding:3px}
+.bl-site .bl-story-product-list b{display:block;font:700 var(--fs-h5)/1 var(--display);transition:color .2s}
+.bl-site .bl-story-product-list small{display:block;margin-top:3px;font-size:var(--fs-micro);line-height:1.4;color:var(--muted)}
+.bl-site .bl-story-product-list a:hover b{color:var(--blue)}
+
+/* The pager's rule sits inside the page gutters, like the content it divides. */
+.bl-site .bl-story-pager{background:linear-gradient(var(--line),var(--line)) top center/calc(100% - 2 * var(--gutter)) 1px no-repeat}
+
+.bl-site .bl-story-pager{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:clamp(48px,3.6vw,88px);margin-bottom:clamp(48px,3.6vw,88px);padding-top:clamp(18px,1.4vw,28px)}
+.bl-site .bl-story-pager a{display:flex;flex-direction:column;gap:8px}
+.bl-site .bl-story-pager span{display:inline-flex;align-items:center;gap:8px;font-size:var(--fs-micro);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.bl-site .bl-story-pager .bl-icon{width:15px;height:15px}
+.bl-site .bl-story-pager b{max-width:22em;font:600 var(--fs-h5)/1.15 var(--display);transition:color .2s}
+.bl-site .bl-story-pager a:hover b{color:var(--blue)}
+.bl-site .bl-story-pager-older{grid-column:2;align-items:flex-end;text-align:right}
+
+@media(max-width:1000px){
+  .bl-site .bl-news-head-row{flex-direction:column;align-items:flex-start}
+  .bl-site .bl-story-layout{grid-template-columns:1fr}
+  .bl-site .bl-story-aside{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));align-items:start}
+}
+@media(max-width:700px){
+  .bl-site .bl-news-item{grid-template-columns:1fr;gap:16px}
+  .bl-site .bl-story-pager{grid-template-columns:1fr}
+  .bl-site .bl-story-pager-older{grid-column:auto;align-items:flex-start;text-align:left}
+  .bl-site .bl-story-poster{float:none;width:auto;max-width:340px;margin:24px auto}
+}

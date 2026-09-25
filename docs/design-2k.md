@@ -96,3 +96,43 @@
 - 应用页的样式在 `assets/css/applications.css`，只在应用页加载。旧版 `.bl-application-directory`、`.bl-application-wide`、`.bl-application-requirements` 已从 `pages.css` 和 `page-responsive.css` 删除。各应用的检查项已挪到 `inc/content.php`。
 - 验证：`tests/test_site.py` 13 项全部通过（新增 `test_range_charts_take_the_visitors_number` 和 `test_applications_describe_the_job_and_point_to_the_range`）。在 1440 宽下截图检查；375 宽下 `scrollWidth` 等于视口宽度。WordPress Playground 本轮没有重跑。
 - 注意：物料运输“路线”检查项里写的“轮式 1.5–1.8 m、履带式不到 0.9 m”是手写文案，翻斗车参数变了要同步改。
+
+## 2026-09-25：新闻页重做
+
+- **内容**：新增一篇紧凑设备新闻 `canton-fair-2026`（广交会）。
+  - 事实来源：用户提供的易拉宝（小型滑移装载机、8 种快换属具、室外展位 12.0B34，欢迎现场试机）。
+  - 届次、日期、展馆出自广交会官方《2026 Attendance Guide for Overseas Buyers》PDF：第 140 届第一期 10 月 15–19 日，工程机械在第一期。
+  - 易拉宝上的机器是 BL-T360-H / BL-T460-H 共用的站驾履带机身，现场具体摆哪一款没有确认，文中没有写。
+  - 易拉宝原图存为 `assets/images/news/canton-fair-2026-banner.webp`，从中裁出机器部分作封面 `canton-fair-2026-cover.webp`。
+- **数据**：`news.json` 每篇新增 `line` 字段：`compact` 是本站紧凑设备新闻，`group` 是母公司的起重机新闻。可选字段有 `event`（活动名称、起止日期、场馆、地址、展位、日期来源）、`poster`、`products`、`products_note`。WordPress 后台的新闻编辑框加了“归属”和“展会 / 活动”字段；保存时保留其他字段。
+- **列表页**：统一的单列列表，按时间倒序。每条都是“3:2 图 + 标签·分类·日期 + 标题 + 摘要”。活动新闻多一行：日期 | 展位 | 还有几天开幕（`bl_event_status()`，按北京时间计算）。删掉了分类筛选。
+- **文章页**：正文列加右侧栏。
+  - 活动新闻：侧栏放“Event details”细线框和易拉宝，正文末尾有到访联系方式。
+  - 集团新闻：顶部放原图，侧栏放“About this story”（说明讲的是起重机业务）和原文链接（boblift.com 在正文区只出现一次）。
+  - 下方是相关机型卡片和上一篇 / 下一篇导航。活动新闻额外输出 schema.org `Event`。
+- **中途弃用的一版**：先做过一版头条大图、深色集团通栏、巨大标题和蓝色展位牌。用户认为是“为了设计而设计”，所以改成现在这版：规整、通用，靠对齐、细线、元信息排版和统一的图片比例来体现设计感，不靠大字号。
+- 样式在 `assets/css/news.css`，只在新闻页加载；旧的 `.bl-journal`、`.bl-article-*`、`.bl-original-source` 已从 `pages.css` 和 `page-responsive.css` 删除。首页新闻区仍用 `.bl-news-card`，这次没有改。
+- 验证：13 项测试通过（新闻测试覆盖了排序、归属标签、活动信息、Event 结构化数据、集团新闻外链次数）；在 1440 宽下截图检查；375 宽下没有横向溢出。
+
+### 同日调整：栏目、侧栏模块、标题区
+
+- **栏目**：Product news（`product-news`）、Customer stories（`customer-stories`）、Industry news（`industry-news`），定义在 `BL_NEWS_CATEGORIES`。列表页标题下是二级导航（沿用产品页的 `.bl-category-nav`，每项带篇数），没有文章的栏目不显示。栏目页地址是 `?category=` 形式，设为 noindex，未知的栏目值当作“全部”处理。
+- **集团新闻**：母公司的三篇起重机新闻按用户要求保留，不归入任何栏目（`category` 为空），只在 All 里出现，标签显示为 “BOB-LIFT group”。广交会一篇归入 Product news。旧的 `Company news`、`Exhibitions` 值一律视为“不归入栏目”。
+- **文章标题区**：面包屑 → 蓝色栏目链接（点击进入对应栏目页）→ 标题 → 导语 → 分隔线。
+- **正文列**：每篇开头都放主图。易拉宝作为正文插图靠右浮动，插在 `poster.after` 指定的段落处；手机上改为居中通栏。
+- **侧栏**：固定三个模块，按顺序排列，没有数据的不显示。
+  - Written by：WordPress 下取文章作者的头像、显示名和个人资料里新增的“职位”（`bl_title`），不放联系方式；另有发布日期和更新日期，集团新闻附原文链接。
+  - Event details：只有活动新闻才有。
+  - Related products：在后台勾选，存为 `products`。
+- 删掉了 “About this story” 文案框和文章底部的大产品卡片区。
+- **WordPress 后台**：新闻分类改为固定下拉（三个栏目，外加“不归入栏目”），新增相关产品勾选；用户资料页新增“职位”字段。
+
+## 2026-09-26：产品页默认进入滑移装载机
+
+用户确认装载机是主推产品线。
+
+- `/products/` 不再展示“全部设备”，而是 301 跳转到 `/products/skid-steer-loaders/`，旧的筛选链接也一样跳转。唯一例外是头部搜索（`?q=`）：这时仍在 `/products/` 显示两个系列的搜索结果。站点地图已去掉 `/products/`。
+- 两个系列页顶部原来的“All / Skid steer loaders / Mini dumpers”小标签，换成了系列切换器（`.bl-family-switch`）：两张卡片，各有机器图、款数、系列名，以及一行关键数字（装载机“Rated 200–500 kg · from 930 mm wide”，翻斗车“Rated 0.5–5 t · tracked and wheeled”），数字取自 `bl_family_ranges()`。装载机卡片更宽，当前系列用蓝色标出。吸顶子导航改为在切换器滚出屏幕后出现。
+- 头部 “Equipment” 直接链到装载机页；紧跟其后放了一个下拉面板（`.bl-nav-panel`），列出两个系列。鼠标悬停时显示；键盘 Tab 到 “Equipment” 时显示，再按 Tab 进入面板；手机菜单里显示为缩进的子列表。
+- 面包屑去掉了 “Equipment” 一级，因为它会跳转。结构化数据的面包屑改为产品所属的系列页。首页“Explore the range”和 404 页的链接改为装载机页；页脚删掉了 “All equipment”。
+- 验证：14 项测试通过（新增 `test_range_opens_on_the_loaders`，覆盖 301 跳转、搜索保留、导航面板、切换器的当前项、页脚和站点地图）；1440 宽截图检查；键盘展开面板实测通过；375 宽手机菜单检查通过。

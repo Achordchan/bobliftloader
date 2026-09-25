@@ -60,7 +60,7 @@ function bl_public_base(): string
 
 function bl_sitemap_paths(): array
 {
-    $paths = ['/', '/about/', '/products/', '/products/skid-steer-loaders/', '/products/mini-dumpers/', '/applications/', '/support/', '/news/', '/contact/', '/privacy/'];
+    $paths = ['/', '/about/', '/products/skid-steer-loaders/', '/products/mini-dumpers/', '/applications/', '/support/', '/news/', '/contact/', '/privacy/'];
     global $applications;
     foreach ($applications as $app) $paths[] = '/applications/' . bl_application_slug($app) . '/';
     foreach (bl_products() as $product) $paths[] = '/product/' . $product['slug'] . '/';

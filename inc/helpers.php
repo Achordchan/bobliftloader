@@ -164,9 +164,68 @@ function bl_articles(): array
     $articles = bl_read_data('news');
     foreach ($articles as &$article) {
         $article['image'] = bl_asset($article['image']);
+        if (!empty($article['poster']['image'])) $article['poster']['image'] = bl_asset($article['poster']['image']);
     }
     unset($article);
     return $articles;
+}
+
+/** "15–19 October 2026", or "30 October – 2 November 2026" across months. */
+function bl_event_dates(array $event): string
+{
+    [$start, $end] = [strtotime($event['start']), strtotime($event['end'] ?: $event['start'])];
+    if ($start === $end) return date('j F Y', $start);
+    if (date('Y-m', $start) === date('Y-m', $end)) return date('j', $start) . '–' . date('j F Y', $end);
+    return date('j F', $start) . ' – ' . date('j F Y', $end);
+}
+
+/** Where an event stands today: 'upcoming' with the days to go, 'live', or 'past'. Dates are the event's local days. */
+/** A real calendar date written YYYY-MM-DD (2026-13-15 and 2026-02-30 are not). */
+function bl_is_date(string $value): bool
+{
+    return (bool) preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value, $m) && checkdate((int) $m[2], (int) $m[3], (int) $m[1]);
+}
+
+function bl_event_status(array $event, ?string $today = null): array
+{
+    $today = new DateTimeImmutable($today ?? 'today', new DateTimeZone('Asia/Shanghai'));
+    $today = $today->setTime(0, 0);
+    $start = new DateTimeImmutable($event['start'], new DateTimeZone('Asia/Shanghai'));
+    $end = new DateTimeImmutable($event['end'] ?: $event['start'], new DateTimeZone('Asia/Shanghai'));
+    if ($today < $start) {
+        $days = (int) $today->diff($start)->days;
+        return ['state' => 'upcoming', 'label' => $days === 1 ? 'Opens tomorrow' : 'Opens in ' . $days . ' days'];
+    }
+    if ($today <= $end) return ['state' => 'live', 'label' => 'On now'];
+    return ['state' => 'past', 'label' => 'Held ' . bl_event_dates($event)];
+}
+
+/** News sections of this site, keyed by the value stored with each story. Stories from the wider group carry none. */
+const BL_NEWS_CATEGORIES = ['product-news' => 'Product news', 'customer-stories' => 'Customer stories', 'industry-news' => 'Industry news'];
+
+/** A story's section key, or '' for a group story or any older value (Company news, Exhibitions) no longer used. */
+function bl_news_category(array $article): string
+{
+    if (($article['line'] ?? '') === 'group') return ''; // group stories sit under All only, whatever category they still carry
+    return isset(BL_NEWS_CATEGORIES[$article['category'] ?? '']) ? $article['category'] : '';
+}
+
+/**
+ * Whose story it is: 'group' or 'compact'. Stories imported before news had a line keep their original record (the
+ * importer never rewrites it), so the bundled data answers for those until an editor saves the story with a choice.
+ */
+function bl_news_line(array $record, string $slug): string
+{
+    $line = $record['line'] ?? (bl_find_record(bl_read_data('news'), $slug)['line'] ?? 'compact');
+    return $line === 'group' ? 'group' : 'compact';
+}
+
+/** What the list and the story show above the title: the section, or "BOB-LIFT group" for the parent company's stories. */
+function bl_news_label(array $article): string
+{
+    $category = bl_news_category($article);
+    if ($category) return BL_NEWS_CATEGORIES[$category];
+    return ($article['line'] ?? '') === 'group' ? 'BOB-LIFT group' : 'News';
 }
 
 function bl_find_record(array $records, string $slug): ?array

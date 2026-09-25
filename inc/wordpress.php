@@ -48,13 +48,19 @@ function bl_wp_articles(): array
     foreach (get_posts(['post_type' => 'bl_news', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'date', 'order' => 'DESC']) as $post) {
         $meta = get_post_meta($post->ID, '_bl_record', true);
         if (!is_array($meta)) $meta = [];
-        $record = array_replace(['category' => 'Company news', 'source' => '', 'image' => '', 'caption' => '', 'sections' => []], $meta);
+        $meta['line'] = bl_news_line($meta, $post->post_name);
+        $record = array_replace(['category' => '', 'line' => 'compact', 'source' => '', 'image' => '', 'caption' => '', 'sections' => [], 'event' => [], 'poster' => [], 'products' => []], $meta);
+        if (!empty($record['poster']['image'])) $record['poster']['image'] = bl_wp_image($record['poster']['image']);
         $record['slug'] = $post->post_name;
         $record['title'] = get_the_title($post);
         $record['url'] = get_permalink($post);
         $record['date'] = get_the_date('Y-m-d', $post);
         $record['excerpt'] = $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35);
         $record['content_html'] = apply_filters('the_content', $post->post_content);
+        // The person who wrote it: name, job title from their profile, and avatar. No contact details are shown.
+        $author = (int) $post->post_author;
+        if ($author) $record['author'] = ['name' => get_the_author_meta('display_name', $author), 'title' => (string) get_user_meta($author, 'bl_title', true), 'avatar' => (string) get_avatar_url($author, ['size' => 128])];
+        if (get_the_modified_date('Y-m-d', $post) > $record['date']) $record['updated'] = get_the_modified_date('Y-m-d', $post);
         $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: bl_wp_image($record['image']);
         if (!$record['image']) $record['image'] = bl_asset('images/company/boblift-workshop-aerial-mobile.webp');
         $result[] = $record;

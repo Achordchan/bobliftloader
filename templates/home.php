@@ -13,7 +13,7 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
   <div class="bl-hero-content bl-shell">
     <p class="bl-eyebrow bl-hero-eyebrow"><span class="bl-status-dot"></span> COMPACT EQUIPMENT. OPEN POSSIBILITIES.</p>
     <h1 id="hero-title"><span>SMALL SIZE.</span><span>SERIOUS</span><span>CAPABILITY<span class="bl-period">.</span></span></h1>
-    <div class="bl-hero-action"><a href="<?= bl_escape(bl_url('/products/')) ?>" class="bl-button bl-button-blue">Explore the range <?= bl_icon('arrow-up-right') ?></a><a href="<?= bl_escape(bl_url('/contact/')) ?>" class="bl-text-link">Talk to our team <?= bl_icon('arrow-up-right') ?></a></div>
+    <div class="bl-hero-action"><a href="<?= bl_escape(bl_url('/products/skid-steer-loaders/')) ?>" class="bl-button bl-button-blue">Explore the range <?= bl_icon('arrow-up-right') ?></a><a href="<?= bl_escape(bl_url('/contact/')) ?>" class="bl-text-link">Talk to our team <?= bl_icon('arrow-up-right') ?></a></div>
   </div>
   <div class="bl-hero-entries bl-shell">
     <?php foreach ($equipment as $key => $item): $facts = $familyFacts[$key]; ?>
