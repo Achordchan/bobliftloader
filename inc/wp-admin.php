@@ -37,11 +37,12 @@ function bl_news_meta_box(WP_Post $post): void
 {
     $record = get_post_meta($post->ID, '_bl_record', true);
     if (!is_array($record)) $record = [];
+    $record['line'] = bl_news_line($record, $post->post_name); // the same line the site shows, so saving keeps it
     wp_nonce_field('bl_save_record', 'bl_record_nonce');
     echo '<p>正文、摘要、发布日期和特色图片使用 WordPress 编辑器管理。转载摘要应保留来源。</p><label for="bl-category">分类</label><select id="bl-category" name="bl_record[category]">';
     foreach (['' => '不归入栏目（集团新闻，只在“全部”中显示）', 'product-news' => '产品新闻 Product news', 'customer-stories' => '应用案例 Customer stories', 'industry-news' => '行业新闻 Industry news'] as $value => $label) echo '<option value="' . esc_attr($value) . '" ' . selected(bl_news_category($record), $value, false) . '>' . esc_html($label) . '</option>';
     echo '</select><label for="bl-line">归属</label><select id="bl-line" name="bl_record[line]">';
-    foreach (['compact' => '紧凑设备（本站新闻）', 'group' => 'BOB-LIFT 集团（起重机等，列表中标注 BOB-LIFT group）'] as $value => $label) echo '<option value="' . esc_attr($value) . '" ' . selected($record['line'] ?? 'compact', $value, false) . '>' . esc_html($label) . '</option>';
+    foreach (['compact' => '紧凑设备（本站新闻）', 'group' => 'BOB-LIFT 集团（起重机等，列表中标注 BOB-LIFT group）'] as $value => $label) echo '<option value="' . esc_attr($value) . '" ' . selected($record['line'], $value, false) . '>' . esc_html($label) . '</option>';
     echo '</select>';
     bl_meta_input('原始文章网址（原创可留空）', 'source', (string) ($record['source'] ?? ''));
     bl_meta_input('备用图片（优先使用特色图片）', 'image', (string) ($record['image'] ?? ''));

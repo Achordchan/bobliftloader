@@ -48,9 +48,7 @@ function bl_wp_articles(): array
     foreach (get_posts(['post_type' => 'bl_news', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'date', 'order' => 'DESC']) as $post) {
         $meta = get_post_meta($post->ID, '_bl_record', true);
         if (!is_array($meta)) $meta = [];
-        // Stories imported before news had a line keep their original record, which the importer never rewrites. Read
-        // the line from the bundled data for those; once an editor saves the story, the meta box stores its own choice.
-        if (!isset($meta['line'])) $meta['line'] = bl_find_record(bl_read_data('news'), $post->post_name)['line'] ?? 'compact';
+        $meta['line'] = bl_news_line($meta, $post->post_name);
         $record = array_replace(['category' => '', 'line' => 'compact', 'source' => '', 'image' => '', 'caption' => '', 'sections' => [], 'event' => [], 'poster' => [], 'products' => []], $meta);
         if (!empty($record['poster']['image'])) $record['poster']['image'] = bl_wp_image($record['poster']['image']);
         $record['slug'] = $post->post_name;
