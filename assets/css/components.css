@@ -107,6 +107,8 @@
 /* Equipment panel: both families, under the header, while Equipment is hovered or anything in the panel has focus. */
 .bl-site .bl-nav-panel{position:absolute;left:0;right:0;top:100%;display:grid;grid-template-columns:repeat(2,minmax(0,clamp(300px,19vw,420px)));justify-content:end;gap:12px;padding:16px max(var(--gutter),calc((100% - var(--frame-width))/2 + var(--gutter))) 20px;background:#0d2536;border-top:1px solid #2b4456;box-shadow:0 20px 30px #081c2b40;opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .2s,transform .2s,visibility 0s linear .25s}
 .bl-site .bl-nav>a:first-child:hover+.bl-nav-panel,.bl-site .bl-nav-panel:hover,.bl-site .bl-nav-panel:focus-within,.bl-site .bl-nav>a:first-child:focus-visible+.bl-nav-panel{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+/* Escape dismisses it while hover or focus stays (assets/js/main.js). */
+.bl-site .bl-header .bl-nav>a:first-child+.bl-nav-panel.bl-nav-panel-closed{opacity:0;visibility:hidden;transition:none}
 .bl-site .bl-nav-panel a{display:grid;grid-template-columns:76px minmax(0,1fr);align-items:center;gap:16px;padding:10px 14px 10px 10px;border:1px solid #2b4456;transition:background .2s,border-color .2s}
 .bl-site .bl-nav-panel a:hover{background:#143248;border-color:#476070}
 .bl-site .bl-nav-panel img{width:100%;aspect-ratio:1.2;object-fit:contain;background:#f1f2ed}

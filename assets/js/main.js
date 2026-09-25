@@ -45,6 +45,23 @@ document.addEventListener('focusin', (event) => {
 });
 window.matchMedia('(min-width: 601px)').addEventListener('change', () => closeNavigation());
 
+// The Equipment panel opens on hover or focus (CSS). Escape hides it without moving the pointer or focus; it comes back
+// on the next hover of Equipment, or the next time focus arrives there after leaving.
+const equipmentPanel = navigation.querySelector('.bl-nav-panel');
+if (equipmentPanel) {
+  const equipmentLink = equipmentPanel.previousElementSibling;
+  const reopen = () => equipmentPanel.classList.remove('bl-nav-panel-closed');
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || getComputedStyle(equipmentPanel).position !== 'absolute' || getComputedStyle(equipmentPanel).visibility !== 'visible') return;
+    equipmentPanel.classList.add('bl-nav-panel-closed');
+    if (equipmentPanel.contains(document.activeElement)) equipmentLink.focus();
+  });
+  equipmentLink.addEventListener('mouseenter', reopen);
+  equipmentLink.addEventListener('blur', reopen);
+  equipmentPanel.addEventListener('focusin', reopen);
+  window.matchMedia('(min-width: 601px)').addEventListener('change', reopen); // the phone menu always lists it
+}
+
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
   anchor.addEventListener('click', (event) => {
     const target = document.getElementById(anchor.getAttribute('href').slice(1));
