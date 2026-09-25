@@ -28,18 +28,28 @@ class SupportTests(unittest.TestCase):
     def test_support_page_sections_and_terms(self):
         status, html, _ = fetch('/support/')
         self.assertEqual(status, 200)
-        # The on-this-page bar lands on real sections, and the plate carries the confirmed buying terms.
-        targets = re.findall(r'href="#([\w-]+)" data-section-link', html)
-        self.assertEqual(targets, ['buying', 'after-delivery', 'downloads', 'faq'])
-        for target in targets + ['containers']: self.assertIn(f'id="{target}"', html)
-        plate = re.search(r'<dl class="bl-sup-plate.*?</dl>', html, re.S).group(0)
-        for text in ['Minimum order', '>1<small>unit', 'T/T', '8–30<small>working days', '12<small>months']: self.assertIn(text, plate)
+        # The four tasks lead to the service form, the catalogue and the sections below; every section has the same shape.
+        tasks = re.search(r'<ul class="bl-sup-tasks">.*?</ul>', html, re.S).group(0)
+        hrefs = re.findall(r'<a href="([^"]+)"', tasks)
+        self.assertEqual(len(hrefs), 4)
+        self.assertIn('/contact/?topic=service#enquiry', hrefs)
+        self.assertTrue(any(h.endswith('.pdf') for h in hrefs))
+        for target in [h[1:] for h in hrefs if h.startswith('#')] + ['buying', 'containers', 'after-delivery', 'downloads', 'faq']:
+            self.assertIn(f'id="{target}"', html)
+        self.assertEqual(html.count('class="bl-sup-section bl-shell"'), 4)
+        # The buying terms are stated once, in the buying section.
+        terms = re.search(r'<dl class="bl-sup-terms".*?</dl>', html, re.S).group(0)
+        for text in ['Minimum order', '>1 <small>unit', 'T/T', '8–30 <small>working days', '12 <small>months']: self.assertIn(text, terms)
+        self.assertEqual(html.count('<dl class="bl-sup-terms"'), 1)
+        # No display-size decoration left over from the first version: no photo stage, plate, dark band or section bar.
+        for old in ['bl-sup-hero', 'bl-sup-plate', 'bl-sup-after-grid', 'data-section-nav']: self.assertNotIn(old, html)
         self.assertIn('aria-current="page">Support', html.replace('<span class="bl-nav-index">04</span>', ''))
 
     def test_container_table_covers_every_model(self):
         with open('inc/data/products.json') as source: products = json.load(source)
         _, html, _ = fetch('/support/')
         rows = re.findall(r'<tr><th scope="row"><a href="/product/([a-z0-9-]+)/">', html)
+        # The dumpers sit in a closed disclosure, still in the page for search engines and readers without script.
         self.assertEqual(sorted(rows), sorted(p['slug'] for p in products))
 
     def test_faq_structured_data_matches_the_page(self):
@@ -47,7 +57,7 @@ class SupportTests(unittest.TestCase):
         graph = structured(html)[0]['@graph']
         faq = next(node for node in graph if node['@type'] == 'FAQPage')
         questions = [q['name'] for q in faq['mainEntity']]
-        self.assertEqual(questions, [re.sub('&#0?39;', "'", q) for q in re.findall(r'<summary>(.*?)<img', html)])
+        self.assertEqual(questions, [re.sub('&#0?39;', "'", q) for q in re.findall(r'<details class="bl-sup-faq-item">\s*<summary>(.*?)<img', html)])
         self.assertGreaterEqual(len(questions), 8)
 
     def test_downloads_resolve(self):

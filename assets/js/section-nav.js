@@ -1,6 +1,6 @@
 /**
- * Family pages and the Support page: pin the on-this-page bar under the header once the family switch (or the element
- * marked data-section-nav-after) has scrolled away, mark the section in view, and fill the progress line as the page is read.
+ * Family pages (or any page with an element marked data-section-nav-after): pin the on-this-page bar under the header
+ * once the family switch or that element has scrolled away, mark the section in view, and fill the progress line as the page is read.
  */
 export function initializeSectionNav() {
   const nav = document.querySelector('[data-section-nav]');
