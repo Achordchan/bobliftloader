@@ -3,6 +3,11 @@ declare(strict_types=1);
 require_once __DIR__ . '/inc/bootstrap.php';
 if (!bl_is_wordpress()) bl_serve_discovery();
 $route = bl_resolve_route();
+// The range opens on the loaders, the main line. /products/ itself stays only for header searches (?q=), which span both families.
+if ($route['type'] === 'products' && $route['category'] === '' && bl_query('q') === '') {
+    header('Location: ' . bl_url('/products/skid-steer-loaders/'), true, 301);
+    exit;
+}
 if (!bl_is_wordpress() && $route['status'] === 200) {
     $requested = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
     if ($requested !== $route['path'] && !str_contains($requested, '%')) {
@@ -23,7 +28,7 @@ http_response_code($route['status']);
   <link rel="preload" href="<?= bl_escape(bl_asset('fonts/barlow-condensed-700.ttf')) ?>" as="font" type="font/ttf" crossorigin>
   <?php if ($route['type'] === 'home'): ?><link rel="preload" href="<?= bl_escape(bl_asset('images/hero-banner-2k.webp')) ?>" as="image" media="(min-width: 801px)" fetchpriority="high"><link rel="preload" href="<?= bl_escape(bl_asset('images/hero-real-loader.webp')) ?>" as="image" media="(max-width: 800px)" fetchpriority="high"><?php endif; ?>
   <?php if ($route['type'] === 'about'): ?><link rel="preload" as="image" imagesrcset="<?= bl_escape(bl_asset('images/about/hall-1200.webp')) ?> 1200w, <?= bl_escape(bl_asset('images/about/hall-2560.webp')) ?> 2560w" imagesizes="100vw" fetchpriority="high"><?php endif; ?>
-  <?php foreach (['base', 'home', 'components', 'responsive', 'pages', 'page-responsive', ...($route['type'] === 'about' ? ['about'] : []), ...(in_array($route['type'], ['applications', 'application'], true) ? ['applications'] : [])] as $stylesheet): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset('css/' . $stylesheet . '.css')) ?>"><?php endforeach; ?>
+  <?php foreach (['base', 'home', 'components', 'responsive', 'pages', 'page-responsive', ...($route['type'] === 'about' ? ['about'] : []), ...(in_array($route['type'], ['applications', 'application'], true) ? ['applications'] : []), ...(in_array($route['type'], ['news', 'article'], true) ? ['news'] : [])] as $stylesheet): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset('css/' . $stylesheet . '.css')) ?>"><?php endforeach; ?>
   <script type="module" src="<?= bl_escape(bl_asset('js/main.js')) ?>"></script>
   <?php if (bl_is_wordpress()) wp_head(); ?>
 </head>

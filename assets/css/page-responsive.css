@@ -19,7 +19,6 @@
   .bl-site .bl-contact-details{display:grid;grid-template-columns:1fr 1fr;gap:25px}
   .bl-site .bl-contact-details>div:last-child{grid-column:1/-1}
   .bl-site .bl-contact-parent{grid-template-columns:1fr;gap:25px}
-  .bl-site .bl-article-cover>img{height:410px}
 }
 @media(max-width:600px){
   .bl-site .bl-nav>a{font-size:34px}
@@ -40,7 +39,7 @@
   .bl-site .bl-catalog-filters{flex-direction:column;gap:18px}
   .bl-site .bl-product-card-content h2{font-size:32px}
   .bl-site .bl-product-card-content dl{gap:45px}
-  .bl-site .bl-catalog,.bl-site .bl-journal{padding-bottom:55px}
+  .bl-site .bl-catalog{padding-bottom:55px}
   .bl-site .bl-page-cta{align-items:flex-start;flex-direction:column;padding-block:45px}
   .bl-site .bl-page-cta h2{font-size:48px}
   .bl-site .bl-product-overview h2,.bl-site .bl-specifications h2{font-size:47px}
@@ -56,18 +55,6 @@
   .bl-site .bl-news-grid{grid-template-columns:1fr;gap:40px}
   .bl-site .bl-news-card h2{font-size:36px}
   .bl-site .bl-home-journal{padding-block:50px}
-  .bl-site .bl-article-header{padding:20px 24px 30px}
-  .bl-site .bl-article-header>.bl-eyebrow{font-size:11px}
-  .bl-site .bl-article-header h1{font-size:59px;letter-spacing:-.6px}
-  .bl-site .bl-article-header>p:not(.bl-eyebrow){font-size:15px}
-  .bl-site .bl-article-cover>img{height:270px}
-  .bl-site .bl-article-cover figcaption{font-size:11px}
-  .bl-site .bl-article-body{padding:30px 24px 45px}
-  .bl-site .bl-article-body section h2{font-size:32px}
-  .bl-site .bl-article-body section p{font-size:14px}
-  .bl-site .bl-original-source{padding:23px 18px}
-  .bl-site .bl-original-source .bl-text-link{font-size:12px;gap:12px}
-  .bl-site .bl-article-bottom{align-items:flex-start;flex-direction:column;gap:22px}
   .bl-site .bl-contact-page-grid{padding-bottom:50px}
   .bl-site .bl-contact-details{grid-template-columns:1fr;gap:0}
   .bl-site .bl-contact-details>div{margin-bottom:30px}

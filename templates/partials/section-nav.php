@@ -1,6 +1,6 @@
 <?php
 /**
- * On-this-page navigation for a family page. The script pins it under the header once the family tabs scroll away
+ * On-this-page navigation for a family page. The script pins it under the header once the family switch scrolls away
  * and marks the section in view; without the script it sits in the page as a plain list of links.
  */
 $loaderPage = $category === 'skid-steer-loaders';

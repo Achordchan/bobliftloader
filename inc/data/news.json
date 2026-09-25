@@ -1,9 +1,55 @@
 [
   {
+    "slug": "canton-fair-2026",
+    "title": "Try our mini loader at the Canton Fair.",
+    "date": "2026-09-25",
+    "category": "product-news",
+    "line": "compact",
+    "excerpt": "A working mini skid steer loader and its quick-change attachments will be at our outdoor booth, 12.0B34, during Phase 1 of the 140th Canton Fair in Guangzhou, 15–19 October 2026.",
+    "caption": "The mini skid steer loader on our Canton Fair stand banner.",
+    "image": "images/news/canton-fair-2026-cover.webp",
+    "poster": {
+      "image": "images/news/canton-fair-2026-banner.webp",
+      "alt": "BOB-LIFT Canton Fair banner: One machine, multiple possibilities. A tracked mini skid steer loader, eight quick-change attachments, and booth number 12.0B34.",
+      "caption": "Our stand banner for the fair.",
+      "after": 2
+    },
+    "event": {
+      "name": "140th Canton Fair · Phase 1",
+      "start": "2026-10-15",
+      "end": "2026-10-19",
+      "venue": "China Import and Export Fair Complex, Guangzhou",
+      "address": "No. 382, Yuejiang Zhong Road, Guangzhou",
+      "booth": "12.0B34",
+      "booth_note": "Outdoor booth",
+      "source": "https://cospub.cantonfair.org.cn/461100754573217792/1772444977466-6467b271-5b42-491e-a018-48efd58f7300.pdf",
+      "source_label": "Dates, venue and exhibition sections from the Canton Fair’s 2026 Attendance Guide for Overseas Buyers"
+    },
+    "products": [
+      "bl-t360-h-mini-skid-steer-loader",
+      "bl-t460-h-mini-skid-steer-loader"
+    ],
+    "sections": [
+      {
+        "heading": "A real machine, outside",
+        "text": "We are bringing a working mini skid steer loader to the 140th China Import and Export Fair, better known as the Canton Fair. It will be at our outdoor booth, 12.0B34, and you are welcome to come and try it."
+      },
+      {
+        "heading": "One machine, eight attachments",
+        "text": "Our stand banner shows the loader with eight quick-change attachments: bucket, fork, auger, sweeper, rotary tiller, breaker, snow blower and crab bucket. Ask the team which of them suit your model and the work you have in mind."
+      },
+      {
+        "heading": "When and where",
+        "text": "Phase 1 of the fair, which includes the construction machinery section, runs from 15 to 19 October 2026 at the China Import and Export Fair Complex in Guangzhou."
+      }
+    ],
+    "source": ""
+  },
+  {
     "slug": "customer-visits-boblift-factory",
     "title": "A closer look. A stronger connection.",
     "date": "2026-06-10",
-    "category": "Company news",
+    "category": "",
     "excerpt": "Overseas customers visited BOB-LIFT to see the workshop, assembly and testing areas, and discuss future cooperation.",
     "caption": "Customer-visit image published on the BOB-LIFT main website.",
     "sections": [
@@ -21,13 +67,14 @@
       }
     ],
     "source": "https://www.boblift.com/BOB-LIFT-Warmly-Welcomes-Customers-To-Visit-And-Inspect-Our-Factory-id09474845.html",
-    "image": "images/news/customer-visits-boblift-factory.webp"
+    "image": "images/news/customer-visits-boblift-factory.webp",
+    "line": "group"
   },
   {
     "slug": "inside-boblift-manufacturing",
     "title": "The work behind the machine.",
     "date": "2026-06-03",
-    "category": "Company news",
+    "category": "",
     "excerpt": "A look at the production, assembly and testing processes described by the BOB-LIFT manufacturing team.",
     "caption": "BOB-LIFT manufacturing photograph from the original company announcement.",
     "sections": [
@@ -45,13 +92,14 @@
       }
     ],
     "source": "https://www.boblift.com/BOB-LIFT-Uses-Professional-Manufacturing-Techniques-To-Produce-Every-Piece-of-Equipment-That-Is-Reliable-And-Trustworthy-id01146955.html",
-    "image": "images/news/inside-boblift-manufacturing.webp"
+    "image": "images/news/inside-boblift-manufacturing.webp",
+    "line": "group"
   },
   {
     "slug": "boblift-ctt-expo-2026",
     "title": "Connecting at CTT EXPO 2026.",
     "date": "2026-05-20",
-    "category": "Exhibitions",
+    "category": "",
     "excerpt": "BOB-LIFT’s announcement for the May 26–29, 2026 construction machinery exhibition in Moscow.",
     "caption": "Exhibition artwork published with BOB-LIFT’s CTT EXPO 2026 announcement.",
     "sections": [
@@ -69,6 +117,7 @@
       }
     ],
     "source": "https://www.boblift.com/BOB-LIFT-Will-Make-Debut-at-CTT-EXPO-2026-id07786155.html",
-    "image": "images/news/boblift-ctt-expo-2026.webp"
+    "image": "images/news/boblift-ctt-expo-2026.webp",
+    "line": "group"
   }
 ]

@@ -72,7 +72,7 @@ class WebsiteTests(unittest.TestCase):
     def setUpClass(cls):
         with open('inc/data/products.json') as source: cls.products = json.load(source)
         with open('inc/data/news.json') as source: cls.articles = json.load(source)
-        cls.paths = ['/', '/about/', '/products/', '/products/skid-steer-loaders/', '/products/mini-dumpers/', '/applications/', '/applications/landscaping/', '/applications/site-preparation/', '/applications/material-transport/', '/news/', '/contact/', '/privacy/']
+        cls.paths = ['/', '/about/', '/products/skid-steer-loaders/', '/products/mini-dumpers/', '/applications/', '/applications/landscaping/', '/applications/site-preparation/', '/applications/material-transport/', '/news/', '/contact/', '/privacy/']
         cls.paths += ['/product/' + p['slug'] + '/' for p in cls.products]
         cls.paths += ['/news/' + a['slug'] + '/' for a in cls.articles]
 
@@ -133,8 +133,8 @@ class WebsiteTests(unittest.TestCase):
         self.assertEqual(len(visible_cards(html)), 2)
         _, html, _ = fetch('/products/mini-dumpers/?load=heavy')
         self.assertEqual(len(visible_cards(html)), 4)
-        # Each family page compares only its own models; the all-equipment view has no table.
-        _, html, _ = fetch('/products/')
+        # Each family page compares only its own models; search results across both families have no table.
+        _, html, _ = fetch('/products/?q=mini')
         self.assertNotIn('bl-compare-table', html)
         _, html, _ = fetch('/products/skid-steer-loaders/')
         self.assertIn('id="compare-skid-steer-loaders"', html)
@@ -157,8 +157,8 @@ class WebsiteTests(unittest.TestCase):
         self.assertNotIn('Fatal error', html)
 
     def test_catalogue_layout(self):
-        # The whole range groups by family; family pages carry an on-this-page bar whose links all land on real sections.
-        _, html, _ = fetch('/products/')
+        # Search results group by family; family pages carry an on-this-page bar whose links all land on real sections.
+        _, html, _ = fetch('/products/?q=mini')
         self.assertEqual(html.count('class="bl-catalog-group-head"'), 2)
         self.assertNotIn('data-section-nav', html)
         for path, expected in [('/products/skid-steer-loaders/', 5), ('/products/mini-dumpers/', 3)]:
@@ -294,16 +294,76 @@ class WebsiteTests(unittest.TestCase):
         self.assertNotIn('id="how-they-are-made"', html)
         self.assertEqual(html.count('<li class="bl-ruler-'), len(loaded_dumpers))
         self.assertNotIn('Painted to order.', html)
-        _, html, _ = fetch('/products/')
+        _, html, _ = fetch('/products/?q=mini')
         self.assertNotIn('id="about-the-range"', html)
+
+    def test_range_opens_on_the_loaders(self):
+        # /products/ goes straight to the loaders, the main line; a header search there still spans both families.
+        class Stay(HTTPRedirectHandler):
+            def redirect_request(self, *args, **kwargs): return None
+        for path in ('/products/', '/products/?load=light'):
+            try:
+                build_opener(ProxyHandler({}), Stay).open(BASE + path, timeout=30)
+                self.fail(path + ' did not redirect')
+            except HTTPError as error:
+                self.assertEqual(error.code, 301)
+                self.assertTrue(error.headers['Location'].endswith('/products/skid-steer-loaders/'))
+        _, html, _ = fetch('/products/?q=FY')
+        self.assertTrue(visible_cards(html))
+        # Every page's Equipment link opens the loaders and its panel names both families; the switch marks the current one.
+        _, html, _ = fetch('/about/')
+        self.assertIn('<a href="/products/skid-steer-loaders/" >Equipment', html)
+        panel = html.split('class="bl-nav-panel"', 1)[1].split('</div>', 1)[0]
+        self.assertIn('/products/skid-steer-loaders/', panel)
+        self.assertIn('/products/mini-dumpers/', panel)
+        for family in ('skid-steer-loaders', 'mini-dumpers'):
+            _, html, _ = fetch('/products/' + family + '/')
+            switch = html.split('class="bl-family-switch"', 1)[1].split('</nav>', 1)[0]
+            self.assertEqual(re.findall(r'href="/products/([a-z-]+)/" aria-current="page"', switch), [family])
+        self.assertNotIn('href="/products/"', html.split('<footer', 1)[1])
+        _, sitemap, _ = fetch('/sitemap.xml')
+        self.assertNotIn('/products/</loc>', sitemap)
 
     def test_news_has_sources_and_dates(self):
         for article in self.articles:
             _, html, _ = fetch('/news/' + article['slug'] + '/')
             self.assertIn(article['source'], html)
             self.assertIn(article['date'], html)
-        _, html, _ = fetch('/news/?category=Exhibitions')
-        self.assertEqual(html.count('<article class="bl-news-card">'), 1)
+        # One list, newest first. Section tabs appear once a section has a story; group stories sit under All only.
+        _, html, _ = fetch('/news/')
+        main = html.split('<main', 1)[1].split('</main>', 1)[0]
+        ordered = sorted(self.articles, key=lambda a: a['date'], reverse=True)
+        self.assertEqual(re.findall(r'<a class="bl-news-item" href="/news/([^/]+)/"', main), [a['slug'] for a in ordered])
+        self.assertEqual(main.count('>BOB-LIFT group<'), sum(not a['category'] for a in self.articles))
+        sections = {a['category'] for a in self.articles if a['category']}
+        self.assertEqual(set(re.findall(r'\?category=([a-z-]+)"', main)), sections)
+        self.assertIn('/css/news.css', html)
+        for section in sections:
+            _, html, _ = fetch('/news/?category=' + section)
+            main = html.split('<main', 1)[1].split('</main>', 1)[0]
+            self.assertEqual(len(re.findall(r'class="bl-news-item"', main)), sum(a['category'] == section for a in self.articles))
+            self.assertIn('noindex', html)
+        _, html, _ = fetch('/news/?category=company-news')
+        self.assertEqual(len(re.findall(r'class="bl-news-item"', html)), len(self.articles))
+        # An event story carries its details, a schema.org Event and the source of its dates; nothing is guessed.
+        fair = next(a for a in self.articles if a.get('event'))
+        _, html, _ = fetch('/news/' + fair['slug'] + '/')
+        main = html.split('<main', 1)[1].split('</main>', 1)[0]
+        self.assertIn(fair['event']['booth'], main)
+        self.assertIn('15–19 October 2026', main)
+        self.assertIn(fair['event']['source'], main)
+        self.assertIn('Written by', main)
+        for slug in fair['products']:
+            self.assertIn('/product/' + slug + '/', main.split('Related products', 1)[1])
+        event = next(item for item in Page(html).structured[0]['@graph'] if item['@type'] == 'Event')
+        self.assertEqual((event['startDate'], event['endDate']), (fair['event']['start'], fair['event']['end']))
+        # Group stories are labelled as such and link to boblift.com once in the page body.
+        for article in (a for a in self.articles if not a['category']):
+            _, html, _ = fetch('/news/' + article['slug'] + '/')
+            main = html.split('<main', 1)[1].split('</main>', 1)[0]
+            self.assertEqual(main.count('href="https://www.boblift.com'), 1)
+            self.assertIn('>BOB-LIFT group<', main)
+            self.assertNotIn('Compact equipment team', main)
 
     def test_not_found_has_real_http_status(self):
         for path in ['/not-a-page/', '/product/nonexistent/', '/news/nonexistent/', '/inc/data/products.json']:

@@ -22,11 +22,16 @@ function bl_structured_data(array $route): array
     }
     if ($route['type'] === 'article') {
         $a = $route['record'];
-        $graph[] = ['@type' => 'Article', 'headline' => $a['title'], 'description' => $a['excerpt'], 'image' => bl_absolute_asset($a['image']), 'datePublished' => $a['date'], 'author' => ['@id' => $organization['@id']], 'publisher' => ['@id' => $organization['@id']], 'mainEntityOfPage' => ['@id' => $base . $route['path'] . '#webpage'], 'citation' => $a['source']];
+        $graph[] = ['@type' => 'Article', 'headline' => $a['title'], 'description' => $a['excerpt'], 'image' => bl_absolute_asset($a['image']), 'datePublished' => $a['date'], 'author' => ['@id' => $organization['@id']], 'publisher' => ['@id' => $organization['@id']], 'mainEntityOfPage' => ['@id' => $base . $route['path'] . '#webpage'], 'citation' => $a['source'] ?: null];
+        $graph[count($graph) - 1] = array_filter($graph[count($graph) - 1], static fn($value) => $value !== null);
+        if (!empty($a['event']['start'])) {
+            $e = $a['event'];
+            $graph[] = ['@type' => 'Event', 'name' => 'BOB-LIFT at the ' . $e['name'] . ', booth ' . $e['booth'], 'startDate' => $e['start'], 'endDate' => $e['end'] ?: $e['start'], 'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode', 'eventStatus' => 'https://schema.org/EventScheduled', 'location' => ['@type' => 'Place', 'name' => $e['venue'], 'address' => $e['address']], 'organizer' => ['@id' => $organization['@id']], 'image' => bl_absolute_asset($a['image']), 'description' => $a['excerpt'], 'url' => $base . $route['path']];
+        }
     }
     if ($route['path'] !== '/' && $route['status'] === 200) {
         $items = [['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => $base . '/']];
-        $parent = $route['type'] === 'product' ? ['Products', '/products/'] : ($route['type'] === 'article' ? ['News', '/news/'] : ($route['type'] === 'application' ? ['Applications', '/applications/'] : null));
+        $parent = $route['type'] === 'product' ? ($route['record']['category'] === 'mini-dumpers' ? ['Mini dumpers', '/products/mini-dumpers/'] : ['Skid steer loaders', '/products/skid-steer-loaders/']) : ($route['type'] === 'article' ? ['News', '/news/'] : ($route['type'] === 'application' ? ['Applications', '/applications/'] : null));
         if ($parent) $items[] = ['@type' => 'ListItem', 'position' => count($items) + 1, 'name' => $parent[0], 'item' => $base . $parent[1]];
         $items[] = ['@type' => 'ListItem', 'position' => count($items) + 1, 'name' => $route['title'], 'item' => $base . $route['path']];
         $graph[] = ['@type' => 'BreadcrumbList', 'itemListElement' => $items];
