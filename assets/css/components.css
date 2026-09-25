@@ -119,3 +119,10 @@
   .bl-site .bl-nav-panel img{display:none}
   .bl-site .bl-nav-panel b{font:600 15px/1.3 var(--sans)}
 }
+/* Five sections since Support joined: just above the phone menu there is no room left for Let's talk, so the bar keeps
+   the sections on one line and the enquiry stays in the fixed contact bar (its Enquire link) until the header widens. */
+@media(min-width:601px) and (max-width:720px){
+  .bl-site .bl-nav{gap:16px}
+  .bl-site .bl-nav>a{white-space:nowrap}
+  .bl-site .bl-nav .bl-nav-contact{display:none}
+}
