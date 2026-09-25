@@ -75,6 +75,7 @@
 .bl-site .bl-app-checks-list p{font-size:var(--fs-small);line-height:1.8;color:var(--muted);text-wrap:pretty}
 .bl-site .bl-app-checks-list .bl-app-check-measure{margin-top:auto;padding-top:clamp(16px,1.2vw,26px);font-weight:700;color:var(--ink)}
 .bl-site .bl-app-check-measure span{display:block;margin:clamp(18px,1.4vw,30px) 0 6px;padding-top:clamp(14px,1vw,22px);border-top:1px solid var(--line);font-size:var(--fs-micro);letter-spacing:1.2px;text-transform:uppercase;color:var(--blue)}
+.bl-site .bl-app-checks-list .bl-text-link{align-self:flex-start;margin-top:clamp(16px,1.2vw,24px)}
 
 .bl-site .bl-app-machines{padding-top:var(--sp-section)}
 .bl-site .bl-app-machines-head{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:clamp(32px,5vw,140px);align-items:end;padding-bottom:clamp(28px,2.4vw,56px)}
