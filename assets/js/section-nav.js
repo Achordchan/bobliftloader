@@ -1,6 +1,6 @@
 /**
- * Family pages: pin the on-this-page bar under the header once the family switch has scrolled away, mark the section
- * in view, and fill the progress line as the page is read.
+ * Family pages and the Support page: pin the on-this-page bar under the header once the family switch (or the element
+ * marked data-section-nav-after) has scrolled away, mark the section in view, and fill the progress line as the page is read.
  */
 export function initializeSectionNav() {
   const nav = document.querySelector('[data-section-nav]');
@@ -8,7 +8,7 @@ export function initializeSectionNav() {
   const links = [...nav.querySelectorAll('[data-section-link]')];
   const sections = links.map((link) => document.getElementById(link.hash.slice(1)));
   const header = document.querySelector('.bl-header');
-  const tabs = document.querySelector('.bl-family-switch');
+  const tabs = document.querySelector('[data-section-nav-after]') || document.querySelector('.bl-family-switch');
   nav.classList.add('bl-section-nav-live');
 
   let scheduled = false;

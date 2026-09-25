@@ -31,6 +31,7 @@ http_response_code($route['status']);
   <?php foreach (['base', 'home', 'components', 'responsive', 'pages', 'page-responsive', ...($route['type'] === 'about' ? ['about'] : []), ...(in_array($route['type'], ['applications', 'application'], true) ? ['applications'] : []), ...(in_array($route['type'], ['news', 'article'], true) ? ['news'] : [])] as $stylesheet): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset('css/' . $stylesheet . '.css')) ?>"><?php endforeach; ?>
   <script type="module" src="<?= bl_escape(bl_asset('js/main.js')) ?>"></script>
   <?php if (bl_is_wordpress()) wp_head(); ?>
+  <?php /* Support page, and the parts of it that product and family pages share (attachments, videos, spec-sheet print). */ if (in_array($route['type'], ['support', 'products', 'product'], true)): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset('css/support.css')) ?>"><?php endif; ?>
 </head>
 <body class="bl-site bl-page-<?= bl_escape($route['type']) ?><?= bl_is_wordpress() && is_admin_bar_showing() ? ' bl-wp-admin-bar' : '' ?>">
   <?php if (bl_is_wordpress()) wp_body_open(); ?>

@@ -7,7 +7,7 @@ export function initializeInquiry() {
   const summary = document.querySelector('#inquiry-summary');
   const emailLink = document.querySelector('#inquiry-email');
   const copyStatus = document.querySelector('#copy-status');
-  const productLabels = { loader: 'Skid steer loader', dumper: 'Mini dumper', help: 'Help choosing equipment' };
+  const productLabels = { loader: 'Skid steer loader', dumper: 'Mini dumper', help: 'Help choosing equipment', service: 'Parts & service' };
   let emailBody = '';
   const modelNote = form.querySelector('.bl-selected-model');
   if (modelNote) {
@@ -49,8 +49,10 @@ export function initializeInquiry() {
       row.append(term, detail);
       summary.append(row);
     });
-    emailBody = `Hello BOB-LIFT team,\n\nI'd like to discuss the following equipment enquiry.\n\n${entries.map(([label, value]) => `${label}: ${value}`).join('\n')}\n\nPlease let me know about available models, specifications and quotation details.\n\nThank you.`;
-    const subject = `Equipment enquiry — ${productLabels[fields.get('product')]}`;
+    // An owner asking about parts or a fault gets a service request, not an equipment enquiry.
+    const service = fields.get('product') === 'service';
+    emailBody = `Hello BOB-LIFT team,\n\n${service ? 'I need help with a machine I already have.' : "I'd like to discuss the following equipment enquiry."}\n\n${entries.map(([label, value]) => `${label}: ${value}`).join('\n')}\n\n${service ? 'Please let me know how you can help.' : 'Please let me know about available models, specifications and quotation details.'}\n\nThank you.`;
+    const subject = service ? 'Parts & service request' : `Equipment enquiry — ${productLabels[fields.get('product')]}`;
     emailLink.href = `mailto:info@boblift.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
     copyStatus.textContent = '';
     openDialog(dialog, form.querySelector('[type="submit"]'));

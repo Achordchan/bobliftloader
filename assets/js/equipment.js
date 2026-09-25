@@ -42,15 +42,49 @@ export function initializeEquipment() {
   document.querySelectorAll('[data-select-equipment]').forEach((link) => {
     link.addEventListener('click', () => selectEquipment(link.dataset.selectEquipment));
   });
+  // Photographs and videos share the stage: a thumbnail shows its photograph, a video tile plays in the same frame.
   const photo = document.querySelector('#product-photo');
-  if (photo) {
-    document.querySelectorAll('[data-gallery-image]').forEach((button, index) => {
-      button.addEventListener('click', () => {
-        photo.src = button.dataset.galleryImage;
-        document.querySelectorAll('[data-gallery-image]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+  const video = document.querySelector('#product-video');
+  const caption = document.querySelector('#product-video-caption');
+  const controls = [...document.querySelectorAll('[data-gallery-image], [data-gallery-video]')];
+  const press = (control) => controls.forEach((item) => item.setAttribute('aria-pressed', String(item === control)));
+  const stopVideo = () => {
+    if (!video || video.hidden) return;
+    video.pause();
+    video.hidden = true;
+    caption.hidden = true;
+    video.closest('.bl-product-main-image').classList.remove('bl-gallery-playing');
+    if (photo) photo.hidden = false;
+  };
+  document.querySelectorAll('[data-gallery-image]').forEach((button) => {
+    button.addEventListener('click', () => {
+      stopVideo();
+      if (photo) photo.src = button.dataset.galleryImage;
+      press(button);
+    });
+  });
+  if (video) {
+    document.querySelectorAll('[data-gallery-video]').forEach((tile) => {
+      tile.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (photo) photo.hidden = true;
+        video.poster = tile.dataset.galleryPoster;
+        video.src = tile.dataset.galleryVideo;
+        video.hidden = false;
+        caption.textContent = tile.dataset.galleryCaption;
+        caption.hidden = !tile.dataset.galleryCaption;
+        video.closest('.bl-product-main-image').classList.add('bl-gallery-playing');
+        video.play().catch(() => {});
+        press(tile);
+        video.closest('.bl-product-gallery').scrollIntoView({ behavior: scrollBehavior(), block: 'nearest' });
       });
     });
   }
+  // The specification sheet prints from the page itself (assets/css/support.css holds the print layout).
+  document.querySelectorAll('[data-print-sheet]').forEach((button) => {
+    button.hidden = false;
+    button.addEventListener('click', () => window.print());
+  });
   // Spec groups sit side by side on wide screens, always open. On phones they stack, so only the first (performance)
   // starts open and the rest expand on tap.
   const specGroups = [...document.querySelectorAll('.bl-spec-block')];

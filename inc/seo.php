@@ -36,6 +36,11 @@ function bl_structured_data(array $route): array
         $items[] = ['@type' => 'ListItem', 'position' => count($items) + 1, 'name' => $route['title'], 'item' => $base . $route['path']];
         $graph[] = ['@type' => 'BreadcrumbList', 'itemListElement' => $items];
     }
+    if ($route['type'] === 'support') {
+        $questions = [];
+        foreach (bl_support_faq() as $group) foreach ($group as $item) $questions[] = ['@type' => 'Question', 'name' => $item['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $item['a']]];
+        $graph[] = ['@type' => 'FAQPage', 'mainEntity' => $questions, 'isPartOf' => ['@id' => $base . '/#website']];
+    }
     return ['@context' => 'https://schema.org', '@graph' => $graph];
 }
 

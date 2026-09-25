@@ -58,7 +58,7 @@ usort($family, static fn($a, $b) => [$order['sort']($a), $a['model']] <=> [$orde
   </div>
   <ol class="bl-app-checks-list">
     <?php foreach ($application['checks'] as $i => $check): ?>
-    <li class="bl-reveal"><span class="bl-app-check-index">0<?= $i + 1 ?></span><h3><?= bl_escape($check['title']) ?></h3><p><?= bl_escape($check['text']) ?></p><p class="bl-app-check-measure"><span>You’ll need</span><?= bl_escape($check['measure']) ?></p></li>
+    <li class="bl-reveal"><span class="bl-app-check-index">0<?= $i + 1 ?></span><h3><?= bl_escape($check['title']) ?></h3><p><?= bl_escape($check['text']) ?></p><p class="bl-app-check-measure"><span>You’ll need</span><?= bl_escape($check['measure']) ?></p><?php if (!empty($check['link'])): ?><a class="bl-text-link" href="<?= bl_escape(bl_url($check['link'][0])) ?>"><?= bl_escape($check['link'][1]) ?> <?= bl_icon('arrow-up-right') ?></a><?php endif; ?></li>
     <?php endforeach; ?>
   </ol>
 </section>

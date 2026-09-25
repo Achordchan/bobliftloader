@@ -42,6 +42,33 @@
       "images/products/bl-360-3.webp",
       "images/products/bl-360-4.webp"
     ],
+    "videos": [
+      {
+        "src": "videos/bucket.mp4",
+        "poster": "videos/bucket.webp",
+        "caption": "Loading with the bucket"
+      },
+      {
+        "src": "videos/drive.mp4",
+        "poster": "videos/drive.webp",
+        "caption": "Driving on rubber tracks"
+      },
+      {
+        "src": "videos/lift.mp4",
+        "poster": "videos/lift.webp",
+        "caption": "Raising the lift arms"
+      },
+      {
+        "src": "videos/render-operation.mp4",
+        "poster": "videos/render-operation.webp",
+        "caption": "3D view: the stand-on controls"
+      },
+      {
+        "src": "videos/render-tracks.mp4",
+        "poster": "videos/render-tracks.webp",
+        "caption": "3D view: the track frame"
+      }
+    ],
     "source_images": [
       "//iprorwxhqnjjli5q.ldycdn.com/cloud/piBpiKollnSRqlinkrmqjp/20.jpg",
       "//iprorwxhqnjjli5q.ldycdn.com/cloud/prBpiKollnSRqlinkrpqjp/22.jpg",
@@ -94,6 +121,33 @@
       "images/products/bl-460-2.webp",
       "images/products/bl-460-3.webp",
       "images/products/bl-460-4.webp"
+    ],
+    "videos": [
+      {
+        "src": "videos/bucket.mp4",
+        "poster": "videos/bucket.webp",
+        "caption": "Loading with the bucket"
+      },
+      {
+        "src": "videos/drive.mp4",
+        "poster": "videos/drive.webp",
+        "caption": "Driving on rubber tracks"
+      },
+      {
+        "src": "videos/lift.mp4",
+        "poster": "videos/lift.webp",
+        "caption": "Raising the lift arms"
+      },
+      {
+        "src": "videos/render-operation.mp4",
+        "poster": "videos/render-operation.webp",
+        "caption": "3D view: the stand-on controls"
+      },
+      {
+        "src": "videos/render-tracks.mp4",
+        "poster": "videos/render-tracks.webp",
+        "caption": "3D view: the track frame"
+      }
     ],
     "source_images": [
       "照片/红色 360-460 站 /滑移装载机主图/25.jpg",
