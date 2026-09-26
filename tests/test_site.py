@@ -297,6 +297,17 @@ class WebsiteTests(unittest.TestCase):
         _, html, _ = fetch('/products/?q=mini')
         self.assertNotIn('id="about-the-range"', html)
 
+    def test_site_switch_lists_the_three_websites(self):
+        _, html, _ = fetch('/about/')
+        switch = re.search(r'<details class="bl-site-switch">.*?</details>', html, re.S).group(0)
+        # The group site and the crane site are links, in the same tab; this site is marked, not linked.
+        self.assertEqual(re.findall(r'<a href="([^"]+)"', switch), ['https://www.boblift.com/', 'https://www.bobliftcrane.com/'])
+        self.assertNotIn('target=', switch)
+        self.assertIn('aria-current="true"', switch)
+        self.assertIn('bobliftloader.com', switch)
+        # The logo still goes home on its own.
+        self.assertIn('<a class="bl-brand" href="/" aria-label="BOB-LIFT home">', html)
+
     def test_range_opens_on_the_loaders(self):
         # /products/ goes straight to the loaders, the main line; a header search there still spans both families.
         class Stay(HTTPRedirectHandler):
