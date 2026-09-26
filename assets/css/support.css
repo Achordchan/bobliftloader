@@ -5,7 +5,7 @@
 
 /* Shared section head: title left, a short note right. */
 .bl-site .bl-sup-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,clamp(300px,24vw,560px));align-items:end;gap:clamp(32px,4vw,120px);margin-bottom:clamp(40px,3.4vw,88px)}
-.bl-site .bl-sup-head h2{margin-top:clamp(18px,1.3vw,30px);font:700 var(--fs-display)/.86 var(--display);letter-spacing:-.015em}
+.bl-site .bl-sup-head h2{margin-top:clamp(16px,1.1vw,26px);font:700 var(--fs-h2)/.92 var(--display);letter-spacing:-.01em}
 .bl-site .bl-sup-head>p{padding-bottom:.4em;font-size:var(--fs-body);line-height:1.85;color:var(--muted);text-wrap:pretty}
 
 /* Hero: statement, then the factory floor full bleed with the four buying terms on a plate. */
@@ -13,13 +13,12 @@
 .bl-site .bl-sup-hero-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,clamp(300px,24vw,560px));align-items:end;gap:clamp(40px,4vw,120px);padding-top:clamp(38px,2.6vw,62px);padding-bottom:clamp(44px,3.6vw,96px)}
 .bl-site .bl-sup-hero h1{margin-top:clamp(22px,1.6vw,40px);font:700 clamp(68px,7.2vw,196px)/.86 var(--display);letter-spacing:-.015em}
 .bl-site .bl-sup-hero h1>span{display:block}
-.bl-site .bl-sup-hero h1 .bl-outline-text{-webkit-text-stroke:clamp(1.5px,.1vw,2.5px) var(--ink);color:transparent}
 .bl-site .bl-sup-hero-side{padding-bottom:.4em}
 .bl-site .bl-sup-hero-side p{font-size:var(--fs-body);line-height:1.85;color:var(--muted);text-wrap:pretty}
 .bl-site .bl-sup-hero-side .bl-text-link{margin-top:clamp(22px,1.6vw,36px)}
 .bl-site .bl-sup-stage{position:relative}
 .bl-site .bl-sup-photo{position:relative;margin:0;overflow:hidden;background:var(--ink)}
-.bl-site .bl-sup-photo img{width:100%;height:clamp(420px,38vw,980px);object-fit:cover;object-position:center 62%}
+.bl-site .bl-sup-photo img{width:100%;height:clamp(420px,38vw,980px);object-fit:cover;object-position:center 38%}
 .bl-site .bl-sup-photo figcaption{position:absolute;right:var(--gutter);top:clamp(18px,1.4vw,32px);padding:8px 12px;background:#081c2bb3;color:#dbe4ea;font-size:var(--fs-micro);font-weight:600;letter-spacing:.6px;backdrop-filter:blur(6px)}
 .bl-site .bl-sup-plate{position:absolute;z-index:1;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0 auto;padding-top:0;padding-bottom:0}
 .bl-site .bl-sup-plate>div{background:var(--ink);color:var(--paper);padding:clamp(20px,1.6vw,40px) clamp(20px,1.6vw,40px) clamp(22px,1.8vw,44px)}
@@ -35,14 +34,13 @@
 .bl-site .bl-sup-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(24px,2vw,56px);margin:0;padding:0;list-style:none;counter-reset:step}
 .bl-site .bl-sup-steps li{position:relative;display:flex;flex-direction:column;align-items:flex-start;padding-top:clamp(18px,1.3vw,30px);border-top:2px solid var(--ink)}
 .bl-site .bl-sup-steps li::before{content:'';position:absolute;left:0;top:-7px;width:12px;height:12px;border-radius:50%;background:var(--blue)}
-.bl-site .bl-sup-step-index{font:700 clamp(52px,4vw,108px)/.85 var(--display);color:var(--blue)}
+.bl-site .bl-sup-step-index{font:700 var(--fs-h3)/.9 var(--display);color:var(--blue)}
 .bl-site .bl-sup-steps h3{margin:clamp(14px,1vw,24px) 0 10px;font:600 var(--fs-h4)/1.05 var(--display)}
 .bl-site .bl-sup-steps p{font-size:var(--fs-small);line-height:1.8;color:var(--muted);text-wrap:pretty}
-.bl-site .bl-sup-steps .bl-sup-step-fact{margin-top:clamp(14px,1vw,22px);padding:6px 10px;background:#e4e9ef;color:var(--ink);font-size:var(--fs-label);font-weight:700;letter-spacing:.4px}
 .bl-site .bl-sup-steps .bl-text-link{margin-top:clamp(16px,1.2vw,26px)}
 
 .bl-site .bl-sup-containers{display:grid;grid-template-columns:minmax(0,.7fr) minmax(0,1.6fr);gap:clamp(20px,2vw,52px) clamp(40px,4vw,120px);margin-top:clamp(72px,5vw,140px);padding:clamp(28px,2.6vw,72px);background:#fff}
-.bl-site .bl-sup-containers-head h3{margin:clamp(14px,1vw,24px) 0 clamp(14px,1vw,24px);font:700 var(--fs-h2)/.9 var(--display)}
+.bl-site .bl-sup-containers-head h3{margin:0 0 clamp(12px,.9vw,20px);font:700 var(--fs-h4)/1 var(--display)}
 .bl-site .bl-sup-containers-head>p:not(.bl-eyebrow){max-width:30em;font-size:var(--fs-small);line-height:1.8;color:var(--muted);text-wrap:pretty}
 .bl-site .bl-sup-containers-tables{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(24px,2.4vw,64px);align-items:start}
 .bl-site .bl-sup-table{width:100%;border-collapse:collapse;font-size:var(--fs-small)}
@@ -65,14 +63,12 @@
 .bl-site .bl-sup-after-grid>*{padding:clamp(28px,2.2vw,56px) clamp(24px,2vw,52px) 0 0}
 .bl-site .bl-sup-after-grid>*+*{padding-left:clamp(24px,2vw,52px);border-left:1px solid var(--night-line)}
 .bl-site .bl-sup-after .bl-eyebrow{color:var(--night-muted)}
-.bl-site .bl-sup-warranty-figure{margin:clamp(14px,1vw,24px) 0 clamp(12px,.9vw,20px);font:700 clamp(120px,10vw,260px)/.8 var(--display);letter-spacing:-.02em;color:var(--night-blue)}
-.bl-site .bl-sup-warranty-figure small{margin-left:.1em;font-size:.2em;letter-spacing:.5px;text-transform:uppercase;color:var(--paper)}
 .bl-site .bl-sup-after h3{font:600 var(--fs-h4)/1.05 var(--display)}
-.bl-site .bl-sup-after-grid p:not(.bl-eyebrow):not(.bl-sup-warranty-figure){margin-top:10px;max-width:28em;font-size:var(--fs-small);line-height:1.8;color:var(--night-text);text-wrap:pretty}
+.bl-site .bl-sup-after-grid p:not(.bl-eyebrow){margin-top:10px;max-width:28em;font-size:var(--fs-small);line-height:1.8;color:var(--night-text);text-wrap:pretty}
+.bl-site .bl-sup-warranty h3{margin-top:clamp(18px,1.4vw,32px)}
 .bl-site .bl-sup-service ol{margin:clamp(18px,1.4vw,32px) 0 0;padding:0;list-style:none}
-.bl-site .bl-sup-service li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(14px,1.2vw,28px);padding:clamp(14px,1vw,24px) 0;border-top:1px solid var(--night-line)}
+.bl-site .bl-sup-service li{display:block;padding:clamp(14px,1vw,24px) 0;border-top:1px solid var(--night-line)}
 .bl-site .bl-sup-service li:first-child{border-top:0;padding-top:0}
-.bl-site .bl-sup-service li>span{font:700 var(--fs-h4)/1 var(--display);color:var(--night-blue)}
 .bl-site .bl-sup-service li p{margin-top:6px!important}
 .bl-site .bl-sup-parts{margin:0}
 .bl-site .bl-sup-parts img{width:100%;aspect-ratio:3/2;object-fit:cover;margin-bottom:clamp(18px,1.4vw,32px)}
@@ -83,21 +79,19 @@
 /* 03 Downloads: one row per document, the whole row clickable. */
 .bl-site .bl-sup-downloads{padding-top:var(--sp-section);padding-bottom:var(--sp-block)}
 .bl-site .bl-sup-files{border-top:2px solid var(--ink)}
-.bl-site .bl-sup-files a{display:grid;grid-template-columns:clamp(60px,5vw,140px) minmax(0,1fr) auto;align-items:center;gap:clamp(16px,2vw,56px);padding:clamp(20px,1.6vw,40px) 0;border-bottom:1px solid var(--line);transition:background .2s,padding .3s}
-.bl-site .bl-sup-file-index{font:700 var(--fs-h3)/1 var(--display);color:#9aa3a8;transition:color .2s}
+.bl-site .bl-sup-files a{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:clamp(16px,2vw,56px);padding:clamp(20px,1.6vw,40px) 0;border-bottom:1px solid var(--line);transition:background .2s,padding .3s}
 .bl-site .bl-sup-file-body{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.2fr);grid-template-areas:'kind kind' 'title text';gap:6px clamp(20px,2vw,56px);align-items:baseline}
 .bl-site .bl-sup-file-kind{grid-area:kind;font-size:var(--fs-micro);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--blue)}
 .bl-site .bl-sup-file-title{grid-area:title;font:700 var(--fs-h3)/1 var(--display)}
 .bl-site .bl-sup-file-text{grid-area:text;font-size:var(--fs-small);line-height:1.7;color:var(--muted)}
 .bl-site .bl-sup-files a:hover{background:#fff;padding-inline:clamp(12px,1vw,24px)}
-.bl-site .bl-sup-files a:hover .bl-sup-file-index{color:var(--blue)}
 .bl-site .bl-sup-files a:hover .bl-circle-button{background:var(--blue);border-color:var(--blue)}
 .bl-site .bl-sup-files a:hover .bl-circle-button .bl-icon{filter:invert(1)}
 
 /* 04 Questions: the heading stays in view beside the groups. */
 .bl-site .bl-sup-faq{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1.5fr);gap:clamp(40px,5vw,140px);align-items:start;padding-top:var(--sp-section);padding-bottom:var(--sp-section)}
 .bl-site .bl-sup-faq-aside{position:sticky;top:calc(var(--header-height) + var(--section-nav-height,0px) + clamp(28px,2.4vw,56px))}
-.bl-site .bl-sup-faq-aside h2{margin:clamp(18px,1.3vw,30px) 0 clamp(18px,1.4vw,32px);font:700 var(--fs-display)/.86 var(--display);letter-spacing:-.015em}
+.bl-site .bl-sup-faq-aside h2{margin:clamp(16px,1.1vw,26px) 0 clamp(16px,1.2vw,28px);font:700 var(--fs-h2)/.92 var(--display);letter-spacing:-.01em}
 .bl-site .bl-sup-faq-aside>p:not(.bl-eyebrow){margin-bottom:clamp(20px,1.6vw,36px);font-size:var(--fs-body);line-height:1.85;color:var(--muted)}
 .bl-site .bl-sup-faq-group+.bl-sup-faq-group{margin-top:clamp(40px,3.2vw,80px)}
 .bl-site .bl-sup-faq-group>h3{padding-bottom:clamp(12px,.9vw,20px);border-bottom:2px solid var(--ink);font-size:var(--fs-label);font-weight:700;letter-spacing:1.4px;text-transform:uppercase}
@@ -182,17 +176,16 @@
 }
 @media(max-width:600px){
   .bl-site .bl-sup-hero h1{font-size:clamp(56px,17vw,92px)}
-  .bl-site .bl-sup-hero h1 .bl-outline-text{-webkit-text-stroke-width:1.5px}
   .bl-site .bl-sup-photo img{height:clamp(300px,80vw,440px)}
   .bl-site .bl-sup-plate>div{padding:18px 18px 20px}
   .bl-site .bl-sup-plate dd{font-size:clamp(30px,9vw,44px);white-space:normal}
-  .bl-site .bl-sup-head h2,.bl-site .bl-sup-faq-aside h2,.bl-site .bl-attachments-head h2{font-size:clamp(52px,15vw,72px)}
+  .bl-site .bl-attachments-head h2{font-size:clamp(52px,15vw,72px)}
+  .bl-site .bl-sup-head h2,.bl-site .bl-sup-faq-aside h2{font-size:clamp(40px,11vw,56px)}
   .bl-site .bl-sup-containers{padding:24px 18px;margin-inline:calc(-1 * var(--gutter))}
   .bl-site .bl-sup-after-grid{grid-template-columns:1fr}
   .bl-site .bl-sup-after-grid>*+*{padding-left:0;border-left:0;border-top:1px solid var(--night-line);margin-top:28px}
   .bl-site .bl-sup-parts{grid-template-columns:1fr}
   .bl-site .bl-sup-files a{grid-template-columns:minmax(0,1fr) auto}
-  .bl-site .bl-sup-file-index{display:none}
   .bl-site .bl-sup-faq-item>div{padding-right:0}
   /* Each kind of work becomes a strip that scrolls sideways, so 24 tools don't stack into a long column. */
   .bl-site .bl-attachments-group ul{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:42%;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 6px;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gutter);scrollbar-width:none}
