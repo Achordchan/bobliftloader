@@ -45,6 +45,23 @@ document.addEventListener('focusin', (event) => {
 });
 window.matchMedia('(min-width: 601px)').addEventListener('change', () => closeNavigation());
 
+// Site switch: a <details>, so it opens without the script; this closes it on Escape, an outside click or focus leaving
+// it, and keeps it and the phone menu from being open together.
+const siteSwitch = header.querySelector('.bl-site-switch');
+if (siteSwitch) {
+  const summary = siteSwitch.querySelector('summary');
+  const closeSwitch = (event) => { if (siteSwitch.open && !siteSwitch.contains(event.target)) siteSwitch.open = false; };
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !siteSwitch.open) return;
+    siteSwitch.open = false;
+    summary.focus();
+  });
+  document.addEventListener('click', closeSwitch);
+  document.addEventListener('focusin', closeSwitch);
+  siteSwitch.addEventListener('toggle', () => { if (siteSwitch.open) closeNavigation(); });
+  menuToggle.addEventListener('click', () => { siteSwitch.open = false; });
+}
+
 // The Equipment panel opens on hover or focus (CSS). Escape hides it without moving the pointer or focus; it comes back
 // on the next hover of Equipment, or the next time focus arrives there after leaving.
 const equipmentPanel = navigation.querySelector('.bl-nav-panel');

@@ -128,3 +128,42 @@
   .bl-site .bl-nav>a{white-space:nowrap}
   .bl-site .bl-nav .bl-nav-contact{display:none}
 }
+
+/* Site switch: the "Compact equipment" label beside the logo opens the three BOB-LIFT websites. The panel hangs from the
+   header (its containing block, being sticky), lined up with the logo. */
+.bl-site .bl-brand-group{display:flex;align-items:center;gap:18px;flex-shrink:0}
+.bl-site .bl-site-switch>summary{display:flex;align-items:center;gap:12px;padding:6px 10px 6px 17px;border-left:1px solid #71808a;font-size:var(--fs-micro);letter-spacing:1.15px;line-height:1.45;list-style:none;cursor:pointer;transition:background .2s}
+.bl-site .bl-site-switch>summary::-webkit-details-marker{display:none}
+.bl-site .bl-site-switch>summary>i{width:7px;height:7px;margin-top:-4px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;opacity:.7;transform:rotate(45deg);transition:transform .2s,margin .2s,opacity .2s}
+.bl-site .bl-site-switch>summary:hover{background:#173346}
+.bl-site .bl-site-switch>summary:hover>i,.bl-site .bl-site-switch[open]>summary>i{opacity:1}
+.bl-site .bl-site-switch[open]>summary{background:#173346}
+.bl-site .bl-site-switch[open]>summary>i{margin-top:4px;transform:rotate(-135deg)}
+.bl-site .bl-site-panel{position:absolute;top:100%;left:max(var(--gutter),calc((100% - var(--frame-width))/2 + var(--gutter)));z-index:25;width:min(430px,calc(100% - 2 * var(--gutter)));padding:8px;background:#0d2536;border:1px solid #2b4456;border-top:0;box-shadow:0 20px 30px #081c2b40;animation:bl-site-panel .18s ease-out}
+@keyframes bl-site-panel{from{opacity:0;transform:translateY(-6px)}}
+.bl-site .bl-site-panel>p{padding:10px 12px 8px;font-size:var(--fs-micro);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#91aabb}
+.bl-site .bl-site-panel ul{margin:0;padding:0;list-style:none}
+.bl-site .bl-site-panel li>*{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:14px;padding:12px;border-top:1px solid #2b4456;transition:background .2s}
+.bl-site .bl-site-panel li>*>i{display:grid;place-items:center;width:40px;height:40px;border:1px solid #476070;font:700 20px/1 var(--display);font-style:normal;color:#dbe4ea}
+.bl-site .bl-site-panel small{display:block;font-size:var(--fs-micro);letter-spacing:.4px;color:#91aabb}
+.bl-site .bl-site-panel b{display:block;margin-top:2px;font:600 var(--fs-h5)/1.1 var(--display);color:#fff}
+.bl-site .bl-site-panel b+span{display:block;margin-top:3px;font-size:var(--fs-label);line-height:1.45;color:#b7c9d5}
+.bl-site .bl-site-panel .bl-icon{width:16px;height:16px;filter:invert(1);opacity:.6;transition:opacity .2s,transform .2s}
+.bl-site .bl-site-panel a:hover{background:#143248}
+.bl-site .bl-site-panel a:hover .bl-icon{opacity:1;transform:translate(2px,-2px)}
+.bl-site .bl-site-panel a:hover>i{border-color:#8fb0ff}
+.bl-site .bl-site-current>i{background:var(--blue);border-color:var(--blue)!important;color:#fff!important}
+.bl-site .bl-site-current em{font-size:var(--fs-micro);font-style:normal;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#8fb0ff}
+@media(max-width:1150px){
+  /* The label gives way to the nav here (as it did before the switch); the caret alone still opens it. */
+  .bl-site .bl-site-switch>summary>span{display:none}
+  .bl-site .bl-site-switch>summary{padding:10px 8px 10px 14px}
+  .bl-site .bl-brand-group{gap:12px}
+}
+@media(max-width:600px){
+  .bl-site .bl-site-switch>summary>span{display:block}
+  .bl-site .bl-site-switch>summary{gap:10px;padding:6px 8px 6px 12px;font-size:11px}
+  .bl-site .bl-site-panel{left:0;width:100%;border-inline:0}
+  .bl-site .bl-site-panel b{font-size:19px}
+}
+@media(prefers-reduced-motion:reduce){.bl-site .bl-site-panel{animation:none}}
