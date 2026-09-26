@@ -83,12 +83,10 @@ function bl_support_faq(): array
             ['q' => 'Which attachments can I use?', 'a' => 'Our loaders take a range of attachments, from pallet forks and augers to sweepers and breakers. We confirm which suit your model when we quote the machine.', 'link' => ['See the attachments', $loaders . '#attachments']],
         ],
         'Shipping & paperwork' => [
-            ['q' => 'How many machines fit in a container?', 'a' => 'Anything from one large wheeled dumper in a 20-foot container to about fourteen stand-on loaders in a 40-foot high cube.', 'link' => ['Machines per container', '#containers']],
             ['q' => 'Which certificates do you hold?', 'a' => 'Xuzhou BOB-LIFT Construction Machinery Co., Ltd. holds ISO 9001, CE and EAC certificates. Ask which documents cover your model and market.', 'link' => ['View the certificates', bl_url('/about/') . '#certificates']],
             ['q' => 'Can we visit the factory before ordering?', 'a' => 'Yes. Tell us your dates and we will arrange a visit to our factory in Xuzhou, Jiangsu.', 'link' => ['Plan a visit', bl_url('/contact/') . '#enquiry']],
         ],
         'Parts & service' => [
-            ['q' => 'Do you supply spare parts?', 'a' => 'Each machine ships with a set of original wear parts, and more can be ordered from the same team at any time.'],
             ['q' => 'Can I order parts for a machine I already have?', 'a' => 'Yes. Send the model and serial number with a photo of the part, and we will confirm it before shipping.', 'link' => ['Ask about parts', bl_url('/contact/') . '?topic=service#enquiry']],
         ],
     ];
