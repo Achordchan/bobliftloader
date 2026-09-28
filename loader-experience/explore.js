@@ -67,6 +67,7 @@ const explodeStatus = document.querySelector('#explode-status');
 const gsap = window.gsap, ScrollTrigger = window.ScrollTrigger;
 
 function setStatus(el, text) { if (!el) return; el.hidden = !text; el.textContent = text || ''; }
+if (gsap) bindPartSteps(); // with or without the 3D: the list is there either way
 
 // The scenes chapter plays pre-rendered loops (assets/scenes/video/). `?capture-scenes` instead runs the original
 // real-time scene on a virtual clock so scripts/capture_scenes.mjs can record those loops frame by frame.
@@ -488,6 +489,88 @@ function bindParts(viewer) {
   });
   if (reduced.matches || !ScrollTrigger) activate(PARTS[0]);
   document.querySelector('#parts-all').addEventListener('click', () => { current = null; viewer.setFocus(null); viewer.flyTo(null, { azimuth: 2.4, elevation: 1.15 }); cards.forEach(c => c.classList.remove('is-active')); document.querySelector('#parts-current').textContent = t('整机'); });
+}
+
+// The parts list scrolls natively, so a hard flick ran through all eight cards and out of the chapter. Each card is a
+// stop now: a wheel turn, a swipe or a page key moves one card, however hard, and the rest of that gesture is absorbed;
+// beyond the first or the last card the page scrolls on as usual. A flick that carries into the list from outside is
+// caught on the first (or last) card. Only input is steered: the tour and in-page links scroll straight through.
+function bindPartSteps() {
+  const cards = [...document.querySelectorAll('.exp-part-card')], pinned = document.querySelector('.exp-parts-viewer'), root = document.documentElement;
+  // Where a card rests: its top 28% down the screen beside the model; on phones just under the pinned model. Both are
+  // above the line that hands the model to it (bindParts).
+  const rest = () => matchMedia('(max-width: 700px)').matches ? pinned.getBoundingClientRect().height + parseFloat(getComputedStyle(pinned).top) + 14 : innerHeight * .28;
+  const stops = () => { const r = rest(); return cards.map(c => c.getBoundingClientRect().top + scrollY - r); };
+  const inside = () => { const s = stops(); return scrollY >= s[0] - 2 && scrollY <= s[s.length - 1] + 2; };
+  const nearest = () => stops().reduce((a, v) => Math.abs(v - scrollY) < Math.abs(a - scrollY) ? v : a);
+  const off = () => reduced.matches || document.body.style.overflow === 'hidden'; // reduced motion, or a dialog is open
+  // The stop a gesture going dir (1 down, -1 up) by delta px leads to, or null to let the page scroll natively.
+  const next = (dir, delta) => {
+    const s = stops(), y = scrollY, first = s[0], last = s[s.length - 1];
+    if (dir > 0) return y < first - 2 ? (y + delta >= first ? first : null) : s.find(v => v > y + 2) ?? null;
+    return y > last + 2 ? (y + delta <= last ? last : null) : [...s].reverse().find(v => v < y - 2) ?? null;
+  };
+  let tween = null;
+  const go = y => {
+    tween?.kill();
+    const pos = { y: scrollY };
+    tween = gsap.to(pos, { y, duration: .65, ease: 'power2.inOut', onUpdate: () => scrollTo(0, pos.y), onComplete: () => { tween = null; root.style.overflow = ''; } });
+  };
+
+  // Wheel: one card per turn. A turn ends after 180 ms without events; a trackpad's momentum tail keeps it going, while
+  // a new swipe shows as a delta rising again. A turn that moved a card is absorbed to its end; one that the page
+  // scrolled natively stays native (it may start with a 1 px event on the last card), unless it carries into the list.
+  let quietAt = 0, lastAbs = 0, ours = false;
+  addEventListener('wheel', e => {
+    if (off() || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    const now = performance.now(), delta = e.deltaY * (e.deltaMode ? 40 : 1), abs = Math.abs(delta);
+    const fresh = now > quietAt || abs > lastAbs * 1.6 + 4;
+    quietAt = now + 180; lastAbs = abs;
+    if (tween) { e.preventDefault(); return; }
+    if (fresh) ours = false;
+    if (ours) { e.preventDefault(); return; }
+    const y = fresh || !inside() ? next(Math.sign(delta), delta) : null;
+    if (y != null) { e.preventDefault(); ours = true; go(y); }
+  }, { passive: false });
+
+  addEventListener('keydown', e => {
+    if (off() || e.altKey || e.ctrlKey || e.metaKey || /INPUT|TEXTAREA|SELECT|BUTTON/.test(e.target.tagName)) return;
+    const dir = e.key === ' ' ? (e.shiftKey ? -1 : 1) : { ArrowDown: 1, PageDown: 1, ArrowUp: -1, PageUp: -1 }[e.key];
+    if (!dir) return;
+    if (tween) { e.preventDefault(); return; }
+    const y = next(dir, dir * (e.key.startsWith('Arrow') ? 40 : innerHeight * .85));
+    if (y != null) { e.preventDefault(); go(y); }
+  });
+
+  // Touch: a vertical drag that starts inside the list is ours from its first move (a move can only be cancelled
+  // before the page starts scrolling): it steps one card once it has gone 30 px. A drag from outside scrolls natively;
+  // if it ends inside the list, or its momentum carries into it, the momentum is stopped (overflow: hidden, which
+  // also halts iOS) and the page settles on the nearest card.
+  let touch = null, coastUntil = 0, lastY = scrollY;
+  const settle = () => { root.style.overflow = 'hidden'; go(nearest()); };
+  addEventListener('touchstart', e => { coastUntil = 0; touch = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY, dir: 0, ours: false, stepped: false } : null; }, { passive: true });
+  addEventListener('touchmove', e => {
+    if (!touch || off()) return;
+    const dx = e.touches[0].clientX - touch.x, dy = touch.y - e.touches[0].clientY; // dy > 0: towards the end of the page
+    if (!touch.dir) {
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      if (Math.abs(dx) > Math.abs(dy)) { touch = null; return; } // sideways: rotating the model, swiping photos
+      touch.dir = Math.sign(dy); touch.ours = !!tween || (inside() && next(touch.dir, 0) != null);
+    }
+    if (!touch.ours) return;
+    e.preventDefault();
+    if (!touch.stepped && !tween && Math.abs(dy) > 30) { touch.stepped = true; const y = next(touch.dir, 0); if (y != null) go(y); }
+  }, { passive: false });
+  addEventListener('touchend', () => {
+    if (touch?.dir && !touch.ours && !off()) { if (inside()) settle(); else coastUntil = performance.now() + 2500; }
+    touch = null;
+  }, { passive: true });
+  addEventListener('scroll', () => {
+    const y = scrollY, prev = lastY; lastY = y;
+    if (tween || performance.now() > coastUntil || off()) return;
+    const s = stops(), first = s[0] - 2, last = s[s.length - 1] + 2;
+    if ((prev < first && y >= first) || (prev > last && y <= last)) { coastUntil = 0; settle(); }
+  }, { passive: true });
 }
 
 // Lift → dump → curl back and lower. Progress 0…1 is driven by scroll, the slider or the play button.

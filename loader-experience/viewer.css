@@ -330,7 +330,13 @@
 .exp-finale-product { position: relative; z-index: 4; flex: 1 1 0; min-height: 0; width: min(68vw, 900px); margin: -7svh auto 0; pointer-events: none; }
 .exp-finale-product img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transition: opacity .8s ease; }
 .exp-finale-frame { position: absolute; inset: 0; }
-@media (min-width: 701px) { .exp-finale-frame { top: -40%; bottom: 8%; } } /* at the hero's size the machine is tall for this stage: compose it higher, over the big numerals, clear of the colour picker */
+/* Wide screens: the machine comes in at the hero's size, which does not follow this stage's height, so it is centred in
+   the free space between the line above the numerals and the "drag to rotate" hint, whatever the window's shape (it had
+   sat a fixed way up, over the line on tall windows). The frame keeps its height (132% of the product box: the camera's
+   distance, and so the perspective, follow from it) and moves: its centre goes to the middle of that space, --shift
+   above the box's middle. The line ends above the box by the numerals' height (the h2's font-size clamp, line-height 1)
+   plus its 15px margin, less the box's 7svh pull-up; the hint is the box's last 18px. */
+@media (min-width: 701px) { .exp-finale-frame { --shift: calc((clamp(48px, 8.36vw, 130px) + 15px - 7svh) / 2 + 9px); top: calc(-16% - var(--shift)); bottom: calc(-16% + var(--shift)); } }
 .exp-finale-3d { position: absolute; top: 0; bottom: 0; left: -8.14%; right: -8.14%; width: auto; height: auto; z-index: 3; cursor: grab; } /* out to the section's edges (its padding is 7% of 86%); above the specs table's sticky head, which it passes on its way in */
 .exp-finale-3d:active { cursor: grabbing; }
 .exp-finale-stage.is-driving .exp-finale-3d { pointer-events: none; }
