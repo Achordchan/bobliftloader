@@ -34,6 +34,21 @@ npx --yes @wp-playground/cli@latest server --auto-mount="$PWD" --blueprint="$PWD
 
 本次预览：PHP `http://127.0.0.1:4173/`；WordPress `http://127.0.0.1:9402/`。已有进程运行时不要重复占用端口。WordPress Playground 使用隔离的 SQLite 临时数据，退出后不作为持久生产数据保存。
 
+## 本地 WordPress 后台
+
+持久的本地 WordPress（MySQL 数据库 `bobliftloader_wp`，中文后台），用来在 `/wp-admin/` 管理产品、新闻和页面。需要 Homebrew 的 `php`、`wp-cli`、`mysql`，并先 `brew services start mysql`。
+
+```sh
+scripts/setup-local-wordpress.sh   # 首次安装；重复运行只补缺，不覆盖已有内容
+./start.sh                         # 前台运行，默认 http://127.0.0.1:8090/ ，Ctrl+C 停止；./start.sh 8091 换端口
+```
+
+- WordPress 装在仓库内的 `.wordpress/`（已忽略，不进 Git）；主题目录是指向本仓库的软链接，改代码刷新即生效。
+- 首次安装生成管理员 `bobadmin` 和随机密码，写在 `.wordpress/admin-login.txt`（仅本机可读）。
+- 安装后自动启用主题、导入 18 个产品 / 4 篇新闻 / 9 个页面、静态首页、文章名固定链接、上海时区，并关闭搜索引擎收录。
+- 访问地址跟随浏览器打开的主机和端口，换端口不需要改数据库。
+- 调试日志在 `.wordpress/wp-content/debug.log`。
+
 ## 安装到 WordPress
 
 1. 运行 `python3 scripts/package-theme.py` 得到 `dist/bobliftloader-theme.zip`。
