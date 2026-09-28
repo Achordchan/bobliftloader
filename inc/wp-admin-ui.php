@@ -98,7 +98,7 @@ add_action('pre_get_posts', static function (WP_Query $query): void {
     $category = sanitize_key(wp_unslash($_GET['bl_product_category'] ?? ''));
     if (!isset(BL_LIST_PRODUCT_CATEGORIES[$category])) return;
     $ids = [];
-    foreach (get_posts(['post_type' => 'bl_product', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids', 'suppress_filters' => true]) as $id) {
+    foreach (get_posts(['post_type' => 'bl_product', 'post_status' => array_keys(get_post_stati()), 'numberposts' => -1, 'fields' => 'ids', 'suppress_filters' => true]) as $id) {
         if ((bl_list_record((int) $id)['category'] ?? 'skid-steer-loaders') === $category) $ids[] = (int) $id;
     }
     $query->set('post__in', $ids ?: [0]);
