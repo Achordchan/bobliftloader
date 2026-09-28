@@ -1,0 +1,36 @@
+/* 网站内容 screens */
+.bl-ce { max-width: 1040px; }
+.bl-ce-lead { font-size: 14px; color: #50575e; max-width: 760px; }
+.bl-ce-toc { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 16px 0 8px; padding: 10px 14px; background: #fff; border: 1px solid #dcdcde; position: sticky; top: 32px; z-index: 5; }
+.bl-ce-toc a { text-decoration: none; }
+.bl-ce-section { background: #fff; border: 1px solid #dcdcde; padding: 4px 20px 16px; margin: 16px 0; scroll-margin-top: 90px; }
+.bl-ce-section > h2 { font-size: 16px; margin: 14px 0 6px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f1; }
+.bl-ce-field { margin: 16px 0; }
+.bl-ce-label { display: block; font-weight: 600; margin: 0 0 6px; }
+.bl-ce-changed { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 2px; background: #f0f6fc; color: #2271b1; font-size: 11px; font-weight: 500; line-height: 18px; vertical-align: 1px; }
+.bl-ce .description { margin-top: 4px; }
+.bl-ce-heading { font-weight: 600; letter-spacing: .02em; }
+.bl-ce-image { display: grid; grid-template-columns: 160px 1fr; gap: 14px; align-items: start; }
+.bl-ce-image-preview { height: 100px; border: 1px solid #dcdcde; background: #f6f7f7 repeating-conic-gradient(#f0f0f1 0 25%, transparent 0 50%) 0 0 / 16px 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.bl-ce-image-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.bl-ce-image-preview span { color: #646970; font-size: 12px; }
+.bl-ce-image p { margin: 8px 0 0; }
+.bl-ce-list { list-style: decimal; margin: 0 0 0 1.6em; padding: 0; }
+.bl-ce-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 12px 12px 4px; margin: 0 0 10px; border: 1px solid #dcdcde; background: #f6f7f7; }
+.bl-ce-row-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+.bl-ce-subfield { margin-bottom: 8px; }
+.bl-ce-subfield label { display: block; font-size: 12px; color: #50575e; margin-bottom: 2px; }
+.bl-ce-subfield.bl-ce-type-textarea, .bl-ce-subfield.bl-ce-type-rich { grid-column: 1 / -1; }
+.bl-ce-row-tools { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.bl-ce-row-tools .button-link { text-decoration: none; }
+.bl-ce-table { max-width: 760px; }
+.bl-ce-table input { max-width: 100%; }
+.bl-ce-loading { max-width: 460px; }
+.bl-ce-loading input { width: 80px; }
+.bl-ce-actions { position: sticky; bottom: 0; z-index: 5; padding: 12px 0; background: #f0f0f1; border-top: 1px solid #dcdcde; }
+.bl-ce-reset { margin: 8px 0 40px; }
+@media (max-width: 782px) {
+  .bl-ce-toc { top: 46px; }
+  .bl-ce-image, .bl-ce-row, .bl-ce-row-fields { grid-template-columns: 1fr; }
+  .bl-ce-row-tools { flex-direction: row; justify-content: flex-end; }
+}

@@ -4,6 +4,7 @@
  * happens after delivery, the downloads, and the questions the sections don't already answer. All facts come from
  * inc/support.php, which the product and family pages read too.
  */
+$content = bl_editable('support');
 $terms = bl_support_terms();
 $loading = bl_container_loading();
 $catalogue = bl_catalogue();
@@ -17,31 +18,36 @@ unset($rows);
 $filmed = array_values(array_filter(bl_products(), static fn($p) => bl_product_videos($p)));
 $filmedModels = array_column($filmed, 'model');
 $filmedModels = count($filmedModels) > 1 ? implode(', ', array_slice($filmedModels, 0, -1)) . ' and ' . end($filmedModels) : implode('', $filmedModels);
+$files = $content['downloads'];
 $downloads = [
-    ['kind' => 'PDF' . ($catalogue['size'] ? ' · ' . $catalogue['size'] : ''), 'title' => 'Product catalogue', 'text' => 'The range in print, with specification tables and the attachments.', 'url' => $catalogue['url'], 'download' => true],
-    ['kind' => count(bl_products()) . ' models', 'title' => 'Specification sheets', 'text' => 'Open any model and save its specification sheet as a PDF, straight from the page.', 'url' => bl_url('/products/skid-steer-loaders/')],
-    ['kind' => 'ISO 9001 · CE · EAC', 'title' => 'Certificates', 'text' => 'The quality and export certificates held by Xuzhou BOB-LIFT Construction Machinery Co., Ltd.', 'url' => bl_url('/about/') . '#certificates'],
+    ['kind' => 'PDF' . ($catalogue['size'] ? ' · ' . $catalogue['size'] : ''), 'title' => $files['catalogue_title'], 'text' => $files['catalogue_text'], 'url' => $catalogue['url'], 'download' => true],
+    ['kind' => count(bl_products()) . ' models', 'title' => $files['sheets_title'], 'text' => $files['sheets_text'], 'url' => bl_url('/products/skid-steer-loaders/')],
+    ['kind' => $files['certificates_kind'], 'title' => $files['certificates_title'], 'text' => $files['certificates_text'], 'url' => bl_url('/about/') . '#certificates'],
 ];
-if ($filmed) $downloads[] = ['kind' => 'Video', 'title' => 'Machine videos', 'text' => 'Watch the ' . $filmedModels . ' at work, in ' . (count($filmed) > 1 ? 'their product galleries.' : 'its product gallery.'), 'url' => bl_product_url($filmed[0])];
+if ($filmed) $downloads[] = ['kind' => 'Video', 'title' => $files['videos_title'], 'text' => 'Watch the ' . $filmedModels . ' at work, in ' . (count($filmed) > 1 ? 'their product galleries.' : 'its product gallery.'), 'url' => bl_product_url($filmed[0])];
+$hero = $content['hero'];
+$heroImage = bl_content_image($hero['image'], ['src' => bl_asset('images/about/people-1600.webp'), 'srcset' => bl_asset('images/about/people-900.webp') . ' 900w, ' . bl_asset('images/about/people-1600.webp') . ' 1600w, ' . bl_asset('images/about/people-2560.webp') . ' 2560w', 'width' => 2560, 'height' => 1707]);
+$after = $content['after'];
+$partsImage = bl_content_image($after['parts_image'], ['src' => bl_asset('images/about/hydraulics-900.webp'), 'width' => 900, 'height' => 600]);
 ?>
 <section class="bl-sup-hero" aria-labelledby="support-title">
   <div class="bl-shell">
     <?php bl_breadcrumbs([['label' => 'Support']]); ?>
     <div class="bl-sup-hero-grid">
       <div>
-        <p class="bl-eyebrow"><span class="bl-status-dot"></span> SUPPORT / BUYING &amp; AFTER DELIVERY</p>
-        <h1 id="support-title"><span>FROM ORDER</span><span>TO DELIVERY.</span><span class="bl-blue-text">AND AFTER.</span></h1>
+        <p class="bl-eyebrow"><span class="bl-status-dot"></span> <?= bl_escape($hero['eyebrow']) ?></p>
+        <h1 id="support-title"><?= bl_heading_lines($hero['title']) ?></h1>
       </div>
       <div class="bl-sup-hero-side">
-        <p>How an order works, what the warranty covers, and where to find parts, documents and answers. One team handles all of it, from the first message to the last spare part.</p>
-        <a class="bl-text-link" href="#buying">How buying works <?= bl_icon('arrow-down') ?></a>
+        <p><?= bl_escape($hero['text']) ?></p>
+        <a class="bl-text-link" href="#buying"><?= bl_escape($hero['link']) ?> <?= bl_icon('arrow-down') ?></a>
       </div>
     </div>
   </div>
   <div class="bl-sup-stage">
     <figure class="bl-sup-photo">
-      <img srcset="<?= bl_escape(bl_asset('images/about/people-900.webp')) ?> 900w, <?= bl_escape(bl_asset('images/about/people-1600.webp')) ?> 1600w, <?= bl_escape(bl_asset('images/about/people-2560.webp')) ?> 2560w" sizes="100vw" src="<?= bl_escape(bl_asset('images/about/people-1600.webp')) ?>" alt="A BOB-LIFT technician fitting the hydraulics on a tracked loader at the factory in Xuzhou" width="2560" height="1707" fetchpriority="high">
-      <figcaption>The team that builds the machines also answers for them after delivery</figcaption>
+      <img<?= bl_image_attributes($heroImage, '100vw') ?> alt="<?= bl_escape($hero['alt']) ?>" fetchpriority="high">
+      <?php if ($hero['caption'] !== ''): ?><figcaption><?= bl_escape($hero['caption']) ?></figcaption><?php endif; ?>
     </figure>
     <dl class="bl-sup-plate bl-shell" aria-label="Buying terms at a glance" data-section-nav-after>
       <?php foreach ($terms as $term): ?><div><dt><?= bl_escape($term['label']) ?></dt><dd><?= bl_escape($term['value']) ?><?php if ($term['unit']): ?><small><?= bl_escape($term['unit']) ?></small><?php endif; ?></dd></div><?php endforeach; ?>
@@ -60,13 +66,13 @@ if ($filmed) $downloads[] = ['kind' => 'Video', 'title' => 'Machine videos', 'te
 
 <section class="bl-sup-buying bl-shell" id="buying" aria-labelledby="buying-title">
   <div class="bl-sup-head bl-reveal">
-    <div><p class="bl-eyebrow">01 / HOW BUYING WORKS</p><h2 id="buying-title">FIVE STEPS<br><span class="bl-blue-text">TO YOUR SITE.</span></h2></div>
-    <p>You deal directly with the company that builds the machine, from the first message to the container door.</p>
+    <div><p class="bl-eyebrow"><?= bl_escape($content['buying']['eyebrow']) ?></p><h2 id="buying-title"><?= bl_heading($content['buying']['title']) ?></h2></div>
+    <p><?= bl_escape($content['buying']['intro']) ?></p>
   </div>
   <ol class="bl-sup-steps">
     <?php foreach (bl_buying_steps() as $i => $step): ?>
     <li class="bl-reveal">
-      <span class="bl-sup-step-index">0<?= $i + 1 ?></span>
+      <span class="bl-sup-step-index"><?= sprintf('%02d', $i + 1) ?></span>
       <h3><?= bl_escape($step['title']) ?></h3>
       <p><?= bl_escape($step['text']) ?></p>
       <?php if (!empty($step['link'])): ?><a class="bl-text-link" href="<?= bl_escape($step['link'][0]) ?>"><?= bl_escape($step['link'][1]) ?> <?= bl_icon(str_starts_with($step['link'][0], '#') ? 'arrow-down' : 'arrow-up-right') ?></a><?php endif; ?>
@@ -76,8 +82,8 @@ if ($filmed) $downloads[] = ['kind' => 'Video', 'title' => 'Machine videos', 'te
 
   <section class="bl-sup-containers" id="containers" aria-labelledby="containers-title">
     <div class="bl-sup-containers-head bl-reveal">
-      <h3 id="containers-title">MACHINES PER CONTAINER.</h3>
-      <p>Approximate figures, worked out from each model’s published dimensions for open-seat versions, with loader buckets taken off and packed alongside. We confirm the loading plan with your order.</p>
+      <h3 id="containers-title"><?= bl_escape($content['containers']['title']) ?></h3>
+      <p><?= bl_escape($content['containers']['text']) ?></p>
     </div>
     <div class="bl-sup-containers-tables">
       <?php foreach ($containerGroups as $category => $rows): if (!$rows) continue; ?>
@@ -92,42 +98,42 @@ if ($filmed) $downloads[] = ['kind' => 'Video', 'title' => 'Machine videos', 'te
       </table>
       <?php endforeach; ?>
     </div>
-    <p class="bl-sup-note">With a roof or cab, the FY-20 to FY-50 and FJZ-30 dumpers stand 2.65–2.75 m tall, above a container door. Ask how they ship.</p>
+    <?php if ($content['containers']['note'] !== ''): ?><p class="bl-sup-note"><?= bl_escape($content['containers']['note']) ?></p><?php endif; ?>
   </section>
 </section>
 
 <section class="bl-sup-after" id="after-delivery" aria-labelledby="after-title">
   <div class="bl-shell">
     <div class="bl-sup-head bl-reveal">
-      <div><p class="bl-eyebrow">02 / AFTER DELIVERY</p><h2 id="after-title">COVERED FOR<br><span>TWELVE MONTHS.</span></h2></div>
-      <p>The team that built your machine stays on the other end of the line, for questions, faults and parts.</p>
+      <div><p class="bl-eyebrow"><?= bl_escape($after['eyebrow']) ?></p><h2 id="after-title"><?= bl_heading($after['title'], '') ?></h2></div>
+      <p><?= bl_escape($after['intro']) ?></p>
     </div>
     <div class="bl-sup-after-grid">
       <div class="bl-sup-warranty bl-reveal">
-        <p class="bl-eyebrow">WARRANTY</p>
-        <h3>The whole machine.</h3>
-        <p>Every BOB-LIFT loader and dumper carries a 12-month warranty that covers the whole machine.</p>
+        <p class="bl-eyebrow"><?= bl_escape($after['warranty_eyebrow']) ?></p>
+        <h3><?= bl_escape($after['warranty_title']) ?></h3>
+        <p><?= bl_escape($after['warranty_text']) ?></p>
       </div>
       <div class="bl-sup-service bl-reveal">
-        <p class="bl-eyebrow">IF SOMETHING GOES WRONG</p>
+        <p class="bl-eyebrow"><?= bl_escape($after['service_eyebrow']) ?></p>
         <ol><?php foreach (bl_service_steps() as $step): ?><li><div><h3><?= bl_escape($step['title']) ?></h3><p><?= bl_escape($step['text']) ?></p></div></li><?php endforeach; ?></ol>
       </div>
       <figure class="bl-sup-parts bl-reveal">
-        <img src="<?= bl_escape(bl_asset('images/about/hydraulics-900.webp')) ?>" alt="Hydraulic hose fittings at a loader’s lift arm pivot" width="900" height="600" loading="lazy">
-        <figcaption><p class="bl-eyebrow">SPARE PARTS</p><h3>Original wear parts.</h3><p>Each machine ships with a set of original wear parts. Order more from the same team at any time, with your model and serial number.</p></figcaption>
+        <img<?= bl_image_attributes($partsImage, '(max-width: 800px) 100vw, 50vw') ?> alt="<?= bl_escape($after['parts_alt']) ?>" loading="lazy">
+        <figcaption><p class="bl-eyebrow"><?= bl_escape($after['parts_eyebrow']) ?></p><h3><?= bl_escape($after['parts_title']) ?></h3><p><?= bl_escape($after['parts_text']) ?></p></figcaption>
       </figure>
     </div>
     <div class="bl-sup-after-actions bl-reveal">
-      <a class="bl-button bl-button-blue" href="<?= bl_escape($serviceUrl) ?>">Parts &amp; service request <?= bl_icon('arrow-up-right') ?></a>
-      <a class="bl-text-link" href="https://wa.me/8615852499415?text=<?= rawurlencode('Hello BOB-LIFT, I need help with my machine. Model: , serial number: .') ?>" target="_blank" rel="noopener">Send us a video on WhatsApp <?= bl_icon('arrow-up-right') ?></a>
+      <a class="bl-button bl-button-blue" href="<?= bl_escape($serviceUrl) ?>"><?= bl_escape($after['button']) ?> <?= bl_icon('arrow-up-right') ?></a>
+      <?php if ($after['whatsapp_number'] !== ''): ?><a class="bl-text-link" href="https://wa.me/<?= bl_escape($after['whatsapp_number']) ?>?text=<?= rawurlencode($after['whatsapp_message']) ?>" target="_blank" rel="noopener"><?= bl_escape($after['whatsapp_label']) ?> <?= bl_icon('arrow-up-right') ?></a><?php endif; ?>
     </div>
   </div>
 </section>
 
 <section class="bl-sup-downloads bl-shell" id="downloads" aria-labelledby="downloads-title">
   <div class="bl-sup-head bl-reveal">
-    <div><p class="bl-eyebrow">03 / DOWNLOADS</p><h2 id="downloads-title">KEEP IT<br><span class="bl-blue-text">ON FILE.</span></h2></div>
-    <p>The documents buyers ask for most, in one place. Ask the team for anything that isn’t here.</p>
+    <div><p class="bl-eyebrow"><?= bl_escape($files['eyebrow']) ?></p><h2 id="downloads-title"><?= bl_heading($files['title']) ?></h2></div>
+    <p><?= bl_escape($files['intro']) ?></p>
   </div>
   <ul class="bl-sup-files">
     <?php foreach ($downloads as $file): ?>
@@ -141,16 +147,16 @@ if ($filmed) $downloads[] = ['kind' => 'Video', 'title' => 'Machine videos', 'te
 
 <section class="bl-sup-faq bl-shell" id="faq" aria-labelledby="faq-title">
   <div class="bl-sup-faq-aside bl-reveal">
-    <p class="bl-eyebrow">04 / QUESTIONS</p>
-    <h2 id="faq-title">ASKED &amp;<br><span class="bl-blue-text">ANSWERED.</span></h2>
-    <p>Not answered here? Ask the team that builds the machines.</p>
-    <a class="bl-text-link" href="<?= bl_escape(bl_url('/contact/') . '#enquiry') ?>">Ask a question <?= bl_icon('arrow-up-right') ?></a>
+    <p class="bl-eyebrow"><?= bl_escape($content['faq']['eyebrow']) ?></p>
+    <h2 id="faq-title"><?= bl_heading($content['faq']['title']) ?></h2>
+    <p><?= bl_escape($content['faq']['intro']) ?></p>
+    <a class="bl-text-link" href="<?= bl_escape(bl_url('/contact/') . '#enquiry') ?>"><?= bl_escape($content['faq']['link']) ?> <?= bl_icon('arrow-up-right') ?></a>
   </div>
   <div class="bl-sup-faq-groups">
-    <?php foreach (bl_support_faq() as $group => $items): ?>
+    <?php foreach (bl_support_faq() as $group): ?>
     <div class="bl-sup-faq-group bl-reveal">
-      <h3><?= bl_escape($group) ?></h3>
-      <?php foreach ($items as $item): ?>
+      <h3><?= bl_escape($group['title']) ?></h3>
+      <?php foreach ($group['items'] as $item): ?>
       <details class="bl-sup-faq-item">
         <summary><?= bl_escape($item['q']) ?><?= bl_icon('plus') ?></summary>
         <div><p><?= bl_escape($item['a']) ?></p><?php if (!empty($item['link'])): ?><a class="bl-text-link" href="<?= bl_escape($item['link'][1]) ?>"><?= bl_escape($item['link'][0]) ?> <?= bl_icon(str_starts_with($item['link'][1], '#') ? 'arrow-down' : 'arrow-up-right') ?></a><?php endif; ?></div>
