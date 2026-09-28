@@ -10,13 +10,13 @@ function bl_resolve_route(): array
     $path = '/' . trim(rawurldecode($path), '/') . '/';
     if ($path === '//') $path = '/';
     $pages = [
-        '/' => ['home', 'Small size. Serious capability.', 'Explore BOB-LIFT skid steer loaders and mini dumpers. A dedicated compact equipment business website of Xuzhou BOB-LIFT Construction Machinery Co., Ltd.'],
+        '/' => ['home', bl_editable('home')['seo']['title'], bl_editable('home')['seo']['description']],
         '/about/' => ['about', 'About BOB-LIFT Compact Equipment', 'BOB-LIFT Compact Equipment is the mini skid steer loader and mini dumper line of Xuzhou BOB-LIFT Construction Machinery Co., Ltd., built to order at its factory in Xuzhou.'],
         '/products/' => ['products', 'Skid Steer Loaders & Mini Dumpers', 'Explore BOB-LIFT compact equipment. Compare skid steer loader and mini dumper specifications side by side, then discuss your configuration with our team.'],
         '/products/skid-steer-loaders/' => ['products', 'Skid Steer Loaders', 'Compare BOB-LIFT mini skid steer loaders rated from 200 to 500 kg: stand-on, tracked and wheeled seated models with published specifications.'],
         '/products/mini-dumpers/' => ['products', 'Mini Dumpers | 0.5–5 Ton Range', 'Browse BOB-LIFT mini dumpers rated from 0.5 to 5 tonnes, including tracked and mixer models. View model specifications, bucket capacities and enquiry options.'],
         '/applications/' => ['applications', 'Compact Equipment Applications', 'Find BOB-LIFT equipment for landscaping, site preparation and material transport. Explore application requirements and relevant product families.'],
-        '/support/' => ['support', 'Buying, Warranty & Support', 'How buying from BOB-LIFT works: one-unit orders, T/T payment, 8–30 working days to ship, a 12-month whole-machine warranty, spare parts, downloads and answers to common questions.'],
+        '/support/' => ['support', bl_editable('support')['seo']['title'], bl_editable('support')['seo']['description']],
         '/news/' => ['news', 'BOB-LIFT News & Company Updates', 'Read company and exhibition updates from BOB-LIFT, with links to original announcements on the main BOB-LIFT website.'],
         '/contact/' => ['contact', 'Contact BOB-LIFT Compact Equipment', 'Contact BOB-LIFT for skid steer loaders, mini dumpers, specifications and quotations. Reach our Xuzhou team by email, phone or WhatsApp.'],
         '/privacy/' => ['privacy', 'Privacy & Enquiry Information', 'How this BOB-LIFT website handles enquiry information and email drafts.'],

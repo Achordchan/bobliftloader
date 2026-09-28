@@ -1,0 +1,316 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * The words and pictures of the home and Support pages. The defaults below are the site as written; in WordPress the
+ * "网站内容" screens save only what an editor changed (options bl_content_home / bl_content_support), and those changes are
+ * laid over the defaults here. The standalone preview has no database and always shows the defaults.
+ *
+ * Text conventions shared with the admin screens:
+ *  - headings: a new line is a line break, *words* in stars take the section's accent (blue or outline);
+ *  - rich text: a new line is a line break, and simple links / bold / italics are allowed;
+ *  - an empty image means the theme's own photograph.
+ */
+
+function bl_home_defaults(): array
+{
+    return [
+        'seo' => [
+            'title' => 'Small size. Serious capability.',
+            'description' => 'Explore BOB-LIFT skid steer loaders and mini dumpers. A dedicated compact equipment business website of Xuzhou BOB-LIFT Construction Machinery Co., Ltd.',
+        ],
+        'hero' => [
+            'eyebrow' => 'COMPACT EQUIPMENT. OPEN POSSIBILITIES.',
+            'title' => "SMALL SIZE.\nSERIOUS\nCAPABILITY.",
+            'button' => 'Explore the range',
+            'link' => 'Talk to our team',
+            'image' => '',
+            'image_mobile' => '',
+            'alt' => 'Illustrative stone-quarry scene at dusk based on BOB-LIFT BL-T1000-H product photography',
+        ],
+        'families' => [
+            'loader' => [
+                'label' => 'Skid steer loaders',
+                'title' => "SMALL FOOTPRINT.\nBIG POTENTIAL.",
+                'description' => 'For the jobs that call for more than one kind of capability. Explore a compact approach to loading, ground preparation and everyday site work.',
+                'image' => '',
+                'alt' => 'Studio view of a BOB-LIFT tracked mini skid steer loader, based on BL-T1000-H product photography',
+            ],
+            'dumper' => [
+                'label' => 'Mini dumpers',
+                'title' => "LESS BACK & FORTH.\nMORE FORWARD.",
+                'description' => 'Move soil, gravel and site materials where they need to go. Discover a dedicated range of mini dumpers for the everyday work between A and B.',
+                'image' => '',
+                'alt' => 'Studio view of a yellow BOB-LIFT site mini dumper, based on FY-30 product photography',
+            ],
+        ],
+        'intro' => [
+            'eyebrow' => 'MADE FOR YOUR EVERYDAY',
+            'title' => "Less space.\n*More possibilities.*",
+            'text' => 'Great work doesn’t always come with plenty of room. Find compact equipment for the ground you’re breaking, the materials you’re moving and the next job on your list.',
+            'link' => 'Meet your next machine',
+            'facts' => [
+                ['value' => '37,000', 'unit' => 'm²', 'label' => 'Own factory in Xuzhou, China'],
+                ['value' => '200+', 'unit' => '', 'label' => 'Countries and regions served'],
+                ['value' => 'ISO 9001', 'unit' => '', 'label' => 'Certified quality management'],
+            ],
+        ],
+        'range' => [
+            'eyebrow' => '01 / THE EQUIPMENT',
+            'title' => 'THE RANGE.',
+            'description' => "Two families. {models} models.\nBuilt for the space you actually have.",
+            'assist' => 'Different jobs. Different requirements.',
+            'assist_link' => 'Let’s find your fit',
+        ],
+        'applications' => [
+            'eyebrow' => '02 / IN YOUR ELEMENT',
+            'title' => "WORK WITHOUT\n*LIMITS.*",
+            'description' => "Every site has its own challenges. \nStart with yours.",
+        ],
+        'approach' => [
+            'eyebrow' => '03 / PEOPLE BEHIND THE MACHINE',
+            'title' => "BUILT BY PEOPLE\nYOU CAN *TALK TO.*",
+            'text' => 'Our loaders are welded, painted and assembled by our own team at our factory in Xuzhou. Tell us about your work and talk it through with the people behind the machines.',
+            'link' => 'Meet our company',
+            'image' => '',
+            'alt' => 'A BOB-LIFT technician assembling a tracked loader at the factory in Xuzhou',
+            'caption' => 'Loader assembly · BOB-LIFT factory, Xuzhou',
+            'steps' => [
+                ['title' => 'Start with the right fit.', 'text' => 'Your site, your materials, your priorities. Tell us what you need to do and we’ll discuss the equipment options with you.'],
+                ['title' => 'Know what you’re choosing.', 'text' => 'Ask for model specifications, configuration options and product documentation before you decide, and confirm the details that matter to your work.'],
+                ['title' => 'Keep the conversation going.', 'text' => 'Contact the same team for equipment questions, <a href="' . bl_escape(bl_url('/support/') . '#after-delivery') . '">parts and service</a>, with a 12-month warranty on the whole machine. Have a machine already? Include its model and serial number.'],
+            ],
+        ],
+        'journal' => [
+            'eyebrow' => 'FROM THE COMPANY',
+            'title' => 'INSIDE BOB-LIFT.',
+            'link' => 'All company stories',
+        ],
+        'contact' => [
+            'eyebrow' => 'YOUR NEXT PROJECT STARTS HERE',
+            'title' => "LET’S GET\nTO *WORK.*",
+            'text' => "A question. A project. A new partnership.\nTell us what you have in mind.",
+            'email' => 'info@boblift.com',
+            'signoff' => 'REAL PEOPLE. PRACTICAL CONVERSATIONS.',
+        ],
+    ];
+}
+
+function bl_support_defaults(): array
+{
+    return [
+        'seo' => [
+            'title' => 'Buying, Warranty & Support',
+            'description' => 'How buying from BOB-LIFT works: one-unit orders, T/T payment, 8–30 working days to ship, a 12-month whole-machine warranty, spare parts, downloads and answers to common questions.',
+        ],
+        'hero' => [
+            'eyebrow' => 'SUPPORT / BUYING & AFTER DELIVERY',
+            'title' => "FROM ORDER\nTO DELIVERY.\n*AND AFTER.*",
+            'text' => 'How an order works, what the warranty covers, and where to find parts, documents and answers. One team handles all of it, from the first message to the last spare part.',
+            'link' => 'How buying works',
+            'image' => '',
+            'alt' => 'A BOB-LIFT technician fitting the hydraulics on a tracked loader at the factory in Xuzhou',
+            'caption' => 'The team that builds the machines also answers for them after delivery',
+        ],
+        // The keys are fixed: product pages quote these four terms by name. Terms confirmed by BOB-LIFT on 2026-09-25.
+        'terms' => [
+            'moq' => ['label' => 'Minimum order', 'value' => '1', 'unit' => 'unit'],
+            'payment' => ['label' => 'Payment', 'value' => 'T/T', 'unit' => ''],
+            'lead' => ['label' => 'Ready to ship', 'value' => '8–30', 'unit' => 'working days'],
+            'warranty' => ['label' => 'Whole-machine warranty', 'value' => '12', 'unit' => 'months'],
+        ],
+        'buying' => [
+            'eyebrow' => '01 / HOW BUYING WORKS',
+            'title' => "FIVE STEPS\n*TO YOUR SITE.*",
+            'intro' => 'You deal directly with the company that builds the machine, from the first message to the container door.',
+            'steps' => [
+                ['title' => 'Tell us the job', 'text' => 'The narrowest opening on your site, the heaviest load and the ground you will work on. A few photos of the route help.', 'link_label' => 'What to send us', 'link_url' => bl_url('/applications/') . '#before-you-enquire'],
+                ['title' => 'Quote & configuration', 'text' => 'We suggest a model and confirm its engine, running gear, colour and attachments, then quote on the trade terms you need.', 'link_label' => '', 'link_url' => ''],
+                ['title' => 'Place the order', 'text' => 'One machine is enough to order. Payment is by T/T bank transfer.', 'link_label' => '', 'link_url' => ''],
+                ['title' => 'Built to order', 'text' => 'Your machine is built at our Xuzhou factory, typically in 8 to 30 working days. Quantity and configuration decide the date, which we confirm with your order.', 'link_label' => '', 'link_url' => ''],
+                ['title' => 'Shipping', 'text' => 'We quote EXW, FOB, CFR, CIF and the other common Incoterms, and ship by container.', 'link_label' => 'Machines per container', 'link_url' => '#containers'],
+            ],
+        ],
+        'containers' => [
+            'title' => 'MACHINES PER CONTAINER.',
+            'text' => 'Approximate figures, worked out from each model’s published dimensions for open-seat versions, with loader buckets taken off and packed alongside. We confirm the loading plan with your order.',
+            // Machines per 20GP and 40HQ container, estimated from each model's published dimensions against standard interiors.
+            'loading' => [
+                'bl-t360-h-mini-skid-steer-loader' => [6, 14], 'bl-t460-h-mini-skid-steer-loader' => [6, 14],
+                'bl-s390-c-mini-skid-steer-loader' => [6, 12], 'bl-t390-c-mini-skid-steer-loader' => [6, 12],
+                'bl-t1000-h-mini-skid-steer-loader' => [5, 11], 'bl-t750-h-mini-skid-steer-loader' => [4, 10],
+                'bl-s490-c-mini-skid-steer-loader' => [4, 10], 'bl-t490-c-mini-skid-steer-loader' => [4, 10],
+                '500kg-tracked-mini-dumper' => [6, 12], 'tracked-mini-mixer-truck' => [6, 12],
+                '1-ton-mini-dumper' => [2, 4], '1-5-ton-mini-dumper' => [2, 4], '2-ton-mini-dumper-with-bucket' => [1, 3],
+                '2-ton-mini-dumper' => [1, 2], '3-ton-mini-dumper' => [1, 2], '3-ton-mini-dumper-with-bucket' => [1, 2],
+                '4-ton-mini-dumper' => [1, 2], '5-ton-mini-dumper' => [1, 2],
+            ],
+            'note' => 'With a roof or cab, the FY-20 to FY-50 and FJZ-30 dumpers stand 2.65–2.75 m tall, above a container door. Ask how they ship.',
+        ],
+        'after' => [
+            'eyebrow' => '02 / AFTER DELIVERY',
+            'title' => "COVERED FOR\n*TWELVE MONTHS.*",
+            'intro' => 'The team that built your machine stays on the other end of the line, for questions, faults and parts.',
+            'warranty_eyebrow' => 'WARRANTY',
+            'warranty_title' => 'The whole machine.',
+            'warranty_text' => 'Every BOB-LIFT loader and dumper carries a 12-month warranty that covers the whole machine.',
+            'service_eyebrow' => 'IF SOMETHING GOES WRONG',
+            'service_steps' => [
+                ['title' => 'Send us the details', 'text' => 'The model, the serial number and a photo or short video of the problem.'],
+                ['title' => 'Remote guidance', 'text' => 'Our team talks you through the diagnosis and the fix over WhatsApp, video or email.'],
+                ['title' => 'Parts on the way', 'text' => 'We ship the replacement parts to you.'],
+            ],
+            'parts_image' => '',
+            'parts_alt' => 'Hydraulic hose fittings at a loader’s lift arm pivot',
+            'parts_eyebrow' => 'SPARE PARTS',
+            'parts_title' => 'Original wear parts.',
+            'parts_text' => 'Each machine ships with a set of original wear parts. Order more from the same team at any time, with your model and serial number.',
+            'button' => 'Parts & service request',
+            'whatsapp_label' => 'Send us a video on WhatsApp',
+            'whatsapp_number' => '8615852499415',
+            'whatsapp_message' => 'Hello BOB-LIFT, I need help with my machine. Model: , serial number: .',
+        ],
+        'downloads' => [
+            'eyebrow' => '03 / DOWNLOADS',
+            'title' => "KEEP IT\n*ON FILE.*",
+            'intro' => 'The documents buyers ask for most, in one place. Ask the team for anything that isn’t here.',
+            'catalogue_title' => 'Product catalogue',
+            'catalogue_text' => 'The range in print, with specification tables and the attachments.',
+            'sheets_title' => 'Specification sheets',
+            'sheets_text' => 'Open any model and save its specification sheet as a PDF, straight from the page.',
+            'certificates_kind' => 'ISO 9001 · CE · EAC',
+            'certificates_title' => 'Certificates',
+            'certificates_text' => 'The quality and export certificates held by Xuzhou BOB-LIFT Construction Machinery Co., Ltd.',
+            'videos_title' => 'Machine videos',
+        ],
+        'faq' => [
+            'eyebrow' => '04 / QUESTIONS',
+            'title' => "ASKED &\n*ANSWERED.*",
+            'intro' => 'Not answered here? Ask the team that builds the machines.',
+            'link' => 'Ask a question',
+            // Questions the sections above don't already answer, in page order; consecutive items share a group heading.
+            'items' => bl_support_default_faq(),
+        ],
+    ];
+}
+
+function bl_support_default_faq(): array
+{
+    $loaders = bl_url('/products/skid-steer-loaders/');
+    $items = [];
+    $groups = [
+        'Choosing a machine' => [
+            ['Which loader fits through my gate or doorway?', 'Set your narrowest opening on the width chart of the loaders page. It shows which models pass through, with and without the bucket fitted.', 'Check your opening', $loaders . '#about-the-range'],
+            ['Should I choose tracks or tires?', 'Rubber tracks suit soft ground, lawns and slopes. Rubber tires suit concrete, asphalt and paving.'],
+            ['Can I choose the engine?', 'Several loaders offer more than one engine brand, and some have an electric version. Each model lists its choices under Engine options on its specification sheet.'],
+            ['Can the loader be painted in our colour?', 'Yes. Loaders are painted to order, so tell us the colour when you ask for a quote.'],
+            ['Which attachments can I use?', 'Our loaders take a range of attachments, from pallet forks and augers to sweepers and breakers. We confirm which suit your model when we quote the machine.', 'See the attachments', $loaders . '#attachments'],
+        ],
+        'Shipping & paperwork' => [
+            ['Which certificates do you hold?', 'Xuzhou BOB-LIFT Construction Machinery Co., Ltd. holds ISO 9001, CE and EAC certificates. Ask which documents cover your model and market.', 'View the certificates', bl_url('/about/') . '#certificates'],
+            ['Can we visit the factory before ordering?', 'Yes. Tell us your dates and we will arrange a visit to our factory in Xuzhou, Jiangsu.', 'Plan a visit', bl_url('/contact/') . '#enquiry'],
+        ],
+        'Parts & service' => [
+            ['Can I order parts for a machine I already have?', 'Yes. Send the model and serial number with a photo of the part, and we will confirm it before shipping.', 'Ask about parts', bl_url('/contact/') . '?topic=service#enquiry'],
+        ],
+    ];
+    foreach ($groups as $group => $questions) foreach ($questions as $q) $items[] = ['group' => $group, 'q' => $q[0], 'a' => $q[1], 'link_label' => $q[2] ?? '', 'link_url' => $q[3] ?? ''];
+    return $items;
+}
+
+function bl_content_defaults(string $page): array
+{
+    return $page === 'support' ? bl_support_defaults() : bl_home_defaults();
+}
+
+/** A page's content: the defaults with the editor's saved changes laid over them. */
+function bl_editable(string $page): array
+{
+    static $cache = [];
+    if (isset($cache[$page])) return $cache[$page];
+    $content = bl_content_defaults($page);
+    $saved = bl_is_wordpress() ? get_option('bl_content_' . $page) : [];
+    if (is_array($saved) && $saved) {
+        $content = bl_merge_content($content, $saved);
+        // Loading figures are keyed by product, so models added in WordPress after these defaults are kept as well.
+        if ($page === 'support' && is_array($saved['containers']['loading'] ?? null)) {
+            foreach ($saved['containers']['loading'] as $slug => $fit) if (is_array($fit)) $content['containers']['loading'][$slug] = $fit;
+        }
+    }
+    return $cache[$page] = $content;
+}
+
+/** Saved values replace defaults of the same kind; groups merge key by key, lists are replaced whole. */
+function bl_merge_content(array $defaults, array $saved): array
+{
+    foreach ($saved as $key => $value) {
+        if (!array_key_exists($key, $defaults)) continue;
+        $default = $defaults[$key];
+        if (is_array($default) && !array_is_list($default) && is_array($value)) $defaults[$key] = bl_merge_content($default, $value);
+        elseif (is_array($default) === is_array($value)) $defaults[$key] = $value;
+    }
+    return $defaults;
+}
+
+/** A heading: new lines break, *words* take the accent class (an empty class still wraps them in a plain span). */
+function bl_heading(string $text, string $accent = 'bl-blue-text', bool $period = false): string
+{
+    $html = bl_escape($text);
+    if ($period && str_ends_with($html, '.')) $html = substr($html, 0, -1) . '<span class="bl-period">.</span>';
+    $html = preg_replace('/\*(.+?)\*/s', $accent === '' ? '<span>$1</span>' : '<span class="' . bl_escape($accent) . '">$1</span>', $html);
+    return str_replace(["\r\n", "\n"], '<br>', $html);
+}
+
+/** A display title set line by line: each line its own span, a line in *stars* takes the accent. */
+function bl_heading_lines(string $text, bool $period = false): string
+{
+    $lines = array_values(array_filter(array_map('trim', preg_split('/\R/', $text)), 'strlen'));
+    $html = '';
+    foreach ($lines as $i => $line) {
+        $accent = preg_match('/^\*(.+)\*$/s', $line, $match) === 1;
+        $inner = bl_escape($accent ? $match[1] : $line);
+        if ($period && $i === count($lines) - 1 && str_ends_with($inner, '.')) $inner = substr($inner, 0, -1) . '<span class="bl-period">.</span>';
+        $html .= $accent ? '<span class="bl-blue-text">' . $inner . '</span>' : '<span>' . $inner . '</span>';
+    }
+    return $html;
+}
+
+/** Rich text: already filtered when saved (links, bold, italics), so only its line breaks are turned into <br>. */
+function bl_rich(string $text, array $replace = []): string
+{
+    return str_replace(["\r\n", "\n"], '<br>', strtr($text, $replace));
+}
+
+/**
+ * An image slot: the theme's own photograph (with its responsive sizes) unless the editor chose another. A chosen image from
+ * the media library brings its own sizes and dimensions.
+ */
+function bl_content_image(string $custom, array $default): array
+{
+    if ($custom === '') return $default + ['srcset' => '', 'width' => 0, 'height' => 0];
+    $image = ['src' => $custom, 'srcset' => '', 'width' => 0, 'height' => 0];
+    // Saved links to this site are paths (/wp-content/uploads/…); the media lookup needs the full address.
+    if (bl_is_wordpress() && ($id = attachment_url_to_postid(str_starts_with($custom, '/') ? home_url($custom) : $custom))) {
+        $meta = wp_get_attachment_metadata($id);
+        $image['srcset'] = (string) wp_get_attachment_image_srcset($id, 'full');
+        $image['width'] = (int) ($meta['width'] ?? 0);
+        $image['height'] = (int) ($meta['height'] ?? 0);
+    }
+    return $image;
+}
+
+/** src / srcset / sizes / width / height attributes for an image slot. */
+function bl_image_attributes(array $image, string $sizes = ''): string
+{
+    $html = ($image['srcset'] ? ' srcset="' . bl_escape($image['srcset']) . '"' . ($sizes ? ' sizes="' . bl_escape($sizes) . '"' : '') : '') . ' src="' . bl_escape($image['src']) . '"';
+    if ($image['width'] && $image['height']) $html .= ' width="' . (int) $image['width'] . '" height="' . (int) $image['height'] . '"';
+    return $html;
+}
+
+/** The home page's hero pictures: wide screens and phones, each falling back to the theme's own. */
+function bl_home_hero_images(): array
+{
+    $hero = bl_editable('home')['hero'];
+    $wide = $hero['image'] ?: bl_asset('images/hero-banner-2k.webp');
+    return ['wide' => $wide, 'narrow' => $hero['image_mobile'] ?: ($hero['image'] ?: bl_asset('images/hero-real-loader.webp'))];
+}
