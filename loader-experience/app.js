@@ -65,7 +65,7 @@ function interrupt() { stopPlayback(); clips.forEach(clip => clip.pause()); navi
 // the whole opening), anything beyond it as before.
 const OPENING_PACE = 2.2;
 function goTo(target) {
-  interrupt();
+  interrupt(); window.__partSteps?.cancel(); // a card step or a caught flick in the parts list would pull it back
   const y = Math.max(0, target.getBoundingClientRect().top + scrollY - header.offsetHeight + 2);
   if (preference.matches || !gsap) { window.scrollTo(0, y); return; }
   const opening = document.querySelector('.exp-hero'), end = opening.offsetTop + opening.offsetHeight;
@@ -90,7 +90,7 @@ document.querySelectorAll('a[href^="#"]').forEach(link => link.addEventListener(
 playButton.addEventListener('click', () => {
   if (preference.matches) { goTo(document.querySelector('#chassis')); return; }
   if (autoplay) { stopPlayback(); return; }
-  navigationTween?.kill(); navigationTween = null;
+  navigationTween?.kill(); navigationTween = null; window.__partSteps?.cancel();
   const end = document.documentElement.scrollHeight - innerHeight;
   if (scrollY > end - 20) window.scrollTo(0, 0);
   const position = { y: scrollY };
