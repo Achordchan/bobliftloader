@@ -153,10 +153,10 @@ $partsImage = bl_content_image($after['parts_image'], ['src' => bl_asset('images
     <a class="bl-text-link" href="<?= bl_escape(bl_url('/contact/') . '#enquiry') ?>"><?= bl_escape($content['faq']['link']) ?> <?= bl_icon('arrow-up-right') ?></a>
   </div>
   <div class="bl-sup-faq-groups">
-    <?php foreach (bl_support_faq() as $group => $items): ?>
+    <?php foreach (bl_support_faq() as $group): ?>
     <div class="bl-sup-faq-group bl-reveal">
-      <h3><?= bl_escape($group) ?></h3>
-      <?php foreach ($items as $item): ?>
+      <h3><?= bl_escape($group['title']) ?></h3>
+      <?php foreach ($group['items'] as $item): ?>
       <details class="bl-sup-faq-item">
         <summary><?= bl_escape($item['q']) ?><?= bl_icon('plus') ?></summary>
         <div><p><?= bl_escape($item['a']) ?></p><?php if (!empty($item['link'])): ?><a class="bl-text-link" href="<?= bl_escape($item['link'][1]) ?>"><?= bl_escape($item['link'][0]) ?> <?= bl_icon(str_starts_with($item['link'][1], '#') ? 'arrow-down' : 'arrow-up-right') ?></a><?php endif; ?></div>

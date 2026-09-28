@@ -52,14 +52,18 @@ function bl_catalogue(): array
     return ['url' => $url, 'size' => $size ? number_format($size / 1048576, 1) . ' MB' : ''];
 }
 
-/** Questions the sections above don't already answer, by group. Answers may carry one link: [text, url]. */
+/**
+ * Questions the sections above don't already answer, in page order: each run of consecutive questions with the same group
+ * name becomes one group ['title', 'items'], so a group name may appear more than once. Answers may carry one link: [text, url].
+ */
 function bl_support_faq(): array
 {
     $groups = [];
     foreach (bl_editable('support')['faq']['items'] as $item) {
         $row = ['q' => $item['q'], 'a' => $item['a']];
         if ($item['link_label'] !== '' && $item['link_url'] !== '') $row['link'] = [$item['link_label'], $item['link_url']];
-        $groups[$item['group']][] = $row;
+        if (!$groups || end($groups)['title'] !== $item['group']) $groups[] = ['title' => $item['group'], 'items' => []];
+        $groups[array_key_last($groups)]['items'][] = $row;
     }
     return $groups;
 }

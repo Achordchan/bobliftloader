@@ -289,14 +289,21 @@ function bl_content_image(string $custom, array $default): array
 {
     if ($custom === '') return $default + ['srcset' => '', 'width' => 0, 'height' => 0];
     $image = ['src' => $custom, 'srcset' => '', 'width' => 0, 'height' => 0];
-    // Saved links to this site are paths (/wp-content/uploads/…); the media lookup needs the full address.
-    if (bl_is_wordpress() && ($id = attachment_url_to_postid(str_starts_with($custom, '/') ? home_url($custom) : $custom))) {
+    // Saved links to this site are root-relative paths; the media lookup needs the full address, so only the origin is added.
+    if (bl_is_wordpress() && ($id = attachment_url_to_postid(str_starts_with($custom, '/') ? bl_site_origin() . $custom : $custom))) {
         $meta = wp_get_attachment_metadata($id);
         $image['srcset'] = (string) wp_get_attachment_image_srcset($id, 'full');
         $image['width'] = (int) ($meta['width'] ?? 0);
         $image['height'] = (int) ($meta['height'] ?? 0);
     }
     return $image;
+}
+
+/** scheme://host[:port] of this WordPress site, without any installation subdirectory. */
+function bl_site_origin(): string
+{
+    $home = wp_parse_url(home_url());
+    return ($home['scheme'] ?? 'http') . '://' . ($home['host'] ?? '') . (isset($home['port']) ? ':' . $home['port'] : '');
 }
 
 /** src / srcset / sizes / width / height attributes for an image slot. */

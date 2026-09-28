@@ -195,11 +195,14 @@ function bl_content_set(array &$data, string $key, $value): void
 
 /* ---------- Cleaning what was submitted ---------- */
 
-/** Links to this site are kept as paths (/contact/), so the content survives a move to another domain. */
+/**
+ * Links to this site are kept as root-relative paths, so the content survives a move to another domain. Only the origin
+ * (scheme, host, port) is removed: an install under /site/ keeps /site/contact/, which still resolves there.
+ */
 function bl_content_local_url(string $url): string
 {
-    $home = untrailingslashit(home_url());
-    return $home !== '' && str_starts_with($url, $home . '/') ? substr($url, strlen($home)) : $url;
+    $origin = bl_site_origin();
+    return str_starts_with($url, $origin . '/') ? substr($url, strlen($origin)) : $url;
 }
 
 function bl_content_clean_url(string $url): string
@@ -237,7 +240,7 @@ function bl_content_clean_all(string $page, array $input): array
         switch ($field['type']) {
             case 'list':
                 $rows = [];
-                foreach (array_slice(array_values(is_array($raw) ? $raw : []), 0, 40) as $row) {
+                foreach (array_values(is_array($raw) ? $raw : []) as $row) {
                     if (!is_array($row)) continue;
                     $clean = [];
                     foreach ($field['fields'] as $name => $sub) $clean[$name] = bl_content_clean($sub['type'], $row[$name] ?? '');
@@ -324,7 +327,7 @@ function bl_content_screen(string $page): void
         foreach ($section['fields'] as $field) bl_content_field($field, bl_content_get($values, $field['key']), bl_content_get($saved, $field['key']) !== null);
         echo '</section>';
     }
-    echo '<div class="bl-ce-actions">';
+    echo '<input type="hidden" name="bl_content_complete" value="1"><div class="bl-ce-actions">';
     submit_button('保存修改', 'primary large', 'submit', false);
     echo ' <a class="button button-large" href="' . esc_url(home_url($info['path'])) . '" target="_blank" rel="noopener">查看页面</a></div></form>';
     if ($saved) {
@@ -429,8 +432,18 @@ function bl_content_request_page(): string
 add_action('admin_post_bl_save_content', static function (): void {
     $page = bl_content_request_page();
     check_admin_referer('bl_save_content_' . $page);
+    // PHP drops fields beyond max_input_vars without an error. The form's last field is a marker: if it did not arrive,
+    // the submission is incomplete and saving it would silently lose content, so nothing is saved.
+    if (!isset($_POST['bl_content_complete'])) wp_die('提交的内容不完整（可能超出了服务器的 max_input_vars 限制），没有保存任何修改。请返回后减少列表条目，或调高服务器的 max_input_vars。', '', ['response' => 400, 'back_link' => true]);
     $input = isset($_POST['bl_content']) && is_array($_POST['bl_content']) ? wp_unslash($_POST['bl_content']) : [];
     $diff = bl_content_diff(bl_content_clean_all($page, $input), bl_content_clean_all($page, bl_content_defaults($page)));
+    // The loading table lists published products only; figures saved for a model not on the form (unpublished for now)
+    // are carried over rather than dropped.
+    $previous = get_option('bl_content_' . $page);
+    if (is_array($previous['containers']['loading'] ?? null)) {
+        $posted = is_array($input['containers']['loading'] ?? null) ? array_map('sanitize_title', array_keys($input['containers']['loading'])) : [];
+        foreach ($previous['containers']['loading'] as $slug => $fit) if (!in_array((string) $slug, $posted, true)) $diff['containers']['loading'][$slug] = $fit;
+    }
     if ($diff) update_option('bl_content_' . $page, $diff);
     else delete_option('bl_content_' . $page);
     wp_safe_redirect(admin_url('admin.php?page=bl-content-' . $page . '&bl_saved=1'));
