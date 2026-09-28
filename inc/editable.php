@@ -90,7 +90,6 @@ function bl_home_defaults(): array
             'eyebrow' => 'YOUR NEXT PROJECT STARTS HERE',
             'title' => "LET’S GET\nTO *WORK.*",
             'text' => "A question. A project. A new partnership.\nTell us what you have in mind.",
-            'email' => 'info@boblift.com',
             'signoff' => 'REAL PEOPLE. PRACTICAL CONVERSATIONS.',
         ],
     ];

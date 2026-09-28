@@ -158,11 +158,10 @@ function bl_content_schema(string $page): array
             ['key' => 'journal.title', 'label' => '标题', 'type' => 'text'],
             ['key' => 'journal.link', 'label' => '链接文字', 'type' => 'text'],
         ]],
-        ['title' => '底部联系', 'fields' => [
+        ['title' => '底部联系', 'note' => '联系邮箱 info@boblift.com 全站统一（页脚、联系页、询盘表单都用它），不在这里单独修改。', 'fields' => [
             ['key' => 'contact.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'contact.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
             ['key' => 'contact.text', 'label' => '说明', 'type' => 'rich', 'help' => $rich],
-            ['key' => 'contact.email', 'label' => '邮箱', 'type' => 'email'],
             ['key' => 'contact.signoff', 'label' => '底部一句话', 'type' => 'text'],
         ]],
         ['title' => '搜索结果显示', 'note' => '浏览器标签和 Google 搜索结果里的标题与摘要；标题后面会自动加“ | BOB-LIFT”。', 'fields' => [
@@ -223,9 +222,14 @@ function bl_content_clean(string $type, $value)
         case 'heading': return trim(implode("\n", array_map('trim', explode("\n", sanitize_textarea_field($value)))));
         case 'rich':
             $html = wp_kses(trim($value), ['a' => ['href' => true, 'target' => true, 'rel' => true], 'strong' => [], 'b' => [], 'em' => [], 'i' => [], 'br' => []]);
-            return preg_replace_callback('~href="([^"]*)"~', static fn($m) => 'href="' . esc_attr(bl_content_local_url(html_entity_decode($m[1]))) . '"', $html);
+            // An HTML parser reads href however it is written (quotes, case, entities) and writes it back normalised.
+            $tags = new WP_HTML_Tag_Processor($html);
+            while ($tags->next_tag('a')) {
+                $href = $tags->get_attribute('href');
+                if (is_string($href)) $tags->set_attribute('href', bl_content_local_url($href));
+            }
+            return $tags->get_updated_html();
         case 'image': case 'url': return bl_content_clean_url($value);
-        case 'email': return sanitize_email($value);
         case 'digits': return preg_replace('/\D+/', '', $value);
     }
     return '';
@@ -355,8 +359,6 @@ function bl_content_input(string $type, string $name, string $id, string $value)
         case 'image':
             $preview = $value !== '' ? '<img src="' . esc_url($value) . '" alt="">' : '<span>主题默认</span>';
             return '<div class="bl-ce-image"><div class="bl-ce-image-preview">' . $preview . '</div><div><input class="large-text code" type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '" placeholder="留空 = 主题默认图片"><p><button type="button" class="button bl-ce-pick">从媒体库选择</button> <button type="button" class="button-link bl-ce-clear">恢复默认图片</button></p></div></div>';
-        case 'email':
-            return '<input class="regular-text" type="email" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '">';
         case 'url': case 'digits':
             return '<input class="large-text code" type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '">';
     }
