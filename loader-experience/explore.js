@@ -549,48 +549,58 @@ function bindPartSteps() {
     if (y != null) { e.preventDefault(); go(y); }
   });
 
-  // Touch. A vertical drag is decided on its first move, the only time it can still be cancelled:
+  // Touch. A gesture that starts in the list or less than a screen from it is ours from its very first move (a browser
+  // may commit to native scrolling on the first move it is not stopped from making), and a new touch stops whatever
+  // is still moving. Once it has gone 6 px it is decided:
   // - inside the list, it steps one card once it has gone 30 px;
-  // - heading for the list from less than a screen away, the page follows the finger but stops at the first (or last)
-  //   card, and a flick glides on as far as that card at most;
-  // - otherwise it scrolls natively; if it ends inside the list, or its momentum carries into it, the momentum is
-  //   stopped (overflow: hidden, which also halts iOS) and the page settles on the nearest card.
+  // - otherwise the page follows the finger, and a flick glides on after release; heading into the list it stops at
+  //   the first (or last) card, and a glide that ends in the list settles on the nearest card.
+  // A gesture from further away scrolls natively; if its momentum carries into the list, the momentum is stopped
+  // (overflow: hidden, which also halts iOS) and the page settles on the nearest card.
   let touch = null, lastY = scrollY;
   const settle = () => { root.style.overflow = 'hidden'; go(nearest()); };
+  const near = () => { const s = stops(); return scrollY > s[0] - innerHeight && scrollY < s[s.length - 1] + innerHeight; };
   addEventListener('touchstart', e => {
     coastUntil = 0;
+    const stopped = !!tween; if (stopped) cancel();
     const t = e.touches[0];
-    touch = e.touches.length === 1 ? { x: t.clientX, y: t.clientY, dir: 0, mode: '', stepped: false, from: 0, edge: 0, last: t.clientY, at: 0, v: 0 } : null;
+    touch = e.touches.length === 1 && !off() ? { x: t.clientX, y: t.clientY, ours: near(), stopped, dir: 0, mode: '', stepped: false, from: 0, edge: null, last: t.clientY, at: 0, v: 0 } : null;
   }, { passive: true });
   addEventListener('touchmove', e => {
-    if (!touch || off()) return;
+    if (!touch) return;
     const t = e.touches[0], dx = t.clientX - touch.x, dy = touch.y - t.clientY; // dy > 0: towards the end of the page
     if (!touch.dir) {
-      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
-      if (Math.abs(dx) > Math.abs(dy)) { touch = null; return; } // sideways: rotating the model, swiping photos
-      const s = stops(), dir = touch.dir = Math.sign(dy);
-      touch.edge = dir > 0 ? s[0] : s[s.length - 1];
-      const gap = dir * (touch.edge - scrollY); // how far the list is ahead, in the drag's direction
-      touch.mode = tween || (inside() && next(dir, 0) != null) ? 'step' : gap > 2 && gap < innerHeight ? 'drag' : 'native';
+      if (Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(dy)) { touch = null; return; } // sideways: rotating the model
+      if (touch.ours && e.cancelable) e.preventDefault();
+      if (Math.abs(dy) < 6) return;
+      const dir = touch.dir = Math.sign(dy);
+      if (!touch.ours) { touch.mode = 'native'; return; }
+      const s = stops(), edge = dir > 0 ? s[0] : s[s.length - 1];
+      touch.mode = inside() && next(dir, 0) != null ? 'step' : 'drag';
+      if (dir * (edge - scrollY) > 2) touch.edge = edge; // heading into the list: that card is as far as it goes
       touch.from = scrollY - dy;
     }
     if (touch.mode === 'native') return;
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     if (touch.mode === 'drag') {
       const now = performance.now(), y = touch.from + dy;
       if (touch.at) touch.v = .8 * (touch.last - t.clientY) / Math.max(1, now - touch.at) + .2 * touch.v; // px/ms, page direction
       touch.last = t.clientY; touch.at = now;
-      scrollTo(0, touch.dir > 0 ? Math.min(touch.edge, y) : Math.max(touch.edge, y));
+      scrollTo(0, touch.edge == null ? y : touch.dir > 0 ? Math.min(touch.edge, y) : Math.max(touch.edge, y));
       return;
     }
     if (!touch.stepped && !tween && Math.abs(dy) > 30) { touch.stepped = true; const y = next(touch.dir, 0); if (y != null) go(y); }
   }, { passive: false });
   const release = () => {
     if (touch?.mode === 'drag') {
-      const v = performance.now() - touch.at < 80 ? touch.v : 0, y = scrollY + v * 320; // a flick glides on…
-      const to = touch.dir > 0 ? Math.min(touch.edge, y) : Math.max(touch.edge, y); // …but not past the card
+      const v = performance.now() - touch.at < 80 ? touch.v : 0; // a flick glides on
+      let to = scrollY + v * 320;
+      if (touch.edge != null) to = touch.dir > 0 ? Math.min(touch.edge, to) : Math.max(touch.edge, to);
+      const s = stops();
+      if (to > s[0] - 2 && to < s[s.length - 1] + 2) to = s.reduce((a, b) => Math.abs(b - to) < Math.abs(a - to) ? b : a); // ends in the list: on a card
       if (Math.abs(to - scrollY) > 2) go(to, .7, 'power3.out');
     } else if (touch?.mode === 'native' && !off()) { if (inside()) settle(); else coastUntil = performance.now() + 2500; }
+    else if (touch && !touch.dir && touch.stopped && inside()) settle(); // a tap that stopped a step between two cards
     touch = null;
   };
   addEventListener('touchend', release, { passive: true });
