@@ -42,12 +42,21 @@ function bl_import_initial_content(): array
 
 add_action('admin_menu', static function (): void {
     add_management_page('BOB-LIFT 站点初始化', 'BOB-LIFT 站点初始化', 'manage_options', 'bl-site-setup', static function (): void {
-        echo '<div class="wrap"><h1>BOB-LIFT 站点初始化</h1><p>导入已核实的 ' . count(bl_read_data('products')) . ' 款产品、' . count(bl_read_data('news')) . ' 篇新闻和 9 个页面。已有同路径内容会跳过，不会覆盖。</p><p>初始化会将 Home 设为静态首页；未设置固定链接时启用文章名形式。不会改变搜索引擎可见性，也不会发送邮件。</p>';
-        if (isset($_GET['imported'])) echo '<div class="notice notice-success"><p>初始化已完成，请前往设备产品、企业新闻和页面检查内容。</p></div>';
+        $products = count(bl_read_data('products'));
+        $news = count(bl_read_data('news'));
+        echo '<div class="wrap bl-setup"><div class="bl-page-head"><div><h1>BOB-LIFT 站点初始化</h1><p>新装的网站用这一页把主题自带的产品、新闻和页面导入 WordPress。已经初始化过的网站一般不需要再用。</p></div></div><hr class="wp-header-end">';
+        if (isset($_GET['imported'])) echo '<div class="notice notice-success"><p>初始化已完成。请到 <a href="' . esc_url(admin_url('edit.php?post_type=bl_product')) . '">设备产品</a>、<a href="' . esc_url(admin_url('edit.php?post_type=bl_news')) . '">企业新闻</a> 和 <a href="' . esc_url(admin_url('edit.php?post_type=page')) . '">页面</a> 检查内容。</p></div>';
+        echo '<section class="bl-panel"><div class="bl-panel-head"><h2>会做什么</h2></div><div class="bl-panel-body"><ul>';
+        echo '<li>导入已核实的 ' . $products . ' 款设备产品和 ' . $news . ' 篇企业新闻。</li><li>建立 9 个页面：Home、About、Applications（含 3 个应用子页）、Support、Contact、Privacy。</li><li>把 Home 设为网站首页；还没设置固定链接时，改用“文章名”形式的网址。</li>';
+        echo '</ul></div></section>';
+        echo '<section class="bl-panel"><div class="bl-panel-head"><h2>不会做什么</h2></div><div class="bl-panel-body"><ul>';
+        echo '<li>不覆盖已有内容：网址相同的产品、新闻或页面会跳过，编辑改过的内容保持不变。</li><li>不删除任何内容，可以重复执行。</li><li>不改变搜索引擎可见性，不发送邮件。</li>';
+        echo '</ul></div></section>';
         echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="bl_import_sources">';
         wp_nonce_field('bl_import_sources');
-        submit_button('导入初始内容并设置首页');
-        echo '</form></div>';
+        echo '<div class="bl-setup-action">';
+        submit_button('开始导入', 'primary', 'submit', false);
+        echo '<span class="bl-field-help">只补上缺少的内容，通常几秒内完成。</span></div></form></div>';
     });
 });
 

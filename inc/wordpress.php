@@ -5,12 +5,12 @@ defined('ABSPATH') || exit;
 function bl_register_content_types(): void
 {
     register_post_type('bl_product', [
-        'labels' => ['name' => '设备产品', 'singular_name' => '设备产品', 'add_new_item' => '新增设备产品', 'edit_item' => '编辑设备产品'],
+        'labels' => ['name' => '设备产品', 'singular_name' => '设备产品', 'add_new_item' => '新增设备产品', 'edit_item' => '编辑设备产品', 'view_item' => '查看产品页', 'featured_image' => '产品主图', 'set_featured_image' => '设置产品主图', 'remove_featured_image' => '移除产品主图', 'use_featured_image' => '用作产品主图'],
         'public' => true, 'show_in_rest' => true, 'has_archive' => 'products', 'rewrite' => ['slug' => 'product', 'with_front' => false],
         'supports' => ['title', 'editor', 'excerpt', 'thumbnail', 'page-attributes'], 'menu_icon' => 'dashicons-products',
     ]);
     register_post_type('bl_news', [
-        'labels' => ['name' => '企业新闻', 'singular_name' => '企业新闻', 'add_new_item' => '新增企业新闻', 'edit_item' => '编辑企业新闻'],
+        'labels' => ['name' => '企业新闻', 'singular_name' => '企业新闻', 'add_new_item' => '新增企业新闻', 'edit_item' => '编辑企业新闻', 'view_item' => '查看文章', 'featured_image' => '封面图片', 'set_featured_image' => '设置封面图片', 'remove_featured_image' => '移除封面图片', 'use_featured_image' => '用作封面图片'],
         'public' => true, 'show_in_rest' => true, 'has_archive' => 'news', 'rewrite' => ['slug' => 'news', 'with_front' => false],
         'supports' => ['title', 'editor', 'excerpt', 'thumbnail'], 'menu_icon' => 'dashicons-media-document',
     ]);

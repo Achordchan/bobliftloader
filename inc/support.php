@@ -39,7 +39,7 @@ function bl_container_loading(): array
     return array_filter(bl_editable('support')['containers']['loading'], static fn($fit): bool => is_array($fit) && count($fit) === 2);
 }
 
-/** The catalogue on the Downloads list. WordPress can point it at an uploaded file (Settings → BOB-LIFT 资料下载). */
+/** The catalogue on the Downloads list. WordPress can point it at an uploaded file (网站内容 → 资料下载). */
 function bl_catalogue(): array
 {
     $local = 'downloads/boblift-compact-equipment-catalogue.pdf';

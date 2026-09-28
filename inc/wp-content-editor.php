@@ -9,24 +9,30 @@ defined('ABSPATH') || exit;
 
 const BL_CONTENT_PAGES = ['home' => ['title' => '首页内容', 'menu' => '首页', 'path' => '/'], 'support' => ['title' => '采购与售后（Support）页内容', 'menu' => '采购与售后 Support', 'path' => '/support/']];
 
+/**
+ * Field list per page. "group" only groups fields on the screen; "preview" is the theme's own image shown while a slot is
+ * empty; a list's "summary" names the row fields shown on its folded row.
+ */
 function bl_content_schema(string $page): array
 {
     $heading = '换行即分行；用 *星号* 包住的文字显示为强调色。';
     $rich = '换行即分行；可以用 &lt;a href="…"&gt;链接&lt;/a&gt;、&lt;strong&gt;加粗&lt;/strong&gt;。';
     $image = '留空使用主题自带的照片。建议上传宽度 1600px 以上的横图。';
+    $alt = '一句话描述图片内容，给看不到图片的访客和搜索引擎。';
+    $optional = '可留空。';
+    $seo = static fn(string $extra): array => ['title' => '搜索结果显示', 'note' => '浏览器标签和 Google 搜索结果里的标题与摘要；标题后面会自动加“ | BOB-LIFT”。', 'fields' => [
+        ['key' => 'seo.title', 'label' => '页面标题', 'type' => 'text', 'help' => '建议 60 个字符以内。'],
+        ['key' => 'seo.description', 'label' => '页面描述', 'type' => 'textarea', 'help' => '建议 150 个字符左右。' . $extra],
+    ]];
     if ($page === 'support') return [
-        ['title' => '搜索结果显示', 'note' => '浏览器标签和 Google 搜索结果里的标题与摘要；标题后面会自动加“ | BOB-LIFT”。', 'fields' => [
-            ['key' => 'seo.title', 'label' => '页面标题', 'type' => 'text', 'help' => '建议 60 个字符以内。'],
-            ['key' => 'seo.description', 'label' => '页面描述', 'type' => 'textarea', 'help' => '建议 150 个字符左右。采购条款改了，记得同步这里的描述。'],
-        ]],
         ['title' => '首屏', 'fields' => [
             ['key' => 'hero.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'hero.title', 'label' => '大标题', 'type' => 'heading', 'help' => '每行一段；整行用 *星号* 包住显示为蓝色。'],
             ['key' => 'hero.text', 'label' => '右侧介绍', 'type' => 'textarea'],
             ['key' => 'hero.link', 'label' => '向下链接文字', 'type' => 'text'],
-            ['key' => 'hero.image', 'label' => '大图', 'type' => 'image', 'help' => $image],
-            ['key' => 'hero.alt', 'label' => '大图替代文字（给看不到图片的访客和搜索引擎）', 'type' => 'text'],
-            ['key' => 'hero.caption', 'label' => '大图说明', 'type' => 'text'],
+            ['key' => 'hero.image', 'group' => '大图', 'label' => '图片', 'type' => 'image', 'preview' => 'images/about/people-1600.webp', 'help' => $image],
+            ['key' => 'hero.alt', 'group' => '大图', 'label' => '替代文字', 'type' => 'text', 'help' => $alt],
+            ['key' => 'hero.caption', 'group' => '大图', 'label' => '图片说明', 'type' => 'text'],
         ]],
         ['title' => '采购条款', 'note' => '显示在 Support 首屏下方，产品页的“质保 / 交期 / 起订量”也读这里，改一处全站同步。', 'fields' => [
             ['key' => 'terms', 'type' => 'terms', 'rows' => ['moq' => '起订量', 'payment' => '付款方式', 'lead' => '交期', 'warranty' => '质保']],
@@ -35,96 +41,97 @@ function bl_content_schema(string $page): array
             ['key' => 'buying.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'buying.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading . ' 步骤数量变了记得改标题里的数字。'],
             ['key' => 'buying.intro', 'label' => '标题旁说明', 'type' => 'textarea'],
-            ['key' => 'buying.steps', 'label' => '步骤', 'type' => 'list', 'add' => '添加步骤', 'fields' => [
+            ['key' => 'buying.steps', 'label' => '步骤', 'type' => 'list', 'add' => '添加步骤', 'summary' => ['title'], 'fields' => [
                 'title' => ['label' => '步骤名', 'type' => 'text'],
                 'text' => ['label' => '说明', 'type' => 'textarea'],
-                'link_label' => ['label' => '链接文字（可空）', 'type' => 'text'],
-                'link_url' => ['label' => '链接地址（可空，如 /contact/ 或 #containers）', 'type' => 'url'],
+                'link_label' => ['label' => '链接文字', 'type' => 'text', 'help' => $optional],
+                'link_url' => ['label' => '链接地址', 'type' => 'url', 'help' => '可留空。站内页面写 /contact/，本页位置写 #containers。'],
             ]],
         ]],
         ['title' => '装柜数量', 'fields' => [
             ['key' => 'containers.title', 'label' => '标题', 'type' => 'text'],
             ['key' => 'containers.text', 'label' => '说明', 'type' => 'textarea'],
-            ['key' => 'containers.loading', 'label' => '每柜可装台数（约数）', 'type' => 'loading', 'help' => '两格都留空，该型号不出现在表里。'],
+            ['key' => 'containers.loading', 'label' => '每柜台数', 'type' => 'loading', 'help' => '约数。两格都留空，该型号不出现在表里。'],
             ['key' => 'containers.note', 'label' => '表格下方备注', 'type' => 'textarea'],
         ]],
         ['title' => '02 售后', 'fields' => [
             ['key' => 'after.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'after.title', 'label' => '标题', 'type' => 'heading', 'help' => '换行即分行；*星号* 里的文字换一种颜色显示。'],
             ['key' => 'after.intro', 'label' => '标题旁说明', 'type' => 'textarea'],
-            ['key' => 'after.warranty_eyebrow', 'label' => '质保 · 小标题', 'type' => 'text'],
-            ['key' => 'after.warranty_title', 'label' => '质保 · 标题', 'type' => 'text'],
-            ['key' => 'after.warranty_text', 'label' => '质保 · 说明', 'type' => 'textarea'],
-            ['key' => 'after.service_eyebrow', 'label' => '报修流程 · 小标题', 'type' => 'text'],
-            ['key' => 'after.service_steps', 'label' => '报修流程', 'type' => 'list', 'add' => '添加一步', 'fields' => [
+            ['key' => 'after.warranty_eyebrow', 'group' => '质保', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'after.warranty_title', 'group' => '质保', 'label' => '标题', 'type' => 'text'],
+            ['key' => 'after.warranty_text', 'group' => '质保', 'label' => '说明', 'type' => 'textarea'],
+            ['key' => 'after.service_eyebrow', 'group' => '报修流程', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'after.service_steps', 'group' => '报修流程', 'label' => '步骤', 'type' => 'list', 'add' => '添加一步', 'summary' => ['title'], 'fields' => [
                 'title' => ['label' => '步骤名', 'type' => 'text'],
                 'text' => ['label' => '说明', 'type' => 'textarea'],
             ]],
-            ['key' => 'after.parts_image', 'label' => '配件 · 图片', 'type' => 'image', 'help' => '留空使用主题自带的照片（3:2 横图显示）。'],
-            ['key' => 'after.parts_alt', 'label' => '配件 · 图片替代文字', 'type' => 'text'],
-            ['key' => 'after.parts_eyebrow', 'label' => '配件 · 小标题', 'type' => 'text'],
-            ['key' => 'after.parts_title', 'label' => '配件 · 标题', 'type' => 'text'],
-            ['key' => 'after.parts_text', 'label' => '配件 · 说明', 'type' => 'textarea'],
-            ['key' => 'after.button', 'label' => '报修按钮文字', 'type' => 'text'],
-            ['key' => 'after.whatsapp_label', 'label' => 'WhatsApp 链接文字', 'type' => 'text'],
-            ['key' => 'after.whatsapp_number', 'label' => 'WhatsApp 号码（含国家码，只填数字；留空则不显示）', 'type' => 'digits'],
-            ['key' => 'after.whatsapp_message', 'label' => 'WhatsApp 预填消息', 'type' => 'text'],
+            ['key' => 'after.parts_image', 'group' => '配件', 'label' => '图片', 'type' => 'image', 'preview' => 'images/about/hydraulics-900.webp', 'help' => '留空使用主题自带的照片（3:2 横图显示）。'],
+            ['key' => 'after.parts_alt', 'group' => '配件', 'label' => '替代文字', 'type' => 'text', 'help' => $alt],
+            ['key' => 'after.parts_eyebrow', 'group' => '配件', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'after.parts_title', 'group' => '配件', 'label' => '标题', 'type' => 'text'],
+            ['key' => 'after.parts_text', 'group' => '配件', 'label' => '说明', 'type' => 'textarea'],
+            ['key' => 'after.button', 'group' => '报修按钮与 WhatsApp', 'label' => '报修按钮文字', 'type' => 'text'],
+            ['key' => 'after.whatsapp_label', 'group' => '报修按钮与 WhatsApp', 'label' => 'WhatsApp 链接文字', 'type' => 'text'],
+            ['key' => 'after.whatsapp_number', 'group' => '报修按钮与 WhatsApp', 'label' => 'WhatsApp 号码', 'type' => 'digits', 'help' => '含国家码，只填数字。留空则不显示 WhatsApp 链接。'],
+            ['key' => 'after.whatsapp_message', 'group' => '报修按钮与 WhatsApp', 'label' => 'WhatsApp 预填消息', 'type' => 'text', 'help' => '访客打开 WhatsApp 时输入框里预先填好的文字。'],
         ]],
-        ['title' => '03 资料下载', 'note' => '画册 PDF 本身在“设置 → BOB-LIFT 资料下载”更换；视频条目由产品视频自动生成。', 'fields' => [
+        ['title' => '03 资料下载', 'note' => '画册 PDF 本身在<a href="' . esc_url(admin_url('admin.php?page=bl-downloads')) . '">“网站内容 → 资料下载”</a>更换；视频条目由产品视频自动生成。', 'fields' => [
             ['key' => 'downloads.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'downloads.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
             ['key' => 'downloads.intro', 'label' => '标题旁说明', 'type' => 'textarea'],
-            ['key' => 'downloads.catalogue_title', 'label' => '画册 · 名称', 'type' => 'text'],
-            ['key' => 'downloads.catalogue_text', 'label' => '画册 · 说明', 'type' => 'text'],
-            ['key' => 'downloads.sheets_title', 'label' => '规格表 · 名称', 'type' => 'text'],
-            ['key' => 'downloads.sheets_text', 'label' => '规格表 · 说明', 'type' => 'text'],
-            ['key' => 'downloads.certificates_kind', 'label' => '证书 · 标签', 'type' => 'text'],
-            ['key' => 'downloads.certificates_title', 'label' => '证书 · 名称', 'type' => 'text'],
-            ['key' => 'downloads.certificates_text', 'label' => '证书 · 说明', 'type' => 'text'],
-            ['key' => 'downloads.videos_title', 'label' => '视频 · 名称', 'type' => 'text'],
+            ['key' => 'downloads.catalogue_title', 'group' => '画册', 'label' => '名称', 'type' => 'text'],
+            ['key' => 'downloads.catalogue_text', 'group' => '画册', 'label' => '说明', 'type' => 'text'],
+            ['key' => 'downloads.sheets_title', 'group' => '规格表', 'label' => '名称', 'type' => 'text'],
+            ['key' => 'downloads.sheets_text', 'group' => '规格表', 'label' => '说明', 'type' => 'text'],
+            ['key' => 'downloads.certificates_kind', 'group' => '证书', 'label' => '标签', 'type' => 'text'],
+            ['key' => 'downloads.certificates_title', 'group' => '证书', 'label' => '名称', 'type' => 'text'],
+            ['key' => 'downloads.certificates_text', 'group' => '证书', 'label' => '说明', 'type' => 'text'],
+            ['key' => 'downloads.videos_title', 'group' => '视频', 'label' => '名称', 'type' => 'text'],
         ]],
-        ['title' => '04 常见问题', 'note' => '问答也会作为 FAQ 结构化数据提供给搜索引擎。相邻且“分组”相同的问题归在同一个小标题下。', 'fields' => [
+        ['title' => '04 常见问题', 'note' => '问答也会作为 FAQ 结构化数据提供给搜索引擎。', 'fields' => [
             ['key' => 'faq.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'faq.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
             ['key' => 'faq.intro', 'label' => '左侧说明', 'type' => 'textarea'],
             ['key' => 'faq.link', 'label' => '提问链接文字', 'type' => 'text'],
-            ['key' => 'faq.items', 'label' => '问答', 'type' => 'list', 'add' => '添加问答', 'fields' => [
-                'group' => ['label' => '分组', 'type' => 'text'],
+            ['key' => 'faq.items', 'label' => '问答', 'type' => 'list', 'add' => '添加问答', 'summary' => ['q'], 'meta' => 'group', 'fields' => [
+                'group' => ['label' => '分组', 'type' => 'text', 'help' => '相邻且分组相同的问题归在同一个小标题下。'],
                 'q' => ['label' => '问题', 'type' => 'text'],
                 'a' => ['label' => '回答', 'type' => 'textarea'],
-                'link_label' => ['label' => '链接文字（可空）', 'type' => 'text'],
-                'link_url' => ['label' => '链接地址（可空）', 'type' => 'url'],
+                'link_label' => ['label' => '链接文字', 'type' => 'text', 'help' => $optional],
+                'link_url' => ['label' => '链接地址', 'type' => 'url', 'help' => $optional],
             ]],
         ]],
+        $seo('采购条款改了，记得同步这里的描述。'),
     ];
 
-    $family = static fn(string $key, string $name): array => ['title' => $name . '卡片', 'note' => '型号数量、载荷和斗容由产品数据自动计算。', 'fields' => [
+    $family = static fn(string $key, string $name, string $preview): array => ['title' => $name . '卡片', 'note' => '型号数量、载荷和斗容由产品数据自动计算。', 'fields' => [
         ['key' => "families.$key.label", 'label' => '名称', 'type' => 'text'],
         ['key' => "families.$key.title", 'label' => '标题', 'type' => 'heading', 'help' => '换行即分行。'],
         ['key' => "families.$key.description", 'label' => '介绍', 'type' => 'textarea'],
-        ['key' => "families.$key.image", 'label' => '产品图', 'type' => 'image', 'help' => '留空使用主题自带的棚拍图；建议透明或浅色背景。'],
-        ['key' => "families.$key.alt", 'label' => '产品图替代文字', 'type' => 'text'],
+        ['key' => "families.$key.image", 'group' => '产品图', 'label' => '图片', 'type' => 'image', 'preview' => $preview, 'help' => '留空使用主题自带的棚拍图；建议透明或浅色背景。'],
+        ['key' => "families.$key.alt", 'group' => '产品图', 'label' => '替代文字', 'type' => 'text', 'help' => $alt],
     ]];
     return [
         ['title' => '首屏', 'fields' => [
             ['key' => 'hero.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'hero.title', 'label' => '大标题', 'type' => 'heading', 'help' => '每行一段，最后的句号显示为蓝色。'],
-            ['key' => 'hero.button', 'label' => '按钮文字（进入产品）', 'type' => 'text'],
-            ['key' => 'hero.link', 'label' => '链接文字（去联系页）', 'type' => 'text'],
-            ['key' => 'hero.image', 'label' => '大图（宽屏）', 'type' => 'image', 'help' => '留空使用主题自带的首屏图。建议 2560×1067 左右的横图。'],
-            ['key' => 'hero.image_mobile', 'label' => '大图（手机）', 'type' => 'image', 'help' => '留空时手机也用上面的宽屏图；两张都空则用主题自带的图。'],
-            ['key' => 'hero.alt', 'label' => '大图替代文字', 'type' => 'text'],
+            ['key' => 'hero.button', 'label' => '按钮文字', 'type' => 'text', 'help' => '按钮进入产品页。'],
+            ['key' => 'hero.link', 'label' => '链接文字', 'type' => 'text', 'help' => '链接去联系页。'],
+            ['key' => 'hero.image', 'group' => '大图', 'label' => '宽屏', 'type' => 'image', 'preview' => 'images/hero-banner-2k.webp', 'help' => '留空使用主题自带的首屏图。建议 2560×1067 左右的横图。'],
+            ['key' => 'hero.image_mobile', 'group' => '大图', 'label' => '手机', 'type' => 'image', 'preview' => 'images/hero-real-loader.webp', 'help' => '留空时手机也用上面的宽屏图；两张都空则用主题自带的图。'],
+            ['key' => 'hero.alt', 'group' => '大图', 'label' => '替代文字', 'type' => 'text', 'help' => $alt],
         ]],
-        $family('loader', '滑移装载机'),
-        $family('dumper', '迷你翻斗车'),
+        $family('loader', '滑移装载机', 'images/range-loader-studio.webp'),
+        $family('dumper', '迷你翻斗车', 'images/range-dumper-studio.webp'),
         ['title' => '简介', 'fields' => [
             ['key' => 'intro.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'intro.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
             ['key' => 'intro.text', 'label' => '介绍', 'type' => 'textarea'],
             ['key' => 'intro.link', 'label' => '链接文字', 'type' => 'text'],
-            ['key' => 'intro.facts', 'label' => '公司数据', 'type' => 'list', 'add' => '添加一项', 'fields' => [
+            ['key' => 'intro.facts', 'label' => '公司数据', 'type' => 'list', 'add' => '添加一项', 'summary' => ['value', 'unit', 'label'], 'fields' => [
                 'value' => ['label' => '数字', 'type' => 'text'],
-                'unit' => ['label' => '单位（可空）', 'type' => 'text'],
+                'unit' => ['label' => '单位', 'type' => 'text', 'help' => $optional],
                 'label' => ['label' => '说明', 'type' => 'text'],
             ]],
         ]],
@@ -132,8 +139,8 @@ function bl_content_schema(string $page): array
             ['key' => 'range.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'range.title', 'label' => '标题', 'type' => 'heading', 'help' => '最后的句号显示为蓝色。'],
             ['key' => 'range.description', 'label' => '标题旁说明', 'type' => 'rich', 'help' => '{models} 会替换成当前的型号数量。' . $rich],
-            ['key' => 'range.assist', 'label' => '卡片下方一句话', 'type' => 'text'],
-            ['key' => 'range.assist_link', 'label' => '卡片下方链接文字', 'type' => 'text'],
+            ['key' => 'range.assist', 'group' => '卡片下方', 'label' => '一句话', 'type' => 'text'],
+            ['key' => 'range.assist_link', 'group' => '卡片下方', 'label' => '链接文字', 'type' => 'text'],
         ]],
         ['title' => '02 应用场景', 'note' => '三个场景图块的文字与应用详情页共用，暂在主题代码里维护。', 'fields' => [
             ['key' => 'applications.eyebrow', 'label' => '小标题', 'type' => 'text'],
@@ -144,11 +151,11 @@ function bl_content_schema(string $page): array
             ['key' => 'approach.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'approach.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
             ['key' => 'approach.text', 'label' => '介绍', 'type' => 'textarea'],
-            ['key' => 'approach.link', 'label' => '链接文字（去关于页）', 'type' => 'text'],
-            ['key' => 'approach.image', 'label' => '照片', 'type' => 'image', 'help' => $image],
-            ['key' => 'approach.alt', 'label' => '照片替代文字', 'type' => 'text'],
-            ['key' => 'approach.caption', 'label' => '照片说明', 'type' => 'text'],
-            ['key' => 'approach.steps', 'label' => '三步', 'type' => 'list', 'add' => '添加一步', 'fields' => [
+            ['key' => 'approach.link', 'label' => '链接文字', 'type' => 'text', 'help' => '链接去关于页。'],
+            ['key' => 'approach.image', 'group' => '照片', 'label' => '图片', 'type' => 'image', 'preview' => 'images/about/people-1600.webp', 'help' => $image],
+            ['key' => 'approach.alt', 'group' => '照片', 'label' => '替代文字', 'type' => 'text', 'help' => $alt],
+            ['key' => 'approach.caption', 'group' => '照片', 'label' => '图片说明', 'type' => 'text'],
+            ['key' => 'approach.steps', 'group' => '三步', 'type' => 'list', 'add' => '添加一步', 'summary' => ['title'], 'fields' => [
                 'title' => ['label' => '标题', 'type' => 'text'],
                 'text' => ['label' => '说明', 'type' => 'rich', 'help' => $rich],
             ]],
@@ -164,10 +171,7 @@ function bl_content_schema(string $page): array
             ['key' => 'contact.text', 'label' => '说明', 'type' => 'rich', 'help' => $rich],
             ['key' => 'contact.signoff', 'label' => '底部一句话', 'type' => 'text'],
         ]],
-        ['title' => '搜索结果显示', 'note' => '浏览器标签和 Google 搜索结果里的标题与摘要；标题后面会自动加“ | BOB-LIFT”。', 'fields' => [
-            ['key' => 'seo.title', 'label' => '页面标题', 'type' => 'text', 'help' => '建议 60 个字符以内。'],
-            ['key' => 'seo.description', 'label' => '页面描述', 'type' => 'textarea', 'help' => '建议 150 个字符左右。'],
-        ]],
+        $seo(''),
     ];
 }
 
@@ -304,7 +308,7 @@ add_action('admin_enqueue_scripts', static function (string $hook): void {
     $asset = static fn(string $file): array => [get_template_directory_uri() . '/assets/admin/' . $file, (string) filemtime(get_template_directory() . '/assets/admin/' . $file)];
     [$css, $cssVersion] = $asset('content-editor.css');
     [$js, $jsVersion] = $asset('content-editor.js');
-    wp_enqueue_style('bl-content-editor', $css, [], $cssVersion);
+    wp_enqueue_style('bl-content-editor', $css, ['bl-admin'], $cssVersion);
     wp_enqueue_script('bl-content-editor', $js, ['media-editor'], $jsVersion, true);
 });
 
@@ -315,32 +319,51 @@ function bl_content_screen(string $page): void
     $values = bl_editable($page);
     $saved = get_option('bl_content_' . $page);
     $saved = is_array($saved) ? $saved : [];
-    echo '<div class="wrap bl-ce"><h1 class="wp-heading-inline">' . esc_html($info['title']) . '</h1> <a class="page-title-action" href="' . esc_url(home_url($info['path'])) . '" target="_blank" rel="noopener">查看页面</a><hr class="wp-header-end">';
+    $sections = bl_content_schema($page);
+    $changed = static fn(array $field): bool => bl_content_get($saved, $field['key']) !== null;
+    $count = static fn(array $section): int => count(array_filter($section['fields'], $changed));
+    $total = array_sum(array_map($count, $sections));
+    echo '<div class="wrap bl-ce"><div class="bl-page-head"><div><h1>' . esc_html($info['title']) . '</h1><p>改这个页面的文字和图片，版式由主题决定。只保存改过的内容（标“已修改”），其余内容跟随主题默认。</p></div>';
+    echo '<div class="bl-page-head-actions"><a class="button" href="' . esc_url(home_url($info['path'])) . '" target="_blank" rel="noopener">查看页面<span class="screen-reader-text">（在新窗口打开）</span></a></div></div><hr class="wp-header-end">';
     if (isset($_GET['bl_saved'])) echo '<div class="notice notice-success is-dismissible"><p>已保存。</p></div>';
     if (isset($_GET['bl_reset'])) echo '<div class="notice notice-success is-dismissible"><p>已恢复为主题默认内容。</p></div>';
-    echo '<p class="bl-ce-lead">页面的版式由主题决定，这里改文字和图片。只有改过的内容会被保存，标“已修改”；其余内容跟随主题默认。</p>';
+    echo '<div class="bl-ce-layout"><nav class="bl-ce-toc" aria-labelledby="bl-ce-toc-title"><h2 class="bl-ce-toc-title" id="bl-ce-toc-title">页面分区</h2><ol>';
+    foreach ($sections as $i => $section) {
+        $n = $count($section);
+        echo '<li><a href="#bl-ce-' . $i . '"><span class="bl-ce-toc-name">' . esc_html($section['title']) . '</span>' . ($n ? '<span class="bl-chip bl-chip-info" title="已修改 ' . $n . ' 项">' . $n . '</span>' : '') . '<span class="bl-chip bl-chip-warn bl-ce-toc-dirty">未保存</span></a></li>';
+    }
+    echo '</ol></nav><div class="bl-ce-main">';
     echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="bl-ce-form"><input type="hidden" name="action" value="bl_save_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
     wp_nonce_field('bl_save_content_' . $page);
-    echo '<template class="bl-ce-row-tools-template">' . bl_content_row_tools() . '</template>';
-    echo '<nav class="bl-ce-toc" aria-label="分区">';
-    foreach (bl_content_schema($page) as $i => $section) echo '<a href="#bl-ce-' . $i . '">' . esc_html($section['title']) . '</a>';
-    echo '</nav>';
-    foreach (bl_content_schema($page) as $i => $section) {
-        echo '<section class="bl-ce-section" id="bl-ce-' . $i . '"><h2>' . esc_html($section['title']) . '</h2>';
-        if (!empty($section['note'])) echo '<p class="description">' . esc_html($section['note']) . '</p>';
-        foreach ($section['fields'] as $field) bl_content_field($field, bl_content_get($values, $field['key']), bl_content_get($saved, $field['key']) !== null);
-        echo '</section>';
+    foreach ($sections as $i => $section) {
+        $n = $count($section);
+        echo '<section class="bl-panel bl-ce-section" id="bl-ce-' . $i . '" aria-labelledby="bl-ce-' . $i . '-title"><div class="bl-panel-head"><div><h2 id="bl-ce-' . $i . '-title">' . esc_html($section['title']) . '</h2>';
+        if (!empty($section['note'])) echo '<p>' . wp_kses($section['note'], ['a' => ['href' => true]]) . '</p>';
+        echo '</div>' . ($n ? '<span class="bl-chip bl-chip-info">已修改 ' . $n . ' 项</span>' : '') . '</div><div class="bl-panel-body">';
+        $group = '';
+        foreach ($section['fields'] as $field) {
+            $next = $field['group'] ?? '';
+            if ($next !== $group) {
+                if ($group !== '') echo '</div></div>';
+                if ($next !== '') echo '<div class="bl-subgroup"><h3 class="bl-subgroup-title">' . esc_html($next) . '</h3><div class="bl-ce-fields">';
+                $group = $next;
+            }
+            bl_content_field($field, bl_content_get($values, $field['key']), $changed($field));
+        }
+        if ($group !== '') echo '</div></div>';
+        echo '</div></section>';
     }
-    echo '<input type="hidden" name="bl_content_complete" value="1"><div class="bl-ce-actions">';
-    submit_button('保存修改', 'primary large', 'submit', false);
-    echo ' <a class="button button-large" href="' . esc_url(home_url($info['path'])) . '" target="_blank" rel="noopener">查看页面</a></div></form>';
+    echo '<input type="hidden" name="bl_content_complete" value="1"><div class="bl-savebar bl-ce-savebar">';
+    submit_button('保存修改', 'primary', 'submit', false);
+    echo '<span class="bl-savebar-status" role="status">没有未保存的修改</span></div></form>';
     if ($saved) {
-        echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="bl-ce-reset" onsubmit="return confirm(\'确定把整页恢复为主题默认内容吗？已修改的内容会丢失。\')"><input type="hidden" name="action" value="bl_reset_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
+        echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="bl-ce-reset" onsubmit="return confirm(\'确定把整页恢复为主题默认内容吗？已修改的内容会丢失，无法撤销。\')"><input type="hidden" name="action" value="bl_reset_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
         wp_nonce_field('bl_reset_content_' . $page);
-        submit_button('整页恢复默认', 'link-delete', 'submit', false);
+        echo '<p>本页有 ' . $total . ' 项内容改过。恢复默认会清除全部修改，改回主题自带的文字和图片。</p>';
+        echo '<button type="submit" class="button bl-ce-reset-button">整页恢复默认</button>';
         echo '</form>';
     }
-    echo '</div>';
+    echo '</div></div></div>';
 }
 
 function bl_content_name(string $key): string
@@ -349,7 +372,7 @@ function bl_content_name(string $key): string
     return 'bl_content[' . implode('][', $parts) . ']';
 }
 
-function bl_content_input(string $type, string $name, string $id, string $value): string
+function bl_content_input(string $type, string $name, string $id, string $value, string $preview = ''): string
 {
     switch ($type) {
         case 'textarea': case 'rich':
@@ -357,68 +380,90 @@ function bl_content_input(string $type, string $name, string $id, string $value)
         case 'heading':
             return '<textarea class="large-text bl-ce-heading" rows="' . max(2, substr_count($value, "\n") + 1) . '" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '">' . esc_textarea($value) . '</textarea>';
         case 'image':
-            $preview = $value !== '' ? '<img src="' . esc_url($value) . '" alt="">' : '<span>主题默认</span>';
-            return '<div class="bl-ce-image"><div class="bl-ce-image-preview">' . $preview . '</div><div><input class="large-text code" type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '" placeholder="留空 = 主题默认图片"><p><button type="button" class="button bl-ce-pick">从媒体库选择</button> <button type="button" class="button-link bl-ce-clear">恢复默认图片</button></p></div></div>';
+            $fallback = $preview !== '' ? bl_asset($preview) : '';
+            $src = $value !== '' ? $value : $fallback;
+            return '<div class="bl-ce-image' . ($value === '' ? ' is-default' : '') . '" data-fallback="' . esc_url($fallback) . '"><div class="bl-ce-image-preview"><img alt="" src="' . esc_url($src) . '"' . ($src === '' ? ' hidden' : '') . '><span class="bl-chip bl-ce-image-state">主题默认</span></div>'
+                . '<div class="bl-ce-image-side"><p class="bl-ce-image-buttons"><button type="button" class="button bl-ce-pick">从媒体库选择</button><button type="button" class="button-link bl-ce-clear">改回主题默认</button></p>'
+                . '<label class="bl-ce-image-url" for="' . esc_attr($id) . '">图片地址</label><input class="large-text code" type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '" placeholder="留空 = 主题默认图片"></div></div>';
         case 'url': case 'digits':
             return '<input class="large-text code" type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '">';
     }
     return '<input class="large-text" type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '">';
 }
 
+function bl_content_help(array $def): string
+{
+    return !empty($def['help']) ? '<p class="bl-field-help">' . wp_kses($def['help'], []) . '</p>' : '';
+}
+
 function bl_content_field(array $field, $value, bool $changed): void
 {
     $name = bl_content_name($field['key']);
     $id = 'bl-ce-' . str_replace('.', '-', $field['key']);
-    $badge = $changed ? ' <span class="bl-ce-changed">已修改</span>' : '';
-    echo '<div class="bl-ce-field bl-ce-type-' . esc_attr($field['type']) . '">';
-    if (!empty($field['label'])) echo '<label class="bl-ce-label" for="' . esc_attr($id) . '">' . esc_html($field['label']) . $badge . '</label>';
-    elseif ($changed) echo '<p class="bl-ce-label">' . $badge . '</p>';
+    $label = $field['label'] ?? '';
+    $labelled = !in_array($field['type'], ['list', 'loading', 'terms'], true);
+    $wide = in_array($field['type'], ['list', 'terms'], true);
+    echo '<div class="bl-field bl-ce-field bl-ce-type-' . esc_attr($field['type']) . ($wide ? ' bl-ce-wide' : '') . '">';
+    if ($label !== '' || $changed) {
+        echo '<div class="bl-field-label">';
+        if ($label !== '') echo $labelled ? '<label for="' . esc_attr($id) . '">' . esc_html($label) . '</label>' : '<span>' . esc_html($label) . '</span>';
+        if ($changed) echo ' <span class="bl-chip bl-chip-info">已修改</span>';
+        echo '</div>';
+    }
+    echo '<div class="bl-field-control">';
     switch ($field['type']) {
         case 'list':
-            $template = '';
-            foreach ($field['fields'] as $sub => $def) $template .= bl_content_row_field($def, $name . '[__i__][' . $sub . ']', $id . '-__i__-' . $sub, '');
-            echo '<ol class="bl-ce-list" data-template="' . esc_attr($template) . '">';
-            foreach ((array) $value as $i => $row) {
-                echo '<li class="bl-ce-row"><div class="bl-ce-row-fields">';
-                foreach ($field['fields'] as $sub => $def) echo bl_content_row_field($def, $name . '[' . $i . '][' . $sub . ']', $id . '-' . $i . '-' . $sub, (string) ($row[$sub] ?? ''));
-                echo '</div>' . bl_content_row_tools() . '</li>';
-            }
-            echo '</ol><p><button type="button" class="button bl-ce-add">' . esc_html($field['add'] ?? '添加') . '</button></p>';
+            echo '<ol class="bl-rows bl-ce-rows" data-summary="' . esc_attr(implode(' ', $field['summary'] ?? [array_key_first($field['fields'])])) . '" data-meta="' . esc_attr($field['meta'] ?? '') . '">';
+            foreach (array_values((array) $value) as $i => $row) echo bl_content_row($field, $name, $id, (string) $i, is_array($row) ? $row : [], false);
+            echo '</ol><template class="bl-ce-row-template">' . bl_content_row($field, $name, $id, '__i__', [], true) . '</template>';
+            echo '<p class="bl-ce-rows-add"><button type="button" class="button bl-ce-add"><span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span>' . esc_html($field['add'] ?? '添加') . '</button></p>';
             break;
         case 'terms':
-            echo '<table class="widefat striped bl-ce-table"><thead><tr><th>条款</th><th>标签</th><th>数值（大字）</th><th>单位（小字，可空）</th></tr></thead><tbody>';
-            foreach ($field['rows'] as $key => $label) {
-                echo '<tr><th scope="row">' . esc_html($label) . '</th>';
-                foreach (['label', 'value', 'unit'] as $part) echo '<td><input class="widefat" type="text" aria-label="' . esc_attr($label . ' ' . $part) . '" name="' . esc_attr($name . '[' . $key . '][' . $part . ']') . '" value="' . esc_attr((string) ($value[$key][$part] ?? '')) . '"></td>';
+            echo '<div class="bl-ce-table-wrap"><table class="widefat striped bl-ce-table"><thead><tr><th>条款</th><th>标签</th><th>数值（大字）</th><th>单位（小字，可空）</th></tr></thead><tbody>';
+            foreach ($field['rows'] as $key => $rowLabel) {
+                echo '<tr><th scope="row">' . esc_html($rowLabel) . '</th>';
+                foreach (['label' => '标签', 'value' => '数值', 'unit' => '单位'] as $part => $partLabel) echo '<td><input class="widefat" type="text" aria-label="' . esc_attr($rowLabel . ' ' . $partLabel) . '" name="' . esc_attr($name . '[' . $key . '][' . $part . ']') . '" value="' . esc_attr((string) ($value[$key][$part] ?? '')) . '"></td>';
                 echo '</tr>';
             }
-            echo '</tbody></table>';
+            echo '</tbody></table></div>';
             break;
         case 'loading':
-            echo '<table class="widefat striped bl-ce-table bl-ce-loading"><thead><tr><th>型号</th><th>20GP</th><th>40HQ</th></tr></thead><tbody>';
+            echo '<div class="bl-ce-table-wrap"><table class="widefat striped bl-ce-table bl-ce-loading"><thead><tr><th>型号</th><th>20GP</th><th>40HQ</th></tr></thead><tbody>';
             foreach (bl_products() as $product) {
                 $fit = (array) ($value[$product['slug']] ?? []);
                 echo '<tr><th scope="row">' . esc_html($product['model'] ?: $product['name']) . '</th>';
                 foreach ([0, 1] as $n) echo '<td><input type="number" min="0" max="99" step="1" aria-label="' . esc_attr(($product['model'] ?: $product['name']) . ($n ? ' 40HQ' : ' 20GP')) . '" name="' . esc_attr($name . '[' . $product['slug'] . '][' . $n . ']') . '" value="' . esc_attr(isset($fit[$n]) ? (string) $fit[$n] : '') . '"></td>';
                 echo '</tr>';
             }
-            echo '</tbody></table>';
+            echo '</tbody></table></div>';
             break;
         default:
-            echo bl_content_input($field['type'], $name, $id, (string) $value);
+            echo bl_content_input($field['type'], $name, $id, (string) $value, $field['preview'] ?? '');
     }
-    if (!empty($field['help'])) echo '<p class="description">' . wp_kses($field['help'], []) . '</p>';
-    echo '</div>';
+    echo bl_content_help($field) . '</div></div>';
+}
+
+/** One list row: a head showing its number, its summary and the row tools; a body holding the fields, folded by default. */
+function bl_content_row(array $field, string $name, string $id, string $i, array $row, bool $open): string
+{
+    $summary = trim(implode(' ', array_map(static fn(string $key): string => trim((string) ($row[$key] ?? '')), $field['summary'] ?? [array_key_first($field['fields'])])));
+    $meta = isset($field['meta']) ? trim((string) ($row[$field['meta']] ?? '')) : '';
+    $body = '';
+    foreach ($field['fields'] as $sub => $def) $body .= bl_content_row_field($def, $name . '[' . $i . '][' . $sub . ']', $id . '-' . $i . '-' . $sub, (string) ($row[$sub] ?? ''));
+    return '<li class="bl-row bl-ce-row"><div class="bl-row-head"><button type="button" class="bl-ce-toggle" aria-expanded="' . ($open ? 'true' : 'false') . '" aria-controls="' . esc_attr($id . '-' . $i) . '"><span class="dashicons dashicons-arrow-right-alt2 bl-ce-caret" aria-hidden="true"></span>'
+        . '<span class="bl-row-title" data-empty="（未填写）">' . esc_html($summary) . '</span><span class="bl-chip bl-ce-row-meta">' . esc_html($meta) . '</span></button>' . bl_content_row_tools() . '</div>'
+        . '<div class="bl-row-body" id="' . esc_attr($id . '-' . $i) . '"' . ($open ? '' : ' hidden') . '>' . $body . '</div></li>';
 }
 
 function bl_content_row_field(array $def, string $name, string $id, string $value): string
 {
-    return '<div class="bl-ce-subfield bl-ce-type-' . esc_attr($def['type']) . '"><label for="' . esc_attr($id) . '">' . esc_html($def['label']) . '</label>' . bl_content_input($def['type'], $name, $id, $value) . (!empty($def['help']) ? '<p class="description">' . wp_kses($def['help'], []) . '</p>' : '') . '</div>';
+    return '<div class="bl-field bl-ce-subfield bl-ce-type-' . esc_attr($def['type']) . '"><div class="bl-field-label"><label for="' . esc_attr($id) . '">' . esc_html($def['label']) . '</label></div><div class="bl-field-control">' . bl_content_input($def['type'], $name, $id, $value) . bl_content_help($def) . '</div></div>';
 }
 
 function bl_content_row_tools(): string
 {
-    return '<div class="bl-ce-row-tools"><button type="button" class="button-link bl-ce-up" aria-label="上移">↑</button><button type="button" class="button-link bl-ce-down" aria-label="下移">↓</button><button type="button" class="button-link button-link-delete bl-ce-remove">删除</button></div>';
+    $button = static fn(string $class, string $icon, string $label): string => '<button type="button" class="button-link ' . $class . '" title="' . $label . '"><span class="dashicons dashicons-' . $icon . '" aria-hidden="true"></span><span class="screen-reader-text">' . $label . '</span></button>';
+    return '<div class="bl-row-tools">' . $button('bl-ce-up', 'arrow-up-alt2', '上移') . $button('bl-ce-down', 'arrow-down-alt2', '下移') . $button('button-link-delete bl-ce-remove', 'trash', '删除') . '</div>';
 }
 
 /* ---------- Saving ---------- */

@@ -24,9 +24,16 @@ $post = get_page_by_path('bl-t1000-h-mini-skid-steer-loader', OBJECT, 'bl_produc
 $original = get_post_meta($post->ID, '_bl_record', true);
 try {
     wp_set_current_user(1);
-    $_POST = ['bl_record_nonce' => wp_create_nonce('bl_save_record'), 'bl_record' => ['model' => 'QA-PERSISTENCE', 'category' => 'skid-steer-loaders', 'source' => $original['source'], 'image' => $original['image'], 'load' => '', 'gallery' => implode("\n", $original['gallery']), 'specs' => '']];
+    // The edit screen posts spec and video rows as parallel lists and the gallery as one field per image.
+    $specs = ['key' => array_keys($original['specs']), 'value' => array_values($original['specs'])];
+    $_POST = ['bl_record_nonce' => wp_create_nonce('bl_save_record'), 'bl_record' => ['model' => 'QA-PERSISTENCE', 'category' => 'skid-steer-loaders', 'source' => $original['source'], 'image' => $original['image'], 'gallery' => $original['gallery'], 'specs' => $specs],
+        'bl_videos_nonce' => wp_create_nonce('bl_save_videos'), 'bl_videos' => ['src' => ['videos/bucket.mp4', ''], 'poster' => ['videos/bucket.webp', ''], 'caption' => ['QA clip', '']]];
     wp_update_post(['ID' => $post->ID, 'post_title' => $post->post_title]);
-    bl_test_assert(get_post_meta($post->ID, '_bl_record', true)['model'] === 'QA-PERSISTENCE', 'Valid admin save failed');
+    $saved = get_post_meta($post->ID, '_bl_record', true);
+    bl_test_assert($saved['model'] === 'QA-PERSISTENCE', 'Valid admin save failed');
+    bl_test_assert($saved['specs'] === $original['specs'] && $saved['gallery'] === $original['gallery'] && $saved['load'] === $original['load'], 'Spec rows or gallery did not round-trip');
+    bl_test_assert($saved['videos'] === [['src' => 'videos/bucket.mp4', 'poster' => 'videos/bucket.webp', 'caption' => 'QA clip']], 'Video rows were not saved');
+    unset($_POST['bl_videos_nonce'], $_POST['bl_videos']);
     bl_test_assert(bl_find_record(bl_wp_products(), $post->post_name)['model'] === 'QA-PERSISTENCE', 'Frontend did not read saved data');
     $_POST['bl_record_nonce'] = 'invalid';
     $_POST['bl_record']['model'] = 'QA-NONCE-REJECT';
