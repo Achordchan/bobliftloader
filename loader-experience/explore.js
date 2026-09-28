@@ -463,17 +463,16 @@ function bindExplode(viewer) {
   } else setValue(1);
 }
 
+// The part card that owns the model is the one crossing this line: 55% down on wide screens (the model sits beside the
+// list); on phones the model is pinned above the list, so the line sits a little below it, in the visible part.
+// Each card keeps the model until the next one reaches the line (its range covers the gap below it).
+const partsNarrow = () => matchMedia('(max-width: 700px)').matches;
+const partsBelowModel = () => { const pinned = document.querySelector('.exp-parts-viewer'); return pinned.getBoundingClientRect().height + parseFloat(getComputedStyle(pinned).top); };
+const partsLine = () => partsNarrow() ? partsBelowModel() + (innerHeight - partsBelowModel()) * .22 : innerHeight * .55;
+
 function bindParts(viewer) {
   const cards = [...document.querySelectorAll('.exp-part-card')];
-  const pinned = document.querySelector('.exp-parts-viewer');
-  // The card that owns the model is the one crossing this line: 55% down on wide screens (the model sits beside the
-  // list); on phones the model is pinned above the list, so the line sits a little below it, in the visible part.
-  // Each card keeps the model until the next one reaches the line (its range covers the gap below it).
-  const line = () => {
-    if (!matchMedia('(max-width: 700px)').matches) return innerHeight * .55;
-    const below = pinned.getBoundingClientRect().height + parseFloat(getComputedStyle(pinned).top);
-    return below + (innerHeight - below) * .22;
-  };
+  const line = partsLine;
   let current = null;
   const activate = part => {
     if (current === part) return; current = part;
@@ -497,16 +496,23 @@ function bindParts(viewer) {
 // caught on the first (or last) card. Only input is steered: in-page links and the tour cancel whatever is in flight
 // (window.__partSteps.cancel, called from app.js) and scroll straight through, as do Home and End.
 function bindPartSteps() {
-  const cards = [...document.querySelectorAll('.exp-part-card')], pinned = document.querySelector('.exp-parts-viewer'), root = document.documentElement;
-  // Where a card rests: its top 28% down the screen beside the model; on phones just under the pinned model. Both are
-  // above the line that hands the model to it (bindParts).
-  const rest = () => matchMedia('(max-width: 700px)').matches ? pinned.getBoundingClientRect().height + parseFloat(getComputedStyle(pinned).top) + 14 : innerHeight * .28;
-  const stops = () => { const r = rest(); return cards.map(c => c.getBoundingClientRect().top + scrollY - r); };
+  const cards = [...document.querySelectorAll('.exp-part-card')], list = document.querySelector('.exp-parts-list'), root = document.documentElement;
+  // Where each card rests: its top 28% down the screen beside the model, on phones just under the pinned model, but
+  // always where it owns the model (bindParts): its top at most 16 px above the line, and the line still inside the
+  // card or the gap below it. On a tall screen 28% can be too high for that, and the next card would own the model.
+  const place = () => {
+    const line = partsLine(), gap = parseFloat(getComputedStyle(list).rowGap) || 0, base = partsNarrow() ? partsBelowModel() + 14 : innerHeight * .28;
+    return cards.map(c => {
+      const box = c.getBoundingClientRect(), rest = Math.min(line - 16, Math.max(line - box.height - gap + 16, base));
+      return { stop: box.top + scrollY - rest, room: innerHeight - rest - 12, height: box.height };
+    });
+  };
+  const stops = () => place().map(p => p.stop);
   const inside = () => { const s = stops(); return scrollY >= s[0] - 2 && scrollY <= s[s.length - 1] + 2; };
   const nearest = () => stops().reduce((a, v) => Math.abs(v - scrollY) < Math.abs(a - scrollY) ? v : a);
   // A card taller than the room under its resting place (a phone on its side, a very short window) has to be read by
   // scrolling through it, so then the list scrolls natively.
-  const fits = () => { const room = innerHeight - rest() - 12; return cards.every(c => c.offsetHeight <= room); };
+  const fits = () => place().every(p => p.height <= p.room);
   const off = () => reduced.matches || document.body.style.overflow === 'hidden' || !fits(); // also: a dialog is open
   // The stop a gesture going dir (1 down, -1 up) by delta px leads to, or null to let the page scroll natively.
   const next = (dir, delta) => {
@@ -514,7 +520,7 @@ function bindPartSteps() {
     if (dir > 0) return y < first - 2 ? (y + delta >= first ? first : null) : s.find(v => v > y + 2) ?? null;
     return y > last + 2 ? (y + delta <= last ? last : null) : [...s].reverse().find(v => v < y - 2) ?? null;
   };
-  let tween = null, ours = false, coastUntil = 0;
+  let tween = null, ours = false, coastUntil = 0, coastLock = true; // coastLock: stop the momentum with overflow: hidden (touch)
   const go = (y, duration = .65, ease = 'power2.inOut') => {
     tween?.kill();
     const pos = { y: scrollY };
@@ -538,6 +544,7 @@ function bindPartSteps() {
     if (ours) { e.preventDefault(); return; }
     const y = fresh || !inside() ? next(Math.sign(delta), delta) : null;
     if (y != null) { e.preventDefault(); ours = true; go(y); }
+    else { coastUntil = now + 800; coastLock = false; } // browsers smooth-scroll a burst as one: it may still cross into the list
   }, { passive: false });
 
   addEventListener('keydown', e => {
@@ -559,7 +566,7 @@ function bindPartSteps() {
   // A gesture from further away scrolls natively; if its momentum carries into the list, the momentum is stopped
   // (overflow: hidden, which also halts iOS) and the page settles on the nearest card.
   let touch = null, lastY = scrollY;
-  const settle = (y = nearest()) => { root.style.overflow = 'hidden'; go(y); };
+  const settle = (y = nearest(), lock = true) => { if (lock) root.style.overflow = 'hidden'; go(y); };
   const near = () => { const s = stops(); return scrollY > s[0] - innerHeight && scrollY < s[s.length - 1] + innerHeight; };
   addEventListener('touchstart', e => {
     coastUntil = 0;
@@ -601,7 +608,7 @@ function bindPartSteps() {
       if (to > s[0] - 2 && to < s[s.length - 1] + 2) to = s.reduce((a, b) => Math.abs(b - to) < Math.abs(a - to) ? b : a); // ends in the list: on a card
       if (Math.abs(to - scrollY) > 2) go(to, .7, 'power3.out');
     } else if (touch?.mode === 'native' && !off()) { // it came in from outside the list, over the card on that side
-      if (inside()) { const s = stops(); settle(touch.dir > 0 ? s[0] : s[s.length - 1]); } else coastUntil = performance.now() + 2500;
+      if (inside()) { const s = stops(); settle(touch.dir > 0 ? s[0] : s[s.length - 1]); } else { coastUntil = performance.now() + 2500; coastLock = true; }
     }
     else if (touch && !touch.dir && touch.stopped && inside()) settle(); // a tap that stopped a step between two cards
     touch = null;
@@ -613,8 +620,12 @@ function bindPartSteps() {
     if (tween || performance.now() > coastUntil || off()) return;
     const s = stops(), first = s[0] - 2, last = s[s.length - 1] + 2;
     // The card whose edge it crossed, not the nearest: a late scroll event can already be past the second one's midpoint.
-    if (prev < first && y >= first) { coastUntil = 0; settle(s[0]); }
-    else if (prev > last && y <= last) { coastUntil = 0; settle(s[s.length - 1]); }
+    // A wheel's native scroll is taken over by the step (a scroll call ends the browser's smooth scroll) and the rest of
+    // its turn is absorbed; there is no momentum to stop, and hiding the scrollbar would shift the page.
+    const stop = prev < first && y >= first ? s[0] : prev > last && y <= last ? s[s.length - 1] : null;
+    if (stop == null) return;
+    if (!coastLock) ours = true;
+    coastUntil = 0; settle(stop, coastLock);
   }, { passive: true });
 }
 
