@@ -26,7 +26,7 @@
 .exp-hero-product.is-3d img { opacity: 0; }
 .no-webgl .exp-hero-3d { display: none; }
 
-/* Opening load (html.hero-loading, see index.html): the poster starts as a line drawing and fills with colour from the
+/* Opening load (html.hero-loading, see index.html; hero-pending for the first 0.4 s): the poster starts as a line drawing and fills with colour from the
    left as the model downloads (--load 0…1 on the root, set by __heroLoad in index.html), a red edge riding the boundary, then the
    live model fades in over it. The meter sits where the "drag to rotate" hint appears afterwards. */
 .exp-hero-line { opacity: 0; }
@@ -42,6 +42,7 @@
 .hero-loading .exp-hero-meter { opacity: 1; }
 .hero-loading .exp-hero-product.is-3d .exp-hero-meter { opacity: 0; }
 .hero-loading .exp-hero-index { opacity: 0; } /* no "scroll to explore" while the page is held */
+.hero-pending .exp-hero-product img, .hero-pending .exp-hero-index { opacity: 0; } /* the first moment: nothing yet, so a quick model fades in on its own */
 
 /* Intro: site photographs of the same machine, as a plain cross-fading slideshow. */
 .exp-intro { grid-template-columns: .9fr 1.25fr; gap: 6%; align-items: center; }

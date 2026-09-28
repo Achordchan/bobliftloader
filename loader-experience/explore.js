@@ -85,7 +85,7 @@ const HERO_OFFSET = new Vector3(3.4, 1.5, -3.9), HERO_LOOK = new Vector3(0, .62,
 const showLoad = f => window.__heroLoad?.(f);
 const endLoad = ok => {
   window.__heroHold?.release();
-  if (ok) try { localStorage.setItem('boblift-3d', '1'); } catch {}
+  document.documentElement.classList.remove('hero-pending'); // no model: show the poster
   setTimeout(() => document.documentElement.classList.remove('hero-loading'), ok ? 900 : 0); // after the poster has faded; at once if there is no model
 };
 
@@ -126,11 +126,13 @@ if (!webglAvailable()) {
     bindHeroDrive(hero); bindExplode(explode); bindParts(parts); bindMotion(motion); bindPaint(finale); bindFinaleDrive(finale, hero);
     manageContexts([hero, explode, parts, motion, finale]);
     hero.wake().then(() => { // poster stays until the model draws; the colour fill finishes first
+      const root = document.documentElement, quick = root.classList.contains('hero-pending'); // drawn before the fill began: the poster never showed
+      root.classList.remove('hero-pending');
       showLoad(1);
       setTimeout(() => {
         document.querySelector('.exp-hero-product').classList.add('is-3d'); // the poster fades out…
-        setTimeout(() => { document.querySelector('.exp-hero').classList.add('is-live'); endLoad(true); }, 420); // …then the model fades in, once it has gone
-      }, document.documentElement.classList.contains('hero-loading') ? 500 : 0);
+        setTimeout(() => { document.querySelector('.exp-hero').classList.add('is-live'); endLoad(true); }, quick ? 0 : 420); // …then the model fades in, once it has gone
+      }, root.classList.contains('hero-loading') ? 500 : 0);
     });
   }).catch(err => { console.error(err); endLoad(false); setStatus(explodeStatus, t('三维模型未能载入，已显示静态图。')); document.body.classList.add('no-webgl'); });
 
