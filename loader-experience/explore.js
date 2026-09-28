@@ -530,7 +530,7 @@ function bindPartSteps() {
   let quietAt = 0, lastAbs = 0;
   addEventListener('wheel', e => {
     if (off() || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-    const now = performance.now(), delta = e.deltaY * (e.deltaMode ? 40 : 1), abs = Math.abs(delta);
+    const now = performance.now(), delta = e.deltaY * [1, 40, innerHeight][e.deltaMode], abs = Math.abs(delta); // pixels, lines, pages
     const fresh = now > quietAt || abs > lastAbs * 1.6 + 4;
     quietAt = now + 180; lastAbs = abs;
     if (tween) { e.preventDefault(); return; }
@@ -559,7 +559,7 @@ function bindPartSteps() {
   // A gesture from further away scrolls natively; if its momentum carries into the list, the momentum is stopped
   // (overflow: hidden, which also halts iOS) and the page settles on the nearest card.
   let touch = null, lastY = scrollY;
-  const settle = () => { root.style.overflow = 'hidden'; go(nearest()); };
+  const settle = (y = nearest()) => { root.style.overflow = 'hidden'; go(y); };
   const near = () => { const s = stops(); return scrollY > s[0] - innerHeight && scrollY < s[s.length - 1] + innerHeight; };
   addEventListener('touchstart', e => {
     coastUntil = 0;
@@ -600,7 +600,9 @@ function bindPartSteps() {
       const s = stops();
       if (to > s[0] - 2 && to < s[s.length - 1] + 2) to = s.reduce((a, b) => Math.abs(b - to) < Math.abs(a - to) ? b : a); // ends in the list: on a card
       if (Math.abs(to - scrollY) > 2) go(to, .7, 'power3.out');
-    } else if (touch?.mode === 'native' && !off()) { if (inside()) settle(); else coastUntil = performance.now() + 2500; }
+    } else if (touch?.mode === 'native' && !off()) { // it came in from outside the list, over the card on that side
+      if (inside()) { const s = stops(); settle(touch.dir > 0 ? s[0] : s[s.length - 1]); } else coastUntil = performance.now() + 2500;
+    }
     else if (touch && !touch.dir && touch.stopped && inside()) settle(); // a tap that stopped a step between two cards
     touch = null;
   };
@@ -610,7 +612,9 @@ function bindPartSteps() {
     const y = scrollY, prev = lastY; lastY = y;
     if (tween || performance.now() > coastUntil || off()) return;
     const s = stops(), first = s[0] - 2, last = s[s.length - 1] + 2;
-    if ((prev < first && y >= first) || (prev > last && y <= last)) { coastUntil = 0; settle(); }
+    // The card whose edge it crossed, not the nearest: a late scroll event can already be past the second one's midpoint.
+    if (prev < first && y >= first) { coastUntil = 0; settle(s[0]); }
+    else if (prev > last && y <= last) { coastUntil = 0; settle(s[s.length - 1]); }
   }, { passive: true });
 }
 
