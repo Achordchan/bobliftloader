@@ -518,7 +518,8 @@ function bindPartSteps() {
   const go = (y, duration = .65, ease = 'power2.inOut') => {
     tween?.kill();
     const pos = { y: scrollY };
-    tween = gsap.to(pos, { y, duration, ease, onUpdate: () => scrollTo(0, pos.y), onComplete: () => { tween = null; root.style.overflow = ''; } });
+    tween = gsap.to(pos, { y, duration, ease, onComplete: () => { tween = null; root.style.overflow = ''; },
+      onUpdate: () => { if (document.body.style.overflow === 'hidden') cancel(); else scrollTo(0, pos.y); } }); // a dialog opened meanwhile: stop behind it
   };
   const cancel = () => { tween?.kill(); tween = null; root.style.overflow = ''; ours = false; coastUntil = 0; };
   window.__partSteps = { cancel };

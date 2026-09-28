@@ -101,7 +101,8 @@ playButton.addEventListener('click', () => {
 window.addEventListener('wheel', interrupt, { passive: true });
 window.addEventListener('touchstart', interrupt, { passive: true });
 window.addEventListener('keydown', event => {
-  if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', 'Escape'].includes(event.key)) interrupt();
+  const scrolls = event.key === ' ' && !/INPUT|TEXTAREA|SELECT|BUTTON/.test(event.target.tagName); // Space scrolls (and steps the parts list), except on a control, where it presses it
+  if (scrolls || ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', 'Escape'].includes(event.key)) interrupt();
 });
 
 preference.addEventListener('change', () => { interrupt(); });
