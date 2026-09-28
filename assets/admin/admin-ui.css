@@ -1,0 +1,38 @@
+/* Admin shape: list-table columns, the dashboard shortcuts, 资料下载 and 站点初始化. Built on admin.css. */
+.bl-muted { color: var(--bl-muted); }
+
+/* Products list */
+.post-type-bl_product .wp-list-table .column-bl_thumb { width: 56px; }
+.post-type-bl_product .wp-list-table .column-bl_thumb img,
+.post-type-bl_product .wp-list-table .bl-thumb-empty { display: block; width: 48px; height: 36px; object-fit: contain; background: var(--bl-sunken); border: 1px solid var(--bl-border-soft); border-radius: 2px; }
+.post-type-bl_product .wp-list-table .column-bl_model { width: 120px; }
+.post-type-bl_product .wp-list-table .column-bl_category { width: 110px; }
+.post-type-bl_product .wp-list-table .column-bl_load { width: 90px; font-variant-numeric: tabular-nums; }
+.post-type-bl_product .wp-list-table .column-menu_order { width: 64px; font-variant-numeric: tabular-nums; }
+
+/* News list */
+.post-type-bl_news .wp-list-table .column-bl_news_category { width: 110px; }
+.post-type-bl_news .wp-list-table .column-bl_line { width: 64px; }
+.post-type-bl_news .wp-list-table .column-bl_event { width: 230px; }
+.post-type-bl_news .wp-list-table .column-bl_event .bl-muted { font-size: 12px; }
+
+/* Dashboard: grouped link lists */
+#bl_dashboard .inside { margin: 0; padding: 4px 12px 12px; }
+.bl-dash { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 4px 24px; }
+.bl-dash-group { padding-top: 8px; }
+.bl-dash ul { margin: 6px 0 0; }
+.bl-dash li { margin: 0 0 8px; }
+.bl-dash li a { font-weight: 600; }
+.bl-dash li span { display: block; color: var(--bl-muted); font-size: 12px; }
+.bl-dash-foot { margin: 8px 0 0; padding-top: 12px; border-top: 1px solid var(--bl-border-soft); display: flex; align-items: center; gap: 8px; }
+
+/* 资料下载 */
+.bl-downloads .bl-dl-current { padding-top: 6px; }
+.bl-downloads .bl-dl-size { color: var(--bl-muted); margin-left: 6px; }
+.bl-downloads .bl-dl-tools { display: flex; align-items: center; gap: 12px; margin: 8px 0 0; }
+
+/* 站点初始化 */
+.bl-setup .bl-panel-body ul { margin: 12px 0 0; padding-left: 18px; list-style: disc; }
+.bl-setup .bl-panel-body li { margin: 0 0 6px; }
+.bl-setup .bl-setup-action { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px 0 4px; }
+.bl-setup .bl-setup-action .submit { margin: 0; padding: 0; }

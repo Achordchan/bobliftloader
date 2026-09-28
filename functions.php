@@ -8,6 +8,7 @@ require_once __DIR__ . '/inc/wp-admin.php';
 require_once __DIR__ . '/inc/wp-import.php';
 require_once __DIR__ . '/inc/wp-support.php';
 require_once __DIR__ . '/inc/wp-content-editor.php';
+require_once __DIR__ . '/inc/wp-admin-ui.php';
 
 add_action('after_setup_theme', static function (): void {
     add_theme_support('post-thumbnails');

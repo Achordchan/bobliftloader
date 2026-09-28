@@ -1,0 +1,66 @@
+/*
+ * Shared look for every BOB-LIFT admin screen (网站内容, product and news boxes, list tables, dashboard).
+ * Stays close to WordPress's own admin: white panels with a plain 1px border, one heading scale, grey help text.
+ * Status is shown with chips, never with a coloured bar on the left edge.
+ */
+:root {
+  --bl-border: #dcdcde;
+  --bl-border-soft: #f0f0f1;
+  --bl-muted: #646970;
+  --bl-text: #1d2327;
+  --bl-accent: #2271b1;
+  --bl-surface: #fff;
+  --bl-sunken: #f6f7f7;
+  --bl-radius: 4px;
+  --bl-gap: 16px;
+}
+
+/* Page head: title, one line of purpose, actions on the right. */
+.bl-page-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px; margin: 8px 0 20px; }
+.bl-page-head h1 { margin: 0; padding: 0; font-size: 23px; font-weight: 400; line-height: 1.3; }
+.bl-page-head p { margin: 4px 0 0; max-width: 720px; color: var(--bl-muted); font-size: 13px; }
+.bl-page-head-actions { display: flex; gap: 8px; align-items: center; }
+
+/* Panel: one titled block of related fields. */
+.bl-panel { background: var(--bl-surface); border: 1px solid var(--bl-border); border-radius: var(--bl-radius); margin: 0 0 var(--bl-gap); }
+.bl-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--bl-border-soft); }
+.bl-panel-head h2 { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.4; }
+.bl-panel-head p { margin: 2px 0 0; color: var(--bl-muted); font-size: 12px; }
+.bl-panel-body { padding: 4px 20px 16px; }
+
+/* Field: label column + control column on wide screens, stacked on narrow ones. */
+.bl-field { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 6px 20px; padding: 14px 0; border-top: 1px solid var(--bl-border-soft); }
+.bl-field:first-child { border-top: 0; }
+.bl-field-label { padding-top: 6px; font-weight: 600; color: var(--bl-text); }
+.bl-field-control > input[type="text"], .bl-field-control > input[type="url"], .bl-field-control > textarea, .bl-field-control > select { width: 100%; max-width: 640px; }
+.bl-field-help { margin: 6px 0 0; color: var(--bl-muted); font-size: 12px; line-height: 1.5; max-width: 640px; }
+
+/* Sub-group inside a panel (e.g. 质保 / 配件 inside 售后). */
+.bl-subgroup { margin: 12px 0 4px; padding-top: 12px; border-top: 1px solid var(--bl-border); }
+.bl-subgroup-title { margin: 0 0 2px; font-size: 13px; font-weight: 600; color: var(--bl-text); }
+
+/* Chip: small status label. */
+.bl-chip { display: inline-block; padding: 0 7px; border-radius: 10px; font-size: 11px; font-weight: 500; line-height: 18px; white-space: nowrap; vertical-align: 1px; background: var(--bl-border-soft); color: var(--bl-muted); }
+.bl-chip-info { background: #f0f6fc; color: var(--bl-accent); }
+.bl-chip-ok { background: #edfaef; color: #00711e; }
+.bl-chip-warn { background: #fcf9e8; color: #8a6300; }
+
+/* Repeater: ordered rows of the same fields, each a bordered card. */
+.bl-rows { list-style: none; margin: 0; padding: 0; counter-reset: bl-row; }
+.bl-row { counter-increment: bl-row; background: var(--bl-sunken); border: 1px solid var(--bl-border); border-radius: var(--bl-radius); margin: 0 0 8px; }
+.bl-row-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
+.bl-row-head::before { content: counter(bl-row); min-width: 20px; color: var(--bl-muted); font-variant-numeric: tabular-nums; }
+.bl-row-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.bl-row-tools { display: flex; gap: 4px; }
+.bl-row-body { padding: 4px 12px 12px 42px; }
+
+/* Sticky save bar at the bottom of long forms. */
+.bl-savebar { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; gap: 12px; margin: 0 -20px; padding: 12px 20px; background: rgba(240, 240, 241, .96); border-top: 1px solid var(--bl-border); }
+.bl-savebar-status { color: var(--bl-muted); font-size: 12px; }
+
+@media (max-width: 782px) {
+  .bl-field { grid-template-columns: 1fr; }
+  .bl-field-label { padding-top: 0; }
+  .bl-row-body { padding-left: 12px; }
+  .bl-savebar { margin: 0 -10px; padding: 10px; }
+}
