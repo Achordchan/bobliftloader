@@ -64,7 +64,9 @@ if [[ ! -e "${theme_link}" ]]; then
     ln -s ../../.. "${theme_link}"
 fi
 
+fresh_install=0
 if ! wpcli core is-installed >/dev/null 2>&1; then
+    fresh_install=1
     admin_password="$(php -r 'echo bin2hex(random_bytes(10));')"
     wpcli core install --url="${SITE_URL}" --title="BOB-LIFT Compact Equipment" \
         --admin_user="${ADMIN_USER}" --admin_password="${admin_password}" --admin_email="${ADMIN_EMAIL}" --skip-email
@@ -96,7 +98,15 @@ fi
 
 wpcli theme activate "${THEME_SLUG}" >/dev/null
 # The theme's own importer: adds the products, news and pages that are missing, never overwrites existing ones.
-wpcli eval 'print_r(bl_import_initial_content());'
+# It also makes Home the static front page; on a later run the front-page choice an editor made is put back.
+wpcli eval '
+$front = [get_option("show_on_front"), get_option("page_on_front"), get_option("page_for_posts")];
+print_r(bl_import_initial_content());
+if (!'"${fresh_install}"') {
+    update_option("show_on_front", $front[0]);
+    update_option("page_on_front", $front[1]);
+    update_option("page_for_posts", $front[2]);
+}'
 # The footer's privacy link and WordPress's privacy settings point at the same page.
 wpcli eval '$page = get_page_by_path("privacy"); if ($page) update_option("wp_page_for_privacy_policy", $page->ID);'
 wpcli rewrite flush >/dev/null

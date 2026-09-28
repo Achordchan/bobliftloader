@@ -24,7 +24,11 @@ if lsof -nP -iTCP:"${RUNTIME_PORT}" -sTCP:LISTEN >/dev/null 2>&1; then
     lsof -nP -iTCP:"${RUNTIME_PORT}" -sTCP:LISTEN >&2 || true
     fail "Port ${RUNTIME_PORT} is in use. Choose another, for example: ./start.sh $((RUNTIME_PORT + 1))"
 fi
-lsof -nP -iTCP:3306 -sTCP:LISTEN >/dev/null 2>&1 || fail "MySQL is not running. Start it with: brew services start mysql"
+# Reach the database wp-config.php actually names (any host or port), not an assumed local 3306.
+if command -v wp >/dev/null 2>&1; then
+    wp --path="${WORDPRESS_ROOT}" db query 'SELECT 1' >/dev/null 2>&1 ||
+        fail "Cannot reach the database set in .wordpress/wp-config.php. For a local MySQL: brew services start mysql"
+fi
 
 printf 'BOB-LIFT local WordPress: http://%s:%s/  (admin: /wp-admin/)\n' "${RUNTIME_HOST}" "${RUNTIME_PORT}"
 printf 'Press Ctrl+C to stop.\n'

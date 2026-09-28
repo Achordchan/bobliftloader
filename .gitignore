@@ -20,5 +20,5 @@ node_modules/
 # Logs
 *.log
 
-# Local WordPress (scripts/setup-local-wordpress.sh)
-.wordpress/
+# Local WordPress (scripts/setup-local-wordpress.sh): config, database password, salts, admin login
+/.wordpress/
