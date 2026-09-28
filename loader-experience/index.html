@@ -45,12 +45,25 @@
       var total = (m.total || 1.8e6) + (k.total || .58e6) + 1.05e6;
       window.__heroLoad((Math.min(m.loaded, m.total || 1.8e6) + Math.min(k.loaded, k.total || .58e6)) / total * .92);
     }
-    var shown = 0;
-    window.__heroLoad = function (f) { // never backwards
-      if (f <= shown && f < 1) return; shown = f;
-      root.style.setProperty('--load', f.toFixed(3));
+    var shown = 0, creep = null;
+    function show(f) {
+      shown = f; root.style.setProperty('--load', f.toFixed(3));
       var meter = document.querySelector('.exp-hero-meter span'), n = Math.round(f * 100);
       if (meter) meter.textContent = window.I18N ? I18N.t('正在载入三维模型 {n}%', { n: n }) : '正在载入三维模型 ' + n + '%';
+    }
+    window.__heroLoad = function (f) { // never backwards
+      if (f <= shown && f < 1) return; show(f);
+      // The downloads end at 92%; unpacking, parsing and the first draw report nothing, so meanwhile the meter eases on
+      // towards 99% (about 95% after 1 s, 97% after 2 s) instead of standing still. __heroLoad(1) finishes it.
+      if (f >= .919 && f < 1 && !creep) {
+        var t0 = Date.now(), from = f;
+        creep = setInterval(function () {
+          var v = from + (.99 - from) * (1 - Math.exp((t0 - Date.now()) / 1500));
+          if (v > shown) show(v);
+          if (v > .985) clearInterval(creep);
+        }, 150);
+      }
+      if (f >= 1) clearInterval(creep);
     };
     if (location.hash || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (/[?&]intro\b/.test(location.search)) root.classList.add('hero-loading'); // ?intro: the fill from the first moment (demos)
@@ -77,7 +90,7 @@
   </script>
   <link rel="stylesheet" href="styles.css?v=34">
     <link rel="stylesheet" href="gallery.css?v=23">
-    <link rel="stylesheet" href="viewer.css?v=50">
+    <link rel="stylesheet" href="viewer.css?v=52">
   <link rel="stylesheet" href="specs.css?v=4">
   <link rel="stylesheet" href="responsive.css?v=36">
   <script src="i18n/strings.js?v=9"></script>
@@ -85,8 +98,8 @@
   <script type="importmap">{"imports":{"three":"./assets/vendor/three/three.module.js","three/addons/":"./assets/vendor/three/addons/"}}</script>
   <script defer src="assets/vendor/gsap.min.js"></script>
   <script defer src="assets/vendor/ScrollTrigger.min.js"></script>
-  <script type="module" src="app.js?v=37"></script>
-  <script type="module" src="explore.js?v=84"></script>
+  <script type="module" src="app.js?v=39"></script>
+  <script type="module" src="explore.js?v=90"></script>
 </head>
 <body class="experience">
   <a class="exp-skip" href="#explode">跳到产品细节</a>
