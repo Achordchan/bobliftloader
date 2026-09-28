@@ -14,8 +14,9 @@
   <script>
   // Opening. Until the live 3D is on screen the page is held at the top (explore.js calls __heroHold.release(); 10 s at
   // most), so the drive-out that starts on the first scroll is not missed; the machine, drawn in line, fills with
-  // colour as the model loads (__heroLoad sets --load, 0…1). Not for a link to a section or reduced motion; the colour
-  // fill is skipped once the model has loaded before (it comes from the cache). In-page links and the tour button let go.
+  // colour as the model loads (__heroLoad sets --load, 0…1). Not for a link to a section or reduced motion. The poster
+  // is held back for a moment first (hero-pending): a model that is on screen by then (from the cache, on a fast machine)
+  // just fades in; otherwise the fill starts from where the download is. In-page links and the tour button let go.
   // The model and sky downloads start here, before any page script, so the meter moves from the first moment:
   // viewer.js picks them up from __packed (url → { promise, loaded, total, listeners }).
   (function () {
@@ -52,8 +53,11 @@
       if (meter) meter.textContent = window.I18N ? I18N.t('正在载入三维模型 {n}%', { n: n }) : '正在载入三维模型 ' + n + '%';
     };
     if (location.hash || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    var seen = false; try { seen = localStorage.getItem('boblift-3d') === '1'; } catch (err) {}
-    if (!seen || /[?&]intro\b/.test(location.search)) root.classList.add('hero-loading'); // ?intro: replay it (demos)
+    if (/[?&]intro\b/.test(location.search)) root.classList.add('hero-loading'); // ?intro: the fill from the first moment (demos)
+    else {
+      root.classList.add('hero-pending'); // explore.js takes it off when the model draws
+      setTimeout(function () { if (root.classList.contains('hero-pending')) { root.classList.remove('hero-pending'); root.classList.add('hero-loading'); } }, 400);
+    }
     var keys = { ' ': 1, PageDown: 1, PageUp: 1, ArrowDown: 1, ArrowUp: 1, End: 1, Home: 1 };
     var stop = function (e) { e.preventDefault(); };
     var key = function (e) { if (keys[e.key] && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) e.preventDefault(); };
@@ -63,7 +67,7 @@
     addEventListener('wheel', stop, opts); addEventListener('touchmove', stop, opts); addEventListener('keydown', key); addEventListener('scroll', top);
     document.addEventListener('click', click, true);
     var timer = setTimeout(release, 10000);
-    addEventListener('load', function () { if (!window.__loaderViewers) { root.classList.remove('hero-loading'); release(); } }); // every script has run and the page script did not start: show the photo
+    addEventListener('load', function () { if (!window.__loaderViewers) { root.classList.remove('hero-pending', 'hero-loading'); release(); } }); // every script has run and the page script did not start: show the photo
     function release() {
       removeEventListener('wheel', stop, opts); removeEventListener('touchmove', stop, opts); removeEventListener('keydown', key); removeEventListener('scroll', top);
       document.removeEventListener('click', click, true); clearTimeout(timer); window.__heroHold = null;
@@ -73,7 +77,7 @@
   </script>
   <link rel="stylesheet" href="styles.css?v=34">
     <link rel="stylesheet" href="gallery.css?v=23">
-    <link rel="stylesheet" href="viewer.css?v=49">
+    <link rel="stylesheet" href="viewer.css?v=50">
   <link rel="stylesheet" href="specs.css?v=4">
   <link rel="stylesheet" href="responsive.css?v=36">
   <script src="i18n/strings.js?v=9"></script>
@@ -82,7 +86,7 @@
   <script defer src="assets/vendor/gsap.min.js"></script>
   <script defer src="assets/vendor/ScrollTrigger.min.js"></script>
   <script type="module" src="app.js?v=37"></script>
-  <script type="module" src="explore.js?v=83"></script>
+  <script type="module" src="explore.js?v=84"></script>
 </head>
 <body class="experience">
   <a class="exp-skip" href="#explode">跳到产品细节</a>
