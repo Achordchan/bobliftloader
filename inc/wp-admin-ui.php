@@ -152,6 +152,7 @@ function bl_dashboard_widget(): void
         '页面内容' => [
             ['首页内容', 'admin.php?page=bl-content-home', 'edit_pages', '首屏、产品、应用和联系区的文字与图片'],
             ['采购与售后（Support）', 'admin.php?page=bl-content-support', 'edit_pages', '采购流程、质保、配件和常见问题'],
+            ['应用场景（Applications）', 'admin.php?page=bl-content-applications', 'edit_pages', '应用列表页和景观、场地、运输三个应用页'],
             ['换产品画册', 'admin.php?page=bl-downloads', 'edit_pages', 'Support 页可下载的 PDF'],
         ],
         '产品与新闻' => [

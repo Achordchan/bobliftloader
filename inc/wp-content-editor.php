@@ -7,7 +7,7 @@ defined('ABSPATH') || exit;
  * what differs from the defaults in inc/editable.php, so text an editor never touched follows later theme updates.
  */
 
-const BL_CONTENT_PAGES = ['home' => ['title' => '首页内容', 'menu' => '首页', 'path' => '/'], 'support' => ['title' => '采购与售后（Support）页内容', 'menu' => '采购与售后 Support', 'path' => '/support/']];
+const BL_CONTENT_PAGES = ['home' => ['title' => '首页内容', 'menu' => '首页', 'path' => '/'], 'support' => ['title' => '采购与售后（Support）页内容', 'menu' => '采购与售后 Support', 'path' => '/support/'], 'applications' => ['title' => '应用场景（Applications）页内容', 'menu' => '应用场景 Applications', 'path' => '/applications/']];
 
 /**
  * Field list per page. "group" only groups fields on the screen; "preview" is the theme's own image shown while a slot is
@@ -24,6 +24,46 @@ function bl_content_schema(string $page): array
         ['key' => 'seo.title', 'label' => '页面标题', 'type' => 'text', 'help' => '建议 60 个字符以内。'],
         ['key' => 'seo.description', 'label' => '页面描述', 'type' => 'textarea', 'help' => '建议 150 个字符左右。' . $extra],
     ]];
+    if ($page === 'applications') {
+        $names = ['landscaping' => '景观绿化', 'site-preparation' => '场地准备', 'material-transport' => '物料运输'];
+        $sections = [
+            ['title' => '列表页首屏', 'note' => '“应用”列表页最上面的大标题和右侧说明；下面三张场景卡的图片和文字在各应用分区里改。', 'fields' => [
+                ['key' => 'hero.line1', 'label' => '大标题第一行', 'type' => 'text', 'help' => '普通实心字。'],
+                ['key' => 'hero.line2', 'label' => '大标题第二行', 'type' => 'text', 'help' => '描边字。'],
+                ['key' => 'hero.line3', 'label' => '大标题第三行', 'type' => 'text', 'help' => '蓝色字。'],
+                ['key' => 'hero.text', 'label' => '右侧说明', 'type' => 'textarea'],
+                ['key' => 'hero.link', 'label' => '向下链接文字', 'type' => 'text'],
+            ]],
+            ['title' => '询价前请告诉我们', 'note' => '列表页下方的“四个问题”，帮访客先准备好资料再询价。', 'fields' => [
+                ['key' => 'send.eyebrow', 'label' => '小标题', 'type' => 'text'],
+                ['key' => 'send.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
+                ['key' => 'send.text', 'label' => '标题下说明', 'type' => 'textarea'],
+                ['key' => 'send.items', 'label' => '四个问题', 'type' => 'list', 'add' => '添加问题', 'summary' => ['title'], 'fields' => [
+                    'title' => ['label' => '问题', 'type' => 'text'],
+                    'text' => ['label' => '说明', 'type' => 'rich', 'help' => $rich],
+                ]],
+            ]],
+        ];
+        foreach ($GLOBALS['bl_application_base'] as $app) {
+            $slug = bl_application_slug($app);
+            $sections[] = ['title' => ($names[$slug] ?? $app['title']) . ' ' . $app['title'], 'note' => '这个应用的详情页（' . '/applications/' . $slug . '/）。网址固定，改名称不会改网址；首页应用场景卡片、联系表单的下拉选项、站内搜索都读这里，改一处全站同步。', 'fields' => [
+                ['key' => "jobs.$slug.title", 'label' => '名称', 'type' => 'text', 'help' => '页面大标题、面包屑、卡片和联系表单选项都用它。留空使用主题自带名称。'],
+                ['key' => "jobs.$slug.subtitle", 'label' => '副标题', 'type' => 'text', 'help' => '大标题下方的一句英文口号。'],
+                ['key' => "jobs.$slug.description", 'label' => '介绍', 'type' => 'textarea', 'help' => '详情页首屏右侧和首页卡片上的说明。'],
+                ['key' => "jobs.$slug.image", 'group' => '场景图', 'label' => '图片', 'type' => 'image', 'preview' => substr($app['image'], strlen('/assets/')), 'help' => '留空使用主题自带的场景图（3:2 横图）。列表页三联图、首页卡片、详情页大图共用这一张。'],
+                ['key' => "jobs.$slug.alt", 'group' => '场景图', 'label' => '替代文字', 'type' => 'text', 'help' => $alt],
+                ['key' => "jobs.$slug.checks", 'group' => '询价前要确认的事', 'label' => '事项', 'type' => 'list', 'add' => '添加事项', 'summary' => ['title'], 'fields' => [
+                    'title' => ['label' => '标题', 'type' => 'text'],
+                    'text' => ['label' => '说明', 'type' => 'textarea'],
+                    'measure' => ['label' => '访客需要准备', 'type' => 'text', 'help' => '“You’ll need”后面那句。'],
+                    'link_label' => ['label' => '链接文字', 'type' => 'text', 'help' => $optional],
+                    'link_url' => ['label' => '链接地址', 'type' => 'url', 'help' => '可留空；文字和地址都填了才显示链接。站内页面写 /products/…。'],
+                ]],
+            ]];
+        }
+        $sections[] = $seo('');
+        return $sections;
+    }
     if ($page === 'support') return [
         ['title' => '首屏', 'fields' => [
             ['key' => 'hero.eyebrow', 'label' => '小标题', 'type' => 'text'],
@@ -142,7 +182,7 @@ function bl_content_schema(string $page): array
             ['key' => 'range.assist', 'group' => '卡片下方', 'label' => '一句话', 'type' => 'text'],
             ['key' => 'range.assist_link', 'group' => '卡片下方', 'label' => '链接文字', 'type' => 'text'],
         ]],
-        ['title' => '02 应用场景', 'note' => '三个场景图块的文字与应用详情页共用，暂在主题代码里维护。', 'fields' => [
+        ['title' => '02 应用场景', 'note' => '这里只改这一块的标题和说明；三个场景卡片的图片和文字在<a href="' . esc_url(admin_url('admin.php?page=bl-content-applications')) . '">应用场景</a>里改。', 'fields' => [
             ['key' => 'applications.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'applications.title', 'label' => '标题', 'type' => 'heading', 'help' => '换行即分行；*星号* 里的文字显示为描边字。'],
             ['key' => 'applications.description', 'label' => '标题旁说明', 'type' => 'rich', 'help' => $rich],
@@ -523,12 +563,16 @@ add_action('admin_post_bl_reset_content', static function (): void {
 
 /* ---------- Pointers from the page editor ---------- */
 
-/** Which content screen a page belongs to: the static front page and the top-level "support" page. */
+/** Which content screen a page belongs to: the static front page, the top-level "support" and "applications" pages, and the application pages under the latter. */
 function bl_content_page_for_post(?WP_Post $post): string
 {
     if (!$post || $post->post_type !== 'page') return '';
     if ((int) get_option('page_on_front') === $post->ID) return 'home';
-    return $post->post_name === 'support' && !$post->post_parent ? 'support' : '';
+    if ($post->post_name === 'support' && !$post->post_parent) return 'support';
+    if ($post->post_name === 'applications' && !$post->post_parent) return 'applications';
+    // The three application pages sit under Applications and are edited on the same screen.
+    $parent = $post->post_parent ? get_post($post->post_parent) : null;
+    return $parent && $parent->post_name === 'applications' && !$parent->post_parent ? 'applications' : '';
 }
 
 // Their layout comes from the theme and the editor body is not shown, so the page editor points to the right screen.
