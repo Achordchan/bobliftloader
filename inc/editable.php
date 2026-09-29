@@ -18,6 +18,7 @@ function bl_home_defaults(): array
         'seo' => [
             'title' => 'Small size. Serious capability.',
             'description' => 'Explore BOB-LIFT skid steer loaders and mini dumpers. A dedicated compact equipment business website of Xuzhou BOB-LIFT Construction Machinery Co., Ltd.',
+            'image' => '',
         ],
         'hero' => [
             'eyebrow' => 'COMPACT EQUIPMENT. OPEN POSSIBILITIES.',
@@ -101,6 +102,7 @@ function bl_support_defaults(): array
         'seo' => [
             'title' => 'Buying, Warranty & Support',
             'description' => 'How buying from BOB-LIFT works: one-unit orders, T/T payment, 8–30 working days to ship, a 12-month whole-machine warranty, spare parts, downloads and answers to common questions.',
+            'image' => '',
         ],
         'hero' => [
             'eyebrow' => 'SUPPORT / BUYING & AFTER DELIVERY',
@@ -234,6 +236,7 @@ function bl_applications_defaults(): array
         'seo' => [
             'title' => 'Compact Equipment Applications',
             'description' => 'Find BOB-LIFT equipment for landscaping, site preparation and material transport. Explore application requirements and relevant product families.',
+            'image' => '',
         ],
         'hero' => [
             'line1' => 'YOUR WORK.',
