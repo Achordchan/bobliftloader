@@ -12,9 +12,10 @@ $facts = array_filter((array) ($case['facts'] ?? []), static fn($value): bool =>
 $factLabels = ['location' => 'Location', 'customer' => 'Customer', 'task' => 'The work', 'site' => 'The site', 'duration' => 'Duration', 'result' => 'Result'];
 $machines = array_values(array_filter(array_map(static fn($slug) => bl_find_record(bl_products(), $slug), $case['products'] ?? [])));
 $all = bl_application_cases();
-$index = (int) array_search($case['slug'], array_column($all, 'slug'), true);
-$newer = $all[$index - 1] ?? null;
-$older = $all[$index + 1] ?? null;
+// A preview of an unpublished case is not in the list, so it has no neighbours to link to.
+$index = array_search($case['id'] ?? null, array_column($all, 'id'), true);
+$newer = $index === false ? null : ($all[$index - 1] ?? null);
+$older = $index === false ? null : ($all[$index + 1] ?? null);
 ?>
 <article class="bl-story bl-shell" aria-labelledby="story-title">
   <?php bl_breadcrumbs(array_values(array_filter([['label' => 'Applications', 'url' => bl_url('/applications/')], $hub ? ['label' => $hubTitle, 'url' => $hubUrl] : null, ['label' => $case['title']]]))); ?>
