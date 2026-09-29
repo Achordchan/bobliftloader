@@ -374,7 +374,8 @@ function bl_content_card_meta(array $section, array $values): string
         foreach ($section['fields'] as $field) {
             if (($field['type'] ?? '') !== $type) continue;
             $text = trim((string) preg_replace('/\s+/', ' ', str_replace('*', '', wp_strip_all_tags((string) bl_content_get($values, $field['key'])))));
-            if ($text !== '') return mb_strimwidth($text, 0, 90, '…');
+            // wp_html_excerpt() shortens by characters and works without the mbstring extension, which WordPress does not require.
+            if ($text !== '') return wp_html_excerpt($text, 90, '…');
         }
     }
     return '';
