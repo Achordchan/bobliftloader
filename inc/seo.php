@@ -56,13 +56,25 @@ function bl_absolute_asset(string $url): string
     return str_starts_with($url, '/') ? bl_public_base() . $url : $url;
 }
 
+/** The picture a shared link shows: the record's own, else the page's chosen one, else the one chosen for the whole site (Home), else the theme's. */
+function bl_share_image(array $route): string
+{
+    if (!empty($route['record']['image'])) return $route['record']['image'];
+    $page = in_array($route['type'], ['home', 'support', 'applications'], true) ? $route['type'] : 'home';
+    foreach (array_unique([$page, 'home']) as $key) {
+        $custom = (string) (bl_editable($key)['seo']['image'] ?? '');
+        if ($custom !== '') return $custom;
+    }
+    return bl_asset('images/share-default.jpg');
+}
+
 function bl_render_seo(array $route): void
 {
     $title = $route['title'] . ' | BOB-LIFT';
     $canonical = bl_public_base() . $route['path'];
     $filtered = (bool) array_filter(['q', 'load', 'gear', 'operator', 'opening', 'payload', 'category'], static fn($key) => bl_query($key) !== '');
     $robots = $route['status'] === 200 && bl_indexable() && !$filtered && empty($route['preview']) ? 'index, follow, max-image-preview:large' : 'noindex, follow';
-    $image = bl_absolute_asset(!empty($route['record']['image']) ? $route['record']['image'] : bl_asset('images/logo.png'));
+    $image = bl_absolute_asset(bl_share_image($route));
     echo '<title>' . bl_escape($title) . '</title>';
     echo '<meta name="description" content="' . bl_escape($route['description']) . '">';
     echo '<meta name="robots" content="' . $robots . '">';

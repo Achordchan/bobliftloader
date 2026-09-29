@@ -20,9 +20,11 @@ function bl_content_schema(string $page): array
     $image = '留空使用主题自带的照片。建议上传宽度 1600px 以上的横图。';
     $alt = '一句话描述图片内容，给看不到图片的访客和搜索引擎。';
     $optional = '可留空。';
+    $share = '在微信、WhatsApp、LinkedIn 等处转发这个页面时显示的图。留空使用主题自带的默认图。建议 1200×630 像素的横图。';
     $seo = static fn(string $extra): array => ['title' => '搜索结果显示', 'note' => '浏览器标签和 Google 搜索结果里的标题与摘要；标题后面会自动加“ | BOB-LIFT”。', 'fields' => [
         ['key' => 'seo.title', 'label' => '页面标题', 'type' => 'text', 'help' => '建议 60 个字符以内。'],
         ['key' => 'seo.description', 'label' => '页面描述', 'type' => 'textarea', 'help' => '建议 150 个字符左右。' . $extra],
+        ['key' => 'seo.image', 'label' => '分享图片', 'type' => 'image', 'preview' => 'images/share-default.jpg', 'help' => $share],
     ]];
     if ($page === 'applications') {
         $names = ['landscaping' => '景观绿化', 'site-preparation' => '场地准备', 'material-transport' => '物料运输'];
