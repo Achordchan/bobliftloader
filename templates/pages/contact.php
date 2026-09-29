@@ -43,7 +43,7 @@ if ($selectedFamily === 'service') $prefillMessage = "Model:\nSerial number:\nWh
     <div class="bl-contact-prepare">
       <p class="bl-eyebrow">WHAT HELPS US REPLY WELL</p>
       <ol>
-        <?php foreach ($prepare as $i => $item): ?><li><span>0<?= $i + 1 ?></span><div><h2><?= bl_escape($item['title']) ?></h2><p><?= bl_escape($item['text']) ?></p></div></li><?php endforeach; ?>
+        <?php foreach ($prepare as $i => $item): ?><li><span>0<?= $i + 1 ?></span><div><h2><?= bl_escape($item['title']) ?></h2><p><?= bl_rich($item['text']) ?></p></div></li><?php endforeach; ?>
       </ol>
     </div>
     <div class="bl-contact-form-panel">
