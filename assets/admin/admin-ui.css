@@ -27,6 +27,7 @@
 .bl-dash-foot { margin: 8px 0 0; padding-top: 12px; border-top: 1px solid var(--bl-border-soft); display: flex; align-items: center; gap: 8px; }
 
 /* 资料下载 */
+.bl-downloads { max-width: 1080px; }
 .bl-downloads .bl-dl-current { padding-top: 6px; }
 .bl-downloads .bl-dl-size { color: var(--bl-muted); margin-left: 6px; }
 .bl-downloads .bl-dl-tools { display: flex; align-items: center; gap: 12px; margin: 8px 0 0; }

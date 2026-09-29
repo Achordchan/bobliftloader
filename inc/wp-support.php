@@ -13,13 +13,12 @@ add_action('add_meta_boxes_bl_product', static function (): void {
 
 function bl_product_video_row(array $video): string
 {
-    $picker = static fn(string $field, string $type, string $label, string $placeholder): string => '<div class="bl-media-input">' . bl_admin_input('', 'bl_videos[' . $field . '][]', (string) ($video[$field] ?? ''), 'text', ' class="regular-text code" aria-label="' . esc_attr($label) . '" placeholder="' . esc_attr($placeholder) . '"') . '<button type="button" class="button" data-bl="media-' . $type . '">' . esc_html('选择' . ($type === 'video' ? '视频' : '图片')) . '</button></div>';
     $poster = (string) ($video['poster'] ?? '');
     $title = (string) ($video['caption'] ?? '') ?: '新视频';
     return '<li class="bl-row"><div class="bl-row-head"><span class="bl-row-title">' . esc_html($title) . '</span>' . bl_admin_row_tools() . '</div><div class="bl-row-body bl-video-body">'
         . '<div class="bl-video-poster">' . ($poster ? '<img src="' . esc_url(bl_wp_image($poster)) . '" alt="">' : '<span class="dashicons dashicons-format-video" aria-hidden="true"></span>') . '</div><div class="bl-video-fields">'
-        . '<div class="bl-mini-field"><span aria-hidden="true">视频</span>' . $picker('src', 'video', '视频网址', 'MP4 网址或 videos/… 路径') . '</div>'
-        . '<div class="bl-mini-field"><span aria-hidden="true">封面</span>' . $picker('poster', 'image', '封面图网址', '图片网址或 images/… 路径') . '</div>'
+        . '<div class="bl-mini-field"><span aria-hidden="true">视频</span>' . bl_admin_media('bl_videos[src][]', (string) ($video['src'] ?? ''), 'video', '未选择视频') . '</div>'
+        . '<div class="bl-mini-field"><span aria-hidden="true">封面</span>' . bl_admin_media('bl_videos[poster][]', $poster, 'image', '未选择封面') . '</div>'
         . '<label class="bl-mini-field"><span>说明</span>' . bl_admin_input('', 'bl_videos[caption][]', (string) ($video['caption'] ?? ''), 'text', ' class="regular-text bl-video-caption" placeholder="英文，如 Loading with the bucket"') . '</label></div></div></li>';
 }
 
@@ -74,16 +73,17 @@ function bl_downloads_screen(): void
     settings_errors();
     echo '<form method="post" action="options.php">';
     settings_fields('bl_downloads');
-    echo '<section class="bl-panel"><div class="bl-panel-head"><div><h2>产品画册 PDF</h2><p>换画册时先上传新 PDF，再选中它保存。</p></div></div><div class="bl-panel-body">';
-    echo '<div class="bl-field"><div class="bl-field-label">当前画册</div><div class="bl-field-control bl-dl-current" data-default="使用主题自带占位画册">';
-    if ($url) echo '<strong class="bl-dl-name">' . esc_html($name) . '</strong> <span class="bl-dl-size">' . esc_html($size ? size_format($size, 1) : '大小未知') . '</span>';
-    else echo '<span class="bl-chip bl-chip-warn">使用主题自带占位画册</span>';
-    echo '</div></div>';
-    echo '<div class="bl-field"><label class="bl-field-label" for="bl-catalogue-url">PDF 网址</label><div class="bl-field-control"><input class="code" type="url" id="bl-catalogue-url" name="bl_catalogue_url" value="' . esc_attr($url) . '" placeholder="https://…/catalogue.pdf">';
+    $current = $url ? '<strong class="bl-dl-name">' . esc_html($name) . '</strong> <span class="bl-dl-size">' . esc_html($size ? size_format($size, 1) : '大小未知') . '</span>' : '<span class="bl-chip bl-chip-warn">使用主题自带占位画册</span>';
+    echo '<details class="bl-panel" data-bl-card open><summary class="bl-panel-head">' . bl_admin_card_head(1, '产品画册 PDF', $url ? $name : '使用主题自带占位画册', 0) . '</summary><div class="bl-panel-body">';
+    echo '<p class="bl-card-note">换画册时从媒体库选一个 PDF（没有就在弹出的窗口里上传），保存后 Support 页的下载链接同步更新。</p>';
+    echo '<div class="bl-field"><span class="bl-field-label">当前画册</span><div class="bl-field-control"><div class="bl-dl-current" data-default="使用主题自带占位画册">' . $current . '</div>';
+    echo '<input type="hidden" id="bl-catalogue-url" name="bl_catalogue_url" value="' . esc_attr($url) . '">';
     echo '<p class="bl-dl-tools"><button type="button" class="button" id="bl-catalogue-pick">从媒体库选择 PDF</button> <button type="button" class="button-link" id="bl-catalogue-clear"' . ($url ? '' : ' hidden') . '>清空，改用占位画册</button></p>';
-    echo '<p class="bl-field-help">用上面的按钮选择或上传 PDF，网址会自动填好；也可以直接粘贴网址。文件大小只对媒体库里的文件自动读取。留空保存即恢复主题自带的占位画册。</p></div></div>';
-    echo '</div></section>';
-    submit_button('保存画册设置');
+    echo '<p class="bl-field-help">文件大小自动读取。清空后保存，即恢复主题自带的占位画册。</p></div></div>';
+    echo '</div></details>';
+    echo '<div class="bl-savebar">';
+    submit_button('保存画册设置', 'primary', 'submit', false);
+    echo '</div>';
     echo '</form></div>';
 }
 

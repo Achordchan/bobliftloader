@@ -1,25 +1,17 @@
-/* 网站内容 screens: section list on the left, section panels on the right. Shared pieces come from admin.css. */
-.bl-ce { max-width: 1200px; }
-.bl-ce-layout { display: grid; grid-template-columns: 196px minmax(0, 1fr); gap: 24px; align-items: start; }
-.bl-ce-main { min-width: 0; max-width: 960px; }
+/* 网站内容 screens: one column of folding cards under a sticky jump bar. Shared pieces come from admin.css. */
+.bl-ce { max-width: 1080px; padding-bottom: 32px; }
 
-/* Section list */
-.bl-ce-toc { position: sticky; top: 48px; max-height: calc(100vh - 64px); overflow-y: auto; }
-.bl-ce-toc-title { margin: 0 0 6px; padding: 0 10px; color: var(--bl-muted); font-size: 12px; font-weight: 600; }
-.bl-ce-toc ol { list-style: none; margin: 0; padding: 0; }
-.bl-ce-toc li { margin: 0 0 2px; }
-.bl-ce-toc a { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; padding: 6px 10px; border: 1px solid transparent; border-radius: var(--bl-radius); color: #50575e; text-decoration: none; line-height: 1.4; }
-.bl-ce-toc a:hover { color: var(--bl-accent); }
-.bl-ce-toc a:focus { box-shadow: 0 0 0 2px var(--bl-accent); outline: 0; }
-.bl-ce-toc a[aria-current="true"] { background: var(--bl-surface); border-color: var(--bl-border); color: var(--bl-text); font-weight: 600; }
-.bl-ce-toc-name { flex: 1 1 auto; min-width: 0; }
-.bl-ce-toc-dirty { display: none; }
-.bl-ce-toc a.is-dirty .bl-ce-toc-dirty { display: inline-block; }
+/* Jump bar: one pill per card, then 全部展开 / 全部收起. */
+.bl-jump { position: sticky; top: 32px; z-index: 21; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0 0 var(--bl-gap); padding: 9px 14px; border: 1px solid var(--bl-border); border-radius: 6px; background: rgba(255, 255, 255, .96); box-shadow: 0 1px 2px rgba(0, 0, 0, .04); backdrop-filter: blur(4px); }
+.bl-jump-label { margin-right: 2px; color: var(--bl-muted); font-size: 12px; }
+.bl-jump-link { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid var(--bl-border); border-radius: 12px; background: var(--bl-surface); color: var(--bl-text); font-size: 12.5px; line-height: 1.6; text-decoration: none; }
+.bl-jump-link:hover, .bl-jump-link:focus { border-color: var(--bl-accent); color: var(--bl-accent); }
+.bl-jump-link .bl-chip.bl-dirty-chip { line-height: 16px; }
+.bl-jump-link.is-dirty .bl-chip.bl-dirty-chip { display: inline-block; }
+.bl-jump-all { margin-left: auto; padding: 3px 4px; font-size: 12.5px; }
 
 /* Panels and fields */
-.bl-ce-section { scroll-margin-top: 48px; }
-.bl-ce-section .bl-panel-head { align-items: center; }
-.bl-ce-section .bl-panel-head > span { flex: none; }
+.bl-ce-section, .bl-downloads .bl-panel { scroll-margin-top: 92px; }
 .bl-ce .bl-field-label .bl-chip { margin-top: 4px; }
 .bl-ce .bl-subgroup { margin-top: 16px; padding-top: 16px; }
 .bl-ce .bl-subgroup-title { font-size: 14px; }
@@ -39,7 +31,7 @@
 .bl-ce-image-state { position: absolute; top: 6px; left: 6px; background: rgba(255, 255, 255, .94); }
 .bl-ce-image:not(.is-default) .bl-ce-image-state, .bl-ce-image.is-default .bl-ce-clear { display: none; }
 .bl-ce-image-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 10px; }
-.bl-ce-image-url { display: block; margin: 0 0 2px; color: var(--bl-muted); font-size: 12px; }
+.bl-ce-image-file { margin: 0 0 10px; overflow-wrap: anywhere; color: var(--bl-muted); font-size: 12px; }
 
 /* List rows: folded to a one-line summary; the fields stay in the form either way. */
 .bl-ce-rows:empty::before { content: "还没有条目。"; display: block; margin: 0 0 8px; color: var(--bl-muted); }
@@ -62,28 +54,13 @@
 .bl-ce-rows-add { margin: 4px 0 0; }
 .bl-ce-rows-add .dashicons { margin: 4px 4px 0 -2px; font-size: 16px; width: 16px; height: 16px; }
 
-/* Save bar and the page reset, kept apart. */
-.bl-ce-savebar { margin: 0; padding: 12px 16px; border: 1px solid var(--bl-border); border-radius: var(--bl-radius); }
+/* Save bar: the status turns amber while there are unsaved edits. */
 .bl-ce-form.is-dirty .bl-savebar-status { color: #8a6300; font-weight: 600; }
-.bl-ce-reset { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 48px 0 24px; padding-top: 16px; border-top: 1px solid var(--bl-border); }
-.bl-ce-reset p { margin: 0; color: var(--bl-muted); }
-.wp-core-ui .bl-ce-reset-button { border-color: #b32d2e; color: #b32d2e; }
-.wp-core-ui .bl-ce-reset-button:hover, .wp-core-ui .bl-ce-reset-button:focus { border-color: #8a2424; background: #fcf0f1; color: #8a2424; }
 
-/* Below the WordPress menu breakpoint the section list becomes a plain list above the panels. */
-@media (max-width: 960px) {
-  .bl-ce-layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
-  .bl-ce-toc { position: static; max-height: none; margin: 0 0 var(--bl-gap); padding: 10px 12px; background: var(--bl-surface); border: 1px solid var(--bl-border); border-radius: var(--bl-radius); }
-  .bl-ce-toc-title { padding: 0; }
-  .bl-ce-toc ol { display: flex; flex-wrap: wrap; gap: 2px 4px; }
-  .bl-ce-toc li { margin: 0; }
-  .bl-ce-toc a { padding: 4px 8px; }
-  .bl-ce-toc a[aria-current="true"] { background: none; border-color: transparent; font-weight: 400; color: #50575e; }
-}
 @media (max-width: 782px) {
+  .bl-jump { position: static; }
   .bl-ce-section { scroll-margin-top: 58px; }
   .bl-ce-image { grid-template-columns: minmax(0, 1fr); }
   .bl-ce-row .bl-field { grid-template-columns: minmax(0, 1fr); }
   .bl-ce-row-meta { display: none; }
-  .bl-ce-savebar { margin: 0 -10px; border-radius: 0; border-left: 0; border-right: 0; }
 }

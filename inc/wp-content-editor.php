@@ -327,19 +327,20 @@ function bl_content_screen(string $page): void
     echo '<div class="bl-page-head-actions"><a class="button" href="' . esc_url(home_url($info['path'])) . '" target="_blank" rel="noopener">查看页面<span class="screen-reader-text">（在新窗口打开）</span></a></div></div><hr class="wp-header-end">';
     if (isset($_GET['bl_saved'])) echo '<div class="notice notice-success is-dismissible"><p>已保存。</p></div>';
     if (isset($_GET['bl_reset'])) echo '<div class="notice notice-success is-dismissible"><p>已恢复为主题默认内容。</p></div>';
-    echo '<div class="bl-ce-layout"><nav class="bl-ce-toc" aria-labelledby="bl-ce-toc-title"><h2 class="bl-ce-toc-title" id="bl-ce-toc-title">页面分区</h2><ol>';
-    foreach ($sections as $i => $section) {
-        $n = $count($section);
-        echo '<li><a href="#bl-ce-' . $i . '"><span class="bl-ce-toc-name">' . esc_html($section['title']) . '</span>' . ($n ? '<span class="bl-chip bl-chip-info" title="已修改 ' . $n . ' 项">' . $n . '</span>' : '') . '<span class="bl-chip bl-chip-warn bl-ce-toc-dirty">未保存</span></a></li>';
+    $open = count($sections) === 1;
+    if (count($sections) >= 3) {
+        echo '<nav class="bl-jump" aria-label="页面分区"><span class="bl-jump-label">跳到</span>';
+        foreach ($sections as $i => $section) echo '<a class="bl-jump-link" href="#bl-ce-' . $i . '">' . esc_html(bl_admin_card_title($section['title'])) . '<span class="bl-chip bl-chip-warn bl-dirty-chip">未保存</span></a>';
+        echo '<button type="button" class="button-link bl-jump-all" data-bl-toggle-all aria-expanded="false">全部展开</button></nav>';
     }
-    echo '</ol></nav><div class="bl-ce-main">';
     echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="bl-ce-form"><input type="hidden" name="action" value="bl_save_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
     wp_nonce_field('bl_save_content_' . $page);
     foreach ($sections as $i => $section) {
         $n = $count($section);
-        echo '<section class="bl-panel bl-ce-section" id="bl-ce-' . $i . '" aria-labelledby="bl-ce-' . $i . '-title"><div class="bl-panel-head"><div><h2 id="bl-ce-' . $i . '-title">' . esc_html($section['title']) . '</h2>';
-        if (!empty($section['note'])) echo '<p>' . wp_kses($section['note'], ['a' => ['href' => true]]) . '</p>';
-        echo '</div>' . ($n ? '<span class="bl-chip bl-chip-info">已修改 ' . $n . ' 项</span>' : '') . '</div><div class="bl-panel-body">';
+        echo '<details class="bl-panel bl-ce-section" data-bl-card id="bl-ce-' . $i . '"' . ($open ? ' open' : '') . '><summary class="bl-panel-head">';
+        echo bl_admin_card_head($i + 1, $section['title'], bl_content_card_meta($section, $values), $n);
+        echo '</summary><div class="bl-panel-body">';
+        if (!empty($section['note'])) echo '<p class="bl-card-note">' . wp_kses($section['note'], ['a' => ['href' => true]]) . '</p>';
         $group = '';
         foreach ($section['fields'] as $field) {
             $next = $field['group'] ?? '';
@@ -351,19 +352,32 @@ function bl_content_screen(string $page): void
             bl_content_field($field, bl_content_get($values, $field['key']), $changed($field));
         }
         if ($group !== '') echo '</div></div>';
-        echo '</div></section>';
+        echo '</div></details>';
     }
-    echo '<input type="hidden" name="bl_content_complete" value="1"><div class="bl-savebar bl-ce-savebar">';
+    echo '<input type="hidden" name="bl_content_complete" value="1"><div class="bl-savebar">';
     submit_button('保存修改', 'primary', 'submit', false);
-    echo '<span class="bl-savebar-status" role="status">没有未保存的修改</span></div></form>';
+    echo '<span class="bl-savebar-status" role="status">没有未保存的修改</span>';
+    if ($saved) echo '<button type="submit" form="bl-ce-reset" class="button bl-danger-button" title="本页有 ' . $total . ' 项内容改过；恢复后改回主题自带的文字和图片，无法撤销。">整页恢复默认</button>';
+    echo '</div></form>';
     if ($saved) {
-        echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="bl-ce-reset" onsubmit="return confirm(\'确定把整页恢复为主题默认内容吗？已修改的内容会丢失，无法撤销。\')"><input type="hidden" name="action" value="bl_reset_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
+        echo '<form method="post" id="bl-ce-reset" action="' . esc_url(admin_url('admin-post.php')) . '" onsubmit="return confirm(\'确定把整页恢复为主题默认内容吗？已修改的内容会丢失，无法撤销。\')"><input type="hidden" name="action" value="bl_reset_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
         wp_nonce_field('bl_reset_content_' . $page);
-        echo '<p>本页有 ' . $total . ' 项内容改过。恢复默认会清除全部修改，改回主题自带的文字和图片。</p>';
-        echo '<button type="submit" class="button bl-ce-reset-button">整页恢复默认</button>';
         echo '</form>';
     }
-    echo '</div></div></div>';
+    echo '</div>';
+}
+
+/** A line of the section's current text (its heading, else its first paragraph or text field), so a closed card is still recognisable. */
+function bl_content_card_meta(array $section, array $values): string
+{
+    foreach (['heading', 'textarea', 'rich', 'text'] as $type) {
+        foreach ($section['fields'] as $field) {
+            if (($field['type'] ?? '') !== $type) continue;
+            $text = trim((string) preg_replace('/\s+/', ' ', str_replace('*', '', wp_strip_all_tags((string) bl_content_get($values, $field['key'])))));
+            if ($text !== '') return mb_strimwidth($text, 0, 90, '…');
+        }
+    }
+    return '';
 }
 
 function bl_content_name(string $key): string
@@ -383,8 +397,9 @@ function bl_content_input(string $type, string $name, string $id, string $value,
             $fallback = $preview !== '' ? bl_asset($preview) : '';
             $src = $value !== '' ? $value : $fallback;
             return '<div class="bl-ce-image' . ($value === '' ? ' is-default' : '') . '" data-fallback="' . esc_url($fallback) . '"><div class="bl-ce-image-preview"><img alt="" src="' . esc_url($src) . '"' . ($src === '' ? ' hidden' : '') . '><span class="bl-chip bl-ce-image-state">主题默认</span></div>'
-                . '<div class="bl-ce-image-side"><p class="bl-ce-image-buttons"><button type="button" class="button bl-ce-pick">从媒体库选择</button><button type="button" class="button-link bl-ce-clear">改回主题默认</button></p>'
-                . '<label class="bl-ce-image-url" for="' . esc_attr($id) . '">图片地址</label><input class="large-text code" type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '" placeholder="留空 = 主题默认图片"></div></div>';
+                . '<div class="bl-ce-image-side"><p class="bl-ce-image-file" data-default="使用主题自带的图片">' . ($value !== '' ? esc_html(wp_basename((string) parse_url($value, PHP_URL_PATH))) : '使用主题自带的图片') . '</p>'
+                . '<p class="bl-ce-image-buttons"><button type="button" class="button bl-ce-pick" id="' . esc_attr($id) . '-pick">从媒体库选择</button><button type="button" class="button-link bl-ce-clear">改回主题默认</button></p>'
+                . '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '"></div></div>';
         case 'url': case 'digits':
             return '<input class="large-text code" type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '">';
     }
@@ -406,7 +421,7 @@ function bl_content_field(array $field, $value, bool $changed): void
     echo '<div class="bl-field bl-ce-field bl-ce-type-' . esc_attr($field['type']) . ($wide ? ' bl-ce-wide' : '') . '">';
     if ($label !== '' || $changed) {
         echo '<div class="bl-field-label">';
-        if ($label !== '') echo $labelled ? '<label for="' . esc_attr($id) . '">' . esc_html($label) . '</label>' : '<span>' . esc_html($label) . '</span>';
+        if ($label !== '') echo $labelled ? '<label for="' . esc_attr($id . ($field['type'] === 'image' ? '-pick' : '')) . '">' . esc_html($label) . '</label>' : '<span>' . esc_html($label) . '</span>';
         if ($changed) echo ' <span class="bl-chip bl-chip-info">已修改</span>';
         echo '</div>';
     }

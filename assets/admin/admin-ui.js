@@ -1,4 +1,4 @@
-/* 资料下载: pick the catalogue PDF from the media library and show its name and size before saving. */
+/* 资料下载: the catalogue PDF comes from the media library only; its name and size show before saving. */
 (function ($) {
   var input = $('#bl-catalogue-url'), current = $('.bl-dl-current'), clear = $('#bl-catalogue-clear'), frame;
   if (!input.length) return;
@@ -20,10 +20,4 @@
     frame.open();
   });
   clear.on('click', function () { input.val(''); show('', ''); });
-  input.on('change', function () {
-    var url = input.val().trim();
-    var name = url.split(/[?#]/)[0].split('/').pop();
-    try { name = decodeURIComponent(name); } catch (e) {}
-    show(url ? name : '', '');
-  });
 })(jQuery);

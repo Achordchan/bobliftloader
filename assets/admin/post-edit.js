@@ -6,6 +6,11 @@
   // Defaults only: once the editor opens, closes or resizes the pane, WordPress keeps that choice.
   if (window.wp && wp.data && wp.data.dispatch('core/preferences') && !document.getElementById('post-body')) {
     wp.data.dispatch('core/preferences').setDefaults('core/edit-post', { metaBoxesMainIsOpen: true, metaBoxesMainOpenHeight: Math.max(280, Math.round(window.innerHeight * 0.4)) });
+    // The news boxes hold one media picker (the fallback image); the block editor has no #post form to listen on.
+    document.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-bl-media] [data-bl]');
+      if (button) mediaAction(button);
+    });
     return;
   }
 
@@ -18,7 +23,7 @@
 
   // Theme paths (images/…, videos/…) live under the theme's assets folder; anything else is already a full address.
   function resolve(path) {
-    return /^(images|videos)\//.test(path) ? base + path : path;
+    return /^(images|videos)\//.test(path) ? (base || '') + path : path;
   }
 
   function fromTemplate(name) {
@@ -70,6 +75,34 @@
     }
   }
 
+  // Shows the chosen file (name, and a thumbnail for images) and stores its address in the hidden field.
+  function setMedia(media, path) {
+    var input = media.querySelector('input');
+    var name = media.querySelector('.bl-media-name');
+    var thumb = media.querySelector('.bl-media-thumb');
+    input.value = path;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    name.textContent = path ? decodeURIComponent(path.split(/[?#]/)[0].split('/').pop()) : media.dataset.empty;
+    name.classList.toggle('is-empty', !path);
+    media.querySelector('.bl-media-clear').hidden = !path;
+    if (thumb) {
+      thumb.textContent = '';
+      if (path) {
+        var img = document.createElement('img');
+        img.src = resolve(path);
+        img.alt = '';
+        thumb.appendChild(img);
+      }
+    }
+    if (input.name === 'bl_videos[poster][]') setPoster(media.closest('.bl-row'), path);
+  }
+
+  function mediaAction(button) {
+    var media = button.closest('[data-bl-media]');
+    if (button.dataset.bl === 'clear-media') return setMedia(media, '');
+    pick(media.dataset.blMedia, false, function (urls) { setMedia(media, urls[0]); });
+  }
+
   form.addEventListener('click', function (event) {
     var button = event.target.closest('[data-bl]');
     if (!button || !form.contains(button)) return;
@@ -95,27 +128,7 @@
       });
       return;
     }
-    if (action === 'add-path') {
-      var field = form.querySelector('[data-bl-gallery-path]');
-      var path = field.value.trim();
-      if (!path) return field.focus();
-      if (!/^(images\/|https?:\/\/)/.test(path)) {
-        window.alert('请填写 http(s):// 开头的图片网址，或主题里的 images/ 路径。');
-        return field.focus();
-      }
-      if (galleryFull()) return;
-      addGalleryImage(path);
-      field.value = '';
-      return;
-    }
-    if (action === 'media-video' || action === 'media-image') {
-      var input = button.parentNode.querySelector('input');
-      pick(action === 'media-video' ? 'video' : 'image', false, function (urls) {
-        input.value = urls[0];
-        if (action === 'media-image') setPoster(button.closest('.bl-row'), urls[0]);
-      });
-      return;
-    }
+    if (action === 'pick' || action === 'clear-media') return mediaAction(button);
 
     var item = button.closest('.bl-row, .bl-gallery-item');
     if (!item) return;
@@ -136,19 +149,6 @@
     if (!input.closest('#bl_main-sortables')) return;
     dirty = true;
     if (input.classList.contains('bl-video-caption')) input.closest('.bl-row').querySelector('.bl-row-title').textContent = input.value.trim() || '新视频';
-  });
-
-  form.addEventListener('change', function (event) {
-    var input = event.target;
-    if (input.name === 'bl_videos[poster][]') setPoster(input.closest('.bl-row'), input.value.trim());
-  });
-
-  // Enter in the path box adds the image instead of submitting the whole post.
-  form.addEventListener('keydown', function (event) {
-    if (event.key === 'Enter' && event.target.matches('[data-bl-gallery-path]')) {
-      event.preventDefault();
-      form.querySelector('[data-bl="add-path"]').click();
-    }
   });
 
   if (gallery && window.jQuery && jQuery.fn.sortable) {
