@@ -61,13 +61,13 @@ function bl_render_seo(array $route): void
     $title = $route['title'] . ' | BOB-LIFT';
     $canonical = bl_public_base() . $route['path'];
     $filtered = (bool) array_filter(['q', 'load', 'gear', 'operator', 'opening', 'payload', 'category'], static fn($key) => bl_query($key) !== '');
-    $robots = $route['status'] === 200 && bl_indexable() && !$filtered ? 'index, follow, max-image-preview:large' : 'noindex, follow';
+    $robots = $route['status'] === 200 && bl_indexable() && !$filtered && empty($route['preview']) ? 'index, follow, max-image-preview:large' : 'noindex, follow';
     $image = bl_absolute_asset(!empty($route['record']['image']) ? $route['record']['image'] : bl_asset('images/logo.png'));
     echo '<title>' . bl_escape($title) . '</title>';
     echo '<meta name="description" content="' . bl_escape($route['description']) . '">';
     echo '<meta name="robots" content="' . $robots . '">';
-    if ($route['status'] === 200) echo '<link rel="canonical" href="' . bl_escape($canonical) . '">';
+    if ($route['status'] === 200 && empty($route['preview'])) echo '<link rel="canonical" href="' . bl_escape($canonical) . '">';
     foreach (['og:type' => in_array($route['type'], ['article', 'application_case'], true) ? 'article' : 'website', 'og:title' => $title, 'og:description' => $route['description'], 'og:url' => $canonical, 'og:image' => $image, 'og:site_name' => 'BOB-LIFT Compact Equipment', 'og:locale' => 'en_US'] as $key => $value) echo '<meta property="' . $key . '" content="' . bl_escape($value) . '">';
     echo '<meta name="twitter:card" content="summary_large_image">';
-    if ($route['status'] === 200) echo '<script type="application/ld+json">' . json_encode(bl_structured_data($route), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>';
+    if ($route['status'] === 200 && empty($route['preview'])) echo '<script type="application/ld+json">' . json_encode(bl_structured_data($route), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>';
 }
