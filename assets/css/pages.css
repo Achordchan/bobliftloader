@@ -90,19 +90,52 @@
 .bl-site .bl-news-card>p{font-size:var(--fs-small);color:var(--muted);line-height:1.85;margin-bottom:22px}
 .bl-site .bl-news-card>.bl-text-link{font-size:var(--fs-label)}
 .bl-site .bl-home-journal{padding-top:clamp(60px,calc(46.1px + 2.01vw),98px);padding-bottom:clamp(68px,calc(52.2px + 2.28vw),110px);background:#fafbf8}
-.bl-site .bl-contact-page-grid{display:grid;grid-template-columns:1fr 1.35fr;gap:8%;padding-top:20px;padding-bottom:clamp(68px,calc(52.2px + 2.28vw),110px)}
-.bl-site .bl-contact-details>div{border-top:1px solid #b5c2ca;padding-top:clamp(21px,calc(16.0px + 0.70vw),34px);margin-bottom:clamp(30px,calc(23.3px + 1.02vw),49px)}
-.bl-site .bl-contact-details .bl-eyebrow{font-size:var(--fs-micro);margin-bottom:19px}
-.bl-site .bl-contact-details>div>a{display:flex;align-items:center;gap:15px;font-size:var(--fs-lead);margin-bottom:14px}
-.bl-site .bl-contact-details .bl-text-link{font-size:var(--fs-small);display:inline-flex;margin-top:10px}
-.bl-site .bl-contact-details h2{font:600 var(--fs-h4)/1.12 var(--display);margin-bottom:20px}
-.bl-site .bl-contact-details address,.bl-site .bl-contact-details p:not(.bl-eyebrow){font-size:var(--fs-small);color:var(--muted);line-height:1.9;font-style:normal;margin-top:16px}
-.bl-site .bl-contact-form-panel{background:#e5eaf0;padding:42px}
-.bl-site .bl-contact-form-panel>h2{font:600 var(--fs-h3)/.97 var(--display);margin:22px 0 35px}
 .bl-site .bl-selected-model{font-size:var(--fs-small);margin-bottom:18px}
-.bl-site .bl-contact-parent{background:var(--ink);color:white;display:grid;grid-template-columns:1fr 2fr;gap:clamp(48px,calc(36.9px + 1.61vw),78px);padding-block:clamp(38px,calc(29.5px + 1.29vw),62px)}
-.bl-site .bl-contact-parent p{font-size:var(--fs-body);color:#b7cbd8;line-height:1.9}
-.bl-site .bl-contact-parent a{color:white;text-decoration:underline;text-underline-offset:4px}
+/* ---------- Contact: the enquiry sits in the first screen, with the ways to reach us and what to bring beside it ---------- */
+.bl-site .bl-contact-main{padding-bottom:clamp(56px,calc(43px + 2vw),100px)}
+.bl-site .bl-contact-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);grid-template-areas:"intro form" "prepare form";grid-template-rows:auto 1fr;column-gap:clamp(40px,5.6vw,150px);row-gap:clamp(36px,3vw,72px);align-items:start;padding-top:clamp(24px,calc(18px + 1vw),48px)}
+.bl-site .bl-contact-intro{grid-area:intro}
+.bl-site .bl-contact-intro h1{margin:clamp(18px,1.3vw,32px) 0 0;font:600 clamp(60px,5.2vw,136px)/.9 var(--display);letter-spacing:-1.8px}
+.bl-site .bl-contact-lede{max-width:30em;margin-top:clamp(20px,1.6vw,36px);font-size:var(--fs-body);line-height:1.85;color:var(--muted)}
+.bl-site .bl-contact-channels{margin-top:clamp(28px,2.2vw,52px);border-top:1px solid var(--ink)}
+.bl-site .bl-contact-channels a{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:clamp(16px,1.3vw,28px);padding:clamp(16px,1.2vw,26px) 0;border-bottom:1px solid #b5c2ca;transition:padding-left .25s}
+.bl-site .bl-contact-channels a>svg{width:clamp(26px,1.5vw,36px);height:clamp(26px,1.5vw,36px);color:var(--blue)}
+.bl-site .bl-contact-channels small{display:block;margin-bottom:3px;font-size:var(--fs-label);color:var(--muted);line-height:1.5}
+.bl-site .bl-contact-channels b{display:block;font:600 clamp(26px,1.7vw,44px)/1.1 var(--display);letter-spacing:.2px}
+.bl-site .bl-contact-channels a:hover,.bl-site .bl-contact-channels a:focus-visible{padding-left:8px}
+.bl-site .bl-contact-channels a:hover b{color:var(--blue)}
+.bl-site .bl-contact-prepare{grid-area:prepare}
+.bl-site .bl-contact-prepare ol{margin:clamp(16px,1.2vw,26px) 0 0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,1.6vw,36px) clamp(20px,2vw,44px)}
+.bl-site .bl-contact-prepare li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.bl-site .bl-contact-prepare li>span{font:700 var(--fs-label)/1.9 var(--sans);letter-spacing:1px;color:var(--blue)}
+.bl-site .bl-contact-prepare h2{font:600 var(--fs-h5)/1.1 var(--display);margin-bottom:6px}
+.bl-site .bl-contact-prepare p:not(.bl-eyebrow){font-size:var(--fs-small);line-height:1.75;color:var(--muted)}
+.bl-site .bl-contact-form-panel{grid-area:form;background:var(--white);border:1px solid #b5c2ca;padding:clamp(28px,2.6vw,64px)}
+.bl-site .bl-contact-form-panel>h2{font:600 var(--fs-h3)/.97 var(--display);margin:18px 0 clamp(24px,2vw,44px)}
+.bl-site .bl-selected-model{font-size:var(--fs-small);margin-bottom:18px}
+/* The enquiry form inside the contact panel: boxed fields on white, a rule above each step. Home's form keeps its own look. */
+.bl-site .bl-contact-form-panel .bl-inquiry-form{padding-top:0}
+.bl-site .bl-contact-form-panel .bl-inquiry-form fieldset{margin:0 0 clamp(22px,1.8vw,40px);padding-top:clamp(16px,1.2vw,26px);border-top:1px solid #d5dde2}
+.bl-site .bl-contact-form-panel .bl-inquiry-form legend{float:left;width:100%;margin-bottom:16px;color:var(--blue)}
+.bl-site .bl-contact-form-panel .bl-inquiry-form legend+*{clear:both}
+.bl-site .bl-contact-form-panel .bl-form-grid label,.bl-site .bl-contact-form-panel .bl-message-label{font-size:var(--fs-label);letter-spacing:.2px}
+.bl-site .bl-contact-form-panel .bl-inquiry-form input:not([type=radio]),.bl-site .bl-contact-form-panel .bl-inquiry-form textarea{margin-top:7px;padding:12px 14px;border:1px solid #a0afbc;background:#f7f9fb}
+.bl-site .bl-contact-form-panel .bl-inquiry-form input:not([type=radio]):focus,.bl-site .bl-contact-form-panel .bl-inquiry-form textarea:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 1px var(--blue)}
+.bl-site .bl-contact-form-panel .bl-message-label{margin-top:clamp(19px,calc(14.7px + 0.64vw),28px)}
+.bl-site .bl-contact-form-panel .bl-form-bottom{margin-top:clamp(20px,1.6vw,36px)}
+/* Company band: address, hours and business contact in one dark line-up. */
+.bl-site .bl-contact-company{background:var(--ink);color:var(--white)}
+.bl-site .bl-contact-company-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:clamp(32px,4vw,110px);padding-top:clamp(40px,3.2vw,84px)}
+.bl-site .bl-contact-company .bl-eyebrow{font-size:var(--fs-micro);color:#8fa9bb;margin-bottom:18px}
+.bl-site .bl-contact-company h2{font:600 var(--fs-h5)/1.15 var(--display);margin-bottom:16px}
+.bl-site .bl-contact-company address,.bl-site .bl-contact-company-grid p:not(.bl-eyebrow){font-size:var(--fs-small);line-height:1.9;font-style:normal;color:#b7cbd8}
+.bl-site .bl-contact-company-link{display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:var(--fs-body);color:var(--white)}
+.bl-site .bl-contact-company-link .bl-icon{filter:invert(1);width:16px;height:16px}
+.bl-site .bl-contact-company-link:hover{text-decoration:underline;text-underline-offset:4px}
+.bl-site .bl-contact-company-note{margin-top:clamp(32px,2.6vw,64px);padding:clamp(20px,1.5vw,32px) 0 clamp(28px,2.2vw,56px);border-top:1px solid #2b4456;font-size:var(--fs-label);line-height:1.8;color:#91aabb}
+.bl-site .bl-contact-company-note a{color:var(--white);text-decoration:underline;text-underline-offset:4px}
+/* The quick-contact stack repeats this page and would sit on the form. */
+.bl-site.bl-page-contact .bl-side-contact{display:none}
 .bl-site .bl-privacy-content{max-width:850px;margin:auto;padding:0 30px 80px}
 .bl-site .bl-privacy-content h2{font:600 var(--fs-h4)/1.1 var(--display);color:var(--ink);margin:35px 0 18px}
 .bl-site .bl-privacy-content a{text-decoration:underline;text-underline-offset:4px}
