@@ -2,7 +2,8 @@
 declare(strict_types=1);
 
 /**
- * The enquiry form as a real form: Contact Form 7 sends the mail and Flamingo keeps every entry in the WordPress admin.
+ * The enquiry form as a real form: Contact Form 7 sends the mail and Flamingo keeps every entry in the WordPress admin
+ * (both plugins are needed).
  * The form's HTML is the theme's own (its CSS is unchanged); the theme creates the form once, so installing the two plugins
  * is all a site needs. Without them the theme keeps its email-draft form. Spam protection (Cloudflare Turnstile) is
  * switched on in Contact → Integration with the site's own keys.
@@ -10,10 +11,13 @@ declare(strict_types=1);
 
 const BL_ENQUIRY_EMAIL = 'info@boblift.com';
 
-/** The form CF7 renders for the theme, or 0 when CF7 is not active (or its form has been deleted). */
+/**
+ * The form CF7 renders for the theme, or 0 when CF7 or Flamingo is not active (or the form has been deleted). Flamingo is
+ * required because CF7 alone keeps nothing: an enquiry whose email failed would be lost, and the privacy page promises a copy.
+ */
 function bl_wp_inquiry_form_id(): int
 {
-    if (!class_exists('WPCF7_ContactForm')) return 0;
+    if (!class_exists('WPCF7_ContactForm') || !class_exists('Flamingo_Inbound_Message')) return 0;
     $id = (int) get_option('bl_inquiry_form');
     return $id && get_post_type($id) === 'wpcf7_contact_form' && get_post_status($id) === 'publish' ? $id : 0;
 }
@@ -47,7 +51,7 @@ HTML;
 
 /** Create the form the first time an administrator opens the admin with CF7 active. An edited form is never overwritten. */
 add_action('admin_init', static function (): void {
-    if (!class_exists('WPCF7_ContactForm') || bl_wp_inquiry_form_id() || !current_user_can('manage_options')) return;
+    if (!class_exists('WPCF7_ContactForm') || !class_exists('Flamingo_Inbound_Message') || bl_wp_inquiry_form_id() || !current_user_can('manage_options')) return;
     $known = get_posts(['post_type' => 'wpcf7_contact_form', 'post_status' => 'publish', 'meta_key' => '_bl_inquiry', 'meta_value' => '1', 'numberposts' => 1, 'fields' => 'ids']);
     if ($known) {
         update_option('bl_inquiry_form', (int) $known[0]);
@@ -81,8 +85,12 @@ add_action('admin_init', static function (): void {
     }
 });
 
-// The theme lays the form out itself: no paragraph wrapping of its markup and no CF7 sample styling of the fields.
-add_filter('wpcf7_autop_or_not', '__return_false');
+// The theme lays its own form out itself, so CF7 must not wrap its markup in paragraphs; other forms keep their setting.
+add_filter('wpcf7_autop_or_not', static function (bool $autop, $options = []): bool {
+    if (($options['for'] ?? 'form') !== 'form') return $autop;
+    $form = WPCF7_ContactForm::get_current();
+    return $form && $form->id() === bl_wp_inquiry_form_id() ? false : $autop;
+}, 10, 2);
 
 // A field only a script fills in: anything in it means a bot filled every box.
 add_filter('wpcf7_spam', static fn(bool $spam): bool => $spam || trim((string) ($_POST['bl_website'] ?? '')) !== '');
