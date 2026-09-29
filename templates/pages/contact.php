@@ -4,7 +4,7 @@ $selectedFamily = $selectedRecord && $selectedRecord['category'] === 'mini-dumpe
 $requestedApplication = bl_query('application');
 $validApplications = array_column($applications, 'title');
 $applicationName = in_array($requestedApplication, $validApplications, true) ? $requestedApplication : '';
-if (!$selectedRecord && $applicationName === 'Material transport') $selectedFamily = 'dumper';
+if (!$selectedRecord && $applicationName !== '' && ($applications[array_search($applicationName, $validApplications, true)]['product'] ?? '') === 'dumper') $selectedFamily = 'dumper';
 // Family pages link here with ?equipment=loader|dumper so the right equipment is already chosen.
 if (!$selectedRecord && bl_query('equipment') === 'dumper') $selectedFamily = 'dumper';
 // The Support page and its FAQ link here with ?topic=service: an owner asking about parts or a fault.

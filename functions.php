@@ -2,6 +2,7 @@
 declare(strict_types=1);
 defined('ABSPATH') || exit;
 require_once __DIR__ . '/inc/helpers.php';
+require_once __DIR__ . '/inc/content.php';
 require_once __DIR__ . '/inc/editable.php';
 require_once __DIR__ . '/inc/wordpress.php';
 require_once __DIR__ . '/inc/wp-admin.php';

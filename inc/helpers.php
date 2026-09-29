@@ -282,7 +282,7 @@ function bl_news_card(array $article): void
 
 function bl_application_slug(array $application): string
 {
-    return strtolower(str_replace(' ', '-', $application['title']));
+    return $application['slug'] ?? strtolower(str_replace(' ', '-', $application['title']));
 }
 
 /**

@@ -217,9 +217,74 @@ function bl_support_default_faq(): array
     return $items;
 }
 
+/**
+ * The Applications list page and the three application pages. The three jobs start from the records in inc/content.php
+ * (also read by the home page tiles, the contact form and site search); each job's URL is fixed, its words are not.
+ */
+function bl_applications_defaults(): array
+{
+    global $bl_application_base;
+    $jobs = [];
+    foreach ($bl_application_base as $app) {
+        $checks = [];
+        foreach ($app['checks'] as $check) $checks[] = ['title' => $check['title'], 'text' => $check['text'], 'measure' => $check['measure'], 'link_label' => $check['link'][1] ?? '', 'link_url' => $check['link'][0] ?? ''];
+        $jobs[bl_application_slug($app)] = ['title' => $app['title'], 'subtitle' => $app['subtitle'], 'description' => $app['description'], 'image' => '', 'alt' => $app['alt'], 'checks' => $checks];
+    }
+    return [
+        'seo' => [
+            'title' => 'Compact Equipment Applications',
+            'description' => 'Find BOB-LIFT equipment for landscaping, site preparation and material transport. Explore application requirements and relevant product families.',
+        ],
+        'hero' => [
+            'line1' => 'YOUR WORK.',
+            'line2' => 'OUR STARTING',
+            'line3' => 'POINT.',
+            'text' => 'Every job has one number that decides the machine. Start with the job, and we will point you to the models that suit it.',
+            'link' => 'Before you enquire',
+        ],
+        'send' => [
+            'eyebrow' => 'BEFORE YOU ENQUIRE',
+            'title' => "TELL US ABOUT\n*THE SITE.*",
+            'text' => 'With these four answers, our team can suggest a model and configuration in its first reply instead of starting with questions.',
+            'items' => [
+                ['title' => 'The narrowest opening', 'text' => 'Gate, side passage, doorway or ramp: the tightest point between the road and the work, in millimetres.'],
+                ['title' => 'The heaviest load', 'text' => 'What you will move and roughly how much at a time, per bucket or per trip.'],
+                ['title' => 'The ground', 'text' => 'Lawn, soil, gravel, paving or concrete, and the steepest slope the machine will climb.'],
+                ['title' => 'Photos of the route', 'text' => 'A few pictures of the way in and the work area answer most of our questions before we ask them.'],
+            ],
+        ],
+        'jobs' => $jobs,
+    ];
+}
+
+/** $applications with the words and pictures an editor saved laid over the theme's own; a cleared field falls back to the theme's. */
+function bl_apply_application_content(array $applications): array
+{
+    $jobs = bl_editable('applications')['jobs'];
+    foreach ($applications as &$app) {
+        $slug = bl_application_slug($app);
+        $app['slug'] = $slug;
+        $job = $jobs[$slug] ?? null;
+        if (!is_array($job)) continue;
+        foreach (['title', 'subtitle', 'description', 'alt', 'image'] as $key) if (($job[$key] ?? '') !== '') $app[$key] = $job[$key];
+        $checks = [];
+        foreach ((array) ($job['checks'] ?? []) as $check) {
+            $item = ['title' => (string) ($check['title'] ?? ''), 'text' => (string) ($check['text'] ?? ''), 'measure' => (string) ($check['measure'] ?? '')];
+            if (($check['link_url'] ?? '') !== '' && ($check['link_label'] ?? '') !== '') $item['link'] = [$check['link_url'], $check['link_label']];
+            $checks[] = $item;
+        }
+        if ($checks) $app['checks'] = $checks;
+    }
+    return $applications;
+}
+
 function bl_content_defaults(string $page): array
 {
-    return $page === 'support' ? bl_support_defaults() : bl_home_defaults();
+    return match ($page) {
+        'support' => bl_support_defaults(),
+        'applications' => bl_applications_defaults(),
+        default => bl_home_defaults(),
+    };
 }
 
 /** A page's content: the defaults with the editor's saved changes laid over them. */

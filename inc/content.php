@@ -26,5 +26,7 @@ $applications = [
         ]],
 ];
 
+// The theme's own records, kept as written: they are the defaults of the 应用场景 content screen (inc/editable.php).
+$GLOBALS['bl_application_base'] = $applications; // set through $GLOBALS: WP-CLI and some loaders include the theme inside a function
 foreach ($applications as &$item) $item['image'] = bl_asset(substr($item['image'], strlen('/assets/')));
 unset($item);
