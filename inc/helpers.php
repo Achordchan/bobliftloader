@@ -275,9 +275,33 @@ function bl_product_card(array $product, string $attributes = ''): void
     require __DIR__ . '/../templates/partials/product-card.php';
 }
 
+function bl_case_card(array $case): void
+{
+    require __DIR__ . '/../templates/partials/case-card.php';
+}
+
 function bl_news_card(array $article): void
 {
     require __DIR__ . '/../templates/partials/news-card.php';
+}
+
+/** The application cases, newest first; only $hub's own when one is named. Empty where there is no database (standalone preview). */
+function bl_application_cases(string $hub = ''): array
+{
+    $cases = bl_is_wordpress() ? bl_wp_application_cases() : [];
+    return $hub === '' ? $cases : array_values(array_filter($cases, static fn($case): bool => $case['hub'] === $hub));
+}
+
+function bl_case_url(array $case): string
+{
+    return $case['url'] ?? bl_url('/application/' . $case['slug'] . '/');
+}
+
+/** One of the three application hubs by its URL slug. */
+function bl_application_hub(string $slug): ?array
+{
+    foreach ($GLOBALS['applications'] ?? $GLOBALS['bl_application_base'] ?? [] as $application) if (bl_application_slug($application) === $slug) return $application;
+    return null;
 }
 
 function bl_application_slug(array $application): string

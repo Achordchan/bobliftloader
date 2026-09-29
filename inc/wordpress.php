@@ -14,6 +14,12 @@ function bl_register_content_types(): void
         'public' => true, 'show_in_rest' => true, 'has_archive' => 'news', 'rewrite' => ['slug' => 'news', 'with_front' => false],
         'supports' => ['title', 'editor', 'excerpt', 'thumbnail'], 'menu_icon' => 'dashicons-media-document',
     ]);
+    // A specific application (one job, one site, the machines used), written in the block editor. Its hub is a saved choice.
+    register_post_type('bl_application', [
+        'labels' => ['name' => '应用案例', 'singular_name' => '应用案例', 'add_new' => '新增案例', 'add_new_item' => '新增应用案例', 'edit_item' => '编辑应用案例', 'new_item' => '新应用案例', 'view_item' => '查看案例页', 'featured_image' => '封面图片', 'set_featured_image' => '设置封面图片', 'remove_featured_image' => '移除封面图片', 'use_featured_image' => '用作封面图片'],
+        'public' => true, 'show_in_rest' => true, 'has_archive' => false, 'rewrite' => ['slug' => 'application', 'with_front' => false],
+        'supports' => ['title', 'editor', 'excerpt', 'thumbnail'], 'menu_icon' => 'dashicons-location-alt',
+    ]);
     add_rewrite_tag('%bl_category%', '(skid-steer-loaders|mini-dumpers)');
     add_rewrite_rule('^products/(skid-steer-loaders|mini-dumpers)/?$', 'index.php?post_type=bl_product&bl_category=$matches[1]', 'top');
 }
@@ -63,6 +69,29 @@ function bl_wp_articles(): array
         if (get_the_modified_date('Y-m-d', $post) > $record['date']) $record['updated'] = get_the_modified_date('Y-m-d', $post);
         $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: bl_wp_image($record['image']);
         if (!$record['image']) $record['image'] = bl_asset('images/company/boblift-workshop-aerial-mobile.webp');
+        $result[] = $record;
+    }
+    return $result;
+}
+
+/** The application cases (each a page of its own under /application/), newest first. */
+function bl_wp_application_cases(): array
+{
+    $result = [];
+    foreach (get_posts(['post_type' => 'bl_application', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'date', 'order' => 'DESC']) as $post) {
+        $meta = get_post_meta($post->ID, '_bl_record', true);
+        $record = array_replace(['hub' => '', 'products' => [], 'facts' => []], is_array($meta) ? $meta : []);
+        $hub = bl_application_hub((string) $record['hub']);
+        $record['hub'] = $hub ? bl_application_slug($hub) : '';
+        $record['slug'] = $post->post_name;
+        $record['title'] = get_the_title($post);
+        $record['url'] = get_permalink($post);
+        $record['date'] = get_the_date('Y-m-d', $post);
+        $record['excerpt'] = $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35);
+        $record['content_html'] = apply_filters('the_content', $post->post_content);
+        if (get_the_modified_date('Y-m-d', $post) > $record['date']) $record['updated'] = get_the_modified_date('Y-m-d', $post);
+        // No cover chosen: the job's own scene picture, so a card is never empty.
+        $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: ($hub['image'] ?? bl_asset('images/app-site-prep.webp'));
         $result[] = $record;
     }
     return $result;

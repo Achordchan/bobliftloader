@@ -78,6 +78,7 @@
 .bl-site .bl-app-checks-list .bl-text-link{align-self:flex-start;margin-top:clamp(16px,1.2vw,24px)}
 
 .bl-site .bl-app-machines{padding-top:var(--sp-section)}
+.bl-site .bl-app-cases{padding-top:var(--sp-section)}
 .bl-site .bl-app-machines-head{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:clamp(32px,5vw,140px);align-items:end;padding-bottom:clamp(28px,2.4vw,56px)}
 .bl-site .bl-app-machines-head h2{margin-top:clamp(18px,1.3vw,30px);font:700 var(--fs-h2)/.9 var(--display);letter-spacing:-.01em}
 .bl-site .bl-app-machines-head p{max-width:30em;font-size:var(--fs-body);line-height:1.85;color:var(--muted);text-wrap:pretty}
@@ -128,3 +129,7 @@
   .bl-site .bl-app-plate>div{padding:18px 18px 20px}
   .bl-site .bl-app-plate dd{font-size:clamp(30px,9vw,44px);white-space:normal}
 }
+
+/* Application case page: the "similar job" box in the story side column. */
+.bl-site .bl-story-ask p{margin:0 0 18px;font-size:var(--fs-small);line-height:1.8;color:var(--muted)}
+.bl-site .bl-story-ask .bl-button{display:inline-flex}
