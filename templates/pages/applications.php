@@ -47,6 +47,6 @@ $send = $content['send'];
     </div>
   </div>
   <ol class="bl-apps-send-list">
-    <?php foreach ($send['items'] as $i => $item): ?><li class="bl-reveal"><span>0<?= $i + 1 ?></span><h3><?= bl_escape($item['title']) ?></h3><p><?= bl_escape($item['text']) ?></p></li><?php endforeach; ?>
+    <?php foreach ($send['items'] as $i => $item): ?><li class="bl-reveal"><span>0<?= $i + 1 ?></span><h3><?= bl_escape($item['title']) ?></h3><p><?= bl_rich($item['text']) ?></p></li><?php endforeach; ?>
   </ol>
 </section>

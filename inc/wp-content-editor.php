@@ -40,7 +40,7 @@ function bl_content_schema(string $page): array
                 ['key' => 'send.text', 'label' => '标题下说明', 'type' => 'textarea'],
                 ['key' => 'send.items', 'label' => '四个问题', 'type' => 'list', 'add' => '添加问题', 'summary' => ['title'], 'fields' => [
                     'title' => ['label' => '问题', 'type' => 'text'],
-                    'text' => ['label' => '说明', 'type' => 'textarea'],
+                    'text' => ['label' => '说明', 'type' => 'rich', 'help' => $rich],
                 ]],
             ]],
         ];
