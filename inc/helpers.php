@@ -285,6 +285,12 @@ function bl_news_card(array $article): void
     require __DIR__ . '/../templates/partials/news-card.php';
 }
 
+/** The enquiry form's id when the site sends enquiries through Contact Form 7; 0 for the theme's own email-draft form. */
+function bl_inquiry_form_id(): int
+{
+    return bl_is_wordpress() ? bl_wp_inquiry_form_id() : 0;
+}
+
 /** The application cases, newest first; only $hub's own when one is named. Empty where there is no database (standalone preview). */
 function bl_application_cases(string $hub = ''): array
 {

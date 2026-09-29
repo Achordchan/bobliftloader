@@ -170,7 +170,7 @@ class WebsiteTests(unittest.TestCase):
         _, html, _ = fetch('/products/skid-steer-loaders/')
         self.assertIn('<h2><a href="/product/bl-t360-h-mini-skid-steer-loader/">BL-T360-H</a></h2><p class="bl-product-card-line">Tracked Stand-on Mini Skid Steer Loader</p>', html)
         _, html, _ = fetch('/contact/?equipment=dumper')
-        self.assertRegex(html, r'value="dumper"\s+checked')
+        self.assertRegex(html, r'value="(dumper|Mini dumper)"\s+checked')
 
     def test_header_search_index(self):
         _, html, _ = fetch('/news/')
@@ -193,10 +193,11 @@ class WebsiteTests(unittest.TestCase):
 
     def test_quote_context_and_input_escaping(self):
         _, html, _ = fetch('/contact/?product=bl-t1000-h-mini-skid-steer-loader')
-        self.assertIn('name="model" value="BL-T1000-H"', html)
+        # The theme's own form and the Contact Form 7 one write the hidden model field differently.
+        self.assertRegex(html, r'name="model" value="BL-T1000-H"|value="BL-T1000-H"[^>]*name="model"')
         self.assertIn('BL-T1000-H Tracked Stand-on Mini Skid Steer Loader', html)
         _, html, _ = fetch('/contact/?application=Material%20transport')
-        self.assertRegex(html, r'value="dumper"\s+checked')
+        self.assertRegex(html, r'value="(dumper|Mini dumper)"\s+checked')
         _, html, _ = fetch('/products/?q=%3Cscript%3Ealert(1)%3C/script%3E')
         self.assertNotIn('<script>alert(1)</script>', html)
 

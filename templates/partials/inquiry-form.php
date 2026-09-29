@@ -1,3 +1,14 @@
+<?php
+// With Contact Form 7 active the enquiry is sent and stored by the site; otherwise the form below prepares an email draft.
+if (bl_inquiry_form_id()):
+    $inquiryModel = !empty($selectedRecord) ? (string) $selectedRecord['model'] : '';
+    $inquiryFamily = $selectedFamily ?? 'loader';
+?>
+    <div class="bl-inquiry-cf7" data-model="<?= bl_escape($inquiryModel) ?>" data-model-family="<?= bl_escape($inquiryFamily) ?>">
+      <?php if (!empty($selectedRecord)): ?><p class="bl-selected-model">Enquiring about: <strong><?= bl_escape($selectedRecord['name']) ?></strong></p><?php endif; ?>
+      <?= bl_wp_inquiry_form(['product' => $inquiryFamily, 'model' => $inquiryModel, 'message' => $prefillMessage ?? '']) ?>
+    </div>
+<?php return; endif; ?>
     <form class="bl-inquiry-form" id="inquiry-form">
       <fieldset><legend>01 / YOUR EQUIPMENT</legend><?php if (!empty($selectedRecord)): ?><p class="bl-selected-model" data-model-family="<?= bl_escape($selectedFamily) ?>">Enquiring about: <strong><?= bl_escape($selectedRecord['name']) ?></strong></p><input type="hidden" name="model" value="<?= bl_escape($selectedRecord['model']) ?>" data-model-family="<?= bl_escape($selectedFamily) ?>"><?php endif; ?><div class="bl-product-choices"><label><input type="radio" name="product" value="loader" <?= ($selectedFamily ?? 'loader') === 'loader' ? 'checked' : '' ?>><span>Skid steer loader <?= bl_icon('check') ?></span></label><label><input type="radio" name="product" value="dumper" <?= ($selectedFamily ?? 'loader') === 'dumper' ? 'checked' : '' ?>><span>Mini dumper <?= bl_icon('check') ?></span></label><label><input type="radio" name="product" value="help"><span>Help me choose <?= bl_icon('check') ?></span></label><label><input type="radio" name="product" value="service" <?= ($selectedFamily ?? '') === 'service' ? 'checked' : '' ?>><span>Parts &amp; service <?= bl_icon('check') ?></span></label></div></fieldset>
       <fieldset><legend>02 / A LITTLE ABOUT YOU</legend><div class="bl-form-grid"><label>Your name <span>*</span><input name="name" required maxlength="100" autocomplete="name" placeholder="Full name"></label><label>Business email <span>*</span><input name="email" type="email" required maxlength="200" autocomplete="email" placeholder="you@company.com"></label><label>Country / region <span>*</span><input name="country" required maxlength="100" autocomplete="country-name" placeholder="Where will you use the equipment?"></label><label>Company<input name="company" maxlength="150" autocomplete="organization" placeholder="Company name"></label></div><label class="bl-message-label">Your project<textarea name="message" rows="3" maxlength="2000" placeholder="What work do you need to get done?"><?= bl_escape($prefillMessage ?? '') ?></textarea></label></fieldset>
