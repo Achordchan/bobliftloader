@@ -1,6 +1,24 @@
 import { openDialog } from './dialogs.js';
 
+// Enquiry sent through Contact Form 7: the model the visitor came from only travels with their equipment choice.
+function initializeSentInquiry(wrap) {
+  const familyLabels = { loader: 'Skid steer loader', dumper: 'Mini dumper', service: 'Parts & service' };
+  const note = wrap.querySelector('.bl-selected-model');
+  const model = wrap.querySelector('input[name="model"]');
+  const sync = () => {
+    const chosen = wrap.querySelector('input[name="product"]:checked')?.value;
+    const matches = chosen === familyLabels[wrap.dataset.modelFamily];
+    if (note) note.hidden = !matches;
+    if (model) model.value = matches ? wrap.dataset.model : '';
+  };
+  wrap.querySelectorAll('input[name="product"]').forEach((radio) => radio.addEventListener('change', sync));
+  wrap.addEventListener('wpcf7reset', () => setTimeout(sync));
+  sync();
+}
+
 export function initializeInquiry() {
+  const sent = document.querySelector('.bl-inquiry-cf7');
+  if (sent) initializeSentInquiry(sent);
   const form = document.querySelector('#inquiry-form');
   if (!form) return;
   const dialog = document.querySelector('#inquiry-dialog');
