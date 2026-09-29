@@ -1,17 +1,21 @@
-/* 网站内容 screens: image picking, list rows (fold, add, remove, reorder), the section list and unsaved-change warnings. */
+/* 网站内容 screens: folding cards (remembered per screen), image picking, list rows (fold, add, remove, reorder) and unsaved-change warnings. */
 (function () {
   'use strict';
   var form = document.querySelector('.bl-ce-form');
   if (!form) return;
-  var toc = document.querySelector('.bl-ce-toc');
+  var jump = document.querySelector('.bl-jump');
+  var cards = Array.prototype.slice.call(form.querySelectorAll('[data-bl-card]'));
+  var toggleAll = document.querySelector('[data-bl-toggle-all]');
+  var stateKey = 'bl-admin-open:' + (location.search.match(/[?&]page=([^&]*)/) || ['', ''])[1];
   var status = form.querySelector('.bl-savebar-status');
   var added = 0;
   var dirty = false;
 
   function markDirty(el) {
     var section = el.closest('.bl-ce-section');
-    var link = section && toc ? toc.querySelector('a[href="#' + section.id + '"]') : null;
+    var link = section && jump ? jump.querySelector('a[href="#' + section.id + '"]') : null;
     if (link) link.classList.add('is-dirty');
+    if (section) section.classList.add('is-dirty');
     if (dirty) return;
     dirty = true;
     form.classList.add('is-dirty');
@@ -20,7 +24,9 @@
 
   function preview(box, url) {
     var img = box.querySelector('.bl-ce-image-preview img');
+    var file = box.querySelector('.bl-ce-image-file');
     var src = url || box.dataset.fallback || '';
+    if (file) file.textContent = url ? decodeURIComponent(url.split(/[?#]/)[0].split('/').pop()) : file.dataset.default;
     box.classList.toggle('is-default', !url);
     img.hidden = !src;
     if (src) img.src = src;
@@ -113,12 +119,6 @@
     if (row) summarize(row);
   });
 
-  form.addEventListener('change', function (event) {
-    var input = event.target;
-    var box = input.closest('.bl-ce-image');
-    if (box && input.tagName === 'INPUT') preview(box, input.value.trim());
-  });
-
   // Leaving with unsaved edits asks first.
   form.addEventListener('submit', function () { dirty = false; });
   window.addEventListener('beforeunload', function (event) {
@@ -127,44 +127,53 @@
     event.returnValue = '';
   });
 
-  // The section list marks the section being read.
-  if (!toc) return;
-  var sections = Array.prototype.slice.call(form.querySelectorAll('.bl-ce-section'));
-  var links = {};
-  toc.querySelectorAll('a').forEach(function (a) { links[a.getAttribute('href').slice(1)] = a; });
-  var chosen = null;
-  var chosenAt = 0;
-  var ticking = false;
-
-  function highlight() {
-    ticking = false;
-    var active = sections[0];
-    if (chosen && Date.now() - chosenAt < 1000) {
-      active = chosen;
-    } else {
-      sections.forEach(function (section) { if (section.getBoundingClientRect().top <= 120) active = section; });
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
-        var last = sections[sections.length - 1];
-        if (last.getBoundingClientRect().top < window.innerHeight) active = last;
-      }
-    }
-    Object.keys(links).forEach(function (id) {
-      if (id === active.id) links[id].setAttribute('aria-current', 'true');
-      else links[id].removeAttribute('aria-current');
-    });
+  // Cards: saving redirects back to this screen, so the open ones are remembered for the session; a #hash opens its card.
+  function storeOpen() {
+    try {
+      sessionStorage.setItem(stateKey, JSON.stringify(cards.filter(function (card) { return card.open; }).map(function (card) { return card.id; })));
+    } catch (error) { /* private mode or a full quota: the cards still work, just forgetfully */ }
   }
 
-  toc.addEventListener('click', function (event) {
+  function syncToggleAll() {
+    if (!toggleAll) return;
+    var allOpen = cards.length > 0 && cards.every(function (card) { return card.open; });
+    toggleAll.setAttribute('aria-expanded', allOpen ? 'true' : 'false');
+    toggleAll.textContent = allOpen ? '全部收起' : '全部展开';
+  }
+
+  function openCard(id) {
+    var card = id ? document.getElementById(id) : null;
+    if (card && card.hasAttribute('data-bl-card') && !card.open) card.open = true;
+    return card;
+  }
+
+  cards.forEach(function (card) {
+    card.addEventListener('toggle', function () {
+      storeOpen();
+      syncToggleAll();
+    });
+  });
+
+  var stored = [];
+  try { stored = JSON.parse(sessionStorage.getItem(stateKey) || '[]'); } catch (error) { stored = []; }
+  if (Array.isArray(stored)) stored.forEach(openCard);
+  openCard(location.hash.slice(1));
+  syncToggleAll();
+  window.addEventListener('hashchange', function () { openCard(location.hash.slice(1)); });
+
+  if (toggleAll) toggleAll.addEventListener('click', function () {
+    var open = toggleAll.getAttribute('aria-expanded') !== 'true';
+    cards.forEach(function (card) { card.open = open; });
+  });
+
+  // A jump link opens its card first, then scrolls to it.
+  if (jump) jump.addEventListener('click', function (event) {
     var link = event.target.closest('a');
     if (!link) return;
-    chosen = document.getElementById(link.getAttribute('href').slice(1));
-    chosenAt = Date.now();
-    highlight();
+    var card = openCard(link.getAttribute('href').slice(1));
+    if (!card) return;
+    event.preventDefault();
+    card.scrollIntoView({ behavior: 'auto', block: 'start' });
+    history.replaceState(null, '', link.getAttribute('href'));
   });
-  window.addEventListener('scroll', function () {
-    if (ticking) return;
-    ticking = true;
-    window.requestAnimationFrame(highlight);
-  }, { passive: true });
-  highlight();
 })();

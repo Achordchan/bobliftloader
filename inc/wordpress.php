@@ -20,7 +20,7 @@ function bl_register_content_types(): void
 
 function bl_wp_image(string $path): string
 {
-    return str_starts_with($path, 'images/') ? bl_asset($path) : esc_url_raw($path);
+    return str_starts_with($path, 'images/') || str_starts_with($path, 'videos/') ? bl_asset($path) : esc_url_raw($path);
 }
 
 function bl_wp_products(): array

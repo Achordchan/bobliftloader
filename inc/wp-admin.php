@@ -83,6 +83,34 @@ function bl_admin_row_tools(): string
     return '<span class="bl-row-tools">' . bl_admin_tool('up', 'arrow-up-alt2', '上移') . bl_admin_tool('down', 'arrow-down-alt2', '下移') . bl_admin_tool('remove', 'trash', '删除') . '</span>';
 }
 
+/** Card titles carry the front page's own numbering ("01 产品系列"); the card shows its own step number, so the prefix goes. */
+function bl_admin_card_title(string $title): string
+{
+    return (string) preg_replace('/^\d{2}\s+/', '', $title);
+}
+
+/** The head of a folded card: step number, title, one line of what is inside, and how many fields were changed. */
+function bl_admin_card_head(int $number, string $title, string $meta, int $changed): string
+{
+    return '<h2 class="bl-card-title"><span class="bl-card-num">' . $number . '</span><span class="bl-card-name">' . esc_html(bl_admin_card_title($title)) . '</span>'
+        . '<span class="bl-card-meta">' . esc_html($meta) . '</span></h2>'
+        . ($changed ? '<span class="bl-chip bl-chip-info">已修改 ' . $changed . ' 项</span>' : '') . '<span class="bl-chip bl-chip-warn bl-dirty-chip">未保存</span>';
+}
+
+/**
+ * A file chosen only from the media library: name (and a thumbnail for images), a pick button and a remove button. The
+ * address itself lives in a hidden field, so nobody types or pastes one; a theme path already stored (images/…) still
+ * shows and is kept until the file is replaced or removed.
+ */
+function bl_admin_media(string $name, string $value, string $type = 'image', string $empty = '未选择'): string
+{
+    $file = $value !== '' ? wp_basename((string) parse_url($value, PHP_URL_PATH)) : '';
+    $thumb = $type === 'image' ? '<span class="bl-media-thumb">' . ($value !== '' ? '<img src="' . esc_url(bl_wp_image($value)) . '" alt="">' : '') . '</span>' : '';
+    return '<div class="bl-media" data-bl-media="' . esc_attr($type) . '" data-empty="' . esc_attr($empty) . '">' . $thumb . '<div class="bl-media-side"><span class="bl-media-name' . ($file === '' ? ' is-empty' : '') . '">' . esc_html($file !== '' ? $file : $empty) . '</span>'
+        . '<span class="bl-media-buttons"><button type="button" class="button" data-bl="pick">' . ($type === 'video' ? '从媒体库选择视频' : '从媒体库选择图片') . '</button><button type="button" class="button-link bl-media-clear" data-bl="clear-media"' . ($file === '' ? ' hidden' : '') . '>移除</button></span></div>'
+        . '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '"></div>';
+}
+
 function bl_product_basics_box(WP_Post $post): void
 {
     $record = bl_admin_record($post);
@@ -128,14 +156,12 @@ function bl_product_images_box(WP_Post $post): void
 {
     $record = bl_admin_record($post);
     $image = (string) ($record['image'] ?? '');
-    $preview = $image ? '<img class="bl-image-preview" src="' . esc_url(bl_wp_image($image)) . '" alt="">' : '';
-    bl_admin_field('主图地址', 'bl-image', bl_admin_input('bl-image', 'bl_record[image]', $image, 'text', ' class="regular-text code"') . $preview, '产品页大图和产品卡片用的图片。右侧“产品主图”设置了就优先用它；没设置时用这里：填图片网址或主题里的 <code>images/</code> 路径。');
+    bl_admin_field('主图', '', bl_admin_media('bl_record[image]', $image), '产品页大图和产品卡片用的图片。右侧“产品主图”设置了就优先用它；没设置时用这里。');
     $items = '';
     foreach ((array) ($record['gallery'] ?? []) as $path) $items .= bl_product_gallery_item((string) $path);
     $control = '<ul class="bl-gallery" data-bl-gallery data-bl-base="' . esc_url(get_template_directory_uri() . '/assets/') . '">' . $items . '</ul>'
         . '<template data-bl-template="gallery">' . bl_product_gallery_item('') . '</template>'
-        . '<div class="bl-gallery-add"><button type="button" class="button" data-bl="media-gallery"><span class="dashicons dashicons-images-alt2" aria-hidden="true"></span> 从媒体库添加</button>'
-        . '<span class="bl-gallery-or">或</span><input type="text" class="regular-text code" data-bl-gallery-path aria-label="图片网址或 images/ 路径" placeholder="图片网址或 images/… 路径"><button type="button" class="button" data-bl="add-path">添加</button></div>';
+        . '<div class="bl-gallery-add"><button type="button" class="button" data-bl="media-gallery"><span class="dashicons dashicons-images-alt2" aria-hidden="true"></span> 从媒体库添加</button></div>';
     bl_admin_field('图库', '', $control, '图库有两张及以上时，产品页大图旁显示缩略图，点击切换；通常把主图也放在第一张。最多 12 张，可用箭头调整顺序或拖动排序。');
 }
 
@@ -173,7 +199,7 @@ function bl_news_image_box(WP_Post $post): void
     $record = bl_admin_record($post);
     echo '<div class="bl-field-stack">';
     bl_admin_field('图片说明', 'bl-caption', bl_admin_input('bl-caption', 'bl_record[caption]', (string) ($record['caption'] ?? '')), '英文，显示在文章顶部大图下方。');
-    bl_admin_field('备用图片', 'bl-image', bl_admin_input('bl-image', 'bl_record[image]', (string) ($record['image'] ?? ''), 'text', ' class="code"'), '只有没设置上面的“封面图片”时才用：填图片网址或主题里的 <code>images/</code> 路径。');
+    bl_admin_field('备用图片', '', bl_admin_media('bl_record[image]', (string) ($record['image'] ?? '')), '只有没设置上面的“封面图片”时才用。');
     echo '</div>';
 }
 
