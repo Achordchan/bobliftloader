@@ -292,6 +292,12 @@ function bl_application_cases(string $hub = ''): array
     return $hub === '' ? $cases : array_values(array_filter($cases, static fn($case): bool => $case['hub'] === $hub));
 }
 
+/** The rendered body of a case, only for the case page itself. */
+function bl_application_case_content(array $case): string
+{
+    return bl_is_wordpress() ? bl_wp_application_case_content((int) ($case['id'] ?? 0)) : '';
+}
+
 function bl_case_url(array $case): string
 {
     return $case['url'] ?? bl_url('/application/' . $case['slug'] . '/');

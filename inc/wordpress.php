@@ -78,23 +78,32 @@ function bl_wp_articles(): array
 function bl_wp_application_cases(): array
 {
     $result = [];
-    foreach (get_posts(['post_type' => 'bl_application', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'date', 'order' => 'DESC']) as $post) {
+    // Password-protected cases are left out: the site has no password form, so they must not be listed, searched or shown.
+    foreach (get_posts(['post_type' => 'bl_application', 'post_status' => 'publish', 'has_password' => false, 'numberposts' => -1, 'orderby' => 'date', 'order' => 'DESC']) as $post) {
         $meta = get_post_meta($post->ID, '_bl_record', true);
         $record = array_replace(['hub' => '', 'products' => [], 'facts' => []], is_array($meta) ? $meta : []);
         $hub = bl_application_hub((string) $record['hub']);
         $record['hub'] = $hub ? bl_application_slug($hub) : '';
+        $record['id'] = $post->ID;
         $record['slug'] = $post->post_name;
         $record['title'] = get_the_title($post);
         $record['url'] = get_permalink($post);
         $record['date'] = get_the_date('Y-m-d', $post);
-        $record['excerpt'] = $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35);
-        $record['content_html'] = apply_filters('the_content', $post->post_content);
+        // The list carries no rendered body (every page reads it for cards and search); the case page renders its own.
+        $record['excerpt'] = $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags(strip_shortcodes($post->post_content)), 35);
         if (get_the_modified_date('Y-m-d', $post) > $record['date']) $record['updated'] = get_the_modified_date('Y-m-d', $post);
         // No cover chosen: the job's own scene picture, so a card is never empty.
         $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: ($hub['image'] ?? bl_asset('images/app-site-prep.webp'));
         $result[] = $record;
     }
     return $result;
+}
+
+/** One case's body, rendered by WordPress (blocks, embeds, shortcodes). Empty for a protected or missing case. */
+function bl_wp_application_case_content(int $id): string
+{
+    $post = get_post($id);
+    return $post && $post->post_type === 'bl_application' && $post->post_status === 'publish' && !post_password_required($post) ? apply_filters('the_content', $post->post_content) : '';
 }
 
 function bl_page_editor_content(): string

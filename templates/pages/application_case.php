@@ -27,7 +27,8 @@ $older = $all[$index + 1] ?? null;
   <div class="bl-story-layout">
     <div class="bl-story-main">
       <figure class="bl-story-figure"><img src="<?= bl_escape($case['image']) ?>" alt="<?= bl_escape($case['title']) ?>" width="1500" height="900" fetchpriority="high"></figure>
-      <div class="bl-story-text"><div class="bl-wp-article-content"><?= wp_kses_post($case['content_html']) ?></div></div>
+      <?php /* The body is WordPress's own rendering of what an editor saved (blocks, embeds), echoed as the_content() does. */ ?>
+      <div class="bl-story-text"><div class="bl-wp-article-content"><?= $case['content_html'] ?></div></div>
     </div>
 
     <aside class="bl-story-aside" aria-label="About this application">

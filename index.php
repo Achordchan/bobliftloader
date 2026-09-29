@@ -15,7 +15,8 @@ if (!bl_is_wordpress() && $route['status'] === 200) {
         exit;
     }
 }
-http_response_code($route['status']);
+// WordPress has already sent its own status (200 for a post it found, even one this theme will not show); status_header() replaces it.
+if (bl_is_wordpress()) status_header($route['status']); else http_response_code($route['status']);
 ?>
 <!doctype html>
 <html lang="en">
