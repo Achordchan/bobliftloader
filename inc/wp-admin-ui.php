@@ -41,7 +41,7 @@ add_action('admin_bar_menu', static function (WP_Admin_Bar $bar): void {
 }, 99);
 
 add_filter('custom_menu_order', '__return_true');
-add_filter('menu_order', static fn(): array => ['index.php', 'separator1', 'bl-content-home', 'edit.php?post_type=bl_product', 'edit.php?post_type=bl_news', 'edit.php?post_type=page', 'upload.php', 'separator2', 'themes.php', 'plugins.php', 'users.php', 'tools.php', 'options-general.php', 'separator-last']);
+add_filter('menu_order', static fn(): array => ['index.php', 'separator1', 'bl-content-home', 'edit.php?post_type=bl_product', 'edit.php?post_type=bl_news', 'edit.php?post_type=bl_application', 'edit.php?post_type=page', 'upload.php', 'separator2', 'themes.php', 'plugins.php', 'users.php', 'tools.php', 'options-general.php', 'separator-last']);
 
 /** A post's saved record, or [] — the list columns read it and never write. */
 function bl_list_record(int $postId): array
@@ -51,17 +51,17 @@ function bl_list_record(int $postId): array
 }
 
 // WordPress fills unset labels with "文章" wording ("搜索文章", "查看文章"); name the product and news lists properly.
-foreach (['bl_product' => '产品', 'bl_news' => '新闻'] as $bl_type => $bl_noun) {
+foreach (['bl_product' => '产品', 'bl_news' => '新闻', 'bl_application' => '应用案例'] as $bl_type => $bl_noun) {
     add_filter('post_type_labels_' . $bl_type, static function (object $labels) use ($bl_noun): object {
         foreach (['search_items' => '搜索' . $bl_noun, 'not_found' => '没有找到' . $bl_noun, 'not_found_in_trash' => '回收站里没有' . $bl_noun, 'view_items' => '查看全部' . $bl_noun, 'all_items' => '全部' . $bl_noun] as $key => $value) $labels->$key = $value;
         return $labels;
     });
 }
 unset($bl_type, $bl_noun);
-add_filter('disable_months_dropdown', static fn(bool $disable, string $postType): bool => $disable || $postType === 'bl_product', 10, 2);
+add_filter('disable_months_dropdown', static fn(bool $disable, string $postType): bool => $disable || in_array($postType, ['bl_product', 'bl_application'], true), 10, 2);
 
 const BL_LIST_PRODUCT_CATEGORIES = ['skid-steer-loaders' => '滑移装载机', 'mini-dumpers' => '迷你翻斗车'];
-const BL_LIST_NEWS_CATEGORIES = ['product-news' => '产品新闻', 'customer-stories' => '应用案例', 'industry-news' => '行业新闻'];
+const BL_LIST_NEWS_CATEGORIES = ['product-news' => '产品新闻', 'customer-stories' => '客户故事', 'industry-news' => '行业新闻'];
 
 add_filter('manage_bl_product_posts_columns', static fn(array $columns): array => ['cb' => $columns['cb'], 'bl_thumb' => '<span class="screen-reader-text">图片</span>', 'title' => '产品名称', 'bl_model' => '型号', 'bl_category' => '分类', 'bl_load' => '额定载荷', 'menu_order' => '排序']);
 add_filter('manage_edit-bl_product_sortable_columns', static fn(array $columns): array => $columns + ['menu_order' => 'menu_order']);
@@ -130,6 +130,46 @@ add_action('manage_bl_news_posts_custom_column', static function (string $column
     }
 }, 10, 2);
 
+add_filter('manage_bl_application_posts_columns', static function (array $columns): array {
+    $date = $columns['date'];
+    unset($columns['date']);
+    return $columns + ['bl_hub' => '所属应用', 'bl_place' => '地点', 'bl_machines' => '使用机型', 'date' => $date];
+});
+
+add_action('manage_bl_application_posts_custom_column', static function (string $column, int $postId): void {
+    $record = bl_list_record($postId);
+    if ($column === 'bl_hub') {
+        $hubs = bl_case_hubs();
+        echo isset($hubs[$record['hub'] ?? '']) ? esc_html($hubs[$record['hub']]) : '<span class="bl-muted">未归类</span>';
+    } elseif ($column === 'bl_place') {
+        echo ($record['facts']['location'] ?? '') !== '' ? esc_html((string) $record['facts']['location']) : '—';
+    } elseif ($column === 'bl_machines') {
+        $names = [];
+        foreach ((array) ($record['products'] ?? []) as $slug) if ($product = get_page_by_path((string) $slug, OBJECT, 'bl_product')) $names[] = (string) (bl_list_record($product->ID)['model'] ?? '') ?: get_the_title($product);
+        echo $names ? esc_html(implode('、', $names)) : '—';
+    }
+}, 10, 2);
+
+add_action('restrict_manage_posts', static function (string $postType): void {
+    if ($postType !== 'bl_application') return;
+    $current = sanitize_key(wp_unslash($_GET['bl_hub'] ?? ''));
+    echo '<label class="screen-reader-text" for="bl-hub-filter">按应用筛选</label><select name="bl_hub" id="bl-hub-filter"><option value="">全部应用</option>';
+    foreach (bl_case_hubs() as $value => $label) echo '<option value="' . esc_attr($value) . '"' . selected($current, $value, false) . '>' . esc_html($label) . '</option>';
+    echo '</select>';
+});
+
+// The hub is kept in the saved record, so the filter picks matching cases by id.
+add_action('pre_get_posts', static function (WP_Query $query): void {
+    if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'bl_application' || ($GLOBALS['pagenow'] ?? '') !== 'edit.php') return;
+    $hub = sanitize_key(wp_unslash($_GET['bl_hub'] ?? ''));
+    if (!isset(bl_case_hubs()[$hub])) return;
+    $ids = [];
+    foreach (get_posts(['post_type' => 'bl_application', 'post_status' => array_keys(get_post_stati()), 'numberposts' => -1, 'fields' => 'ids', 'suppress_filters' => true]) as $id) {
+        if ((bl_list_record((int) $id)['hub'] ?? '') === $hub) $ids[] = (int) $id;
+    }
+    $query->set('post__in', $ids ?: [0]);
+});
+
 // Dashboard: WordPress's own welcome, quick draft, news and activity boxes say nothing about this site; site health stays.
 add_action('wp_dashboard_setup', static function (): void {
     remove_action('welcome_panel', 'wp_welcome_panel');
@@ -159,6 +199,7 @@ function bl_dashboard_widget(): void
             ['管理设备产品', 'edit.php?post_type=bl_product', 'edit_posts', '已发布 ' . $count('bl_product') . ' 款'],
             ['写一篇新闻', 'post-new.php?post_type=bl_news', 'edit_posts', ''],
             ['全部企业新闻', 'edit.php?post_type=bl_news', 'edit_posts', '已发布 ' . $count('bl_news') . ' 篇'],
+            ['写一个应用案例', 'post-new.php?post_type=bl_application', 'edit_posts', '已发布 ' . $count('bl_application') . ' 个，每个有自己的页面'],
         ],
         '图片与网站' => [
             ['媒体库', 'upload.php', 'upload_files', '上传图片、视频和 PDF'],

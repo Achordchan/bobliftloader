@@ -15,7 +15,8 @@ if (!bl_is_wordpress() && $route['status'] === 200) {
         exit;
     }
 }
-http_response_code($route['status']);
+// WordPress has already sent its own status (200 for a post it found, even one this theme will not show); status_header() replaces it.
+if (bl_is_wordpress()) status_header($route['status']); else http_response_code($route['status']);
 ?>
 <!doctype html>
 <html lang="en">
@@ -28,7 +29,7 @@ http_response_code($route['status']);
   <link rel="preload" href="<?= bl_escape(bl_asset('fonts/barlow-condensed-700.ttf')) ?>" as="font" type="font/ttf" crossorigin>
   <?php if ($route['type'] === 'home'): $heroImages = bl_home_hero_images(); ?><link rel="preload" href="<?= bl_escape($heroImages['wide']) ?>" as="image" media="(min-width: 801px)" fetchpriority="high"><link rel="preload" href="<?= bl_escape($heroImages['narrow']) ?>" as="image" media="(max-width: 800px)" fetchpriority="high"><?php endif; ?>
   <?php if ($route['type'] === 'about'): ?><link rel="preload" as="image" imagesrcset="<?= bl_escape(bl_asset('images/about/hall-1200.webp')) ?> 1200w, <?= bl_escape(bl_asset('images/about/hall-2560.webp')) ?> 2560w" imagesizes="100vw" fetchpriority="high"><?php endif; ?>
-  <?php foreach (['base', 'home', 'components', 'responsive', 'pages', 'page-responsive', ...($route['type'] === 'about' ? ['about'] : []), ...(in_array($route['type'], ['applications', 'application'], true) ? ['applications'] : []), ...(in_array($route['type'], ['news', 'article'], true) ? ['news'] : [])] as $stylesheet): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset('css/' . $stylesheet . '.css')) ?>"><?php endforeach; ?>
+  <?php foreach (['base', 'home', 'components', 'responsive', 'pages', 'page-responsive', ...($route['type'] === 'about' ? ['about'] : []), ...(in_array($route['type'], ['applications', 'application', 'application_case'], true) ? ['applications'] : []), ...(in_array($route['type'], ['news', 'article', 'application_case'], true) ? ['news'] : [])] as $stylesheet): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset('css/' . $stylesheet . '.css')) ?>"><?php endforeach; ?>
   <script type="module" src="<?= bl_escape(bl_asset('js/main.js')) ?>"></script>
   <?php if (bl_is_wordpress()) wp_head(); ?>
   <?php /* Support page, and the parts of it that product and family pages share (attachments, videos, spec-sheet print). */ if (in_array($route['type'], ['support', 'products', 'product'], true)): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset('css/support.css')) ?>"><?php endif; ?>

@@ -71,8 +71,17 @@ usort($family, static fn($a, $b) => [$order['sort']($a), $a['model']] <=> [$orde
   <div class="bl-product-grid"><?php foreach (array_slice($family, 0, 3) as $product) bl_product_card($product); ?></div>
 </section>
 
+<?php $cases = bl_application_cases($slug); if ($cases): ?>
+<section class="bl-app-cases bl-shell" id="in-practice" aria-labelledby="cases-title">
+  <div class="bl-app-machines-head bl-reveal">
+    <div><p class="bl-eyebrow">03 / IN PRACTICE</p><h2 id="cases-title">REAL JOBS.<br><span class="bl-blue-text"><?= bl_escape(strtoupper($application['title'])) ?>.</span></h2></div>
+    <div><p>How BOB-LIFT equipment has been put to work on <?= bl_escape(strtolower($application['title'])) ?> jobs: the site, the machine and the result.</p></div>
+  </div>
+  <div class="bl-news-grid"><?php foreach (array_slice($cases, 0, 6) as $case) bl_case_card($case); ?></div>
+</section>
+<?php endif; ?>
 <section class="bl-app-more bl-shell" aria-labelledby="more-title">
-  <div class="bl-app-more-head bl-reveal"><div><p class="bl-eyebrow">03 / OTHER JOBS</p><h2 id="more-title">MORE WORK.<br>SAME TEAM.</h2></div><a class="bl-text-link" href="<?= bl_escape(bl_url('/products/' . $category . '/')) ?>">All <?= bl_escape(strtolower($familyLabel)) ?> <?= bl_icon('arrow-up-right') ?></a></div>
+  <div class="bl-app-more-head bl-reveal"><div><p class="bl-eyebrow"><?= $cases ? '04' : '03' ?> / OTHER JOBS</p><h2 id="more-title">MORE WORK.<br>SAME TEAM.</h2></div><a class="bl-text-link" href="<?= bl_escape(bl_url('/products/' . $category . '/')) ?>">All <?= bl_escape(strtolower($familyLabel)) ?> <?= bl_icon('arrow-up-right') ?></a></div>
   <ul class="bl-app-more-list">
     <?php foreach ($others as $other): $focus = bl_application_focus($other); ?>
     <li class="bl-reveal"><a href="<?= bl_escape(bl_url('/applications/' . bl_application_slug($other) . '/')) ?>">

@@ -28,6 +28,12 @@ add_action('add_meta_boxes_bl_news', static function (): void {
     add_meta_box('bl-news-event', '展会 / 活动', 'bl_news_event_box', 'bl_news', 'normal', 'high');
 });
 
+add_action('add_meta_boxes_bl_application', static function (): void {
+    add_meta_box('bl-case-hub', '所属应用', 'bl_case_hub_box', 'bl_application', 'side', 'high');
+    add_meta_box('bl-case-products', '使用的机型', 'bl_case_products_box', 'bl_application', 'side', 'default');
+    add_meta_box('bl-case-facts', '项目概况', 'bl_case_facts_box', 'bl_application', 'normal', 'high');
+});
+
 // The product boxes sit between the title and the description editor, in the order the page is built.
 add_action('edit_form_after_title', static function (WP_Post $post): void {
     if ($post->post_type !== 'bl_product') return;
@@ -38,7 +44,7 @@ add_action('edit_form_after_title', static function (WP_Post $post): void {
 
 add_action('admin_enqueue_scripts', static function (string $hook): void {
     $screen = get_current_screen();
-    if (!in_array($hook, ['post.php', 'post-new.php'], true) || !$screen || !in_array($screen->post_type, ['bl_product', 'bl_news'], true)) return;
+    if (!in_array($hook, ['post.php', 'post-new.php'], true) || !$screen || !in_array($screen->post_type, ['bl_product', 'bl_news', 'bl_application'], true)) return;
     $dir = get_template_directory();
     $uri = get_template_directory_uri();
     wp_enqueue_style('bl-post-edit', $uri . '/assets/admin/post-edit.css', ['bl-admin'], (string) filemtime($dir . '/assets/admin/post-edit.css'));
@@ -188,7 +194,7 @@ function bl_news_section_box(WP_Post $post): void
     $record['line'] = bl_news_line($record, $post->post_name); // the same line the site shows, so saving keeps it
     wp_nonce_field('bl_save_record', 'bl_record_nonce');
     echo '<div class="bl-field-stack">';
-    bl_admin_field('分类', 'bl-category', bl_admin_select('bl-category', 'bl_record[category]', ['' => '不归入栏目', 'product-news' => '产品新闻 Product news', 'customer-stories' => '应用案例 Customer stories', 'industry-news' => '行业新闻 Industry news'], bl_news_category($record)), '“不归入栏目”的文章只出现在“全部”里。');
+    bl_admin_field('分类', 'bl-category', bl_admin_select('bl-category', 'bl_record[category]', ['' => '不归入栏目', 'product-news' => '产品新闻 Product news', 'customer-stories' => '客户故事 Customer stories', 'industry-news' => '行业新闻 Industry news'], bl_news_category($record)), '“不归入栏目”的文章只出现在“全部”里。');
     bl_admin_field('归属', 'bl-line', bl_admin_select('bl-line', 'bl_record[line]', ['compact' => '紧凑设备（本站新闻）', 'group' => 'BOB-LIFT 集团'], $record['line']), '集团新闻（起重机等）在列表中标注 BOB-LIFT group，并且不归入任何栏目。');
     bl_admin_field('原文网址', 'bl-source', bl_admin_input('bl-source', 'bl_record[source]', (string) ($record['source'] ?? ''), 'url', ' class="code"'), '转载时填写原文地址，文章页会显示原文链接；原创留空。');
     echo '</div>';
@@ -205,8 +211,14 @@ function bl_news_image_box(WP_Post $post): void
 
 function bl_news_products_box(WP_Post $post): void
 {
+    bl_admin_product_checklist($post, '勾选的产品显示在文章右侧栏。');
+}
+
+/** Every published product as a checkbox, grouped by family; the ticked ones are saved as the post's related products. */
+function bl_admin_product_checklist(WP_Post $post, string $intro): void
+{
     $chosen = (array) (bl_admin_record($post)['products'] ?? []);
-    echo '<p class="bl-field-help bl-box-intro">勾选的产品显示在文章右侧栏。</p>';
+    echo '<p class="bl-field-help bl-box-intro">' . esc_html($intro) . '</p>';
     $groups = ['skid-steer-loaders' => ['滑移装载机', ''], 'mini-dumpers' => ['迷你翻斗车', '']];
     foreach (get_posts(['post_type' => 'bl_product', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'menu_order title', 'order' => 'ASC']) as $product) {
         $meta = get_post_meta($product->ID, '_bl_record', true);
@@ -217,6 +229,37 @@ function bl_news_products_box(WP_Post $post): void
     echo '<div class="bl-checklist">';
     foreach ($groups as [$title, $items]) if ($items) echo '<p class="bl-subgroup-title">' . esc_html($title) . '</p><ul>' . $items . '</ul>';
     echo '</div>';
+}
+
+/** The three application hubs an application case can belong to: slug => title (the theme's own names). */
+function bl_case_hubs(): array
+{
+    $hubs = [];
+    foreach ($GLOBALS['bl_application_base'] ?? [] as $application) $hubs[bl_application_slug($application)] = $application['title'];
+    return $hubs;
+}
+
+function bl_case_hub_box(WP_Post $post): void
+{
+    $record = bl_admin_record($post);
+    wp_nonce_field('bl_save_record', 'bl_record_nonce');
+    echo '<div class="bl-field-stack">';
+    bl_admin_field('应用类别', 'bl-case-hub-select', bl_admin_select('bl-case-hub-select', 'bl_record[hub]', ['' => '不归入具体类别'] + bl_case_hubs(), (string) ($record['hub'] ?? '')), '案例显示在这个应用页的“In practice”里，面包屑也挂在它下面；不选则只出现在应用总页。');
+    echo '</div>';
+}
+
+function bl_case_products_box(WP_Post $post): void
+{
+    bl_admin_product_checklist($post, '勾选的机型显示在案例右侧栏“Machines used”，询价按钮也会带上第一款。');
+}
+
+function bl_case_facts_box(WP_Post $post): void
+{
+    $facts = (array) (bl_admin_record($post)['facts'] ?? []);
+    echo '<p class="bl-box-intro">案例页右侧栏的“At a glance”，用英文填；留空的项不显示。正文在上面的编辑器里写，封面图用右侧“封面图片”。</p>';
+    foreach (['location' => ['地点', 'Bavaria, Germany', ''], 'customer' => ['客户类型', 'Landscaping contractor', ''], 'task' => ['工作内容', 'Terrace levelling and gravel spreading', ''], 'site' => ['场地条件', 'Garden gate 900 mm wide, soft ground', '最窄通道、地面情况等。'], 'duration' => ['工期', '3 days', ''], 'result' => ['成果', 'Finished a day ahead of plan', '']] as $key => [$label, $placeholder, $help]) {
+        bl_admin_field($label, 'bl-fact-' . $key, bl_admin_input('bl-fact-' . $key, 'bl_record[facts][' . $key . ']', (string) ($facts[$key] ?? ''), 'text', ' class="large-text" placeholder="' . esc_attr($placeholder) . '"'), $help);
+    }
 }
 
 function bl_news_event_box(WP_Post $post): void
@@ -258,7 +301,7 @@ function bl_admin_posted_rows($value, array $fields, string $separator = '|'): a
 }
 
 add_action('save_post', static function (int $postId): void {
-    if (!in_array(get_post_type($postId), ['bl_product', 'bl_news'], true) || wp_is_post_revision($postId) || wp_is_post_autosave($postId)) return;
+    if (!in_array(get_post_type($postId), ['bl_product', 'bl_news', 'bl_application'], true) || wp_is_post_revision($postId) || wp_is_post_autosave($postId)) return;
     if (!current_user_can('edit_post', $postId) || !isset($_POST['bl_record_nonce']) || !is_string($_POST['bl_record_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['bl_record_nonce'])), 'bl_save_record')) return;
     if (!isset($_POST['bl_record']) || !is_array($_POST['bl_record'])) return;
     $input = wp_unslash($_POST['bl_record']);
@@ -291,6 +334,12 @@ add_action('save_post', static function (int $postId): void {
         // Bucket and power feed the home page ranges and excerpts, so they follow the spec rows too.
         $record['capacity'] = preg_match('/^([\d.]+)\s*m³$/u', $record['specs']['Bucket capacity'] ?? '', $matches) ? $matches[1] : '';
         $record['power'] = preg_match('/^([\d.]+)\s*kW$/i', $record['specs']['Engine power'] ?? '', $matches) ? $matches[1] : '';
+    } elseif (get_post_type($postId) === 'bl_application') {
+        $record['hub'] = isset(bl_case_hubs()[$text('hub')]) ? $text('hub') : '';
+        $known = array_map(static fn($p) => $p->post_name, get_posts(['post_type' => 'bl_product', 'post_status' => 'publish', 'numberposts' => -1]));
+        $record['products'] = array_values(array_intersect(array_map('sanitize_title', (array) ($input['products'] ?? [])), $known));
+        $record['facts'] = [];
+        foreach (['location', 'customer', 'task', 'site', 'duration', 'result'] as $key) $record['facts'][$key] = isset($input['facts'][$key]) && is_scalar($input['facts'][$key]) ? sanitize_text_field((string) $input['facts'][$key]) : '';
     } else {
         $record['category'] = isset(BL_NEWS_CATEGORIES[$text('category')]) ? $text('category') : '';
         $known = array_map(static fn($p) => $p->post_name, get_posts(['post_type' => 'bl_product', 'post_status' => 'publish', 'numberposts' => -1]));

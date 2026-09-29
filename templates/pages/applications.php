@@ -36,6 +36,15 @@ $send = $content['send'];
   <p class="bl-apps-credit bl-shell">Scenes illustrated from BOB-LIFT product photography. Figures from each model’s published specifications.</p>
 </section>
 
+<?php $recent = array_slice(bl_application_cases(), 0, 6); if ($recent): ?>
+<section class="bl-app-cases bl-shell" id="in-practice" aria-labelledby="cases-title">
+  <div class="bl-app-machines-head bl-reveal">
+    <div><p class="bl-eyebrow">IN PRACTICE</p><h2 id="cases-title">REAL JOBS.<br><span class="bl-blue-text">REAL SITES.</span></h2></div>
+    <div><p>Specific applications, written up: what the site looked like, which machine did the work and how it went.</p></div>
+  </div>
+  <div class="bl-news-grid"><?php foreach ($recent as $case) bl_case_card($case); ?></div>
+</section>
+<?php endif; ?>
 <section class="bl-apps-send bl-shell" id="before-you-enquire" aria-labelledby="send-title">
   <div class="bl-apps-send-head bl-reveal">
     <p class="bl-eyebrow"><?= bl_escape($send['eyebrow']) ?></p>

@@ -32,11 +32,23 @@ function bl_resolve_route(): array
     } elseif (preg_match('~^/news/([a-z0-9-]+)/$~', $path, $matches)) {
         $article = bl_find_record(bl_articles(), $matches[1]);
         if ($article) $route = array_replace($route, ['type' => 'article', 'title' => $article['title'], 'description' => $article['excerpt'], 'record' => $article, 'status' => 200]);
+    } elseif (preg_match('~^/application/([^/]+)/$~', $path, $matches)) {
+        // WordPress slugs can hold non-ASCII letters (stored percent-encoded) and underscores; the request path is already decoded.
+        $case = null;
+        foreach (bl_application_cases() as $candidate) if (rawurldecode($candidate['slug']) === $matches[1]) { $case = $candidate; break; }
+        if ($case) {
+            $case['content_html'] = bl_application_case_content($case);
+            $route = array_replace($route, ['type' => 'application_case', 'title' => $case['title'], 'description' => $case['excerpt'], 'record' => $case, 'status' => 200]);
+        }
     } elseif (preg_match('~^/applications/([a-z0-9-]+)/$~', $path, $matches)) {
         global $applications;
         foreach ($applications as $application) {
             if (bl_application_slug($application) === $matches[1]) $route = array_replace($route, ['type' => 'application', 'title' => $application['title'] . ' Equipment', 'description' => $application['description'], 'record' => $application, 'status' => 200]);
         }
+    }
+    // An editor's preview of a case (draft, or unsaved changes to a published one) arrives at the site root with the post id.
+    if (bl_is_wordpress() && ($case = bl_wp_application_preview())) {
+        $route = array_replace($route, ['type' => 'application_case', 'title' => $case['title'], 'description' => $case['excerpt'], 'record' => $case, 'status' => 200, 'preview' => true, 'path' => '/application/' . $case['slug'] . '/']);
     }
     if (bl_is_wordpress() && !is_404() && $route['type'] === '404' && is_singular(['page', 'post'])) {
         $post = get_queried_object();
@@ -64,6 +76,7 @@ function bl_sitemap_paths(): array
     global $applications;
     foreach ($applications as $app) $paths[] = '/applications/' . bl_application_slug($app) . '/';
     foreach (bl_products() as $product) $paths[] = '/product/' . $product['slug'] . '/';
+    foreach (bl_application_cases() as $case) $paths[] = '/application/' . $case['slug'] . '/';
     foreach (bl_articles() as $article) $paths[] = '/news/' . $article['slug'] . '/';
     return $paths;
 }
