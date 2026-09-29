@@ -31,47 +31,51 @@ function bl_wp_image(string $path): string
 
 function bl_wp_products(): array
 {
-    $result = [];
-    foreach (get_posts(['post_type' => 'bl_product', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'menu_order title', 'order' => 'ASC']) as $post) {
-        $data = get_post_meta($post->ID, '_bl_record', true);
-        if (!is_array($data)) $data = [];
-        $record = array_replace(['model' => '', 'category' => 'skid-steer-loaders', 'load' => 0, 'capacity' => '', 'power' => '', 'image' => '', 'gallery' => [], 'source' => '', 'specs' => []], $data);
-        $record['slug'] = $post->post_name;
-        $record['name'] = get_the_title($post);
-        $record['url'] = get_permalink($post);
-        $record['excerpt'] = $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35);
-        $record['content_html'] = $post->post_content ? apply_filters('the_content', $post->post_content) : '';
-        $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: bl_wp_image($record['image']);
-        $record['gallery'] = array_values(array_filter(array_map('bl_wp_image', (array) $record['gallery'])));
-        $result[] = $record;
-    }
-    return $result;
+    return array_map('bl_wp_product_record', get_posts(['post_type' => 'bl_product', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'menu_order title', 'order' => 'ASC']));
+}
+
+/** One product as the front end reads it, from a post (the saved one, or WordPress's preview copy of it). */
+function bl_wp_product_record(WP_Post $post): array
+{
+    $data = get_post_meta($post->ID, '_bl_record', true);
+    if (!is_array($data)) $data = [];
+    $record = array_replace(['model' => '', 'category' => 'skid-steer-loaders', 'load' => 0, 'capacity' => '', 'power' => '', 'image' => '', 'gallery' => [], 'source' => '', 'specs' => []], $data);
+    $record['slug'] = $post->post_name;
+    $record['name'] = get_the_title($post);
+    $record['url'] = get_permalink($post);
+    $record['excerpt'] = $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35);
+    $record['content_html'] = $post->post_content ? apply_filters('the_content', $post->post_content) : '';
+    $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: bl_wp_image($record['image']);
+    $record['gallery'] = array_values(array_filter(array_map('bl_wp_image', (array) $record['gallery'])));
+    return $record;
 }
 
 function bl_wp_articles(): array
 {
-    $result = [];
-    foreach (get_posts(['post_type' => 'bl_news', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'date', 'order' => 'DESC']) as $post) {
-        $meta = get_post_meta($post->ID, '_bl_record', true);
-        if (!is_array($meta)) $meta = [];
-        $meta['line'] = bl_news_line($meta, $post->post_name);
-        $record = array_replace(['category' => '', 'line' => 'compact', 'source' => '', 'image' => '', 'caption' => '', 'sections' => [], 'event' => [], 'poster' => [], 'products' => []], $meta);
-        if (!empty($record['poster']['image'])) $record['poster']['image'] = bl_wp_image($record['poster']['image']);
-        $record['slug'] = $post->post_name;
-        $record['title'] = get_the_title($post);
-        $record['url'] = get_permalink($post);
-        $record['date'] = get_the_date('Y-m-d', $post);
-        $record['excerpt'] = $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35);
-        $record['content_html'] = apply_filters('the_content', $post->post_content);
-        // The person who wrote it: name, job title from their profile, and avatar. No contact details are shown.
-        $author = (int) $post->post_author;
-        if ($author) $record['author'] = ['name' => get_the_author_meta('display_name', $author), 'title' => (string) get_user_meta($author, 'bl_title', true), 'avatar' => (string) get_avatar_url($author, ['size' => 128])];
-        if (get_the_modified_date('Y-m-d', $post) > $record['date']) $record['updated'] = get_the_modified_date('Y-m-d', $post);
-        $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: bl_wp_image($record['image']);
-        if (!$record['image']) $record['image'] = bl_asset('images/company/boblift-workshop-aerial-mobile.webp');
-        $result[] = $record;
-    }
-    return $result;
+    return array_map('bl_wp_article_record', get_posts(['post_type' => 'bl_news', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'date', 'order' => 'DESC']));
+}
+
+/** One news article as the front end reads it, from a post (the saved one, or WordPress's preview copy of it). */
+function bl_wp_article_record(WP_Post $post): array
+{
+    $meta = get_post_meta($post->ID, '_bl_record', true);
+    if (!is_array($meta)) $meta = [];
+    $meta['line'] = bl_news_line($meta, $post->post_name);
+    $record = array_replace(['category' => '', 'line' => 'compact', 'source' => '', 'image' => '', 'caption' => '', 'sections' => [], 'event' => [], 'poster' => [], 'products' => []], $meta);
+    if (!empty($record['poster']['image'])) $record['poster']['image'] = bl_wp_image($record['poster']['image']);
+    $record['slug'] = $post->post_name;
+    $record['title'] = get_the_title($post);
+    $record['url'] = get_permalink($post);
+    $record['date'] = get_the_date('Y-m-d', $post);
+    $record['excerpt'] = $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35);
+    $record['content_html'] = apply_filters('the_content', $post->post_content);
+    // The person who wrote it: name, job title from their profile, and avatar. No contact details are shown.
+    $author = (int) $post->post_author;
+    if ($author) $record['author'] = ['name' => get_the_author_meta('display_name', $author), 'title' => (string) get_user_meta($author, 'bl_title', true), 'avatar' => (string) get_avatar_url($author, ['size' => 128])];
+    if (get_the_modified_date('Y-m-d', $post) > $record['date']) $record['updated'] = get_the_modified_date('Y-m-d', $post);
+    $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: bl_wp_image($record['image']);
+    if (!$record['image']) $record['image'] = bl_asset('images/company/boblift-workshop-aerial-mobile.webp');
+    return $record;
 }
 
 /** The application cases (each a page of its own under /application/), newest first. */
@@ -108,17 +112,29 @@ function bl_wp_application_case_content(int $id): string
     return $post && $post->post_type === 'bl_application' && $post->post_status === 'publish' && !post_password_required($post) ? apply_filters('the_content', $post->post_content) : '';
 }
 
-/** The case an editor is previewing: only for someone allowed to edit it, and WordPress has already swapped in the unsaved copy. */
-function bl_wp_application_preview(): ?array
+/**
+ * What an editor is previewing: a product, news article or application case, only for someone allowed to edit it. WordPress
+ * has already swapped in the unsaved copy (the draft itself, or the autosave of a published post).
+ */
+function bl_wp_preview(): ?array
 {
-    if (!is_preview() || !is_singular('bl_application')) return null;
+    if (!is_preview() || !is_singular(['bl_product', 'bl_news', 'bl_application'])) return null;
     $post = get_queried_object();
     if (!$post instanceof WP_Post || !current_user_can('edit_post', $post->ID)) return null;
-    $case = bl_wp_application_record($post);
     // A draft has no name yet, so the address it will get is not final; the preview is never linked or indexed.
-    $case['slug'] = $post->post_name ?: (string) $post->ID;
-    $case['content_html'] = apply_filters('the_content', $post->post_content);
-    return $case;
+    $slug = $post->post_name ?: (string) $post->ID;
+    if ($post->post_type === 'bl_product') {
+        $record = bl_wp_product_record($post);
+        return ['type' => 'product', 'title' => $record['name'] . ($record['model'] ? ' | ' . $record['model'] : ''), 'record' => $record, 'path' => '/product/' . $slug . '/'];
+    }
+    if ($post->post_type === 'bl_news') {
+        $record = bl_wp_article_record($post);
+        return ['type' => 'article', 'title' => $record['title'], 'record' => $record, 'path' => '/news/' . $slug . '/'];
+    }
+    $record = bl_wp_application_record($post);
+    $record['slug'] = $slug;
+    $record['content_html'] = apply_filters('the_content', $post->post_content);
+    return ['type' => 'application_case', 'title' => $record['title'], 'record' => $record, 'path' => '/application/' . $slug . '/'];
 }
 
 function bl_page_editor_content(): string

@@ -46,9 +46,9 @@ function bl_resolve_route(): array
             if (bl_application_slug($application) === $matches[1]) $route = array_replace($route, ['type' => 'application', 'title' => $application['title'] . ' Equipment', 'description' => $application['description'], 'record' => $application, 'status' => 200]);
         }
     }
-    // An editor's preview of a case (draft, or unsaved changes to a published one) arrives at the site root with the post id.
-    if (bl_is_wordpress() && ($case = bl_wp_application_preview())) {
-        $route = array_replace($route, ['type' => 'application_case', 'title' => $case['title'], 'description' => $case['excerpt'], 'record' => $case, 'status' => 200, 'preview' => true, 'path' => '/application/' . $case['slug'] . '/']);
+    // An editor's preview (draft, or unsaved changes to a published post) arrives at the site root with the post id.
+    if (bl_is_wordpress() && ($preview = bl_wp_preview())) {
+        $route = array_replace($route, ['type' => $preview['type'], 'title' => $preview['title'], 'description' => $preview['record']['excerpt'], 'record' => $preview['record'], 'status' => 200, 'preview' => true, 'path' => $preview['path']]);
     }
     if (bl_is_wordpress() && !is_404() && $route['type'] === '404' && is_singular(['page', 'post'])) {
         $post = get_queried_object();
