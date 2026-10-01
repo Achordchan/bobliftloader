@@ -276,6 +276,43 @@ function bl_loaders_defaults(): array
 }
 
 /**
+ * The mini dumper family page: the range introduction and its configuration options, the jobs the dumpers are bought for
+ * (each naming the models that suit it, by model name), and the note under the comparison table.
+ */
+function bl_dumpers_defaults(): array
+{
+    return [
+        'about' => [
+            'eyebrow' => 'ABOUT THE DUMPERS',
+            'title' => "FROM THE GARDEN\nPATH TO THE SITE.",
+            'intro' => 'Mini dumpers carry soil, gravel, concrete and site waste over ground a truck can’t reach. The range runs from compact tracked dumpers that fit narrow paths to wheeled site dumpers for heavier loads.',
+            'options' => [
+                ['big' => 'WHEELS / TRACKS', 'title' => 'Running gear.', 'text' => 'Wheeled site dumpers for firm ground and heavier loads; tracked models for soft ground and narrow access.'],
+                ['big' => '4×2 / 4×4', 'title' => 'Drive.', 'text' => 'The FC10, FY15 and FY20-2 drive two wheels; the FY20-4, FY30, FY40, FY50 and FJZ30 drive all four. Each spec sheet lists its drive.'],
+                ['big' => 'OPEN / ROOF / CAB', 'title' => 'Operator cover.', 'text' => 'Wheeled models come open or with a roof or cab. Each spec sheet lists the height with roof / cab.'],
+                ['big' => 'TIP / LOAD / MIX', 'title' => 'Hopper, bucket or drum.', 'text' => 'Every model tips hydraulically. The FY20-2 and FJZ30 add a front bucket; the tracked mixer carries a drum to mix concrete on site.'],
+            ],
+        ],
+        'jobs' => [
+            'eyebrow' => 'WHERE THEY WORK',
+            'title' => "ONE LOAD AT A TIME.\n*ALL DAY LONG.*",
+            'text' => 'Homeowners, farmers, builders and contractors buy our dumpers for the same reason: material has to get from where it is delivered to where it is needed. Start with the job, then check the models that suit it.',
+            'items' => [
+                ['title' => 'Gardens and homesteads', 'text' => 'Soil, gravel, mulch and firewood along garden paths and round the back of the house. The tracked dumper is under 0.9 m wide.', 'models' => 'BL-T500-HD, FC10'],
+                ['title' => 'Farms and orchards', 'text' => 'Feed, manure and bagged fertiliser between sheds and fields, on farm tracks and yards.', 'models' => 'FC10, FY15, FY20-2'],
+                ['title' => 'Building sites', 'text' => 'Sand, gravel, bricks and spoil between the stockpile and the work face, where a truck can’t follow.', 'models' => 'FY20-4, FY30, FY40'],
+                ['title' => 'Concrete and small pours', 'text' => 'Mix a small batch in the tracked mixer’s 200 L drum and drive it to the pour, or carry it in a tipping hopper.', 'models' => 'BL-T200-HJ, BL-T500-HD'],
+                ['title' => 'Loading without a loader', 'text' => 'With a front bucket on the machine, loading doesn’t wait for a second machine on site.', 'models' => 'FY20-2, FJZ30'],
+                ['title' => 'Contractors and heavier loads', 'text' => 'Road, drainage and landscaping contractors moving four to five tonnes a trip on 4×4 site dumpers.', 'models' => 'FY40, FY50'],
+            ],
+        ],
+        'compare' => [
+            'note' => 'Wheeled dumper figures from the BOB-LIFT mini dumper brochure; tracked models from the BOB-LIFT technical sheets. Confirm the final configuration with our team before ordering.',
+        ],
+    ];
+}
+
+/**
  * The Applications list page and the three application pages. The three jobs start from the records in inc/content.php
  * (also read by the home page tiles, the contact form and site search); each job's URL is fixed, its words are not.
  */
@@ -343,6 +380,7 @@ function bl_content_defaults(string $page): array
         'support' => bl_support_defaults(),
         'applications' => bl_applications_defaults(),
         'loaders' => bl_loaders_defaults(),
+        'dumpers' => bl_dumpers_defaults(),
         default => bl_home_defaults(),
     };
 }

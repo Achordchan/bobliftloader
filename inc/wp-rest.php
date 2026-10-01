@@ -126,7 +126,7 @@ foreach (array_keys(BL_REST_FIELDS) as $bl_rest_type) {
 unset($bl_rest_type);
 
 /**
- * The 网站内容 screens (home, Support, Applications, loaders) through REST. Each screen has one item of the hidden type
+ * The 网站内容 screens (home, Support, Applications, loaders, dumpers) through REST. Each screen has one item of the hidden type
  * bl_page_content, slug = the screen's key; its _bl_content meta reads as the page's current content (defaults with the
  * saved changes) and writes through the same cleaning and "keep only what differs" saving as the screen. The item itself
  * holds nothing: the content stays in the bl_content_{page} option the site reads.

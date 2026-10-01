@@ -3,11 +3,11 @@ declare(strict_types=1);
 defined('ABSPATH') || exit;
 
 /**
- * "网站内容" screens for the home, Support, Applications and skid steer loader pages. Each screen is built from the field list below; saving keeps only
+ * "网站内容" screens for the home, Support, Applications, skid steer loader and mini dumper pages. Each screen is built from the field list below; saving keeps only
  * what differs from the defaults in inc/editable.php, so text an editor never touched follows later theme updates.
  */
 
-const BL_CONTENT_PAGES = ['home' => ['title' => '首页内容', 'menu' => '首页', 'path' => '/'], 'support' => ['title' => '采购与售后（Support）页内容', 'menu' => '采购与售后 Support', 'path' => '/support/'], 'applications' => ['title' => '应用场景（Applications）页内容', 'menu' => '应用场景 Applications', 'path' => '/applications/'], 'loaders' => ['title' => '滑移装载机栏目内容', 'menu' => '滑移装载机', 'path' => '/products/skid-steer-loaders/']];
+const BL_CONTENT_PAGES = ['home' => ['title' => '首页内容', 'menu' => '首页', 'path' => '/'], 'support' => ['title' => '采购与售后（Support）页内容', 'menu' => '采购与售后 Support', 'path' => '/support/'], 'applications' => ['title' => '应用场景（Applications）页内容', 'menu' => '应用场景 Applications', 'path' => '/applications/'], 'loaders' => ['title' => '滑移装载机栏目内容', 'menu' => '滑移装载机', 'path' => '/products/skid-steer-loaders/'], 'dumpers' => ['title' => '迷你翻斗车栏目内容', 'menu' => '迷你翻斗车', 'path' => '/products/mini-dumpers/']];
 
 /**
  * Field list per page. "group" only groups fields on the screen; "preview" is the theme's own image shown while a slot is
@@ -86,6 +86,31 @@ function bl_content_schema(string $page): array
                 'image' => ['label' => '图片', 'type' => 'image', 'help' => '4:3 横图。留空则不显示图片。'],
             ]],
             ['key' => 'attachments.note', 'label' => '底部备注', 'type' => 'textarea', 'help' => $optional],
+        ]],
+    ];
+    if ($page === 'dumpers') return [
+        ['title' => '栏目介绍与配置', 'note' => '翻斗车栏目页产品列表下方的介绍（#about-the-range）：标题、介绍和下面一排配置说明。中间的载荷图由产品数据自动生成。', 'fields' => [
+            ['key' => 'about.eyebrow', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'about.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
+            ['key' => 'about.intro', 'label' => '标题旁介绍', 'type' => 'textarea'],
+            ['key' => 'about.options', 'label' => '配置说明', 'type' => 'list', 'add' => '添加一项', 'summary' => ['big', 'title'], 'fields' => [
+                'big' => ['label' => '大字', 'type' => 'text', 'help' => '如 WHEELS / TRACKS；斜杠显示为蓝色。'],
+                'title' => ['label' => '名称', 'type' => 'text'],
+                'text' => ['label' => '说明', 'type' => 'textarea'],
+            ]],
+        ]],
+        ['title' => '适用场景', 'note' => '栏目页的“用在哪里”（#dumper-jobs），在介绍和参数对比之间。全部删掉则不显示这一块。', 'fields' => [
+            ['key' => 'jobs.eyebrow', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'jobs.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
+            ['key' => 'jobs.text', 'label' => '标题旁说明', 'type' => 'textarea'],
+            ['key' => 'jobs.items', 'label' => '场景', 'type' => 'list', 'add' => '添加场景', 'summary' => ['title'], 'fields' => [
+                'title' => ['label' => '场景名', 'type' => 'text'],
+                'text' => ['label' => '说明', 'type' => 'textarea'],
+                'models' => ['label' => '适合型号', 'type' => 'text', 'help' => '写产品的型号（如 FY30），英文逗号分隔；会链接到对应产品页。写错或已下架的型号不显示。'],
+            ]],
+        ]],
+        ['title' => '参数对比', 'fields' => [
+            ['key' => 'compare.note', 'label' => '对比表说明', 'type' => 'textarea', 'help' => '对比表标题旁的说明，写参数出处。'],
         ]],
     ];
     if ($page === 'support') return [

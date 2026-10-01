@@ -7,6 +7,7 @@ $loaderPage = $category === 'skid-steer-loaders';
 $sectionLinks = array_filter([
     'models' => 'Models',
     'about-the-range' => 'About the range',
+    'dumper-jobs' => !$loaderPage && bl_dumper_jobs() ? 'Where they work' : null,
     'attachments' => $loaderPage ? 'Attachments' : null,
     'how-they-are-made' => $loaderPage ? 'How they’re made' : null,
     'compare-' . $category => 'Compare',

@@ -154,10 +154,10 @@ function bl_product_search_text(array $product): string
 function bl_spec_groups(array $specs): array
 {
     $groups = [
-        'Performance' => ['Rated load', 'Lifting capacity', 'Bucket capacity', 'Drum capacity', 'Travel speed', 'Hydraulic pressure', 'Gradeability', 'Tipping', 'Tipping angle', 'Machine weight'],
-        'Engine' => ['Engine options', 'Engine power', 'Engine type', 'Fuel', 'Starting', 'Emission standard', 'Operating voltage'],
-        'Dimensions' => ['Working height', 'Length with bucket', 'Length without bucket', 'Machine width', 'Bucket width', 'Overall height', 'Standard dimensions', 'Dimensions with roof / cab', 'Hopper size', 'Drum length', 'Drum opening diameter', 'Loading bucket length', 'Loading bucket opening width', 'Minimum ground clearance'],
-        'Build' => ['Running gear', 'Operator station', 'Controls', 'Body material', 'Bucket material'],
+        'Performance' => ['Rated load', 'Lifting capacity', 'Bucket capacity', 'Drum capacity', 'Travel speed', 'Max travel speed', 'Hydraulic pressure', 'Gradeability', 'Tipping', 'Tipping angle', 'Machine weight'],
+        'Engine' => ['Engine options', 'Engine model', 'Engine power', 'Engine type', 'Fuel', 'Starting', 'Emission standard', 'Operating voltage'],
+        'Dimensions' => ['Working height', 'Length with bucket', 'Length without bucket', 'Machine width', 'Bucket width', 'Overall height', 'Standard dimensions', 'Dimensions with roof / cab', 'Hopper size', 'Drum length', 'Drum opening diameter', 'Loading bucket length', 'Loading bucket opening width', 'Wheelbase', 'Minimum ground clearance'],
+        'Build' => ['Running gear', 'Drive', 'Brakes', 'Operator station', 'Controls', 'Body material', 'Bucket material'],
     ];
     $result = [];
     foreach ($groups as $group => $labels) {

@@ -161,7 +161,7 @@ class WebsiteTests(unittest.TestCase):
         _, html, _ = fetch('/products/?q=mini')
         self.assertEqual(html.count('class="bl-catalog-group-head"'), 2)
         self.assertNotIn('data-section-nav', html)
-        for path, expected in [('/products/skid-steer-loaders/', 6), ('/products/mini-dumpers/', 3)]:
+        for path, expected in [('/products/skid-steer-loaders/', 6), ('/products/mini-dumpers/', 4)]:
             _, html, _ = fetch(path)
             targets = re.findall(r'href="#([\w-]+)" data-section-link', html)
             self.assertEqual(len(targets), expected, path)
@@ -295,6 +295,17 @@ class WebsiteTests(unittest.TestCase):
         self.assertNotIn('id="how-they-are-made"', html)
         self.assertEqual(html.count('<li class="bl-ruler-'), len(loaded_dumpers))
         self.assertNotIn('Painted to order.', html)
+        # Where the dumpers work: between the introduction and the comparison, each job linking to real dumper pages.
+        self.assertLess(html.index('id="about-the-range"'), html.index('id="dumper-jobs"'))
+        self.assertLess(html.index('id="dumper-jobs"'), html.index('id="compare-mini-dumpers"'))
+        jobs = html.split('id="dumper-jobs"', 1)[1].split('</section>', 1)[0]
+        dumper_slugs = {p['slug'] for p in self.products if p['category'] == 'mini-dumpers'}
+        linked = re.findall(r'<a href="/product/([^/]+)/">', jobs)
+        self.assertGreaterEqual(jobs.count('<li class="bl-reveal">'), 6)
+        self.assertTrue(linked and set(linked) <= dumper_slugs)
+        self.assertEqual(html.count('style="--options:4"'), 1)
+        _, html, _ = fetch('/product/' + next(p['slug'] for p in self.products if p['category'] == 'mini-dumpers') + '/')
+        self.assertIn('/products/mini-dumpers/#dumper-jobs', html)
         _, html, _ = fetch('/products/?q=mini')
         self.assertNotIn('id="about-the-range"', html)
 

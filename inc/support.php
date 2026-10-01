@@ -91,6 +91,29 @@ function bl_loader_jobs(): array
     return $jobs;
 }
 
+/**
+ * Jobs the mini dumpers are bought for, on the dumper family page. Each names its models by model name, separated by
+ * commas; a name that matches a published mini dumper links to it, any other name is left out, so a job never points
+ * at a model the site does not show.
+ */
+function bl_dumper_jobs(): array
+{
+    $byModel = [];
+    foreach (bl_products() as $product) if ($product['category'] === 'mini-dumpers') $byModel[strtolower($product['model'])] = $product;
+    // A model renamed since (FY-30 is now FY30) is still found under its new name in records that keep the old one.
+    foreach (BL_FORMER_MODELS as $model => $former) foreach ($former as $name) if (!isset($byModel[strtolower($model)]) && isset($byModel[strtolower($name)])) $byModel[strtolower($model)] = $byModel[strtolower($name)];
+    $jobs = [];
+    foreach (bl_editable('dumpers')['jobs']['items'] as $job) {
+        $models = [];
+        foreach (array_filter(array_map('trim', explode(',', $job['models'])), 'strlen') as $name) {
+            $product = $byModel[strtolower($name)] ?? null;
+            if ($product && !in_array($product, $models, true)) $models[] = $product;
+        }
+        $jobs[] = ['title' => $job['title'], 'text' => $job['text'], 'models' => $models];
+    }
+    return $jobs;
+}
+
 /** A product's videos: each has a source, a poster and a caption. Theme paths (videos/…) resolve to the theme's assets. */
 function bl_product_videos(array $product): array
 {
