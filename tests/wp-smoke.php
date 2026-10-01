@@ -111,8 +111,10 @@ try {
     update_post_meta($staleProduct->ID, '_bl_record', array_replace_recursive($staleRecord, ['specs' => ['Engine power' => '13.2 kW']]));
     $fresh = bl_find_record(bl_wp_products(), '1-ton-mini-dumper');
     bl_test_assert(str_contains($fresh['excerpt'], '13.2 kW') && !str_contains($fresh['excerpt'], '9 kW'), 'Generated product summary kept old figures');
-    wp_update_post(['ID' => $staleProduct->ID, 'post_excerpt' => 'QA-HANDWRITTEN-SUMMARY']);
-    bl_test_assert(bl_find_record(bl_wp_products(), '1-ton-mini-dumper')['excerpt'] === 'QA-HANDWRITTEN-SUMMARY', 'Handwritten product summary was replaced');
+    foreach (['QA-HANDWRITTEN-SUMMARY', 'Built for farm tracks. Explore published specifications and discuss your application with BOB-LIFT.'] as $handwritten) {
+        wp_update_post(['ID' => $staleProduct->ID, 'post_excerpt' => $handwritten]);
+        bl_test_assert(bl_find_record(bl_wp_products(), '1-ton-mini-dumper')['excerpt'] === $handwritten, 'Handwritten product summary was replaced');
+    }
 } finally {
     wp_update_post(['ID' => $staleProduct->ID, 'post_excerpt' => $staleExcerpt]);
     update_post_meta($staleProduct->ID, '_bl_record', $staleRecord);

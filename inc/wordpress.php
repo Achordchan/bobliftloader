@@ -43,7 +43,8 @@ function bl_wp_product_record(WP_Post $post): array
     $record['slug'] = $post->post_name;
     $record['name'] = get_the_title($post);
     $record['url'] = get_permalink($post);
-    $record['excerpt'] = bl_is_generated_product_excerpt($post->post_excerpt) ? bl_product_excerpt($record) : ($post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35));
+    $record['excerpt'] = bl_is_generated_product_excerpt($post->post_excerpt, $record) ? '' : $post->post_excerpt;
+    $record['excerpt'] = $record['excerpt'] ?: (wp_trim_words(wp_strip_all_tags($post->post_content), 35) ?: bl_product_excerpt($record));
     $record['content_html'] = $post->post_content ? apply_filters('the_content', $post->post_content) : '';
     $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: bl_wp_image($record['image']);
     $record['gallery'] = array_values(array_filter(array_map('bl_wp_image', (array) $record['gallery'])));

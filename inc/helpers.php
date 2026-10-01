@@ -77,8 +77,8 @@ function bl_spec_phrase(array $product): string
 }
 
 /**
- * Summary built from the key figures. The import stored one in each product's excerpt, so an excerpt that still
- * reads like this is treated as generated and rebuilt from the current specs instead of showing old numbers.
+ * Summary built from the key figures. Early imports stored one in each product's excerpt, so an excerpt that is
+ * still exactly that wording is treated as generated and rebuilt from the current specs instead of showing old numbers.
  */
 function bl_product_excerpt(array $product): string
 {
@@ -87,10 +87,12 @@ function bl_product_excerpt(array $product): string
     return 'Explore the BOB-LIFT ' . $product['model'] . ' ' . ($product['category'] === 'mini-dumpers' ? 'mini dumper' : 'mini skid steer loader') . '. View original product photography and discuss the configuration for your next project.';
 }
 
-function bl_is_generated_product_excerpt(string $excerpt): bool
+function bl_is_generated_product_excerpt(string $excerpt, array $product): bool
 {
-    return str_ends_with($excerpt, '. Explore published specifications and discuss your application with BOB-LIFT.')
-        || (str_starts_with($excerpt, 'Explore the BOB-LIFT ') && str_ends_with($excerpt, '. View original product photography and discuss the configuration for your next project.'));
+    // Only the exact generated wording counts: the current name, then figures such as "a 1,500 kg rated load", then the stock close.
+    $figure = 'a [\\d.,]+ ?[^\\s,]* (?:rated load|mixing drum|bucket|hopper|engine)';
+    return (bool) preg_match('/^' . preg_quote($product['name'], '/') . ' with ' . $figure . '(?:, ' . $figure . ')*(?: and ' . $figure . ')?\\. Explore published specifications and discuss your application with BOB-LIFT\\.$/u', $excerpt)
+        || (bool) preg_match('/^Explore the BOB-LIFT [^.]+ (?:mini dumper|mini skid steer loader)\\. View original product photography and discuss the configuration for your next project\\.$/', $excerpt);
 }
 
 /**
