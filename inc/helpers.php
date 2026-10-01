@@ -56,7 +56,7 @@ function bl_products(): array
 /** Up to three headline figures, in the order buyers compare them; short labels suit the catalogue cards. */
 function bl_key_specs(array $product, bool $short = false): array
 {
-    $labels = ['Rated load' => 'Rated load', 'Drum capacity' => 'Drum', 'Bucket capacity' => 'Bucket', 'Engine power' => 'Power', 'Machine weight' => 'Weight'];
+    $labels = ['Rated load' => 'Rated load', 'Drum capacity' => 'Drum', 'Bucket capacity' => 'Bucket', 'Hopper capacity' => 'Hopper', 'Engine power' => 'Power', 'Machine weight' => 'Weight'];
     $specs = [];
     foreach ($labels as $key => $shortLabel) {
         if (!empty($product['specs'][$key])) $specs[$short ? $shortLabel : $key] = $product['specs'][$key];
@@ -69,7 +69,7 @@ function bl_key_specs(array $product, bool $short = false): array
 function bl_spec_phrase(array $product): string
 {
     $parts = [];
-    foreach (['Rated load' => 'rated load', 'Drum capacity' => 'mixing drum', 'Bucket capacity' => 'bucket', 'Engine power' => 'engine'] as $key => $noun) {
+    foreach (['Rated load' => 'rated load', 'Drum capacity' => 'mixing drum', 'Bucket capacity' => 'bucket', 'Hopper capacity' => 'hopper', 'Engine power' => 'engine'] as $key => $noun) {
         if (!empty($product['specs'][$key])) $parts[] = 'a ' . $product['specs'][$key] . ' ' . $noun;
     }
     if (count($parts) < 2) return implode('', $parts);
@@ -131,10 +131,10 @@ function bl_product_facets(array $product, string $category): array
     ];
 }
 
-/** Text the catalogue search looks through: name, model and the model without its T / S letter, as older literature writes it. */
+/** Text the catalogue search looks through: name, model, the model without its T / S letter as older literature writes it, and any former code. */
 function bl_product_search_text(array $product): string
 {
-    return strtolower($product['name'] . ' ' . $product['model'] . ' ' . preg_replace('/^BL-[TS]/', 'BL-', $product['model']));
+    return strtolower(implode(' ', [$product['name'], $product['model'], preg_replace('/^BL-[TS]/', 'BL-', $product['model']), ...(BL_FORMER_MODELS[$product['model']] ?? [])]));
 }
 
 /** Specification rows grouped for the detail table; labels outside the known groups fall under "Details". */
@@ -199,6 +199,9 @@ function bl_event_status(array $event, ?string $today = null): array
     if ($today <= $end) return ['state' => 'live', 'label' => 'On now'];
     return ['state' => 'past', 'label' => 'Held ' . bl_event_dates($event)];
 }
+
+/** Codes the dumpers carried before the 2026 brochure and technical sheet; search still finds a model by them. */
+const BL_FORMER_MODELS = ['FC10' => ['FC10-L'], 'FY15' => ['FY15-L'], 'FY20-2' => ['FY20-2-L'], 'FY20-4' => ['FY-20'], 'FY30' => ['FY-30'], 'FY40' => ['FY-40'], 'FY50' => ['FY-50'], 'FJZ30' => ['FJZ-30'], 'BL-T500-HD' => ['500 Tracked'], 'BL-T200-HJ' => ['200 Mixer']];
 
 /** News sections of this site, keyed by the value stored with each story. Stories from the wider group carry none. */
 const BL_NEWS_CATEGORIES = ['product-news' => 'Product news', 'customer-stories' => 'Customer stories', 'industry-news' => 'Industry news'];

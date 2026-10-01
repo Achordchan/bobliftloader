@@ -146,7 +146,7 @@ function bl_support_defaults(): array
                 '2-ton-mini-dumper' => [1, 2], '3-ton-mini-dumper' => [1, 2], '3-ton-mini-dumper-with-bucket' => [1, 2],
                 '4-ton-mini-dumper' => [1, 2], '5-ton-mini-dumper' => [1, 2],
             ],
-            'note' => 'With a roof or cab, the FY-20 to FY-50 and FJZ-30 dumpers stand 2.65–2.75 m tall, above a container door. Ask how they ship.',
+            'note' => 'With a roof or cab, the FY20-4 to FY50 and FJZ30 dumpers stand 2.65–2.75 m tall, above a container door. Ask how they ship.',
         ],
         'after' => [
             'eyebrow' => '02 / AFTER DELIVERY',
