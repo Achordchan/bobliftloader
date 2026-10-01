@@ -134,6 +134,15 @@ try {
 // is cleaned like the screen, saves only what differs, and anonymous visitors can neither read nor write it.
 $contentItem = get_page_by_path('loaders', OBJECT, 'bl_page_content');
 bl_test_assert($contentItem instanceof WP_Post && count(get_posts(['post_type' => 'bl_page_content', 'post_status' => 'any', 'numberposts' => -1])) === count(BL_CONTENT_PAGES), 'Content items were not made one per screen');
+// A missing item is made again on a later request, as long as the marker was not set; a failed insert leaves it unset.
+delete_option('bl_page_content_items');
+wp_delete_post(get_page_by_path('home', OBJECT, 'bl_page_content')->ID, true);
+add_filter('wp_insert_post_empty_content', $emptyHome = static fn($empty, $data) => $data['post_type'] === 'bl_page_content' ? true : $empty, 10, 2);
+bl_page_content_make_items();
+remove_filter('wp_insert_post_empty_content', $emptyHome, 10);
+bl_test_assert(get_option('bl_page_content_items') === false && !get_page_by_path('home', OBJECT, 'bl_page_content'), 'A failed item insert was marked complete');
+bl_page_content_make_items();
+bl_test_assert(get_option('bl_page_content_items') === array_keys(BL_CONTENT_PAGES) && get_page_by_path('home', OBJECT, 'bl_page_content'), 'A missing item was not made again');
 $supportItem = get_page_by_path('support', OBJECT, 'bl_page_content');
 $savedOptions = ['loaders' => get_option('bl_content_loaders'), 'support' => get_option('bl_content_support')];
 try {

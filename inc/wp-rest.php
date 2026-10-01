@@ -173,18 +173,24 @@ function bl_page_content_current(string $page): array
 // One private item per screen (only editors see them in the API), made once and again whenever a screen is added. Under
 // a lock, with the existence check repeated inside it, so requests arriving together on deployment make each item once;
 // a request that finds the lock taken does not wait for it.
-add_action('init', static function (): void {
+function bl_page_content_make_items(): void
+{
     if (get_option('bl_page_content_items') === array_keys(BL_CONTENT_PAGES) || !($token = bl_lock_acquire('page_content_items', 1))) return;
     try {
+        // The marker is set only once every item is there under its own slug, so a failed insert is tried again later.
+        $complete = true;
         foreach (BL_CONTENT_PAGES as $page => $info) {
             $found = get_posts(['post_type' => 'bl_page_content', 'name' => $page, 'post_status' => 'any', 'numberposts' => 1, 'fields' => 'ids', 'suppress_filters' => true, 'cache_results' => false]);
-            if (!$found) wp_insert_post(['post_type' => 'bl_page_content', 'post_status' => 'private', 'post_name' => $page, 'post_title' => $info['title']]);
+            if ($found) continue;
+            $id = wp_insert_post(['post_type' => 'bl_page_content', 'post_status' => 'private', 'post_name' => $page, 'post_title' => $info['title']], true);
+            if (is_wp_error($id) || !$id || bl_page_content_key((int) $id) !== $page) $complete = false;
         }
-        update_option('bl_page_content_items', array_keys(BL_CONTENT_PAGES), true);
+        if ($complete) update_option('bl_page_content_items', array_keys(BL_CONTENT_PAGES), true);
     } finally {
         bl_lock_release('page_content_items', $token);
     }
-}, 20);
+}
+add_action('init', 'bl_page_content_make_items', 20);
 
 // The slug is the item's identity and the item stays private: neither changes after it is made, through any path.
 add_filter('wp_insert_post_data', static function (array $data, array $postarr): array {
