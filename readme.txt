@@ -1,4 +1,4 @@
-BOB-LIFT Compact Equipment
+BOBLIFT-Loader
 Version: 1.0.0
 Requires PHP: 8.0
 
