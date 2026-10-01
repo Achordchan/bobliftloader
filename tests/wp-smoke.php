@@ -54,6 +54,55 @@ try {
     wp_set_current_user(0);
 }
 bl_test_assert(count(bl_wp_products()) === $productCount, 'Product restore failed');
+// The record is open to the REST API (the WordPress.com connector writes through it): editors read and write it, a
+// REST write is cleaned and the derived load follows the specs, and anonymous visitors can neither read nor write it.
+// rest_do_request() points the global $post at whatever it last returned, so the product is kept apart.
+$product = $post;
+$original = get_post_meta($product->ID, '_bl_record', true);
+try {
+    wp_set_current_user(1);
+    $read = new WP_REST_Request('GET', '/wp/v2/bl_product/' . $product->ID);
+    $read->set_param('context', 'edit');
+    $read = rest_do_request($read);
+    bl_test_assert($read->get_status() === 200 && ($read->get_data()['meta']['_bl_record']['specs'] ?? null) === $original['specs'], 'REST did not return the product record');
+    $record = $original;
+    $record['model'] = '<b>QA-REST</b>';
+    $record['specs']['Rated load'] = '1,234 kg';
+    $record['specs']['Hydraulic flow'] = '40 L/min & 20 MPa';
+    $record['gallery'] = ['javascript:alert(1)', $original['gallery'][0] ?? 'images/a.webp'];
+    $write = new WP_REST_Request('POST', '/wp/v2/bl_product/' . $product->ID);
+    $write->set_body_params(['meta' => ['_bl_record' => $record]]);
+    bl_test_assert(rest_do_request($write)->get_status() === 200, 'REST write was refused');
+    $saved = get_post_meta($product->ID, '_bl_record', true);
+    bl_test_assert($saved['model'] === 'QA-REST' && $saved['load'] === 1234 && $saved['specs']['Rated load'] === '1,234 kg', 'REST write was not cleaned or derived');
+    bl_test_assert($saved['specs']['Hydraulic flow'] === '40 L/min & 20 MPa' && !in_array('javascript:alert(1)', $saved['gallery'], true), 'REST write mangled text or kept a script link');
+    $partial = new WP_REST_Request('POST', '/wp/v2/bl_product/' . $product->ID);
+    $partial->set_body_params(['meta' => ['_bl_record' => ['specs' => ['Rated load' => '900 kg']]]]);
+    bl_test_assert(rest_do_request($partial)->get_status() === 200, 'REST partial write was refused');
+    $partialSaved = get_post_meta($product->ID, '_bl_record', true);
+    bl_test_assert($partialSaved['model'] === 'QA-REST' && $partialSaved['gallery'] === $saved['gallery'] && $partialSaved['load'] === 900, 'REST partial write lost the fields it did not send');
+    $remove = new WP_REST_Request('POST', '/wp/v2/bl_product/' . $product->ID);
+    $remove->set_body_params(['meta' => ['_bl_record' => null]]);
+    bl_test_assert(rest_do_request($remove)->get_status() >= 400 && get_post_meta($product->ID, '_bl_record', true)['model'] === 'QA-REST', 'REST removed the product record');
+    $story = get_page_by_path('customer-visits-boblift-factory', OBJECT, 'bl_news');
+    $newsOriginal = get_post_meta($story->ID, '_bl_record', true);
+    $newsWrite = new WP_REST_Request('POST', '/wp/v2/bl_news/' . $story->ID);
+    $newsWrite->set_body_params(['meta' => ['_bl_record' => array_merge(array_diff_key((array) $newsOriginal, ['line' => 1]), ['products' => 'not-a-list', 'poster' => ['image' => 'images/a.webp', 'alt' => ['x']], 'event' => ['name' => 'QA', 'start' => '2026-10-15', 'source' => 'javascript:alert(1)']])]]);
+    bl_test_assert(rest_do_request($newsWrite)->get_status() === 200, 'REST news write was refused');
+    $newsSaved = get_post_meta($story->ID, '_bl_record', true);
+    update_post_meta($story->ID, '_bl_record', $newsOriginal);
+    bl_test_assert($newsSaved['products'] === [] && $newsSaved['event']['source'] === '' && $newsSaved['event']['start'] === '2026-10-15', 'REST news write kept a bad list or link');
+    bl_test_assert(($newsSaved['poster'] ?? null) === ($newsOriginal['poster'] ?? null) && ($newsSaved['line'] ?? null) === ($newsOriginal['line'] ?? null), 'REST news write changed a field the edit screen does not offer');
+    wp_set_current_user(0);
+    $anonymous = rest_do_request(new WP_REST_Request('GET', '/wp/v2/bl_product/' . $product->ID));
+    bl_test_assert(!isset($anonymous->get_data()['meta']['_bl_record']), 'Anonymous REST read exposed the record');
+    $write->set_body_params(['meta' => ['_bl_record' => ['model' => 'QA-ANON']]]);
+    rest_do_request($write);
+    bl_test_assert(get_post_meta($product->ID, '_bl_record', true)['model'] === 'QA-REST', 'Anonymous REST write was accepted');
+} finally {
+    update_post_meta($product->ID, '_bl_record', $original);
+    wp_set_current_user(0);
+}
 $news = get_page_by_path('customer-visits-boblift-factory', OBJECT, 'bl_news');
 $originalContent = $news->post_content;
 try {
@@ -63,6 +112,6 @@ try {
 } finally {
     wp_update_post(['ID' => $news->ID, 'post_content' => $originalContent]);
 }
-$report = ['wordpress' => get_bloginfo('version'), 'php' => PHP_VERSION, 'theme' => get_stylesheet(), 'import' => $firstImport, 'idempotent_import' => true, 'admin_save_and_frontend_read' => true, 'news_editor_read' => true, 'nonce_rejection' => true, 'anonymous_rejection' => true, 'draft_visibility' => true, 'restored' => true, 'published_products' => $productCount, 'published_news' => $newsCount];
+$report = ['wordpress' => get_bloginfo('version'), 'php' => PHP_VERSION, 'theme' => get_stylesheet(), 'import' => $firstImport, 'idempotent_import' => true, 'admin_save_and_frontend_read' => true, 'news_editor_read' => true, 'nonce_rejection' => true, 'anonymous_rejection' => true, 'draft_visibility' => true, 'rest_record' => true, 'restored' => true, 'published_products' => $productCount, 'published_news' => $newsCount];
 file_put_contents('/wordpress/wp-content/bl-verification.json', wp_json_encode($report));
 echo wp_json_encode($report);

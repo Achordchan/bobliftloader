@@ -7,18 +7,18 @@ function bl_register_content_types(): void
     register_post_type('bl_product', [
         'labels' => ['name' => '设备产品', 'singular_name' => '设备产品', 'add_new_item' => '新增设备产品', 'edit_item' => '编辑设备产品', 'view_item' => '查看产品页', 'featured_image' => '产品主图', 'set_featured_image' => '设置产品主图', 'remove_featured_image' => '移除产品主图', 'use_featured_image' => '用作产品主图'],
         'public' => true, 'show_in_rest' => true, 'has_archive' => 'products', 'rewrite' => ['slug' => 'product', 'with_front' => false],
-        'supports' => ['title', 'editor', 'excerpt', 'thumbnail', 'page-attributes'], 'menu_icon' => 'dashicons-products',
+        'supports' => ['title', 'editor', 'excerpt', 'thumbnail', 'page-attributes', 'custom-fields'], 'menu_icon' => 'dashicons-products',
     ]);
     register_post_type('bl_news', [
         'labels' => ['name' => '企业新闻', 'singular_name' => '企业新闻', 'add_new_item' => '新增企业新闻', 'edit_item' => '编辑企业新闻', 'view_item' => '查看文章', 'featured_image' => '封面图片', 'set_featured_image' => '设置封面图片', 'remove_featured_image' => '移除封面图片', 'use_featured_image' => '用作封面图片'],
         'public' => true, 'show_in_rest' => true, 'has_archive' => 'news', 'rewrite' => ['slug' => 'news', 'with_front' => false],
-        'supports' => ['title', 'editor', 'excerpt', 'thumbnail'], 'menu_icon' => 'dashicons-media-document',
+        'supports' => ['title', 'editor', 'excerpt', 'thumbnail', 'custom-fields'], 'menu_icon' => 'dashicons-media-document',
     ]);
     // A specific application (one job, one site, the machines used), written in the block editor. Its hub is a saved choice.
     register_post_type('bl_application', [
         'labels' => ['name' => '应用案例', 'singular_name' => '应用案例', 'add_new' => '新增案例', 'add_new_item' => '新增应用案例', 'edit_item' => '编辑应用案例', 'new_item' => '新应用案例', 'view_item' => '查看案例页', 'featured_image' => '封面图片', 'set_featured_image' => '设置封面图片', 'remove_featured_image' => '移除封面图片', 'use_featured_image' => '用作封面图片'],
         'public' => true, 'show_in_rest' => true, 'has_archive' => false, 'rewrite' => ['slug' => 'application', 'with_front' => false],
-        'supports' => ['title', 'editor', 'excerpt', 'thumbnail'], 'menu_icon' => 'dashicons-location-alt',
+        'supports' => ['title', 'editor', 'excerpt', 'thumbnail', 'custom-fields'], 'menu_icon' => 'dashicons-location-alt',
     ]);
     add_rewrite_tag('%bl_category%', '(skid-steer-loaders|mini-dumpers)');
     add_rewrite_rule('^products/(skid-steer-loaders|mini-dumpers)/?$', 'index.php?post_type=bl_product&bl_category=$matches[1]', 'top');

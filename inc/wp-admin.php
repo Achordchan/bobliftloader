@@ -300,6 +300,19 @@ function bl_admin_posted_rows($value, array $fields, string $separator = '|'): a
     return $rows;
 }
 
+/** Load, bucket and power feed the home page ranges and excerpts, so they always follow the spec rows. */
+function bl_product_derived(array $record): array
+{
+    $specs = is_array($record['specs'] ?? null) ? $record['specs'] : [];
+    $record['load'] = 0;
+    if (preg_match('/^([\d,. ]+)\s*kg$/i', (string) ($specs['Rated load'] ?? ''), $matches)) {
+        $record['load'] = min(1000000, max(0, (int) str_replace([',', ' '], '', $matches[1])));
+    }
+    $record['capacity'] = preg_match('/^([\d.]+)\s*m³$/u', (string) ($specs['Bucket capacity'] ?? ''), $matches) ? $matches[1] : '';
+    $record['power'] = preg_match('/^([\d.]+)\s*kW$/i', (string) ($specs['Engine power'] ?? ''), $matches) ? $matches[1] : '';
+    return $record;
+}
+
 add_action('save_post', static function (int $postId): void {
     if (!in_array(get_post_type($postId), ['bl_product', 'bl_news', 'bl_application'], true) || wp_is_post_revision($postId) || wp_is_post_autosave($postId)) return;
     if (!current_user_can('edit_post', $postId) || !isset($_POST['bl_record_nonce']) || !is_string($_POST['bl_record_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['bl_record_nonce'])), 'bl_save_record')) return;
@@ -327,13 +340,7 @@ add_action('save_post', static function (int $postId): void {
             $value = sanitize_text_field($row['value']);
             if ($key !== '' && $value !== '') $record['specs'][$key] = $value;
         }
-        $record['load'] = 0;
-        if (preg_match('/^([\d,. ]+)\s*kg$/i', $record['specs']['Rated load'] ?? '', $matches)) {
-            $record['load'] = min(1000000, max(0, (int) str_replace([',', ' '], '', $matches[1])));
-        }
-        // Bucket and power feed the home page ranges and excerpts, so they follow the spec rows too.
-        $record['capacity'] = preg_match('/^([\d.]+)\s*m³$/u', $record['specs']['Bucket capacity'] ?? '', $matches) ? $matches[1] : '';
-        $record['power'] = preg_match('/^([\d.]+)\s*kW$/i', $record['specs']['Engine power'] ?? '', $matches) ? $matches[1] : '';
+        $record = bl_product_derived($record);
     } elseif (get_post_type($postId) === 'bl_application') {
         $record['hub'] = isset(bl_case_hubs()[$text('hub')]) ? $text('hub') : '';
         $known = array_map(static fn($p) => $p->post_name, get_posts(['post_type' => 'bl_product', 'post_status' => 'publish', 'numberposts' => -1]));
