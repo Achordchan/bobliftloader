@@ -151,12 +151,17 @@ try {
     bl_test_assert(!isset($stored['jobs']['eyebrow']) && get_post_meta($contentItem->ID, '_bl_content', true)['attachments']['title'] === "ONE LOADER.\n*MANY JOBS.*", 'Unsent content did not keep its defaults');
     bl_test_assert($GLOBALS['wpdb']->get_var($GLOBALS['wpdb']->prepare("SELECT COUNT(*) FROM {$GLOBALS['wpdb']->postmeta} WHERE post_id = %d AND meta_key = '_bl_content'", $contentItem->ID)) === '0', 'Content was stored on the item');
     // While another save holds the page's lock, a write waits, then gives up without saving; the lock is always released.
-    $GLOBALS['wpdb']->insert($GLOBALS['wpdb']->options, ['option_name' => 'bl_content_lock_loaders', 'option_value' => (string) time(), 'autoload' => 'no']);
+    $held = sprintf('%010d|qa', time());
+    $GLOBALS['wpdb']->insert($GLOBALS['wpdb']->options, ['option_name' => 'bl_lock_content_loaders', 'option_value' => $held, 'autoload' => 'no']);
     $busy = new WP_REST_Request('POST', '/wp/v2/bl_page_content/' . $contentItem->ID);
     $busy->set_body_params(['meta' => ['_bl_content' => ['attachments' => ['note' => 'QA-BUSY']]]]);
     bl_test_assert(rest_do_request($busy)->get_status() === 409 && get_option('bl_content_loaders')['attachments']['note'] === 'QA note', 'A write went through while the page was locked');
-    $GLOBALS['wpdb']->delete($GLOBALS['wpdb']->options, ['option_name' => 'bl_content_lock_loaders']);
-    bl_test_assert(rest_do_request($busy)->get_status() === 200 && get_option('bl_content_loaders')['attachments']['note'] === 'QA-BUSY' && $GLOBALS['wpdb']->get_var("SELECT COUNT(*) FROM {$GLOBALS['wpdb']->options} WHERE option_name LIKE 'bl_content_lock_%'") === '0', 'The lock was not released after a save');
+    // Releasing needs the owner's token: another request's release leaves this lock in place.
+    bl_lock_release('content_loaders', 'not-the-owner');
+    bl_test_assert(bl_lock_owned('content_loaders', $held), 'A lock was released by a request that does not own it');
+    // A lock older than five minutes is taken over.
+    $GLOBALS['wpdb']->update($GLOBALS['wpdb']->options, ['option_value' => sprintf('%010d|qa', time() - 301)], ['option_name' => 'bl_lock_content_loaders']);
+    bl_test_assert(rest_do_request($busy)->get_status() === 200 && get_option('bl_content_loaders')['attachments']['note'] === 'QA-BUSY' && $GLOBALS['wpdb']->get_var("SELECT COUNT(*) FROM {$GLOBALS['wpdb']->options} WHERE option_name IN ('bl_lock_content_loaders', 'bl_lock_page_content_items')") === '0', 'The lock was not released after a save');
     $rename = new WP_REST_Request('POST', '/wp/v2/bl_page_content/' . $contentItem->ID);
     $rename->set_body_params(['slug' => 'loader-content', 'status' => 'publish']);
     rest_do_request($rename);

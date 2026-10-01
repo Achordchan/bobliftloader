@@ -170,14 +170,19 @@ function bl_page_content_current(string $page): array
     return is_array($saved) && $saved ? bl_merge_content($content, $saved) : $content;
 }
 
-// One private item per screen (only editors see them in the API), made once and again whenever a screen is added.
+// One private item per screen (only editors see them in the API), made once and again whenever a screen is added. Under
+// a lock, with the existence check repeated inside it, so requests arriving together on deployment make each item once.
 add_action('init', static function (): void {
-    if (get_option('bl_page_content_items') === array_keys(BL_CONTENT_PAGES)) return;
-    foreach (BL_CONTENT_PAGES as $page => $info) {
-        if (get_page_by_path($page, OBJECT, 'bl_page_content')) continue;
-        wp_insert_post(['post_type' => 'bl_page_content', 'post_status' => 'private', 'post_name' => $page, 'post_title' => $info['title']]);
+    if (get_option('bl_page_content_items') === array_keys(BL_CONTENT_PAGES) || !($token = bl_lock_acquire('page_content_items'))) return;
+    try {
+        foreach (BL_CONTENT_PAGES as $page => $info) {
+            $found = get_posts(['post_type' => 'bl_page_content', 'name' => $page, 'post_status' => 'any', 'numberposts' => 1, 'fields' => 'ids', 'suppress_filters' => true, 'cache_results' => false]);
+            if (!$found) wp_insert_post(['post_type' => 'bl_page_content', 'post_status' => 'private', 'post_name' => $page, 'post_title' => $info['title']]);
+        }
+        update_option('bl_page_content_items', array_keys(BL_CONTENT_PAGES), true);
+    } finally {
+        bl_lock_release('page_content_items', $token);
     }
-    update_option('bl_page_content_items', array_keys(BL_CONTENT_PAGES), true);
 }, 20);
 
 // The slug is the item's identity and the item stays private: neither changes after it is made, through any path.
@@ -205,11 +210,9 @@ add_filter('rest_pre_insert_bl_page_content', static function ($prepared, WP_RES
     if (!is_array($sent)) return new WP_Error('bl_content_invalid', 'The content must be an object.', ['status' => 400]);
     // Starting from the content saved right now keeps everything not sent, loading figures of unpublished models included;
     // the lock keeps two writes to the same page from both starting from the same content.
-    $saved = bl_content_locked($page, static function () use ($page, $sent): void {
-        $current = bl_merge_content(bl_content_defaults($page), bl_content_saved_now($page));
-        $diff = bl_content_diff(bl_content_clean_all($page, bl_merge_content($current, $sent)), bl_content_clean_all($page, bl_content_defaults($page)));
-        if ($diff) update_option('bl_content_' . $page, $diff);
-        else delete_option('bl_content_' . $page);
+    $saved = bl_content_locked($page, static function (array $previous) use ($page, $sent): array {
+        $current = bl_merge_content(bl_content_defaults($page), $previous);
+        return bl_content_diff(bl_content_clean_all($page, bl_merge_content($current, $sent)), bl_content_clean_all($page, bl_content_defaults($page)));
     });
     if (!$saved) return new WP_Error('bl_content_busy', 'Another save of this page is in progress; nothing was saved. Try again.', ['status' => 409]);
     unset($meta['_bl_content']);
