@@ -87,11 +87,12 @@ function bl_product_excerpt(array $product): string
     return 'Explore the BOB-LIFT ' . $product['model'] . ' ' . ($product['category'] === 'mini-dumpers' ? 'mini dumper' : 'mini skid steer loader') . '. View original product photography and discuss the configuration for your next project.';
 }
 
-function bl_is_generated_product_excerpt(string $excerpt, array $product): bool
+/** Only the exact generated wording counts: one of the product's names, figures such as "a 1,500 kg rated load", then the stock close. */
+function bl_is_generated_product_excerpt(string $excerpt, array $names): bool
 {
-    // Only the exact generated wording counts: the current name, then figures such as "a 1,500 kg rated load", then the stock close.
+    $names = implode('|', array_map(static fn($name) => preg_quote($name, '/'), array_filter(array_unique($names), 'strlen')));
     $figure = 'a [\\d.,]+ ?[^\\s,]* (?:rated load|mixing drum|bucket|hopper|engine)';
-    return (bool) preg_match('/^' . preg_quote($product['name'], '/') . ' with ' . $figure . '(?:, ' . $figure . ')*(?: and ' . $figure . ')?\\. Explore published specifications and discuss your application with BOB-LIFT\\.$/u', $excerpt)
+    return ($names !== '' && preg_match('/^(?:' . $names . ') with ' . $figure . '(?:, ' . $figure . ')*(?: and ' . $figure . ')?\\. Explore published specifications and discuss your application with BOB-LIFT\\.$/u', $excerpt))
         || (bool) preg_match('/^Explore the BOB-LIFT [^.]+ (?:mini dumper|mini skid steer loader)\\. View original product photography and discuss the configuration for your next project\\.$/', $excerpt);
 }
 
