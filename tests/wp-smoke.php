@@ -130,6 +130,66 @@ try {
 } finally {
     wp_update_post(['ID' => $news->ID, 'post_content' => $originalContent]);
 }
-$report = ['wordpress' => get_bloginfo('version'), 'php' => PHP_VERSION, 'theme' => get_stylesheet(), 'import' => $firstImport, 'idempotent_import' => true, 'admin_save_and_frontend_read' => true, 'news_editor_read' => true, 'product_summary_follows_specs' => true, 'nonce_rejection' => true, 'anonymous_rejection' => true, 'draft_visibility' => true, 'rest_record' => true, 'restored' => true, 'published_products' => $productCount, 'published_news' => $newsCount];
+// The 网站内容 screens through REST: one bl_page_content item per screen; a write merges into the current content,
+// is cleaned like the screen, saves only what differs, and anonymous visitors can neither read nor write it.
+$contentItem = get_page_by_path('loaders', OBJECT, 'bl_page_content');
+bl_test_assert($contentItem instanceof WP_Post && count(get_posts(['post_type' => 'bl_page_content', 'post_status' => 'any', 'numberposts' => -1])) === count(BL_CONTENT_PAGES), 'Content items were not made one per screen');
+// A missing item is made again on a later request, as long as the marker was not set; a failed insert leaves it unset.
+delete_option('bl_page_content_items');
+wp_delete_post(get_page_by_path('home', OBJECT, 'bl_page_content')->ID, true);
+add_filter('wp_insert_post_empty_content', $emptyHome = static fn($empty, $data) => $data['post_type'] === 'bl_page_content' ? true : $empty, 10, 2);
+bl_page_content_make_items();
+remove_filter('wp_insert_post_empty_content', $emptyHome, 10);
+bl_test_assert(get_option('bl_page_content_items') === false && !get_page_by_path('home', OBJECT, 'bl_page_content'), 'A failed item insert was marked complete');
+bl_page_content_make_items();
+bl_test_assert(get_option('bl_page_content_items') === array_keys(BL_CONTENT_PAGES) && get_page_by_path('home', OBJECT, 'bl_page_content'), 'A missing item was not made again');
+$supportItem = get_page_by_path('support', OBJECT, 'bl_page_content');
+$savedOptions = ['loaders' => get_option('bl_content_loaders'), 'support' => get_option('bl_content_support')];
+try {
+    wp_set_current_user(1);
+    $read = new WP_REST_Request('GET', '/wp/v2/bl_page_content/' . $contentItem->ID);
+    $read->set_param('context', 'edit');
+    $read = rest_do_request($read);
+    $content = $read->get_data()['meta']['_bl_content'] ?? null;
+    bl_test_assert($read->get_status() === 200 && ($content['jobs']['items'][0]['title'] ?? '') === 'Renovation and indoor work' && count($content['attachments']['items']) === 24, 'REST did not return the loader page content');
+    $write = new WP_REST_Request('POST', '/wp/v2/bl_page_content/' . $contentItem->ID);
+    $write->set_body_params(['meta' => ['_bl_content' => ['jobs' => ['items' => [['title' => '<b>QA job</b>', 'text' => 'QA text', 'tools' => 'Auger, Sweeper']]], 'attachments' => ['note' => 'QA note']]]]);
+    bl_test_assert(rest_do_request($write)->get_status() === 200, 'REST content write was refused');
+    $stored = get_option('bl_content_loaders');
+    bl_test_assert($stored['jobs']['items'] === [['title' => 'QA job', 'text' => 'QA text', 'tools' => 'Auger, Sweeper']] && $stored['attachments'] === ['note' => 'QA note'], 'REST content write was not cleaned or saved as a difference');
+    bl_test_assert(!isset($stored['jobs']['eyebrow']) && get_post_meta($contentItem->ID, '_bl_content', true)['attachments']['title'] === "ONE LOADER.\n*MANY JOBS.*", 'Unsent content did not keep its defaults');
+    bl_test_assert($GLOBALS['wpdb']->get_var($GLOBALS['wpdb']->prepare("SELECT COUNT(*) FROM {$GLOBALS['wpdb']->postmeta} WHERE post_id = %d AND meta_key = '_bl_content'", $contentItem->ID)) === '0', 'Content was stored on the item');
+    // While another save holds the page's lock, a write waits, then gives up without saving; the lock is always released.
+    $held = sprintf('%010d|qa', time());
+    $GLOBALS['wpdb']->insert($GLOBALS['wpdb']->options, ['option_name' => 'bl_lock_content_loaders', 'option_value' => $held, 'autoload' => 'no']);
+    $busy = new WP_REST_Request('POST', '/wp/v2/bl_page_content/' . $contentItem->ID);
+    $busy->set_body_params(['meta' => ['_bl_content' => ['attachments' => ['note' => 'QA-BUSY']]]]);
+    bl_test_assert(rest_do_request($busy)->get_status() === 409 && get_option('bl_content_loaders')['attachments']['note'] === 'QA note', 'A write went through while the page was locked');
+    // Releasing needs the owner's token: another request's release leaves this lock in place.
+    bl_lock_release('content_loaders', 'not-the-owner');
+    bl_test_assert(bl_lock_owned('content_loaders', $held), 'A lock was released by a request that does not own it');
+    // A lock older than five minutes is taken over.
+    $GLOBALS['wpdb']->update($GLOBALS['wpdb']->options, ['option_value' => sprintf('%010d|qa', time() - 301)], ['option_name' => 'bl_lock_content_loaders']);
+    bl_test_assert(rest_do_request($busy)->get_status() === 200 && get_option('bl_content_loaders')['attachments']['note'] === 'QA-BUSY' && $GLOBALS['wpdb']->get_var("SELECT COUNT(*) FROM {$GLOBALS['wpdb']->options} WHERE option_name IN ('bl_lock_content_loaders', 'bl_lock_page_content_items')") === '0', 'The lock was not released after a save');
+    $rename = new WP_REST_Request('POST', '/wp/v2/bl_page_content/' . $contentItem->ID);
+    $rename->set_body_params(['slug' => 'loader-content', 'status' => 'publish']);
+    rest_do_request($rename);
+    $renamed = get_post($contentItem->ID);
+    bl_test_assert($renamed->post_name === 'loaders' && $renamed->post_status === 'private', 'A content item lost its slug or became public');
+    $faq = new WP_REST_Request('POST', '/wp/v2/bl_page_content/' . $supportItem->ID);
+    $faq->set_body_params(['meta' => ['_bl_content' => ['faq' => ['intro' => 'QA intro']]]]);
+    rest_do_request($faq);
+    bl_test_assert(['intro' => 'QA intro'] + (is_array($savedOptions['support']) ? (array) ($savedOptions['support']['faq'] ?? []) : []) == get_option('bl_content_support')['faq'], 'Support FAQ write did not merge');
+    wp_set_current_user(0);
+    $anonymous = rest_do_request(new WP_REST_Request('GET', '/wp/v2/bl_page_content/' . $contentItem->ID));
+    bl_test_assert(!isset($anonymous->get_data()['meta']['_bl_content']) && rest_do_request(new WP_REST_Request('GET', '/wp/v2/bl_page_content'))->get_data() === [], 'Anonymous REST read exposed page content');
+    $write->set_body_params(['meta' => ['_bl_content' => ['attachments' => ['note' => 'QA-ANON']]]]);
+    rest_do_request($write);
+    bl_test_assert(get_option('bl_content_loaders')['attachments']['note'] === 'QA-BUSY', 'Anonymous REST content write was accepted');
+} finally {
+    foreach ($savedOptions as $page => $value) is_array($value) ? update_option('bl_content_' . $page, $value) : delete_option('bl_content_' . $page);
+    wp_set_current_user(0);
+}
+$report = ['wordpress' => get_bloginfo('version'), 'php' => PHP_VERSION, 'theme' => get_stylesheet(), 'import' => $firstImport, 'idempotent_import' => true, 'admin_save_and_frontend_read' => true, 'news_editor_read' => true, 'product_summary_follows_specs' => true, 'nonce_rejection' => true, 'anonymous_rejection' => true, 'draft_visibility' => true, 'rest_record' => true, 'rest_page_content' => true, 'restored' => true, 'published_products' => $productCount, 'published_news' => $newsCount];
 file_put_contents('/wordpress/wp-content/bl-verification.json', wp_json_encode($report));
 echo wp_json_encode($report);

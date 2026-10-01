@@ -3,11 +3,11 @@ declare(strict_types=1);
 defined('ABSPATH') || exit;
 
 /**
- * "网站内容" screens for the home and Support pages. Each screen is built from the field list below; saving keeps only
+ * "网站内容" screens for the home, Support, Applications and skid steer loader pages. Each screen is built from the field list below; saving keeps only
  * what differs from the defaults in inc/editable.php, so text an editor never touched follows later theme updates.
  */
 
-const BL_CONTENT_PAGES = ['home' => ['title' => '首页内容', 'menu' => '首页', 'path' => '/'], 'support' => ['title' => '采购与售后（Support）页内容', 'menu' => '采购与售后 Support', 'path' => '/support/'], 'applications' => ['title' => '应用场景（Applications）页内容', 'menu' => '应用场景 Applications', 'path' => '/applications/']];
+const BL_CONTENT_PAGES = ['home' => ['title' => '首页内容', 'menu' => '首页', 'path' => '/'], 'support' => ['title' => '采购与售后（Support）页内容', 'menu' => '采购与售后 Support', 'path' => '/support/'], 'applications' => ['title' => '应用场景（Applications）页内容', 'menu' => '应用场景 Applications', 'path' => '/applications/'], 'loaders' => ['title' => '滑移装载机栏目内容', 'menu' => '滑移装载机', 'path' => '/products/skid-steer-loaders/']];
 
 /**
  * Field list per page. "group" only groups fields on the screen; "preview" is the theme's own image shown while a slot is
@@ -66,6 +66,28 @@ function bl_content_schema(string $page): array
         $sections[] = $seo('');
         return $sections;
     }
+    if ($page === 'loaders') return [
+        ['title' => '适用场景', 'note' => '滑移装载机栏目页属具上方的“用在哪里”，常见问题“什么是滑移装载机”链接到这里（#loader-jobs）。全部删掉则不显示这一块。', 'fields' => [
+            ['key' => 'jobs.eyebrow', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'jobs.items', 'label' => '场景', 'type' => 'list', 'add' => '添加场景', 'summary' => ['title'], 'fields' => [
+                'title' => ['label' => '场景名', 'type' => 'text'],
+                'text' => ['label' => '说明', 'type' => 'textarea'],
+                'tools' => ['label' => '常用属具', 'type' => 'text', 'help' => '用英文逗号分隔，按页面上显示的顺序写；最好和下面属具列表里的名称一致。'],
+            ]],
+        ]],
+        ['title' => '属具', 'note' => '栏目页的属具一节（#attachments）。标题里的属具数量按下面的条目自动计算。', 'fields' => [
+            ['key' => 'attachments.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
+            ['key' => 'attachments.text', 'label' => '标题旁说明', 'type' => 'textarea'],
+            ['key' => 'attachments.link', 'label' => '询价链接文字', 'type' => 'text', 'help' => '链接去联系页（已选好滑移装载机）。留空不显示。'],
+            ['key' => 'attachments.items', 'label' => '属具', 'type' => 'list', 'add' => '添加属具', 'summary' => ['name'], 'meta' => 'group', 'fields' => [
+                'group' => ['label' => '分组', 'type' => 'text', 'help' => '分组名相同的属具归在同一组，分组按第一次出现的顺序排列。'],
+                'name' => ['label' => '名称', 'type' => 'text'],
+                'use' => ['label' => '用途', 'type' => 'text'],
+                'image' => ['label' => '图片', 'type' => 'image', 'help' => '4:3 横图。留空则不显示图片。'],
+            ]],
+            ['key' => 'attachments.note', 'label' => '底部备注', 'type' => 'textarea', 'help' => $optional],
+        ]],
+    ];
     if ($page === 'support') return [
         ['title' => '首屏', 'fields' => [
             ['key' => 'hero.eyebrow', 'label' => '小标题', 'type' => 'text'],
@@ -526,6 +548,67 @@ function bl_content_row_tools(): string
 
 /* ---------- Saving ---------- */
 
+/**
+ * A named lock held by one request at a time: a row in the options table whose value is "<time>|<token>". It is taken
+ * with INSERT IGNORE (add_option() would overwrite an existing row) and only its owner, matched by token, can release it.
+ * A lock older than five minutes belongs to a request PHP has long since stopped, and is taken over with a conditional
+ * UPDATE, so of several requests trying at once only one succeeds. Returns the token, or '' after $tries attempts a
+ * tenth of a second apart (about five seconds by default).
+ */
+function bl_lock_acquire(string $name, int $tries = 50): string
+{
+    global $wpdb;
+    $option = 'bl_lock_' . $name;
+    for ($try = 0; $try < $tries; $try++) {
+        $value = sprintf('%010d|%s', time(), wp_generate_password(20, false));
+        if ($wpdb->query($wpdb->prepare("INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')", $option, $value))) return $value;
+        if ($wpdb->query($wpdb->prepare("UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value < %s", $value, $option, sprintf('%010d|', time() - 300)))) return $value;
+        if ($try + 1 < $tries) usleep(100000);
+    }
+    return '';
+}
+
+function bl_lock_owned(string $name, string $token): bool
+{
+    global $wpdb;
+    return $token !== '' && $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'bl_lock_' . $name)) === $token;
+}
+
+function bl_lock_release(string $name, string $token): void
+{
+    $GLOBALS['wpdb']->delete($GLOBALS['wpdb']->options, ['option_name' => 'bl_lock_' . $name, 'option_value' => $token]);
+}
+
+/**
+ * Saves one page's content under that page's lock, so two saves (screen or REST) never start from the same content and
+ * overwrite each other. $compute gets what is saved right now and returns what to save ([] clears it); the result is
+ * written only while this request still owns the lock. Returns false, saving nothing, when the lock was not had.
+ */
+function bl_content_locked(string $page, callable $compute): bool
+{
+    $token = bl_lock_acquire('content_' . $page);
+    if ($token === '') return false;
+    try {
+        $diff = $compute(bl_content_saved_now($page));
+        if (!bl_lock_owned('content_' . $page, $token)) return false;
+        if ($diff) update_option('bl_content_' . $page, $diff);
+        else delete_option('bl_content_' . $page);
+    } finally {
+        bl_lock_release('content_' . $page, $token);
+    }
+    return true;
+}
+
+/** What is saved for a page now, read past the options cache (another request may have saved since this one started). */
+function bl_content_saved_now(string $page): array
+{
+    global $wpdb;
+    // update_option() compares with the cached value, so the cache is brought up to date as well.
+    foreach (['alloptions', 'notoptions', 'bl_content_' . $page] as $key) wp_cache_delete($key, 'options');
+    $saved = maybe_unserialize((string) $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'bl_content_' . $page)));
+    return is_array($saved) ? $saved : [];
+}
+
 function bl_content_request_page(): string
 {
     $page = isset($_POST['bl_page']) && is_string($_POST['bl_page']) ? sanitize_key(wp_unslash($_POST['bl_page'])) : '';
@@ -541,16 +624,17 @@ add_action('admin_post_bl_save_content', static function (): void {
     // the submission is incomplete and saving it would silently lose content, so nothing is saved.
     if (!isset($_POST['bl_content_complete'])) wp_die('提交的内容不完整（可能超出了服务器的 max_input_vars 限制），没有保存任何修改。请返回后减少列表条目，或调高服务器的 max_input_vars。', '', ['response' => 400, 'back_link' => true]);
     $input = isset($_POST['bl_content']) && is_array($_POST['bl_content']) ? wp_unslash($_POST['bl_content']) : [];
-    $diff = bl_content_diff(bl_content_clean_all($page, $input), bl_content_clean_all($page, bl_content_defaults($page)));
-    // The loading table lists published products only; figures saved for a model not on the form (unpublished for now)
-    // are carried over rather than dropped.
-    $previous = get_option('bl_content_' . $page);
-    if (is_array($previous['containers']['loading'] ?? null)) {
-        $posted = is_array($input['containers']['loading'] ?? null) ? array_map('sanitize_title', array_keys($input['containers']['loading'])) : [];
-        foreach ($previous['containers']['loading'] as $slug => $fit) if (!in_array((string) $slug, $posted, true)) $diff['containers']['loading'][$slug] = $fit;
-    }
-    if ($diff) update_option('bl_content_' . $page, $diff);
-    else delete_option('bl_content_' . $page);
+    $saved = bl_content_locked($page, static function (array $previous) use ($page, $input): array {
+        $diff = bl_content_diff(bl_content_clean_all($page, $input), bl_content_clean_all($page, bl_content_defaults($page)));
+        // The loading table lists published products only; figures saved for a model not on the form (unpublished for now)
+        // are carried over rather than dropped.
+        if (is_array($previous['containers']['loading'] ?? null)) {
+            $posted = is_array($input['containers']['loading'] ?? null) ? array_map('sanitize_title', array_keys($input['containers']['loading'])) : [];
+            foreach ($previous['containers']['loading'] as $slug => $fit) if (!in_array((string) $slug, $posted, true)) $diff['containers']['loading'][$slug] = $fit;
+        }
+        return $diff;
+    });
+    if (!$saved) wp_die('另一个保存正在进行，这次没有保存任何修改。请稍后返回重新保存。', '', ['response' => 409, 'back_link' => true]);
     wp_safe_redirect(admin_url('admin.php?page=bl-content-' . $page . '&bl_saved=1'));
     exit;
 });

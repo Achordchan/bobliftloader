@@ -69,47 +69,26 @@ function bl_support_faq(): array
 }
 
 /**
- * Attachments for the loaders, grouped by the work they do. They are quoted with a machine, not sold on their own.
- * Images cut from BOB-LIFT's supplier attachment sheet; replace with photography when it is supplied.
+ * Attachments for the loaders, grouped by the work they do, groups in the order they first appear. They are quoted with a machine, not sold on their own. The rows are edited in WordPress (网站内容 → 滑移装载机).
  */
 function bl_attachments(): array
 {
-    return [
-        'Dig & trench' => [
-            ['slug' => 'four-in-one-bucket', 'name' => '4-in-1 bucket', 'use' => 'Dig, grab, level and doze'],
-            ['slug' => 'direct-excavation', 'name' => 'Backhoe', 'use' => 'Small excavations and pits'],
-            ['slug' => 'auger', 'name' => 'Auger', 'use' => 'Holes for posts and planting'],
-            ['slug' => 'trencher', 'name' => 'Trencher', 'use' => 'Narrow trenches for cables and pipes'],
-            ['slug' => 'trench-filler', 'name' => 'Trench filler', 'use' => 'Backfill trenches after the pipe is in'],
-        ],
-        'Lift & carry' => [
-            ['slug' => 'pallet-fork', 'name' => 'Pallet forks', 'use' => 'Pallets, bagged cement, bales'],
-            ['slug' => 'hydraulic-grapple', 'name' => 'Hydraulic grapple', 'use' => 'Straw, branches and loose debris'],
-            ['slug' => 'crab-bucket', 'name' => 'Grapple bucket', 'use' => 'Rubble, logs and awkward loads'],
-            ['slug' => 'lifting-device', 'name' => 'Lifting jib', 'use' => 'Lift and place with a chain or sling'],
-            ['slug' => 'pulling-device', 'name' => 'Tow hitch', 'use' => 'Move trailers around the site'],
-        ],
-        'Break & clear' => [
-            ['slug' => 'breaker', 'name' => 'Hydraulic breaker', 'use' => 'Concrete, paving and frozen ground'],
-            ['slug' => 'ripper', 'name' => 'Ripper', 'use' => 'Loosen compacted soil and roots'],
-            ['slug' => 'mulcher', 'name' => 'Mulcher', 'use' => 'Clear scrub and small trees'],
-            ['slug' => 'brush-cutter', 'name' => 'Brush cutter', 'use' => 'Cut back overgrown ground'],
-            ['slug' => 'log-splitter', 'name' => 'Log splitter', 'use' => 'Split firewood on the spot'],
-        ],
-        'Ground & lawn' => [
-            ['slug' => 'leveler', 'name' => 'Leveller', 'use' => 'Grade and spread loose material'],
-            ['slug' => 'rotary-tiller', 'name' => 'Rotary tiller', 'use' => 'Turn soil for beds and planting'],
-            ['slug' => 'soil-conditioner', 'name' => 'Soil conditioner', 'use' => 'Prepare a seed bed in one pass'],
-            ['slug' => 'lawn-aerator', 'name' => 'Lawn aerator', 'use' => 'Open up compacted turf'],
-            ['slug' => 'lawn-mower', 'name' => 'Lawn mower', 'use' => 'Mow large areas of grass'],
-        ],
-        'Sweep, snow & mix' => [
-            ['slug' => 'sweeper', 'name' => 'Sweeper', 'use' => 'Yards, roads and light snow'],
-            ['slug' => 'snow-blower', 'name' => 'Snow blower', 'use' => 'Clear paths and drives'],
-            ['slug' => 'mixer', 'name' => 'Concrete mixer', 'use' => 'Mix small batches on site'],
-            ['slug' => 'mixing-bucket', 'name' => 'Mixing bucket', 'use' => 'Mix and pour in one attachment'],
-        ],
-    ];
+    $groups = [];
+    foreach (bl_editable('loaders')['attachments']['items'] as $item) {
+        $groups[$item['group']][] = ['name' => $item['name'], 'use' => $item['use'], 'image' => $item['image']];
+    }
+    return $groups;
+}
+
+/** Jobs a mini skid steer is bought for, shown above the attachments; each lists the tools it uses, by their names below. */
+function bl_loader_jobs(): array
+{
+    $jobs = [];
+    foreach (bl_editable('loaders')['jobs']['items'] as $job) {
+        $tools = array_values(array_filter(array_map('trim', explode(',', $job['tools'])), 'strlen'));
+        $jobs[] = ['title' => $job['title'], 'text' => $job['text'], 'tools' => $tools];
+    }
+    return $jobs;
 }
 
 /** A product's videos: each has a source, a poster and a caption. Theme paths (videos/…) resolve to the theme's assets. */

@@ -201,6 +201,7 @@ function bl_support_default_faq(): array
     $items = [];
     $groups = [
         'Choosing a machine' => [
+            ['What is a mini skid steer loader?', 'A compact loader that steers by running its left and right tracks or wheels at different speeds, so it turns on the spot. A quick-attach plate lets the same machine dig, lift, break, sweep or clear snow.', 'See the jobs it does', $loaders . '#loader-jobs'],
             ['Which loader fits through my gate or doorway?', 'Set your narrowest opening on the width chart of the loaders page. It shows which models pass through, with and without the bucket fitted.', 'Check your opening', $loaders . '#about-the-range'],
             ['Should I choose tracks or tires?', 'Rubber tracks suit soft ground, lawns and slopes. Rubber tires suit concrete, asphalt and paving.'],
             ['Can I choose the engine?', 'Several loaders offer more than one engine brand, and some have an electric version. Each model lists its choices under Engine options on its specification sheet.'],
@@ -217,6 +218,61 @@ function bl_support_default_faq(): array
     ];
     foreach ($groups as $group => $questions) foreach ($questions as $q) $items[] = ['group' => $group, 'q' => $q[0], 'a' => $q[1], 'link_label' => $q[2] ?? '', 'link_url' => $q[3] ?? ''];
     return $items;
+}
+
+/**
+ * The skid steer loader family page: the jobs a mini loader is bought for and the attachments it takes. A job names its
+ * tools by their names in the attachments list, separated by commas.
+ */
+function bl_loaders_defaults(): array
+{
+    $tool = static fn(string $slug, string $name, string $use, string $group): array => ['group' => $group, 'name' => $name, 'use' => $use, 'image' => bl_asset('images/attachments/' . $slug . '.webp')];
+    return [
+        'jobs' => [
+            'eyebrow' => 'WHERE IT WORKS',
+            'items' => [
+                ['title' => 'Renovation and indoor work', 'text' => 'Inside buildings, basements and car parks: break out floors, clear rubble and move materials where a full-size loader can’t go.', 'tools' => 'Hydraulic breaker, 4-in-1 bucket, Grapple bucket'],
+                ['title' => 'Gardens and landscaping', 'text' => 'Rubber tracks spread the weight on lawns and soft soil. Dig planting holes, level beds, turn soil and gather cuttings.', 'tools' => 'Auger, Leveller, Rotary tiller, Hydraulic grapple'],
+                ['title' => 'Farms, greenhouses and barns', 'text' => 'Narrow enough for greenhouse aisles and livestock sheds: clean out, move feed and carry bales.', 'tools' => '4-in-1 bucket, Pallet forks, Hydraulic grapple'],
+                ['title' => 'Streets and public spaces', 'text' => 'Works on footpaths, lanes and housing estates without closing the road: patch repairs, drain clearing and snow.', 'tools' => 'Hydraulic breaker, Sweeper, Snow blower'],
+                ['title' => 'Yards and warehouses', 'text' => 'Moves pallets and clears scrap and offcuts in narrow aisles and busy yards.', 'tools' => 'Pallet forks, Grapple bucket, Sweeper'],
+                ['title' => 'Alongside bigger machines', 'text' => 'Takes the corners, indoor and finishing work on small sites: footings, trenches, backfill and clean-up.', 'tools' => 'Backhoe, Trencher, Trench filler'],
+            ],
+        ],
+        'attachments' => [
+            'title' => "ONE LOADER.\n*MANY JOBS.*",
+            'text' => 'Our loaders take their tools through a quick-attach plate and auxiliary hydraulic lines, so the bucket comes off and a fork, auger or sweeper goes on in minutes. Attachments are quoted with your loader and matched to its hydraulics.',
+            'link' => 'Ask which suit your model',
+            'note' => 'Hydraulic flow differs from model to model, so not every attachment suits every loader. We confirm the match when we quote your machine.',
+            // Images cut from BOB-LIFT's supplier attachment sheet; replace with photography when it is supplied.
+            'items' => [
+                $tool('four-in-one-bucket', '4-in-1 bucket', 'Dig, grab, level and doze', 'Dig & trench'),
+                $tool('direct-excavation', 'Backhoe', 'Small excavations and pits', 'Dig & trench'),
+                $tool('auger', 'Auger', 'Holes for posts and planting', 'Dig & trench'),
+                $tool('trencher', 'Trencher', 'Narrow trenches for cables and pipes', 'Dig & trench'),
+                $tool('trench-filler', 'Trench filler', 'Backfill trenches after the pipe is in', 'Dig & trench'),
+                $tool('pallet-fork', 'Pallet forks', 'Pallets, bagged cement, bales', 'Lift & carry'),
+                $tool('hydraulic-grapple', 'Hydraulic grapple', 'Straw, branches and loose debris', 'Lift & carry'),
+                $tool('crab-bucket', 'Grapple bucket', 'Rubble, logs and awkward loads', 'Lift & carry'),
+                $tool('lifting-device', 'Lifting jib', 'Lift and place with a chain or sling', 'Lift & carry'),
+                $tool('pulling-device', 'Tow hitch', 'Move trailers around the site', 'Lift & carry'),
+                $tool('breaker', 'Hydraulic breaker', 'Concrete, paving and frozen ground', 'Break & clear'),
+                $tool('ripper', 'Ripper', 'Loosen compacted soil and roots', 'Break & clear'),
+                $tool('mulcher', 'Mulcher', 'Clear scrub and small trees', 'Break & clear'),
+                $tool('brush-cutter', 'Brush cutter', 'Cut back overgrown ground', 'Break & clear'),
+                $tool('log-splitter', 'Log splitter', 'Split firewood on the spot', 'Break & clear'),
+                $tool('leveler', 'Leveller', 'Grade and spread loose material', 'Ground & lawn'),
+                $tool('rotary-tiller', 'Rotary tiller', 'Turn soil for beds and planting', 'Ground & lawn'),
+                $tool('soil-conditioner', 'Soil conditioner', 'Prepare a seed bed in one pass', 'Ground & lawn'),
+                $tool('lawn-aerator', 'Lawn aerator', 'Open up compacted turf', 'Ground & lawn'),
+                $tool('lawn-mower', 'Lawn mower', 'Mow large areas of grass', 'Ground & lawn'),
+                $tool('sweeper', 'Sweeper', 'Yards, roads and light snow', 'Sweep, snow & mix'),
+                $tool('snow-blower', 'Snow blower', 'Clear paths and drives', 'Sweep, snow & mix'),
+                $tool('mixer', 'Concrete mixer', 'Mix small batches on site', 'Sweep, snow & mix'),
+                $tool('mixing-bucket', 'Mixing bucket', 'Mix and pour in one attachment', 'Sweep, snow & mix'),
+            ],
+        ],
+    ];
 }
 
 /**
@@ -286,6 +342,7 @@ function bl_content_defaults(string $page): array
     return match ($page) {
         'support' => bl_support_defaults(),
         'applications' => bl_applications_defaults(),
+        'loaders' => bl_loaders_defaults(),
         default => bl_home_defaults(),
     };
 }
