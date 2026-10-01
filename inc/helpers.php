@@ -77,8 +77,8 @@ function bl_spec_phrase(array $product): string
 }
 
 /**
- * Summary built from the key figures. Early imports stored one in each product's excerpt, so an excerpt that is
- * still exactly that wording is treated as generated and rebuilt from the current specs instead of showing old numbers.
+ * Summary built from the key figures. The import stores one in each product's excerpt, so an excerpt that is still
+ * exactly that wording is treated as generated and rebuilt from the current specs instead of showing old numbers.
  */
 function bl_product_excerpt(array $product): string
 {

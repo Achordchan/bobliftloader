@@ -107,6 +107,7 @@ $staleProduct = get_page_by_path('1-ton-mini-dumper', OBJECT, 'bl_product');
 $staleExcerpt = $staleProduct->post_excerpt;
 $staleRecord = get_post_meta($staleProduct->ID, '_bl_record', true);
 try {
+    bl_test_assert(bl_is_generated_product_excerpt($staleExcerpt, [$staleProduct->post_title]), 'Import did not store the generated summary');
     // A summary generated under the original name, on a product since renamed and given a description.
     wp_update_post(['ID' => $staleProduct->ID, 'post_title' => 'QA Renamed Dumper', 'post_content' => '<p>QA-DESCRIPTION-NOT-A-SUMMARY</p>', 'post_excerpt' => $staleRecord['name'] . ' with a 9 kW engine. Explore published specifications and discuss your application with BOB-LIFT.']);
     update_post_meta($staleProduct->ID, '_bl_record', array_replace_recursive($staleRecord, ['specs' => ['Engine power' => '13.2 kW']]));
