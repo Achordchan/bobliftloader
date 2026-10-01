@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
 /**
  * The record behind every product, news story and application (_bl_record) is open to the REST API, so tools outside
  * wp-admin (the WordPress.com connector, scripts) can read and change specs, models and the rest. Only users who may
- * edit the post can write it, and a REST write is cleaned the same way the edit screen cleans its own form.
+ * edit the post can write it; a REST write changes only the fields the edit screens offer, cleaned the same way.
  */
 // The REST API only carries meta for types that support custom fields; the generic Custom Fields box stays off the
 // product screen, where the record has its own boxes.
@@ -24,21 +24,6 @@ add_action('init', static function (): void {
     }
 });
 
-/** Text stays plain text (tags go, "&" stays "&", line breaks stay), numbers and true/false stay, anything else goes. */
-function bl_rest_clean($value)
-{
-    if (is_array($value)) {
-        $clean = [];
-        foreach ($value as $key => $item) {
-            $item = bl_rest_clean($item);
-            if ($item !== null) $clean[is_string($key) ? sanitize_text_field($key) : $key] = $item;
-        }
-        return $clean;
-    }
-    if (is_string($value)) return sanitize_textarea_field($value);
-    return is_int($value) || is_float($value) || is_bool($value) ? $value : null;
-}
-
 /** A theme path (images/…, videos/…) or an http(s) address, as the edit screens accept. */
 function bl_rest_clean_url($value): string
 {
@@ -53,60 +38,87 @@ function bl_rest_product_slugs($value): array
     return array_values(array_intersect(array_map(static fn($slug): string => sanitize_title(is_scalar($slug) ? (string) $slug : ''), (array) $value), $known));
 }
 
-/** A REST-written record, brought to the same shape and rules the edit screens save. */
-function bl_rest_normalize(string $type, array $record): array
+/**
+ * The fields the edit screens let people change, per type. Through REST these are the only ones that can change;
+ * everything else in a record (imported sections, posters, dates…) keeps its stored value whatever a client sends.
+ */
+const BL_REST_FIELDS = [
+    'bl_product' => ['model', 'category', 'source', 'image', 'gallery', 'specs', 'videos'],
+    'bl_news' => ['category', 'line', 'caption', 'source', 'image', 'products', 'event'],
+    'bl_application' => ['hub', 'products', 'facts', 'source', 'image'],
+];
+
+/** One editable field, cleaned to the shape and rules the edit screens save. */
+function bl_rest_field(string $type, string $key, $value)
 {
-    // Every field a page turns into a link is checked as an address below, so no javascript: link can be stored.
-    $record = bl_rest_clean($record);
-    $text = static fn(string $key): string => isset($record[$key]) && is_scalar($record[$key]) ? sanitize_text_field((string) $record[$key]) : '';
-    $record['source'] = bl_rest_clean_url($record['source'] ?? '');
-    $record['image'] = bl_rest_clean_url($record['image'] ?? '');
-    if ($type === 'bl_product') {
-        $record['model'] = $text('model');
-        $record['category'] = in_array($text('category'), ['skid-steer-loaders', 'mini-dumpers'], true) ? $text('category') : 'skid-steer-loaders';
-        $record['gallery'] = array_values(array_filter(array_map('bl_rest_clean_url', array_slice(array_values((array) ($record['gallery'] ?? [])), 0, 12))));
-        $specs = [];
-        foreach (array_slice(is_array($record['specs'] ?? null) ? $record['specs'] : [], 0, 40, true) as $key => $value) {
-            $key = sanitize_text_field((string) $key);
-            $value = is_scalar($value) ? sanitize_text_field((string) $value) : '';
-            if ($key !== '' && $value !== '') $specs[$key] = $value;
-        }
-        $record['specs'] = $specs;
-        $videos = [];
-        foreach (array_slice(array_values((array) ($record['videos'] ?? [])), 0, 8) as $video) {
-            $src = is_array($video) ? bl_rest_clean_url($video['src'] ?? '') : '';
-            if ($src) $videos[] = ['src' => $src, 'poster' => bl_rest_clean_url($video['poster'] ?? ''), 'caption' => sanitize_text_field(is_scalar($video['caption'] ?? '') ? (string) ($video['caption'] ?? '') : '')];
-        }
-        $record['videos'] = $videos;
-        return bl_product_derived($record);
+    $text = is_scalar($value) ? sanitize_text_field((string) $value) : '';
+    switch ($key) {
+        case 'source':
+        case 'image':
+            return bl_rest_clean_url($value);
+        case 'model':
+        case 'caption':
+            return $text;
+        case 'category':
+            if ($type === 'bl_product') return in_array($text, ['skid-steer-loaders', 'mini-dumpers'], true) ? $text : 'skid-steer-loaders';
+            return isset(BL_NEWS_CATEGORIES[$text]) ? $text : '';
+        case 'line':
+            return $text === 'group' ? 'group' : 'compact';
+        case 'hub':
+            return isset(bl_case_hubs()[$text]) ? $text : '';
+        case 'products':
+            return bl_rest_product_slugs($value);
+        case 'gallery':
+            return array_values(array_filter(array_map('bl_rest_clean_url', array_slice(array_values((array) $value), 0, 12))));
+        case 'specs':
+            $specs = [];
+            foreach (array_slice(is_array($value) ? $value : [], 0, 40, true) as $label => $item) {
+                $label = sanitize_text_field((string) $label);
+                $item = is_scalar($item) ? sanitize_text_field((string) $item) : '';
+                if ($label !== '' && $item !== '') $specs[$label] = $item;
+            }
+            return $specs;
+        case 'videos':
+            $videos = [];
+            foreach (array_slice(array_values((array) $value), 0, 8) as $video) {
+                $src = is_array($video) ? bl_rest_clean_url($video['src'] ?? '') : '';
+                if ($src) $videos[] = ['src' => $src, 'poster' => bl_rest_clean_url($video['poster'] ?? ''), 'caption' => is_scalar($video['caption'] ?? null) ? sanitize_text_field((string) $video['caption']) : ''];
+            }
+            return $videos;
+        case 'facts':
+            $facts = [];
+            foreach (['location', 'customer', 'task', 'site', 'duration', 'result'] as $fact) $facts[$fact] = isset($value[$fact]) && is_scalar($value[$fact]) ? sanitize_text_field((string) $value[$fact]) : '';
+            return $facts;
+        case 'event':
+            $input = is_array($value) ? $value : [];
+            $event = [];
+            foreach (['name', 'venue', 'address', 'booth', 'booth_note', 'source_label'] as $field) $event[$field] = isset($input[$field]) && is_scalar($input[$field]) ? sanitize_text_field((string) $input[$field]) : '';
+            foreach (['start', 'end'] as $field) $event[$field] = isset($input[$field]) && is_string($input[$field]) && bl_is_date($input[$field]) ? $input[$field] : '';
+            if ($event['end'] && $event['end'] < $event['start']) $event['end'] = '';
+            $event['source'] = esc_url_raw(is_scalar($input['source'] ?? null) ? (string) $input['source'] : '', ['http', 'https']);
+            return $event['start'] ? $event : [];
     }
-    $record['products'] = bl_rest_product_slugs($record['products'] ?? []);
-    if ($type === 'bl_application') {
-        $record['hub'] = isset(bl_case_hubs()[$text('hub')]) ? $text('hub') : '';
-        $facts = is_array($record['facts'] ?? null) ? $record['facts'] : [];
-        $record['facts'] = [];
-        foreach (['location', 'customer', 'task', 'site', 'duration', 'result'] as $key) $record['facts'][$key] = isset($facts[$key]) && is_scalar($facts[$key]) ? sanitize_text_field((string) $facts[$key]) : '';
-        return $record;
-    }
-    $record['category'] = isset(BL_NEWS_CATEGORIES[$text('category')]) ? $text('category') : '';
-    $record['line'] = $text('line') === 'group' ? 'group' : 'compact';
-    $record['caption'] = $text('caption');
-    $input = is_array($record['event'] ?? null) ? $record['event'] : [];
-    $event = [];
-    foreach (['name', 'venue', 'address', 'booth', 'booth_note', 'source_label'] as $key) $event[$key] = isset($input[$key]) && is_scalar($input[$key]) ? sanitize_text_field((string) $input[$key]) : '';
-    foreach (['start', 'end'] as $key) $event[$key] = isset($input[$key]) && is_string($input[$key]) && bl_is_date($input[$key]) ? $input[$key] : '';
-    if ($event['end'] && $event['end'] < $event['start']) $event['end'] = '';
-    $event['source'] = esc_url_raw(is_scalar($input['source'] ?? '') ? (string) ($input['source'] ?? '') : '', ['http', 'https']);
-    $record['event'] = $event['start'] ? $event : [];
-    return $record;
+    return null;
 }
 
-foreach (['bl_product', 'bl_news', 'bl_application'] as $bl_rest_type) {
-    add_action('rest_after_insert_' . $bl_rest_type, static function (WP_Post $post, WP_REST_Request $request): void {
+// What was stored before a REST write, so the write can only replace the editable fields.
+$bl_rest_before = [];
+foreach (array_keys(BL_REST_FIELDS) as $bl_rest_type) {
+    add_filter('rest_pre_insert_' . $bl_rest_type, static function ($prepared, WP_REST_Request $request) use (&$bl_rest_before) {
+        $id = (int) $request->get_param('id');
+        if ($id) $bl_rest_before[$id] = get_post_meta($id, '_bl_record', true);
+        return $prepared;
+    }, 10, 2);
+    add_action('rest_after_insert_' . $bl_rest_type, static function (WP_Post $post, WP_REST_Request $request) use (&$bl_rest_before): void {
         $meta = $request->get_param('meta');
-        if (!is_array($meta) || !array_key_exists('_bl_record', $meta)) return;
-        $record = get_post_meta($post->ID, '_bl_record', true);
-        if (is_array($record)) update_post_meta($post->ID, '_bl_record', bl_rest_normalize($post->post_type, $record));
+        if (!is_array($meta) || !is_array($meta['_bl_record'] ?? null)) return;
+        $sent = $meta['_bl_record'];
+        $record = $bl_rest_before[$post->ID] ?? [];
+        if (!is_array($record)) $record = [];
+        // Only fields the client sent change, so a missing "line" keeps the old stories' fallback to the bundled data.
+        foreach (BL_REST_FIELDS[$post->post_type] as $key) if (array_key_exists($key, $sent)) $record[$key] = bl_rest_field($post->post_type, $key, $sent[$key]);
+        if ($post->post_type === 'bl_product') $record = bl_product_derived($record);
+        update_post_meta($post->ID, '_bl_record', $record);
     }, 10, 2);
 }
 unset($bl_rest_type);

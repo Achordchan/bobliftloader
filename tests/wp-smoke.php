@@ -79,11 +79,12 @@ try {
     $story = get_page_by_path('customer-visits-boblift-factory', OBJECT, 'bl_news');
     $newsOriginal = get_post_meta($story->ID, '_bl_record', true);
     $newsWrite = new WP_REST_Request('POST', '/wp/v2/bl_news/' . $story->ID);
-    $newsWrite->set_body_params(['meta' => ['_bl_record' => array_merge((array) $newsOriginal, ['products' => 'not-a-list', 'event' => ['name' => 'QA', 'start' => '2026-10-15', 'source' => 'javascript:alert(1)']])]]);
+    $newsWrite->set_body_params(['meta' => ['_bl_record' => array_merge(array_diff_key((array) $newsOriginal, ['line' => 1]), ['products' => 'not-a-list', 'poster' => ['image' => 'images/a.webp', 'alt' => ['x']], 'event' => ['name' => 'QA', 'start' => '2026-10-15', 'source' => 'javascript:alert(1)']])]]);
     bl_test_assert(rest_do_request($newsWrite)->get_status() === 200, 'REST news write was refused');
     $newsSaved = get_post_meta($story->ID, '_bl_record', true);
     update_post_meta($story->ID, '_bl_record', $newsOriginal);
     bl_test_assert($newsSaved['products'] === [] && $newsSaved['event']['source'] === '' && $newsSaved['event']['start'] === '2026-10-15', 'REST news write kept a bad list or link');
+    bl_test_assert(($newsSaved['poster'] ?? null) === ($newsOriginal['poster'] ?? null) && ($newsSaved['line'] ?? null) === ($newsOriginal['line'] ?? null), 'REST news write changed a field the edit screen does not offer');
     wp_set_current_user(0);
     $anonymous = rest_do_request(new WP_REST_Request('GET', '/wp/v2/bl_product/' . $product->ID));
     bl_test_assert(!isset($anonymous->get_data()['meta']['_bl_record']), 'Anonymous REST read exposed the record');
