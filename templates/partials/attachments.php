@@ -5,6 +5,7 @@
  */
 $attachmentGroups = bl_attachments();
 $attachmentCount = array_sum(array_map('count', $attachmentGroups));
+$attachmentNames = array_column(array_merge(...array_values($attachmentGroups)), 'name', 'slug');
 ?>
 <section class="bl-attachments bl-shell" id="attachments" aria-labelledby="attachments-title">
   <div class="bl-attachments-head bl-reveal">
@@ -13,6 +14,14 @@ $attachmentCount = array_sum(array_map('count', $attachmentGroups));
       <p>Our loaders take their tools through a quick-attach plate and auxiliary hydraulic lines, so the bucket comes off and a fork, auger or sweeper goes on in minutes. Attachments are quoted with your loader and matched to its hydraulics.</p>
       <a class="bl-text-link" href="<?= bl_escape(bl_url('/contact/') . '?equipment=loader#enquiry') ?>">Ask which suit your model <?= bl_icon('arrow-up-right') ?></a>
     </div>
+  </div>
+  <div class="bl-attachments-jobs" id="loader-jobs">
+    <h3 class="bl-eyebrow">WHERE IT WORKS</h3>
+    <ul>
+      <?php foreach (bl_loader_jobs() as $job): ?>
+      <li class="bl-reveal"><strong><?= bl_escape($job['title']) ?></strong><p><?= bl_escape($job['text']) ?></p><span><?= bl_escape(implode(' · ', array_filter(array_map(static fn($slug) => $attachmentNames[$slug] ?? '', $job['tools'])))) ?></span></li>
+      <?php endforeach; ?>
+    </ul>
   </div>
   <div class="bl-attachments-groups">
     <?php foreach ($attachmentGroups as $group => $items): ?>

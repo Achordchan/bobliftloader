@@ -112,6 +112,22 @@ function bl_attachments(): array
     ];
 }
 
+/**
+ * Jobs a mini skid steer is bought for, shown above the attachments they use. Each names attachment slugs from
+ * bl_attachments(), so the names on the page always match the tools listed below them.
+ */
+function bl_loader_jobs(): array
+{
+    return [
+        ['title' => 'Renovation and indoor work', 'text' => 'Inside buildings, basements and car parks: break out floors, clear rubble and move materials where a full-size loader can’t go.', 'tools' => ['breaker', 'four-in-one-bucket', 'crab-bucket']],
+        ['title' => 'Gardens and landscaping', 'text' => 'Rubber tracks spread the weight on lawns and soft soil. Dig planting holes, level beds, turn soil and gather cuttings.', 'tools' => ['auger', 'leveler', 'rotary-tiller', 'hydraulic-grapple']],
+        ['title' => 'Farms, greenhouses and barns', 'text' => 'Narrow enough for greenhouse aisles and livestock sheds: clean out, move feed and carry bales.', 'tools' => ['four-in-one-bucket', 'pallet-fork', 'hydraulic-grapple']],
+        ['title' => 'Streets and public spaces', 'text' => 'Works on footpaths, lanes and housing estates without closing the road: patch repairs, drain clearing and snow.', 'tools' => ['breaker', 'sweeper', 'snow-blower']],
+        ['title' => 'Yards and warehouses', 'text' => 'Moves pallets and clears scrap and offcuts in narrow aisles and busy yards.', 'tools' => ['pallet-fork', 'crab-bucket', 'sweeper']],
+        ['title' => 'Alongside bigger machines', 'text' => 'Takes the corners, indoor and finishing work on small sites: footings, trenches, backfill and clean-up.', 'tools' => ['direct-excavation', 'trencher', 'trench-filler']],
+    ];
+}
+
 /** A product's videos: each has a source, a poster and a caption. Theme paths (videos/…) resolve to the theme's assets. */
 function bl_product_videos(array $product): array
 {

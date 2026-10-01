@@ -201,6 +201,7 @@ function bl_support_default_faq(): array
     $items = [];
     $groups = [
         'Choosing a machine' => [
+            ['What is a mini skid steer loader?', 'A compact loader that steers by running its left and right tracks or wheels at different speeds, so it turns on the spot. A quick-attach plate lets the same machine dig, lift, break, sweep or clear snow.', 'See the jobs it does', $loaders . '#loader-jobs'],
             ['Which loader fits through my gate or doorway?', 'Set your narrowest opening on the width chart of the loaders page. It shows which models pass through, with and without the bucket fitted.', 'Check your opening', $loaders . '#about-the-range'],
             ['Should I choose tracks or tires?', 'Rubber tracks suit soft ground, lawns and slopes. Rubber tires suit concrete, asphalt and paving.'],
             ['Can I choose the engine?', 'Several loaders offer more than one engine brand, and some have an electric version. Each model lists its choices under Engine options on its specification sheet.'],

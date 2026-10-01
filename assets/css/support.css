@@ -110,6 +110,12 @@
 .bl-site .bl-attachments-head h2{margin-top:clamp(18px,1.3vw,30px);font:700 var(--fs-display)/.86 var(--display);letter-spacing:-.015em}
 .bl-site .bl-attachments-head p{font-size:var(--fs-body);line-height:1.85;color:var(--muted);text-wrap:pretty}
 .bl-site .bl-attachments-head .bl-text-link{margin-top:clamp(20px,1.4vw,32px)}
+.bl-site .bl-attachments-jobs{margin-bottom:clamp(40px,3.4vw,88px)}
+.bl-site .bl-attachments-jobs ul{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 clamp(20px,2vw,56px);margin-top:clamp(14px,1vw,22px)}
+.bl-site .bl-attachments-jobs li{display:flex;flex-direction:column;gap:8px;padding:clamp(16px,1.2vw,28px) 0;border-top:1px solid var(--line)}
+.bl-site .bl-attachments-jobs strong{font:700 var(--fs-h4)/1.1 var(--display)}
+.bl-site .bl-attachments-jobs p{font-size:var(--fs-small);line-height:1.7;color:var(--muted);text-wrap:pretty}
+.bl-site .bl-attachments-jobs span{margin-top:auto;font-size:var(--fs-micro);font-weight:600;line-height:1.5;color:var(--blue)}
 .bl-site .bl-attachments-group{display:grid;grid-template-columns:minmax(130px,.9fr) minmax(0,5fr);gap:clamp(20px,2vw,56px);padding:clamp(18px,1.4vw,32px) 0;border-top:1px solid var(--line)}
 .bl-site .bl-attachments-group:first-child{border-top:2px solid var(--ink)}
 .bl-site .bl-attachments-group h3{font:700 var(--fs-h4)/1 var(--display)}
@@ -167,6 +173,7 @@
   .bl-site .bl-sup-faq{grid-template-columns:1fr}
   .bl-site .bl-sup-faq-aside{position:static}
   .bl-site .bl-attachments-group{grid-template-columns:1fr}
+  .bl-site .bl-attachments-jobs ul{grid-template-columns:repeat(2,minmax(0,1fr))}
   .bl-site .bl-attachments-group ul{grid-template-columns:repeat(3,minmax(0,1fr))}
   .bl-site .bl-gallery-videos{grid-column:1}
 }
@@ -192,6 +199,7 @@
   .bl-site .bl-attachments-group ul::-webkit-scrollbar{display:none}
   .bl-site .bl-attachments-group li{scroll-snap-align:start}
   .bl-site .bl-attachments-group h3 small{display:inline;margin:0 0 0 8px}
+  .bl-site .bl-attachments-jobs ul{grid-template-columns:1fr}
   .bl-site .bl-product-terms{flex-direction:column;align-items:flex-start}
   .bl-site .bl-product-terms li+li::before{display:none}
 }
