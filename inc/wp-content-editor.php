@@ -3,11 +3,11 @@ declare(strict_types=1);
 defined('ABSPATH') || exit;
 
 /**
- * "网站内容" screens for the home and Support pages. Each screen is built from the field list below; saving keeps only
+ * "网站内容" screens for the home, Support, Applications and skid steer loader pages. Each screen is built from the field list below; saving keeps only
  * what differs from the defaults in inc/editable.php, so text an editor never touched follows later theme updates.
  */
 
-const BL_CONTENT_PAGES = ['home' => ['title' => '首页内容', 'menu' => '首页', 'path' => '/'], 'support' => ['title' => '采购与售后（Support）页内容', 'menu' => '采购与售后 Support', 'path' => '/support/'], 'applications' => ['title' => '应用场景（Applications）页内容', 'menu' => '应用场景 Applications', 'path' => '/applications/']];
+const BL_CONTENT_PAGES = ['home' => ['title' => '首页内容', 'menu' => '首页', 'path' => '/'], 'support' => ['title' => '采购与售后（Support）页内容', 'menu' => '采购与售后 Support', 'path' => '/support/'], 'applications' => ['title' => '应用场景（Applications）页内容', 'menu' => '应用场景 Applications', 'path' => '/applications/'], 'loaders' => ['title' => '滑移装载机栏目内容', 'menu' => '滑移装载机', 'path' => '/products/skid-steer-loaders/']];
 
 /**
  * Field list per page. "group" only groups fields on the screen; "preview" is the theme's own image shown while a slot is
@@ -66,6 +66,28 @@ function bl_content_schema(string $page): array
         $sections[] = $seo('');
         return $sections;
     }
+    if ($page === 'loaders') return [
+        ['title' => '适用场景', 'note' => '滑移装载机栏目页属具上方的“用在哪里”，常见问题“什么是滑移装载机”链接到这里（#loader-jobs）。全部删掉则不显示这一块。', 'fields' => [
+            ['key' => 'jobs.eyebrow', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'jobs.items', 'label' => '场景', 'type' => 'list', 'add' => '添加场景', 'summary' => ['title'], 'fields' => [
+                'title' => ['label' => '场景名', 'type' => 'text'],
+                'text' => ['label' => '说明', 'type' => 'textarea'],
+                'tools' => ['label' => '常用属具', 'type' => 'text', 'help' => '用英文逗号分隔，按页面上显示的顺序写；最好和下面属具列表里的名称一致。'],
+            ]],
+        ]],
+        ['title' => '属具', 'note' => '栏目页的属具一节（#attachments）。标题里的属具数量按下面的条目自动计算。', 'fields' => [
+            ['key' => 'attachments.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
+            ['key' => 'attachments.text', 'label' => '标题旁说明', 'type' => 'textarea'],
+            ['key' => 'attachments.link', 'label' => '询价链接文字', 'type' => 'text', 'help' => '链接去联系页（已选好滑移装载机）。留空不显示。'],
+            ['key' => 'attachments.items', 'label' => '属具', 'type' => 'list', 'add' => '添加属具', 'summary' => ['name'], 'meta' => 'group', 'fields' => [
+                'group' => ['label' => '分组', 'type' => 'text', 'help' => '分组名相同的属具归在同一组，分组按第一次出现的顺序排列。'],
+                'name' => ['label' => '名称', 'type' => 'text'],
+                'use' => ['label' => '用途', 'type' => 'text'],
+                'image' => ['label' => '图片', 'type' => 'image', 'help' => '4:3 横图。留空则不显示图片。'],
+            ]],
+            ['key' => 'attachments.note', 'label' => '底部备注', 'type' => 'textarea', 'help' => $optional],
+        ]],
+    ];
     if ($page === 'support') return [
         ['title' => '首屏', 'fields' => [
             ['key' => 'hero.eyebrow', 'label' => '小标题', 'type' => 'text'],

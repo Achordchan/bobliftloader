@@ -124,3 +124,82 @@ foreach (array_keys(BL_REST_FIELDS) as $bl_rest_type) {
     }, 10, 2);
 }
 unset($bl_rest_type);
+
+/**
+ * The 网站内容 screens (home, Support, Applications, loaders) through REST. Each screen has one item of the hidden type
+ * bl_page_content, slug = the screen's key; its _bl_content meta reads as the page's current content (defaults with the
+ * saved changes) and writes through the same cleaning and "keep only what differs" saving as the screen. The item itself
+ * holds nothing: the content stays in the bl_content_{page} option the site reads.
+ *
+ * A write sends only what should change: groups merge key by key, a list (FAQ, jobs, attachments…) is replaced whole.
+ */
+add_action('init', static function (): void {
+    register_post_type('bl_page_content', [
+        'label' => '网站内容（接口）',
+        'public' => false,
+        'show_ui' => false,
+        'show_in_rest' => true,
+        'rest_base' => 'bl_page_content',
+        'supports' => ['title', 'custom-fields'],
+        'capability_type' => 'page',
+        'map_meta_cap' => true,
+        // Items are made by the theme, one per screen; they are never created or removed through the API.
+        'capabilities' => ['create_posts' => 'do_not_allow', 'delete_posts' => 'do_not_allow', 'delete_published_posts' => 'do_not_allow', 'delete_others_posts' => 'do_not_allow'],
+    ]);
+    register_post_meta('bl_page_content', '_bl_content', [
+        'type' => 'object',
+        'single' => true,
+        'description' => 'The page\'s current content, shaped like the defaults in inc/editable.php. Send only what changes; lists are replaced whole.',
+        'show_in_rest' => ['schema' => ['type' => 'object', 'context' => ['edit'], 'additionalProperties' => true]],
+        'auth_callback' => static fn(bool $allowed, string $key, int $postId): bool => current_user_can('edit_post', $postId),
+    ]);
+});
+
+/** The screen an item stands for, or '' for anything else. */
+function bl_page_content_key(int $postId): string
+{
+    $post = get_post($postId);
+    return $post && $post->post_type === 'bl_page_content' && isset(BL_CONTENT_PAGES[$post->post_name]) ? $post->post_name : '';
+}
+
+/** A page's content as it stands now (bl_editable() caches per request, which a write in the same request must not see). */
+function bl_page_content_current(string $page): array
+{
+    $saved = get_option('bl_content_' . $page);
+    $content = bl_content_defaults($page);
+    return is_array($saved) && $saved ? bl_merge_content($content, $saved) : $content;
+}
+
+// One private item per screen (only editors see them in the API), made once and again whenever a screen is added.
+add_action('init', static function (): void {
+    if (get_option('bl_page_content_items') === array_keys(BL_CONTENT_PAGES)) return;
+    foreach (BL_CONTENT_PAGES as $page => $info) {
+        if (get_page_by_path($page, OBJECT, 'bl_page_content')) continue;
+        wp_insert_post(['post_type' => 'bl_page_content', 'post_status' => 'private', 'post_name' => $page, 'post_title' => $info['title']]);
+    }
+    update_option('bl_page_content_items', array_keys(BL_CONTENT_PAGES), true);
+}, 20);
+
+add_filter('get_post_metadata', static function ($value, $postId, $key, $single) {
+    if ($key !== '_bl_content' || !($page = bl_page_content_key((int) $postId))) return $value;
+    return [bl_page_content_current($page)];
+}, 10, 4);
+
+// Nothing is ever stored on the item itself.
+add_filter('update_post_metadata', static fn($check, $postId, $key) => $key === '_bl_content' && bl_page_content_key((int) $postId) ? true : $check, 10, 3);
+
+add_filter('rest_pre_insert_bl_page_content', static function ($prepared, WP_REST_Request $request) {
+    $meta = $request->get_param('meta');
+    if (is_wp_error($prepared) || !is_array($meta) || !array_key_exists('_bl_content', $meta)) return $prepared;
+    $page = bl_page_content_key((int) $request->get_param('id'));
+    $sent = $meta['_bl_content'];
+    if (!$page) return new WP_Error('bl_content_unknown', 'Unknown content page.', ['status' => 404]);
+    if (!is_array($sent)) return new WP_Error('bl_content_invalid', 'The content must be an object.', ['status' => 400]);
+    // Starting from the current content keeps everything not sent, loading figures of unpublished models included.
+    $diff = bl_content_diff(bl_content_clean_all($page, bl_merge_content(bl_page_content_current($page), $sent)), bl_content_clean_all($page, bl_content_defaults($page)));
+    if ($diff) update_option('bl_content_' . $page, $diff);
+    else delete_option('bl_content_' . $page);
+    unset($meta['_bl_content']);
+    $request->set_param('meta', $meta);
+    return $prepared;
+}, 10, 2);
