@@ -103,6 +103,24 @@ try {
     update_post_meta($product->ID, '_bl_record', $original);
     wp_set_current_user(0);
 }
+$staleProduct = get_page_by_path('1-ton-mini-dumper', OBJECT, 'bl_product');
+$staleExcerpt = $staleProduct->post_excerpt;
+$staleRecord = get_post_meta($staleProduct->ID, '_bl_record', true);
+try {
+    bl_test_assert(bl_is_generated_product_excerpt($staleExcerpt, [$staleProduct->post_title]), 'Import did not store the generated summary');
+    // A summary generated under the original name, on a product since renamed and given a description.
+    wp_update_post(['ID' => $staleProduct->ID, 'post_title' => 'QA Renamed Dumper', 'post_content' => '<p>QA-DESCRIPTION-NOT-A-SUMMARY</p>', 'post_excerpt' => $staleRecord['name'] . ' with a 9 kW engine. Explore published specifications and discuss your application with BOB-LIFT.']);
+    update_post_meta($staleProduct->ID, '_bl_record', array_replace_recursive($staleRecord, ['specs' => ['Engine power' => '13.2 kW']]));
+    $fresh = bl_find_record(bl_wp_products(), '1-ton-mini-dumper');
+    bl_test_assert($fresh['excerpt'] === bl_product_excerpt($fresh) && str_contains($fresh['excerpt'], '13.2 kW'), 'Generated product summary kept old figures');
+    foreach (['QA-HANDWRITTEN-SUMMARY', 'Built for farm tracks. Explore published specifications and discuss your application with BOB-LIFT.'] as $handwritten) {
+        wp_update_post(['ID' => $staleProduct->ID, 'post_excerpt' => $handwritten]);
+        bl_test_assert(bl_find_record(bl_wp_products(), '1-ton-mini-dumper')['excerpt'] === $handwritten, 'Handwritten product summary was replaced');
+    }
+} finally {
+    wp_update_post(['ID' => $staleProduct->ID, 'post_title' => $staleProduct->post_title, 'post_content' => $staleProduct->post_content, 'post_excerpt' => $staleExcerpt]);
+    update_post_meta($staleProduct->ID, '_bl_record', $staleRecord);
+}
 $news = get_page_by_path('customer-visits-boblift-factory', OBJECT, 'bl_news');
 $originalContent = $news->post_content;
 try {
@@ -112,6 +130,6 @@ try {
 } finally {
     wp_update_post(['ID' => $news->ID, 'post_content' => $originalContent]);
 }
-$report = ['wordpress' => get_bloginfo('version'), 'php' => PHP_VERSION, 'theme' => get_stylesheet(), 'import' => $firstImport, 'idempotent_import' => true, 'admin_save_and_frontend_read' => true, 'news_editor_read' => true, 'nonce_rejection' => true, 'anonymous_rejection' => true, 'draft_visibility' => true, 'rest_record' => true, 'restored' => true, 'published_products' => $productCount, 'published_news' => $newsCount];
+$report = ['wordpress' => get_bloginfo('version'), 'php' => PHP_VERSION, 'theme' => get_stylesheet(), 'import' => $firstImport, 'idempotent_import' => true, 'admin_save_and_frontend_read' => true, 'news_editor_read' => true, 'product_summary_follows_specs' => true, 'nonce_rejection' => true, 'anonymous_rejection' => true, 'draft_visibility' => true, 'rest_record' => true, 'restored' => true, 'published_products' => $productCount, 'published_news' => $newsCount];
 file_put_contents('/wordpress/wp-content/bl-verification.json', wp_json_encode($report));
 echo wp_json_encode($report);

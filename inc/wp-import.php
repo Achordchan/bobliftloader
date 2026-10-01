@@ -8,6 +8,7 @@ function bl_import_initial_content(): array
     $counts = ['products' => 0, 'news' => 0, 'pages' => 0];
     foreach (bl_read_data('products') as $order => $record) {
         if (get_page_by_path($record['slug'], OBJECT, 'bl_product')) continue;
+        // The stored summary is the generated wording, which the site recognises and rebuilds from the current specs.
         $excerpt = bl_product_excerpt($record);
         $id = wp_insert_post(['post_type' => 'bl_product', 'post_status' => 'publish', 'post_title' => $record['name'], 'post_name' => $record['slug'], 'post_excerpt' => $excerpt, 'menu_order' => $order], true);
         if (is_wp_error($id)) throw new RuntimeException($id->get_error_message());

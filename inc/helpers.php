@@ -76,11 +76,24 @@ function bl_spec_phrase(array $product): string
     return implode(', ', array_slice($parts, 0, -1)) . ' and ' . end($parts);
 }
 
+/**
+ * Summary built from the key figures. The import stores one in each product's excerpt, so an excerpt that is still
+ * exactly that wording is treated as generated and rebuilt from the current specs instead of showing old numbers.
+ */
 function bl_product_excerpt(array $product): string
 {
     $phrase = bl_spec_phrase($product);
     if ($phrase !== '') return $product['name'] . ' with ' . $phrase . '. Explore published specifications and discuss your application with BOB-LIFT.';
     return 'Explore the BOB-LIFT ' . $product['model'] . ' ' . ($product['category'] === 'mini-dumpers' ? 'mini dumper' : 'mini skid steer loader') . '. View original product photography and discuss the configuration for your next project.';
+}
+
+/** Only the exact generated wording counts: one of the product's names, figures such as "a 1,500 kg rated load", then the stock close. */
+function bl_is_generated_product_excerpt(string $excerpt, array $names): bool
+{
+    $names = implode('|', array_map(static fn($name) => preg_quote($name, '/'), array_filter(array_unique($names), 'strlen')));
+    $figure = 'a [\\d.,]+ ?[^\\s,]* (?:rated load|mixing drum|bucket|hopper|engine)';
+    return ($names !== '' && preg_match('/^(?:' . $names . ') with ' . $figure . '(?:, ' . $figure . ')*(?: and ' . $figure . ')?\\. Explore published specifications and discuss your application with BOB-LIFT\\.$/u', $excerpt))
+        || (bool) preg_match('/^Explore the BOB-LIFT [^.]+ (?:mini dumper|mini skid steer loader)\\. View original product photography and discuss the configuration for your next project\\.$/', $excerpt);
 }
 
 /**
