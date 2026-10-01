@@ -91,6 +91,43 @@ function bl_loader_jobs(): array
     return $jobs;
 }
 
+/**
+ * Jobs the mini dumpers are bought for, on the dumper family page. Each names its models by model name, separated by
+ * commas; a name that matches a published mini dumper links to it, any other name is left out, so a job never points
+ * at a model the site does not show.
+ */
+function bl_dumper_jobs(): array
+{
+    $byName = bl_dumper_model_index(bl_products());
+    $jobs = [];
+    foreach (bl_editable('dumpers')['jobs']['items'] as $job) {
+        $models = [];
+        foreach (array_filter(array_map('trim', explode(',', $job['models'])), 'strlen') as $name) {
+            $product = $byName[strtolower($name)] ?? null;
+            if ($product && !in_array($product, $models, true)) $models[] = $product;
+        }
+        $jobs[] = ['title' => $job['title'], 'text' => $job['text'], 'models' => $models];
+    }
+    return $jobs;
+}
+
+/**
+ * Published mini dumpers by lower-case model name. A model renamed since (FY-30 is now FY30) is found under either name,
+ * whichever one its record and the editor use; a model's own name always wins over another model's former name.
+ */
+function bl_dumper_model_index(array $products): array
+{
+    $index = [];
+    foreach ($products as $product) if ($product['category'] === 'mini-dumpers') $index[strtolower($product['model'])] = $product;
+    $aliases = [];
+    foreach (BL_FORMER_MODELS as $model => $former) foreach ($former as $name) {
+        // Current name written, record still on the former name; and former name written, record already renamed.
+        if (isset($index[strtolower($name)])) $aliases[strtolower($model)] ??= $index[strtolower($name)];
+        if (isset($index[strtolower($model)])) $aliases[strtolower($name)] ??= $index[strtolower($model)];
+    }
+    return $index + $aliases;
+}
+
 /** A product's videos: each has a source, a poster and a caption. Theme paths (videos/…) resolve to the theme's assets. */
 function bl_product_videos(array $product): array
 {

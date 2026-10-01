@@ -56,21 +56,20 @@ if ($storyCategory === 'skid-steer-loaders') {
     $lightest = $rows[0] ?? null;
     $heaviest = end($rows) ?: null;
     $mixer = $mixers[0] ?? null;
+    // Words and options are edited in WordPress (网站内容 → 迷你翻斗车, defaults in inc/editable.php); the chart follows the products.
+    $about = bl_editable('dumpers')['about'];
     $story = [
-        'eyebrow' => 'ABOUT THE DUMPERS',
-        'title' => 'FROM THE GARDEN<br>PATH TO THE SITE.',
-        'intro' => 'Mini dumpers carry soil, gravel, concrete and site waste over ground a truck can’t reach. The range runs from compact tracked dumpers that fit narrow paths to wheeled site dumpers for heavier loads.',
+        'eyebrow' => bl_escape($about['eyebrow']),
+        'title' => bl_heading($about['title']),
+        'intro' => $about['intro'],
         'chartEyebrow' => 'RATED LOAD',
         'chartTitle' => 'PICK YOUR PAYLOAD.',
         'chartText' => ucfirst($inWords(count($rows))) . ' models' . ($lightest && $heaviest ? ' from ' . ($lightest['value'] < 1000 ? $lightest['value'] . ' kg' : ($lightest['value'] / 1000) . ' t') . ' to ' . ($heaviest['value'] / 1000) . ' t' : '') . '.' . ($buckets ? ' Bucket capacity runs from ' . min($buckets) . ' m³ to ' . max($buckets) . ' m³ on the wheeled dumpers.' : '') . ($mixer ? ' The ' . $mixer['model'] . ' carries a ' . $mixer['specs']['Drum capacity'] . ' drum instead of a hopper.' : ''),
         'chartNote' => 'Rated loads from each model’s published specifications. Confirm your material and typical load with our team.',
         'legend' => ['bar' => 'Rated load', 'marker' => 'Your load'],
         'control' => ['name' => 'payload', 'label' => 'Your load per trip', 'hint' => 'Per trip, not per day', 'step' => 100, 'default' => 0, 'unit' => 'kg'],
-        'options' => [
-            ['big' => 'WHEELS <i>/</i> TRACKS', 'title' => 'Running gear.', 'text' => 'Wheeled site dumpers for firm ground and heavier loads; tracked models for soft ground and narrow access.'],
-            ['big' => 'OPEN <i>/</i> ROOF <i>/</i> CAB', 'title' => 'Operator cover.', 'text' => 'Wheeled models come open or with a roof or cab. Each spec sheet lists the height with roof / cab.'],
-            ['big' => 'TIP <i>/</i> MIX', 'title' => 'Hopper or drum.', 'text' => 'Tracked dumpers tip hydraulically to 100°. The mixer version carries a drum to mix concrete on site.'],
-        ],
+        // The big words are escaped here; a slash between options takes the accent colour, as on the loader page.
+        'options' => array_map(static fn(array $o): array => ['big' => str_replace('/', '<i>/</i>', bl_escape($o['big'])), 'title' => $o['title'], 'text' => $o['text']], $about['options']),
         'colour' => false,
     ];
 }
@@ -133,7 +132,7 @@ $at = static fn(int $v): string => rtrim(rtrim(number_format(($v - $scale['from'
       <div class="bl-ruler-axis" aria-hidden="true"><span></span><span class="bl-ruler-ticks"><?php for ($tick = $scale['from']; $tick <= $scale['to']; $tick += $scale['step']): ?><i style="--at:<?= $at($tick) ?>"><?= bl_escape($scale['tick']($tick)) ?></i><?php endfor; ?></span><span><?= $scale['unit'] ?></span></div>
     </figure>
   </div>
-  <ul class="bl-range-story-options<?= $story['colour'] ? ' bl-range-story-with-colour' : '' ?>">
+  <ul class="bl-range-story-options<?= $story['colour'] ? ' bl-range-story-with-colour' : '' ?>" style="--options:<?= max(1, min(4, count($story['options']))) ?>">
     <?php foreach ($story['options'] as $option): ?>
     <li class="bl-reveal"><strong><?= $option['big'] ?></strong><h3><?= bl_escape($option['title']) ?></h3><p><?= bl_escape($option['text']) ?></p><?php if (!empty($option['link'])): ?><a class="bl-text-link" href="<?= bl_escape($option['link'][0]) ?>"><?= bl_escape($option['link'][1]) ?> <?= bl_icon('arrow-down') ?></a><?php endif; ?></li>
     <?php endforeach; ?>

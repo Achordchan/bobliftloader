@@ -369,7 +369,7 @@
 .bl-site.bl-motion .bl-ruler .bl-ruler-bar,.bl-site.bl-motion .bl-ruler .bl-ruler-sub{transform:scaleX(0);transition:transform .9s cubic-bezier(.2,.7,.2,1) calc(var(--i,0) * 70ms + .15s)}
 .bl-site.bl-motion .bl-ruler .bl-ruler-sub{transition-delay:calc(var(--i,0) * 70ms + .35s)}
 .bl-site.bl-motion .bl-ruler.bl-visible .bl-ruler-bar,.bl-site.bl-motion .bl-ruler.bl-visible .bl-ruler-sub{transform:none}
-.bl-site .bl-range-story-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(24px,2.4vw,64px);margin-top:clamp(64px,5vw,128px);padding-top:clamp(36px,3vw,64px);border-top:1px solid var(--line)}
+.bl-site .bl-range-story-options{display:grid;grid-template-columns:repeat(var(--options,3),minmax(0,1fr));gap:clamp(24px,2.4vw,64px);margin-top:clamp(64px,5vw,128px);padding-top:clamp(36px,3vw,64px);border-top:1px solid var(--line)}
 .bl-site .bl-range-story-with-colour{grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.5fr)}
 .bl-site .bl-range-story-options>li{display:flex;flex-direction:column;align-items:flex-start}
 .bl-site .bl-range-story-options strong{align-self:stretch;padding-bottom:clamp(14px,1vw,24px);border-bottom:2px solid var(--ink);font:700 clamp(30px,2.2vw,58px)/.95 var(--display);letter-spacing:-.005em}
@@ -387,13 +387,14 @@
 .bl-site .bl-range-story-swatches i{width:clamp(18px,1.2vw,28px);aspect-ratio:1;background:var(--c);border:1px solid #ffffff33}
 @media(max-width:1300px){
   .bl-site .bl-range-story-with-colour{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .bl-site .bl-range-story-options:not(.bl-range-story-with-colour){grid-template-columns:repeat(min(var(--options,3),2),minmax(0,1fr))}
   .bl-site .bl-range-story-colour{grid-column:1/-1;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}
 }
 @media(max-width:1000px){
   .bl-site .bl-range-story-head,.bl-site .bl-range-story-chart{grid-template-columns:1fr}
 }
 @media(max-width:800px){
-  .bl-site .bl-range-story-options,.bl-site .bl-range-story-with-colour{grid-template-columns:1fr;gap:36px}
+  .bl-site .bl-range-story-options,.bl-site .bl-range-story-options:not(.bl-range-story-with-colour),.bl-site .bl-range-story-with-colour{grid-template-columns:1fr;gap:36px}
   .bl-site .bl-range-story-colour{grid-template-columns:1fr}
   .bl-site .bl-range-story-colour img{aspect-ratio:3/2;min-height:0}
 }

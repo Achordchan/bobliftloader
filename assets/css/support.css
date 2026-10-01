@@ -116,6 +116,9 @@
 .bl-site .bl-attachments-jobs strong{font:700 var(--fs-h4)/1.1 var(--display)}
 .bl-site .bl-attachments-jobs p{font-size:var(--fs-small);line-height:1.7;color:var(--muted);text-wrap:pretty}
 .bl-site .bl-attachments-jobs span{margin-top:auto;font-size:var(--fs-micro);font-weight:600;line-height:1.5;color:var(--blue)}
+.bl-site .bl-dumper-jobs{border-top:1px solid var(--line)}
+.bl-site .bl-dumper-jobs .bl-attachments-jobs{margin-bottom:0}
+.bl-site .bl-attachments-jobs span a{color:inherit;text-decoration:underline;text-underline-offset:3px}
 .bl-site .bl-attachments-group{display:grid;grid-template-columns:minmax(130px,.9fr) minmax(0,5fr);gap:clamp(20px,2vw,56px);padding:clamp(18px,1.4vw,32px) 0;border-top:1px solid var(--line)}
 .bl-site .bl-attachments-group:first-child{border-top:2px solid var(--ink)}
 .bl-site .bl-attachments-group h3{font:700 var(--fs-h4)/1 var(--display)}
