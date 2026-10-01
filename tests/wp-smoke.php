@@ -54,6 +54,33 @@ try {
     wp_set_current_user(0);
 }
 bl_test_assert(count(bl_wp_products()) === $productCount, 'Product restore failed');
+// The record is open to the REST API (the WordPress.com connector writes through it): editors read and write it, a
+// REST write is cleaned and the derived load follows the specs, and anonymous visitors can neither read nor write it.
+$original = get_post_meta($post->ID, '_bl_record', true);
+try {
+    wp_set_current_user(1);
+    $read = new WP_REST_Request('GET', '/wp/v2/bl_product/' . $post->ID);
+    $read->set_param('context', 'edit');
+    $read = rest_do_request($read);
+    bl_test_assert($read->get_status() === 200 && ($read->get_data()['meta']['_bl_record']['specs'] ?? null) === $original['specs'], 'REST did not return the product record');
+    $record = $original;
+    $record['model'] = '<b>QA-REST</b>';
+    $record['specs']['Rated load'] = '1,234 kg';
+    $write = new WP_REST_Request('POST', '/wp/v2/bl_product/' . $post->ID);
+    $write->set_body_params(['meta' => ['_bl_record' => $record]]);
+    bl_test_assert(rest_do_request($write)->get_status() === 200, 'REST write was refused');
+    $saved = get_post_meta($post->ID, '_bl_record', true);
+    bl_test_assert($saved['model'] === 'QA-REST' && $saved['load'] === 1234 && $saved['specs']['Rated load'] === '1,234 kg', 'REST write was not cleaned or derived');
+    wp_set_current_user(0);
+    $anonymous = rest_do_request(new WP_REST_Request('GET', '/wp/v2/bl_product/' . $post->ID));
+    bl_test_assert(!isset($anonymous->get_data()['meta']['_bl_record']), 'Anonymous REST read exposed the record');
+    $write->set_body_params(['meta' => ['_bl_record' => ['model' => 'QA-ANON']]]);
+    rest_do_request($write);
+    bl_test_assert(get_post_meta($post->ID, '_bl_record', true)['model'] === 'QA-REST', 'Anonymous REST write was accepted');
+} finally {
+    update_post_meta($post->ID, '_bl_record', $original);
+    wp_set_current_user(0);
+}
 $news = get_page_by_path('customer-visits-boblift-factory', OBJECT, 'bl_news');
 $originalContent = $news->post_content;
 try {
@@ -63,6 +90,6 @@ try {
 } finally {
     wp_update_post(['ID' => $news->ID, 'post_content' => $originalContent]);
 }
-$report = ['wordpress' => get_bloginfo('version'), 'php' => PHP_VERSION, 'theme' => get_stylesheet(), 'import' => $firstImport, 'idempotent_import' => true, 'admin_save_and_frontend_read' => true, 'news_editor_read' => true, 'nonce_rejection' => true, 'anonymous_rejection' => true, 'draft_visibility' => true, 'restored' => true, 'published_products' => $productCount, 'published_news' => $newsCount];
+$report = ['wordpress' => get_bloginfo('version'), 'php' => PHP_VERSION, 'theme' => get_stylesheet(), 'import' => $firstImport, 'idempotent_import' => true, 'admin_save_and_frontend_read' => true, 'news_editor_read' => true, 'nonce_rejection' => true, 'anonymous_rejection' => true, 'draft_visibility' => true, 'rest_record' => true, 'restored' => true, 'published_products' => $productCount, 'published_news' => $newsCount];
 file_put_contents('/wordpress/wp-content/bl-verification.json', wp_json_encode($report));
 echo wp_json_encode($report);
