@@ -1,0 +1,29 @@
+# WordPress.com 高级部署：只把主题运行需要的文件交给 WordPress.com，
+# 设计参考、3D/CAD 源文件、文档和测试不上线。文件清单与 scripts/package-theme.py 一致。
+name: Deploy theme to WordPress.com
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Collect theme files
+        run: |
+          mkdir build
+          cp style.css functions.php index.php readme.txt screenshot.png build/
+          cp -R inc templates assets build/
+          find build -name '.*' -type f -delete
+          test -f build/style.css && test -f build/functions.php
+          du -sh build
+
+      - name: Upload artifact for WordPress.com
+        uses: actions/upload-artifact@v4
+        with:
+          name: wpcom
+          path: build/

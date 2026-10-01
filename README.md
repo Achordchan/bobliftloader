@@ -62,6 +62,10 @@ scripts/setup-local-wordpress.sh   # 首次安装；重复运行只补缺，不�
 
 编辑产品规格里参数名为 `Rated load`、值为 `1,000 kg` 的一行时，载荷筛选值自动同步，避免展示参数与筛选字段各自维护。未确认的定量参数不要根据型号名称推断。
 
+## 部署到 WordPress.com
+
+线上站托管在 WordPress.com（Business，Atomic）。GitHub 部署连接用「高级」模式，工作流 `.github/workflows/wpcom.yml`，目标目录 `/wp-content/themes/bobliftloader`。工作流只打包主题文件（与 `scripts/package-theme.py` 同一清单，约 28MB），推送 main 自动部署。不要用「简单」模式，它会把整个仓库（600MB+，含设计参考和 3D 源文件）原样放到公开目录。
+
 ## 主要交互
 
 - 产品分类、关键词搜索、载荷筛选与空结果反馈。
