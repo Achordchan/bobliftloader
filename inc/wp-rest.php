@@ -101,24 +101,26 @@ function bl_rest_field(string $type, string $key, $value)
     return null;
 }
 
-// What was stored before a REST write, so the write can only replace the editable fields.
-$bl_rest_before = [];
+/**
+ * A REST write is merged into the stored record before WordPress saves anything: only the editable fields the client
+ * sent change (so a missing "line" keeps the old stories' fallback to the bundled data), everything else keeps its
+ * stored value, and the record is never written raw or deleted (a null or non-object record is refused).
+ */
 foreach (array_keys(BL_REST_FIELDS) as $bl_rest_type) {
-    add_filter('rest_pre_insert_' . $bl_rest_type, static function ($prepared, WP_REST_Request $request) use (&$bl_rest_before) {
-        $id = (int) $request->get_param('id');
-        if ($id) $bl_rest_before[$id] = get_post_meta($id, '_bl_record', true);
-        return $prepared;
-    }, 10, 2);
-    add_action('rest_after_insert_' . $bl_rest_type, static function (WP_Post $post, WP_REST_Request $request) use (&$bl_rest_before): void {
+    add_filter('rest_pre_insert_' . $bl_rest_type, static function ($prepared, WP_REST_Request $request) use ($bl_rest_type) {
+        $type = $bl_rest_type;
         $meta = $request->get_param('meta');
-        if (!is_array($meta) || !is_array($meta['_bl_record'] ?? null)) return;
+        if (is_wp_error($prepared) || !is_array($meta) || !array_key_exists('_bl_record', $meta)) return $prepared;
         $sent = $meta['_bl_record'];
-        $record = $bl_rest_before[$post->ID] ?? [];
+        if (!is_array($sent)) return new WP_Error('bl_record_invalid', 'The BOB-LIFT record must be an object; it cannot be removed through the API.', ['status' => 400]);
+        $id = (int) $request->get_param('id');
+        $record = $id ? get_post_meta($id, '_bl_record', true) : [];
         if (!is_array($record)) $record = [];
-        // Only fields the client sent change, so a missing "line" keeps the old stories' fallback to the bundled data.
-        foreach (BL_REST_FIELDS[$post->post_type] as $key) if (array_key_exists($key, $sent)) $record[$key] = bl_rest_field($post->post_type, $key, $sent[$key]);
-        if ($post->post_type === 'bl_product') $record = bl_product_derived($record);
-        update_post_meta($post->ID, '_bl_record', $record);
+        foreach (BL_REST_FIELDS[$type] as $key) if (array_key_exists($key, $sent)) $record[$key] = bl_rest_field($type, $key, $sent[$key]);
+        if ($type === 'bl_product') $record = bl_product_derived($record);
+        $meta['_bl_record'] = $record;
+        $request->set_param('meta', $meta);
+        return $prepared;
     }, 10, 2);
 }
 unset($bl_rest_type);

@@ -76,6 +76,14 @@ try {
     $saved = get_post_meta($product->ID, '_bl_record', true);
     bl_test_assert($saved['model'] === 'QA-REST' && $saved['load'] === 1234 && $saved['specs']['Rated load'] === '1,234 kg', 'REST write was not cleaned or derived');
     bl_test_assert($saved['specs']['Hydraulic flow'] === '40 L/min & 20 MPa' && !in_array('javascript:alert(1)', $saved['gallery'], true), 'REST write mangled text or kept a script link');
+    $partial = new WP_REST_Request('POST', '/wp/v2/bl_product/' . $product->ID);
+    $partial->set_body_params(['meta' => ['_bl_record' => ['specs' => ['Rated load' => '900 kg']]]]);
+    bl_test_assert(rest_do_request($partial)->get_status() === 200, 'REST partial write was refused');
+    $partialSaved = get_post_meta($product->ID, '_bl_record', true);
+    bl_test_assert($partialSaved['model'] === 'QA-REST' && $partialSaved['gallery'] === $saved['gallery'] && $partialSaved['load'] === 900, 'REST partial write lost the fields it did not send');
+    $remove = new WP_REST_Request('POST', '/wp/v2/bl_product/' . $product->ID);
+    $remove->set_body_params(['meta' => ['_bl_record' => null]]);
+    bl_test_assert(rest_do_request($remove)->get_status() >= 400 && get_post_meta($product->ID, '_bl_record', true)['model'] === 'QA-REST', 'REST removed the product record');
     $story = get_page_by_path('customer-visits-boblift-factory', OBJECT, 'bl_news');
     $newsOriginal = get_post_meta($story->ID, '_bl_record', true);
     $newsWrite = new WP_REST_Request('POST', '/wp/v2/bl_news/' . $story->ID);
