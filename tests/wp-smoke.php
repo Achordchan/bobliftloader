@@ -150,6 +150,11 @@ try {
     bl_test_assert($stored['jobs']['items'] === [['title' => 'QA job', 'text' => 'QA text', 'tools' => 'Auger, Sweeper']] && $stored['attachments'] === ['note' => 'QA note'], 'REST content write was not cleaned or saved as a difference');
     bl_test_assert(!isset($stored['jobs']['eyebrow']) && get_post_meta($contentItem->ID, '_bl_content', true)['attachments']['title'] === "ONE LOADER.\n*MANY JOBS.*", 'Unsent content did not keep its defaults');
     bl_test_assert($GLOBALS['wpdb']->get_var($GLOBALS['wpdb']->prepare("SELECT COUNT(*) FROM {$GLOBALS['wpdb']->postmeta} WHERE post_id = %d AND meta_key = '_bl_content'", $contentItem->ID)) === '0', 'Content was stored on the item');
+    $rename = new WP_REST_Request('POST', '/wp/v2/bl_page_content/' . $contentItem->ID);
+    $rename->set_body_params(['slug' => 'loader-content', 'status' => 'publish']);
+    rest_do_request($rename);
+    $renamed = get_post($contentItem->ID);
+    bl_test_assert($renamed->post_name === 'loaders' && $renamed->post_status === 'private', 'A content item lost its slug or became public');
     $faq = new WP_REST_Request('POST', '/wp/v2/bl_page_content/' . $supportItem->ID);
     $faq->set_body_params(['meta' => ['_bl_content' => ['faq' => ['intro' => 'QA intro']]]]);
     rest_do_request($faq);

@@ -180,6 +180,14 @@ add_action('init', static function (): void {
     update_option('bl_page_content_items', array_keys(BL_CONTENT_PAGES), true);
 }, 20);
 
+// The slug is the item's identity and the item stays private: neither changes after it is made, through any path.
+add_filter('wp_insert_post_data', static function (array $data, array $postarr): array {
+    if ($data['post_type'] !== 'bl_page_content' || empty($postarr['ID']) || !($stored = get_post((int) $postarr['ID']))) return $data;
+    $data['post_name'] = $stored->post_name;
+    $data['post_status'] = $stored->post_status;
+    return $data;
+}, 10, 2);
+
 add_filter('get_post_metadata', static function ($value, $postId, $key, $single) {
     if ($key !== '_bl_content' || !($page = bl_page_content_key((int) $postId))) return $value;
     return [bl_page_content_current($page)];
