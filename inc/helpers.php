@@ -131,10 +131,10 @@ function bl_product_facets(array $product, string $category): array
     ];
 }
 
-/** Text the catalogue search looks through: name, model and the model without its T / S letter, as older literature writes it. */
+/** Text the catalogue search looks through: name, model, the model without its T / S letter as older literature writes it, and any former code. */
 function bl_product_search_text(array $product): string
 {
-    return strtolower($product['name'] . ' ' . $product['model'] . ' ' . preg_replace('/^BL-[TS]/', 'BL-', $product['model']));
+    return strtolower(implode(' ', [$product['name'], $product['model'], preg_replace('/^BL-[TS]/', 'BL-', $product['model']), ...(BL_FORMER_MODELS[$product['model']] ?? [])]));
 }
 
 /** Specification rows grouped for the detail table; labels outside the known groups fall under "Details". */
