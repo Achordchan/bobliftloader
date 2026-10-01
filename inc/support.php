@@ -98,20 +98,34 @@ function bl_loader_jobs(): array
  */
 function bl_dumper_jobs(): array
 {
-    $byModel = [];
-    foreach (bl_products() as $product) if ($product['category'] === 'mini-dumpers') $byModel[strtolower($product['model'])] = $product;
-    // A model renamed since (FY-30 is now FY30) is still found under its new name in records that keep the old one.
-    foreach (BL_FORMER_MODELS as $model => $former) foreach ($former as $name) if (!isset($byModel[strtolower($model)]) && isset($byModel[strtolower($name)])) $byModel[strtolower($model)] = $byModel[strtolower($name)];
+    $byName = bl_dumper_model_index(bl_products());
     $jobs = [];
     foreach (bl_editable('dumpers')['jobs']['items'] as $job) {
         $models = [];
         foreach (array_filter(array_map('trim', explode(',', $job['models'])), 'strlen') as $name) {
-            $product = $byModel[strtolower($name)] ?? null;
+            $product = $byName[strtolower($name)] ?? null;
             if ($product && !in_array($product, $models, true)) $models[] = $product;
         }
         $jobs[] = ['title' => $job['title'], 'text' => $job['text'], 'models' => $models];
     }
     return $jobs;
+}
+
+/**
+ * Published mini dumpers by lower-case model name. A model renamed since (FY-30 is now FY30) is found under either name,
+ * whichever one its record and the editor use; a model's own name always wins over another model's former name.
+ */
+function bl_dumper_model_index(array $products): array
+{
+    $index = [];
+    foreach ($products as $product) if ($product['category'] === 'mini-dumpers') $index[strtolower($product['model'])] = $product;
+    $aliases = [];
+    foreach (BL_FORMER_MODELS as $model => $former) foreach ($former as $name) {
+        // Current name written, record still on the former name; and former name written, record already renamed.
+        if (isset($index[strtolower($name)])) $aliases[strtolower($model)] ??= $index[strtolower($name)];
+        if (isset($index[strtolower($model)])) $aliases[strtolower($name)] ??= $index[strtolower($model)];
+    }
+    return $index + $aliases;
 }
 
 /** A product's videos: each has a source, a poster and a caption. Theme paths (videos/…) resolve to the theme's assets. */
