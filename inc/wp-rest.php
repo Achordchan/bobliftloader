@@ -171,9 +171,10 @@ function bl_page_content_current(string $page): array
 }
 
 // One private item per screen (only editors see them in the API), made once and again whenever a screen is added. Under
-// a lock, with the existence check repeated inside it, so requests arriving together on deployment make each item once.
+// a lock, with the existence check repeated inside it, so requests arriving together on deployment make each item once;
+// a request that finds the lock taken does not wait for it.
 add_action('init', static function (): void {
-    if (get_option('bl_page_content_items') === array_keys(BL_CONTENT_PAGES) || !($token = bl_lock_acquire('page_content_items'))) return;
+    if (get_option('bl_page_content_items') === array_keys(BL_CONTENT_PAGES) || !($token = bl_lock_acquire('page_content_items', 1))) return;
     try {
         foreach (BL_CONTENT_PAGES as $page => $info) {
             $found = get_posts(['post_type' => 'bl_page_content', 'name' => $page, 'post_status' => 'any', 'numberposts' => 1, 'fields' => 'ids', 'suppress_filters' => true, 'cache_results' => false]);

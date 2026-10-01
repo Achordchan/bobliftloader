@@ -552,17 +552,18 @@ function bl_content_row_tools(): string
  * A named lock held by one request at a time: a row in the options table whose value is "<time>|<token>". It is taken
  * with INSERT IGNORE (add_option() would overwrite an existing row) and only its owner, matched by token, can release it.
  * A lock older than five minutes belongs to a request PHP has long since stopped, and is taken over with a conditional
- * UPDATE, so of several requests trying at once only one succeeds. Returns the token, or '' after about five seconds.
+ * UPDATE, so of several requests trying at once only one succeeds. Returns the token, or '' after $tries attempts a
+ * tenth of a second apart (about five seconds by default).
  */
-function bl_lock_acquire(string $name): string
+function bl_lock_acquire(string $name, int $tries = 50): string
 {
     global $wpdb;
     $option = 'bl_lock_' . $name;
-    for ($try = 0; $try < 50; $try++) {
+    for ($try = 0; $try < $tries; $try++) {
         $value = sprintf('%010d|%s', time(), wp_generate_password(20, false));
         if ($wpdb->query($wpdb->prepare("INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')", $option, $value))) return $value;
         if ($wpdb->query($wpdb->prepare("UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND option_value < %s", $value, $option, sprintf('%010d|', time() - 300)))) return $value;
-        usleep(100000);
+        if ($try + 1 < $tries) usleep(100000);
     }
     return '';
 }
