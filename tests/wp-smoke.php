@@ -150,6 +150,13 @@ try {
     bl_test_assert($stored['jobs']['items'] === [['title' => 'QA job', 'text' => 'QA text', 'tools' => 'Auger, Sweeper']] && $stored['attachments'] === ['note' => 'QA note'], 'REST content write was not cleaned or saved as a difference');
     bl_test_assert(!isset($stored['jobs']['eyebrow']) && get_post_meta($contentItem->ID, '_bl_content', true)['attachments']['title'] === "ONE LOADER.\n*MANY JOBS.*", 'Unsent content did not keep its defaults');
     bl_test_assert($GLOBALS['wpdb']->get_var($GLOBALS['wpdb']->prepare("SELECT COUNT(*) FROM {$GLOBALS['wpdb']->postmeta} WHERE post_id = %d AND meta_key = '_bl_content'", $contentItem->ID)) === '0', 'Content was stored on the item');
+    // While another save holds the page's lock, a write waits, then gives up without saving; the lock is always released.
+    $GLOBALS['wpdb']->insert($GLOBALS['wpdb']->options, ['option_name' => 'bl_content_lock_loaders', 'option_value' => (string) time(), 'autoload' => 'no']);
+    $busy = new WP_REST_Request('POST', '/wp/v2/bl_page_content/' . $contentItem->ID);
+    $busy->set_body_params(['meta' => ['_bl_content' => ['attachments' => ['note' => 'QA-BUSY']]]]);
+    bl_test_assert(rest_do_request($busy)->get_status() === 409 && get_option('bl_content_loaders')['attachments']['note'] === 'QA note', 'A write went through while the page was locked');
+    $GLOBALS['wpdb']->delete($GLOBALS['wpdb']->options, ['option_name' => 'bl_content_lock_loaders']);
+    bl_test_assert(rest_do_request($busy)->get_status() === 200 && get_option('bl_content_loaders')['attachments']['note'] === 'QA-BUSY' && $GLOBALS['wpdb']->get_var("SELECT COUNT(*) FROM {$GLOBALS['wpdb']->options} WHERE option_name LIKE 'bl_content_lock_%'") === '0', 'The lock was not released after a save');
     $rename = new WP_REST_Request('POST', '/wp/v2/bl_page_content/' . $contentItem->ID);
     $rename->set_body_params(['slug' => 'loader-content', 'status' => 'publish']);
     rest_do_request($rename);
@@ -164,7 +171,7 @@ try {
     bl_test_assert(!isset($anonymous->get_data()['meta']['_bl_content']) && rest_do_request(new WP_REST_Request('GET', '/wp/v2/bl_page_content'))->get_data() === [], 'Anonymous REST read exposed page content');
     $write->set_body_params(['meta' => ['_bl_content' => ['attachments' => ['note' => 'QA-ANON']]]]);
     rest_do_request($write);
-    bl_test_assert(get_option('bl_content_loaders')['attachments']['note'] === 'QA note', 'Anonymous REST content write was accepted');
+    bl_test_assert(get_option('bl_content_loaders')['attachments']['note'] === 'QA-BUSY', 'Anonymous REST content write was accepted');
 } finally {
     foreach ($savedOptions as $page => $value) is_array($value) ? update_option('bl_content_' . $page, $value) : delete_option('bl_content_' . $page);
     wp_set_current_user(0);

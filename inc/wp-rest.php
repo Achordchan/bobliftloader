@@ -203,10 +203,15 @@ add_filter('rest_pre_insert_bl_page_content', static function ($prepared, WP_RES
     $sent = $meta['_bl_content'];
     if (!$page) return new WP_Error('bl_content_unknown', 'Unknown content page.', ['status' => 404]);
     if (!is_array($sent)) return new WP_Error('bl_content_invalid', 'The content must be an object.', ['status' => 400]);
-    // Starting from the current content keeps everything not sent, loading figures of unpublished models included.
-    $diff = bl_content_diff(bl_content_clean_all($page, bl_merge_content(bl_page_content_current($page), $sent)), bl_content_clean_all($page, bl_content_defaults($page)));
-    if ($diff) update_option('bl_content_' . $page, $diff);
-    else delete_option('bl_content_' . $page);
+    // Starting from the content saved right now keeps everything not sent, loading figures of unpublished models included;
+    // the lock keeps two writes to the same page from both starting from the same content.
+    $saved = bl_content_locked($page, static function () use ($page, $sent): void {
+        $current = bl_merge_content(bl_content_defaults($page), bl_content_saved_now($page));
+        $diff = bl_content_diff(bl_content_clean_all($page, bl_merge_content($current, $sent)), bl_content_clean_all($page, bl_content_defaults($page)));
+        if ($diff) update_option('bl_content_' . $page, $diff);
+        else delete_option('bl_content_' . $page);
+    });
+    if (!$saved) return new WP_Error('bl_content_busy', 'Another save of this page is in progress; nothing was saved. Try again.', ['status' => 409]);
     unset($meta['_bl_content']);
     $request->set_param('meta', $meta);
     return $prepared;

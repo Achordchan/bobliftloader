@@ -548,6 +548,39 @@ function bl_content_row_tools(): string
 
 /* ---------- Saving ---------- */
 
+/**
+ * Runs $save for one page while holding that page's lock, so two saves (screen or REST) never read the same content and
+ * overwrite each other. The lock is a row taken with INSERT IGNORE straight in the options table (add_option() would
+ * overwrite an existing row), so only one request can hold it; a lock left by a request that died is taken over after
+ * 30 seconds. Returns false when the lock could not be had within about five seconds.
+ */
+function bl_content_locked(string $page, callable $save): bool
+{
+    global $wpdb;
+    $lock = 'bl_content_lock_' . $page;
+    for ($try = 0; !$wpdb->query($wpdb->prepare("INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')", $lock, (string) time())); $try++) {
+        if ($try >= 50) return false;
+        $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value < %s", $lock, (string) (time() - 30)));
+        usleep(100000);
+    }
+    try {
+        // Whatever another request saved before the lock was taken is read from the table, not from this request's cache.
+        foreach (['alloptions', 'notoptions', 'bl_content_' . $page] as $key) wp_cache_delete($key, 'options');
+        $save();
+    } finally {
+        $wpdb->delete($wpdb->options, ['option_name' => $lock]);
+    }
+    return true;
+}
+
+/** What is saved for a page now, read past the options cache (another request may have saved since this one started). */
+function bl_content_saved_now(string $page): array
+{
+    global $wpdb;
+    $saved = maybe_unserialize((string) $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'bl_content_' . $page)));
+    return is_array($saved) ? $saved : [];
+}
+
 function bl_content_request_page(): string
 {
     $page = isset($_POST['bl_page']) && is_string($_POST['bl_page']) ? sanitize_key(wp_unslash($_POST['bl_page'])) : '';
@@ -563,16 +596,19 @@ add_action('admin_post_bl_save_content', static function (): void {
     // the submission is incomplete and saving it would silently lose content, so nothing is saved.
     if (!isset($_POST['bl_content_complete'])) wp_die('提交的内容不完整（可能超出了服务器的 max_input_vars 限制），没有保存任何修改。请返回后减少列表条目，或调高服务器的 max_input_vars。', '', ['response' => 400, 'back_link' => true]);
     $input = isset($_POST['bl_content']) && is_array($_POST['bl_content']) ? wp_unslash($_POST['bl_content']) : [];
-    $diff = bl_content_diff(bl_content_clean_all($page, $input), bl_content_clean_all($page, bl_content_defaults($page)));
-    // The loading table lists published products only; figures saved for a model not on the form (unpublished for now)
-    // are carried over rather than dropped.
-    $previous = get_option('bl_content_' . $page);
-    if (is_array($previous['containers']['loading'] ?? null)) {
-        $posted = is_array($input['containers']['loading'] ?? null) ? array_map('sanitize_title', array_keys($input['containers']['loading'])) : [];
-        foreach ($previous['containers']['loading'] as $slug => $fit) if (!in_array((string) $slug, $posted, true)) $diff['containers']['loading'][$slug] = $fit;
-    }
-    if ($diff) update_option('bl_content_' . $page, $diff);
-    else delete_option('bl_content_' . $page);
+    $saved = bl_content_locked($page, static function () use ($page, $input): void {
+        $diff = bl_content_diff(bl_content_clean_all($page, $input), bl_content_clean_all($page, bl_content_defaults($page)));
+        // The loading table lists published products only; figures saved for a model not on the form (unpublished for now)
+        // are carried over rather than dropped.
+        $previous = bl_content_saved_now($page);
+        if (is_array($previous['containers']['loading'] ?? null)) {
+            $posted = is_array($input['containers']['loading'] ?? null) ? array_map('sanitize_title', array_keys($input['containers']['loading'])) : [];
+            foreach ($previous['containers']['loading'] as $slug => $fit) if (!in_array((string) $slug, $posted, true)) $diff['containers']['loading'][$slug] = $fit;
+        }
+        if ($diff) update_option('bl_content_' . $page, $diff);
+        else delete_option('bl_content_' . $page);
+    });
+    if (!$saved) wp_die('另一个保存正在进行，这次没有保存任何修改。请稍后返回重新保存。', '', ['response' => 409, 'back_link' => true]);
     wp_safe_redirect(admin_url('admin.php?page=bl-content-' . $page . '&bl_saved=1'));
     exit;
 });
