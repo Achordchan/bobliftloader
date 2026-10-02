@@ -58,3 +58,14 @@
 - Barlow Condensed：600、700；Manrope：400、500、600、700。来自 Google Fonts 官方分发，SIL Open Font License；许可文件保存在 `assets/fonts/`。
 - 图标：Phosphor Icons Core 官方仓库 `https://github.com/phosphor-icons/core` 的 regular 图标。未手绘 SVG；使用源文件 `<img>` 引用。MIT License 保存在 `assets/icons/LICENSE`。
 - 页面没有从外部 CDN 加载字体、脚本或图标。
+
+## 首页首屏 · 迷你翻斗车（2026-10-02）
+
+| 页面文件 | 原生尺寸 | 用途 |
+| --- | --- | --- |
+| `assets/images/hero-dumper-2k.webp` | 1942 × 809 | 首页首屏第二张（宽屏） |
+| `assets/images/hero-dumper-mobile.webp` | 1536 × 1024 | 首页首屏第二张（手机） |
+
+codex-image（gpt-image-2.5-sunburst）改图，参考图两张：FY30 实拍 `assets/images/products/3-ton-mini-dumper.webp`（车型依据，保留车斗上的 BOB-LIFT 字样）和现有首屏 `hero-banner-2k.webp`（只作场景与调色参考）。PNG 原图在 `design-references/generated-scenes/hero-dumper-wide.png`、`hero-dumper-mobile.png`；全部候选和与实拍的左右对比图在 `design-references/hero-dumper-candidates/`。逐张对比：外形、顶棚、方向盘、轮胎与黄色轮辋、斗形、散热格栅、后部箱体与实拍一致，座椅保留实拍里的塑料膜；黄昏调色使车身比实拍略偏金黄。替代文字写明是示意图（Illustrative）。
+
+**提示词要点**：Place this exact yellow BOB-LIFT FY30 site dumper (first image) into the same dusk stone-quarry scene, lighting and colour grade as the second image … dumper on the right third, 3/4 front view, skip loaded with grey gravel, warm rim light; left 55% calm and dark for headline text. Keep the dumper's shape, yellow colour, canopy, seat, steering wheel, tyres, rims, skip shape and the BOB-LIFT lettering exactly as in the photo; no other text or logos, no people.

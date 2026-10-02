@@ -29,6 +29,16 @@ function bl_home_defaults(): array
             'image_mobile' => '',
             'alt' => 'Illustrative stone-quarry scene at dusk based on BOB-LIFT BL-T1000-H product photography',
         ],
+        // The second hero slide; the switch above the picture names both slides after the family cards below.
+        'hero_dumper' => [
+            'eyebrow' => 'MINI DUMPERS. ON TRACKS OR WHEELS.',
+            'title' => "MORE LOAD.\nFEWER\nTRIPS.",
+            'button' => 'Explore mini dumpers',
+            'link' => 'Talk to our team',
+            'image' => '',
+            'image_mobile' => '',
+            'alt' => 'Illustrative stone-quarry scene at dusk based on BOB-LIFT FY30 mini dumper product photography',
+        ],
         'families' => [
             'loader' => [
                 'label' => 'Skid steer loaders',
@@ -478,10 +488,16 @@ function bl_image_attributes(array $image, string $sizes = ''): string
     return $html;
 }
 
-/** The home page's hero pictures: wide screens and phones, each falling back to the theme's own. */
-function bl_home_hero_images(): array
+/**
+ * A home hero slide's pictures, wide screens and phones, each falling back to the theme's own. Empty when the slide has
+ * no picture at all, so it is left out.
+ */
+function bl_home_hero_images(string $group = 'hero'): array
 {
-    $hero = bl_editable('home')['hero'];
-    $wide = $hero['image'] ?: bl_asset('images/hero-banner-2k.webp');
-    return ['wide' => $wide, 'narrow' => $hero['image_mobile'] ?: ($hero['image'] ?: bl_asset('images/hero-real-loader.webp'))];
+    $hero = bl_editable('home')[$group];
+    [$wideFile, $narrowFile] = $group === 'hero_dumper' ? ['images/hero-dumper-2k.webp', 'images/hero-dumper-mobile.webp'] : ['images/hero-banner-2k.webp', 'images/hero-real-loader.webp'];
+    $theme = static fn(string $file): string => is_file(dirname(__DIR__) . '/assets/' . $file) ? bl_asset($file) : '';
+    $wide = $hero['image'] ?: $theme($wideFile);
+    $narrow = $hero['image_mobile'] ?: ($hero['image'] ?: ($theme($narrowFile) ?: $wide));
+    return $wide && $narrow ? ['wide' => $wide, 'narrow' => $narrow] : [];
 }

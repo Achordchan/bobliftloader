@@ -2,16 +2,42 @@
 .bl-site .bl-hero{background:var(--ink);color:var(--paper);position:relative;height:calc(100svh - var(--header-height));min-height:clamp(640px,calc(310px + 25vw),1180px);max-height:1180px;display:flex;flex-direction:column;overflow:hidden}
 .bl-site .bl-hero-media{position:absolute;inset:0;overflow:hidden}
 .bl-site .bl-hero-media picture{display:block;width:100%;height:100%}
+/* Hero slides: the pictures cross-fade; the words share one grid cell so the hero keeps its height whichever slide shows. */
+.bl-site .bl-hero-media .bl-hero-picture{position:absolute;inset:0;opacity:0;transition:opacity 1.1s cubic-bezier(.4,0,.2,1)}
+.bl-site .bl-hero-media .bl-hero-picture.bl-active{opacity:1}
+.bl-site .bl-hero-slides{display:grid;width:100%}
+.bl-site .bl-hero-slide{grid-area:1/1;display:flex;flex-direction:column;align-items:flex-start;align-self:center;min-width:0}
+.bl-site .bl-hero-slide:not(.bl-active){visibility:hidden;pointer-events:none}
+.bl-site .bl-hero-slide>*{transition:opacity .5s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.bl-site .bl-hero-slide:not(.bl-active)>*{opacity:0;transform:translateY(18px);transition-duration:.35s,.35s}
+.bl-site .bl-hero-slide.bl-active>:nth-child(2){transition-delay:.12s}
+.bl-site .bl-hero-slide.bl-active>:nth-child(3){transition-delay:.24s}
 .bl-site .bl-hero-media img{width:100%;height:100%;object-fit:cover;object-position:68% 55%}
 .bl-site .bl-hero-media::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#081c2bcc 0%,#081c2b80 34%,#081c2b00 58%),linear-gradient(0deg,#081c2be6 0%,#081c2b00 32%)}
 .bl-site .bl-hero-content{position:relative;z-index:1;padding-top:clamp(40px,4vw,96px);padding-bottom:clamp(28px,2vw,48px);width:100%;flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
 .bl-site .bl-hero-eyebrow{margin-bottom:clamp(24px,1.6vw,40px);font-size:var(--fs-label);letter-spacing:.14em;color:#d3dde5}
-.bl-site .bl-hero h1{font-family:var(--display);font-size:var(--fs-hero);font-weight:700;line-height:.86;letter-spacing:-.012em;max-width:min(60%,1180px);text-shadow:0 4px 40px #081c2b66}
-.bl-site .bl-hero h1>span{display:block}
+.bl-site .bl-hero .bl-hero-title{font-family:var(--display);font-size:var(--fs-hero);font-weight:700;line-height:.86;letter-spacing:-.012em;max-width:min(60%,1180px);text-shadow:0 4px 40px #081c2b66}
+.bl-site .bl-hero .bl-hero-title>span{display:block}
 .bl-site .bl-hero .bl-period{color:#78a1ff}
 .bl-site .bl-hero-action{display:flex;align-items:center;gap:clamp(24px,2vw,48px);margin-top:clamp(32px,2.4vw,56px)}
 .bl-site .bl-hero-action .bl-text-link{color:#e6ecf1;border-color:#9fb0bd}
 .bl-site .bl-hero-action .bl-text-link .bl-icon{filter:invert(1)}
+/* The slide switch: top right over the sky, one button per family; the line under the current one fills until the next slide. */
+.bl-site .bl-hero-switch-row{position:absolute;top:0;left:0;right:0;z-index:2;display:flex;justify-content:flex-end;padding-top:clamp(18px,1.6vw,40px);pointer-events:none}
+.bl-site .bl-hero-switch{display:flex;align-items:stretch;gap:clamp(18px,1.6vw,40px);pointer-events:auto}
+.bl-site .bl-hero-tab{position:relative;display:flex;align-items:baseline;gap:10px;padding:10px 0 14px;background:none;border:0;color:#9fb6c8;font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:color .25s}
+.bl-site .bl-hero-tab small{font:600 clamp(15px,.9vw,20px)/1 var(--display);letter-spacing:.02em;color:#78a1ff}
+.bl-site .bl-hero-tab:hover,.bl-site .bl-hero-tab[aria-pressed=true]{color:white}
+.bl-site .bl-hero-tab i{position:absolute;left:0;right:0;bottom:0;height:2px;background:#ffffff2e;overflow:hidden}
+.bl-site .bl-hero-tab i::after{content:'';position:absolute;inset:0;background:white;transform:scaleX(0);transform-origin:left}
+.bl-site .bl-hero-tab[aria-pressed=true] i::after{transform:none}
+.bl-site .bl-hero[data-hero-playing] .bl-hero-tab[aria-pressed=true] i::after{animation:bl-hero-progress var(--hero-interval,7s) linear both}
+.bl-site .bl-hero[data-hero-playing]:is(:hover,:focus-within) .bl-hero-tab i::after{animation-play-state:paused}
+@keyframes bl-hero-progress{from{transform:scaleX(0)}to{transform:none}}
+.bl-site .bl-hero-pause{align-self:center;display:grid;place-items:center;width:32px;height:32px;border:1px solid #ffffff40;border-radius:50%;background:#081c2b59;color:white;cursor:pointer;transition:border-color .25s,background .25s}
+.bl-site .bl-hero-pause:hover{border-color:#ffffffa6;background:#081c2b99}
+.bl-site .bl-hero-pause .bl-icon{grid-area:1/1;width:12px;height:12px;filter:invert(1)}
+.bl-site .bl-hero[data-hero-playing] .bl-hero-pause .bl-icon:last-child,.bl-site .bl-hero:not([data-hero-playing]) .bl-hero-pause .bl-icon:first-child{visibility:hidden}
 /* Two real entry cards for the two product families, replacing the old 8px text links. */
 .bl-site .bl-hero-entries{position:relative;z-index:1;width:100%;display:grid;grid-template-columns:1fr 1fr auto;gap:clamp(12px,1vw,24px);align-items:stretch;padding-bottom:clamp(24px,2vw,48px)}
 .bl-site .bl-hero-entry{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:clamp(16px,1.2vw,28px);padding:clamp(12px,.9vw,20px) clamp(18px,1.4vw,32px) clamp(12px,.9vw,20px) clamp(12px,.9vw,20px);background:#0d2438e6;border:1px solid #ffffff1f;backdrop-filter:blur(10px);transition:background .25s,border-color .25s;max-width:560px}

@@ -326,6 +326,20 @@ class WebsiteTests(unittest.TestCase):
         _, html, _ = fetch('/products/?q=mini')
         self.assertNotIn('id="about-the-range"', html)
 
+    def test_home_hero_switches_between_the_families(self):
+        _, html, _ = fetch('/')
+        hero = html.split('data-hero>', 1)[1].split('</section>', 1)[0]
+        # The loader slide stays the page's only h1 and the one picture fetched first; the dumper slide waits for the script.
+        self.assertEqual(html.count('<h1'), 1)
+        self.assertIn('id="hero-slide-loader" data-hero-slide>', hero)
+        self.assertIn('id="hero-slide-dumper" data-hero-slide hidden>', hero)
+        self.assertEqual(hero.count('fetchpriority="high"'), 1)
+        self.assertIn('images/hero-banner-2k.webp', hero.split('data-hero-picture', 2)[1])
+        self.assertIn('images/hero-dumper-2k.webp', hero.split('data-hero-picture', 2)[2])
+        self.assertIn('href="/products/mini-dumpers/" class="bl-button', hero)
+        self.assertIn('data-hero-switch hidden', hero)
+        self.assertEqual(hero.count('data-hero-tab'), 2)
+
     def test_site_switch_lists_the_three_websites(self):
         _, html, _ = fetch('/about/')
         switch = re.search(r'<details class="bl-site-switch">.*?</details>', html, re.S).group(0)
