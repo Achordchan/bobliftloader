@@ -138,8 +138,15 @@ bl_test_assert(get_option('bl_application_pages') === bl_application_page_paths(
 foreach (bl_application_page_paths() as $path) bl_test_assert(get_page_by_path($path) instanceof WP_Post, "Missing page $path");
 wp_delete_post(get_page_by_path('applications/farms-and-orchards')->ID, true);
 update_option('bl_application_pages', array_slice(bl_application_page_paths(), 0, 3));
+// While another request holds the lock this one leaves the pages alone; once it is free the page is made exactly once.
+$heldBy = bl_lock_acquire('application_pages', 1);
+bl_application_make_pages();
+bl_test_assert(!get_page_by_path('applications/farms-and-orchards'), 'Pages were made while another request held the lock');
+bl_lock_release('application_pages', $heldBy);
+bl_application_make_pages();
 bl_application_make_pages();
 bl_test_assert(get_page_by_path('applications/farms-and-orchards') instanceof WP_Post && get_option('bl_application_pages') === bl_application_page_paths(), 'A new application page was not made on an initialised site');
+bl_test_assert(count(get_posts(['post_type' => 'page', 'name' => 'farms-and-orchards', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids'])) === 1, 'An application page was made twice');
 $contentItem = get_page_by_path('loaders', OBJECT, 'bl_page_content');
 bl_test_assert($contentItem instanceof WP_Post && count(get_posts(['post_type' => 'bl_page_content', 'post_status' => 'any', 'numberposts' => -1])) === count(BL_CONTENT_PAGES), 'Content items were not made one per screen');
 // A missing item is made again on a later request, as long as the marker was not set; a failed insert leaves it unset.

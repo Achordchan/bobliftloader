@@ -80,20 +80,28 @@ function bl_application_page_paths(): array
 
 /**
  * Jobs added to the theme after a site was initialised get their pages on the next request, so their URLs are not 404s.
- * Runs once per change to the list of jobs; a site that was never initialised (no Applications page) is left alone.
+ * Like the content items, under a lock with the check repeated inside it, so requests arriving together on deployment make
+ * each page once; a request that finds the lock taken does not wait. The list is recorded only once every page is there
+ * under its own slug, so a failed insert is tried again later. A site never initialised (no Applications page) is left alone.
  */
 function bl_application_make_pages(): void
 {
     $paths = bl_application_page_paths();
-    if (get_option('bl_application_pages') === $paths) return;
-    $parent = get_page_by_path('applications');
-    if (!$parent) return;
-    foreach ($GLOBALS['bl_application_base'] as $application) {
-        $slug = bl_application_slug($application);
-        if (get_page_by_path('applications/' . $slug)) continue;
-        $id = wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => $application['title'], 'post_name' => $slug, 'post_parent' => $parent->ID], true);
-        if (is_wp_error($id)) return; // try again on the next request
+    if (get_option('bl_application_pages') === $paths || !($token = bl_lock_acquire('application_pages', 1))) return;
+    try {
+        $parent = get_page_by_path('applications');
+        if (!$parent) return;
+        $complete = true;
+        foreach ($GLOBALS['bl_application_base'] as $application) {
+            $slug = bl_application_slug($application);
+            $found = get_posts(['post_type' => 'page', 'name' => $slug, 'post_parent' => $parent->ID, 'post_status' => 'any', 'numberposts' => 1, 'fields' => 'ids', 'suppress_filters' => true, 'cache_results' => false]);
+            if ($found) continue;
+            $id = wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => $application['title'], 'post_name' => $slug, 'post_parent' => $parent->ID], true);
+            if (is_wp_error($id) || !$id || get_post_field('post_name', (int) $id) !== $slug) $complete = false;
+        }
+        if ($complete) update_option('bl_application_pages', $paths);
+    } finally {
+        bl_lock_release('application_pages', $token);
     }
-    update_option('bl_application_pages', $paths);
 }
 add_action('init', 'bl_application_make_pages', 20);
