@@ -175,6 +175,7 @@ function bl_product_source_box(WP_Post $post): void
 {
     $record = bl_admin_record($post);
     bl_admin_field('原始产品网址', 'bl-source', bl_admin_input('bl-source', 'bl_record[source]', (string) ($record['source'] ?? ''), 'url', ' class="regular-text code" placeholder="https://www.boblift.com/…"'), '产品资料的出处，便于以后核对参数；前台不显示。');
+    bl_admin_field('参数出处', 'bl-spec-source', bl_admin_input('bl-spec-source', 'bl_record[spec_source]', (string) ($record['spec_source'] ?? ''), 'text', ' class="regular-text" placeholder="BOB-LIFT mini dumper brochure"'), '英文，显示在产品页参数表上方：“Figures from the 这里的文字.”。留空则显示“抄自主站产品页和资料”的默认说明。');
 }
 
 function bl_product_order_box(WP_Post $post): void
@@ -326,6 +327,8 @@ add_action('save_post', static function (int $postId): void {
     $record['image'] = str_starts_with($image, 'images/') && !str_contains($image, '..') ? $image : esc_url_raw($image, ['http', 'https']);
     if (get_post_type($postId) === 'bl_product') {
         $record['model'] = $text('model');
+        // Older forms without the field keep the stored value instead of clearing it.
+        if (array_key_exists('spec_source', $input)) $record['spec_source'] = $text('spec_source');
         $record['category'] = in_array($text('category'), ['skid-steer-loaders', 'mini-dumpers'], true) ? $text('category') : 'skid-steer-loaders';
         $record['gallery'] = [];
         $gallery = $input['gallery'] ?? [];
