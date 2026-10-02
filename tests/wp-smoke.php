@@ -26,11 +26,11 @@ try {
     wp_set_current_user(1);
     // The edit screen posts spec and video rows as parallel lists and the gallery as one field per image.
     $specs = ['key' => array_keys($original['specs']), 'value' => array_values($original['specs'])];
-    $_POST = ['bl_record_nonce' => wp_create_nonce('bl_save_record'), 'bl_record' => ['model' => 'QA-PERSISTENCE', 'category' => 'skid-steer-loaders', 'source' => $original['source'], 'image' => $original['image'], 'gallery' => $original['gallery'], 'specs' => $specs],
+    $_POST = ['bl_record_nonce' => wp_create_nonce('bl_save_record'), 'bl_record' => ['model' => 'QA-PERSISTENCE', 'category' => 'skid-steer-loaders', 'source' => $original['source'], 'spec_source' => 'QA spec sheet', 'image' => $original['image'], 'gallery' => $original['gallery'], 'specs' => $specs],
         'bl_videos_nonce' => wp_create_nonce('bl_save_videos'), 'bl_videos' => ['src' => ['videos/bucket.mp4', ''], 'poster' => ['videos/bucket.webp', ''], 'caption' => ['QA clip', '']]];
     wp_update_post(['ID' => $post->ID, 'post_title' => $post->post_title]);
     $saved = get_post_meta($post->ID, '_bl_record', true);
-    bl_test_assert($saved['model'] === 'QA-PERSISTENCE', 'Valid admin save failed');
+    bl_test_assert($saved['model'] === 'QA-PERSISTENCE' && $saved['spec_source'] === 'QA spec sheet', 'Valid admin save failed');
     bl_test_assert($saved['specs'] === $original['specs'] && $saved['gallery'] === $original['gallery'] && $saved['load'] === $original['load'], 'Spec rows or gallery did not round-trip');
     bl_test_assert($saved['videos'] === [['src' => 'videos/bucket.mp4', 'poster' => 'videos/bucket.webp', 'caption' => 'QA clip']], 'Video rows were not saved');
     unset($_POST['bl_videos_nonce'], $_POST['bl_videos']);
@@ -77,10 +77,11 @@ try {
     bl_test_assert($saved['model'] === 'QA-REST' && $saved['load'] === 1234 && $saved['specs']['Rated load'] === '1,234 kg', 'REST write was not cleaned or derived');
     bl_test_assert($saved['specs']['Hydraulic flow'] === '40 L/min & 20 MPa' && !in_array('javascript:alert(1)', $saved['gallery'], true), 'REST write mangled text or kept a script link');
     $partial = new WP_REST_Request('POST', '/wp/v2/bl_product/' . $product->ID);
-    $partial->set_body_params(['meta' => ['_bl_record' => ['specs' => ['Rated load' => '900 kg']]]]);
+    $partial->set_body_params(['meta' => ['_bl_record' => ['specs' => ['Rated load' => '900 kg'], 'spec_source' => '<i>QA brochure</i>']]]);
     bl_test_assert(rest_do_request($partial)->get_status() === 200, 'REST partial write was refused');
     $partialSaved = get_post_meta($product->ID, '_bl_record', true);
     bl_test_assert($partialSaved['model'] === 'QA-REST' && $partialSaved['gallery'] === $saved['gallery'] && $partialSaved['load'] === 900, 'REST partial write lost the fields it did not send');
+    bl_test_assert($partialSaved['spec_source'] === 'QA brochure', 'REST write did not set the specification source');
     $remove = new WP_REST_Request('POST', '/wp/v2/bl_product/' . $product->ID);
     $remove->set_body_params(['meta' => ['_bl_record' => null]]);
     bl_test_assert(rest_do_request($remove)->get_status() >= 400 && get_post_meta($product->ID, '_bl_record', true)['model'] === 'QA-REST', 'REST removed the product record');

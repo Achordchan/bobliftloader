@@ -43,7 +43,7 @@ function bl_rest_product_slugs($value): array
  * everything else in a record (imported sections, posters, dates…) keeps its stored value whatever a client sends.
  */
 const BL_REST_FIELDS = [
-    'bl_product' => ['model', 'category', 'source', 'image', 'gallery', 'specs', 'videos'],
+    'bl_product' => ['model', 'category', 'source', 'spec_source', 'image', 'gallery', 'specs', 'videos'],
     'bl_news' => ['category', 'line', 'caption', 'source', 'image', 'products', 'event'],
     'bl_application' => ['hub', 'products', 'facts', 'source', 'image'],
 ];
@@ -58,6 +58,7 @@ function bl_rest_field(string $type, string $key, $value)
             return bl_rest_clean_url($value);
         case 'model':
         case 'caption':
+        case 'spec_source':
             return $text;
         case 'category':
             if ($type === 'bl_product') return in_array($text, ['skid-steer-loaders', 'mini-dumpers'], true) ? $text : 'skid-steer-loaders';
