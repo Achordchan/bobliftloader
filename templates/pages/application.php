@@ -13,17 +13,22 @@ $plate = [
 ];
 $focusKey = $application['focus'] === 'width' ? 'width' : 'load';
 $plate = ['models' => ['label' => $familyLabel, 'value' => (string) $ranges['count'], 'unit' => 'models']] + array_diff_key($plate, [$focusKey => 1]) + [$focusKey => $plate[$focusKey]];
-if ($application['focus'] === 'width') $plate['width'] = ['label' => 'Narrowest, bucket fitted', 'value' => number_format($ranges['width'][0]), 'unit' => 'mm'];
+if ($application['focus'] === 'width') $plate['width'] = ['label' => $application['product'] === 'dumper' ? 'Narrowest model' : 'Narrowest, bucket fitted', 'value' => number_format($ranges['width'][0]), 'unit' => 'mm'];
 $others = array_values(array_filter($applications, static fn($a) => bl_application_slug($a) !== $slug));
 // The machines for this job, ordered by the figure that decides it; the family page's range chart takes it from there.
 $dimensions = array_column(bl_model_dimensions(), null, 'slug');
 $family = array_values(array_filter(bl_products(), static fn($p) => $p['category'] === $category && isset($dimensions[$p['slug']])));
+$noun = $application['product'] === 'dumper' ? 'dumper' : 'loader';
 $order = [
-    'width' => ['sort' => static fn($p) => $dimensions[$p['slug']]['width'], 'label' => 'Narrowest first, bucket fitted', 'link' => ['#about-the-range', 'Check your gate width against every loader']],
-    'load' => ['sort' => static fn($p) => -$dimensions[$p['slug']]['load'], 'label' => 'Highest rated load first', 'link' => ['#compare-skid-steer-loaders', 'Compare all ' . count($family) . ' loaders']],
+    'width' => ['sort' => static fn($p) => $dimensions[$p['slug']]['width'], 'label' => $noun === 'dumper' ? 'Narrowest first' : 'Narrowest first, bucket fitted', 'link' => ['#about-the-range', $noun === 'dumper' ? 'Check every dumper’s width and load' : 'Check your gate width against every loader']],
+    'load' => ['sort' => static fn($p) => -$dimensions[$p['slug']]['load'], 'label' => 'Highest rated load first', 'link' => ['#compare-' . $category, 'Compare all ' . count($family) . ' ' . $noun . 's']],
     'payload' => ['sort' => static fn($p) => $dimensions[$p['slug']]['load'] ?: PHP_INT_MAX, 'label' => 'Lightest rated load first', 'link' => ['#about-the-range', 'Check your load per trip against every dumper']],
 ][$application['focus']];
 usort($family, static fn($a, $b) => [$order['sort']($a), $a['model']] <=> [$order['sort']($b), $b['model']]);
+// A job that names its machines shows those, in its own order; the rest show the family's first three by the deciding figure.
+$named = array_values(array_filter(bl_application_models($application), static fn($p) => $p['category'] === $category));
+if ($named) $order['label'] = 'Chosen for this job';
+$machines = $named ?: array_slice($family, 0, 3);
 ?>
 <section class="bl-apps-hero bl-app-hero" aria-labelledby="application-title">
   <div class="bl-shell">
@@ -68,7 +73,7 @@ usort($family, static fn($a, $b) => [$order['sort']($a), $a['model']] <=> [$orde
     <div><p class="bl-eyebrow">02 / THE MACHINES</p><h2 id="machines-title">BUILT FOR<br><span class="bl-blue-text"><?= bl_escape(strtoupper($application['title'])) ?>.</span></h2></div>
     <div><p><?= bl_escape($familyLabel) ?>, <?= bl_escape(strtolower($order['label'])) ?>. Every figure is from the model’s published specifications.</p><a class="bl-text-link" href="<?= bl_escape(bl_url('/products/' . $category . '/' . $order['link'][0])) ?>"><?= bl_escape($order['link'][1]) ?> <?= bl_icon('arrow-up-right') ?></a></div>
   </div>
-  <div class="bl-product-grid"><?php foreach (array_slice($family, 0, 3) as $product) bl_product_card($product); ?></div>
+  <div class="bl-product-grid"><?php foreach ($machines as $product) bl_product_card($product); ?></div>
 </section>
 
 <?php $cases = bl_application_cases($slug); if ($cases): ?>

@@ -17,7 +17,7 @@ $send = $content['send'];
       </div>
     </div>
   </div>
-  <ol class="bl-apps-triptych">
+  <ol class="bl-apps-triptych<?= count($applications) > 3 ? ' bl-apps-triptych-rows' : '' ?>">
     <?php foreach ($applications as $i => $application): $focus = bl_application_focus($application); ?>
     <li>
       <a href="<?= bl_escape(bl_url('/applications/' . bl_application_slug($application) . '/')) ?>">

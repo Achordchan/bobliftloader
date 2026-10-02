@@ -416,13 +416,33 @@ function bl_load_range(array $range): string
     return $t($low) . '–' . $t($high) . ' t';
 }
 
-/** The one published figure that decides an application ($application['focus']), as value, unit and what it measures. */
+/** The machines an application names in 'models', in that order, matched by current or former model name; none named, none returned. */
+function bl_application_models(array $application): array
+{
+    $index = bl_dumper_model_index(bl_products());
+    foreach (bl_products() as $product) $index[strtolower($product['model'])] ??= $product;
+    $products = [];
+    foreach ((array) ($application['models'] ?? []) as $model) {
+        $product = $index[strtolower(trim((string) $model))] ?? null;
+        if ($product && !in_array($product, $products, true)) $products[] = $product;
+    }
+    return $products;
+}
+
+/**
+ * The one published figure that decides an application ($application['focus']), as value, unit and what it measures:
+ * across the machines it names when it names them, otherwise across its whole family.
+ */
 function bl_application_focus(array $application): array
 {
-    $ranges = bl_family_ranges($application['product']);
+    $named = array_column(bl_application_models($application), 'slug');
+    $models = array_values(array_filter(bl_model_dimensions(), static fn($m) => $m['family'] === $application['product'] && (!$named || in_array($m['slug'], $named, true))));
+    $loads = array_filter(array_column($models, 'load'));
+    $widths = array_column($models, 'width');
+    $load = $loads ? [min($loads), max($loads)] : [0, 0];
+    $noun = $application['product'] === 'dumper' ? 'dumpers' : 'loaders';
     return match ($application['focus']) {
-        'width' => ['value' => number_format($ranges['width'][0]), 'unit' => 'mm', 'label' => 'Narrowest loader, bucket fitted'],
-        'load' => ['value' => str_replace(' kg', '', bl_load_range($ranges['load'])), 'unit' => 'kg', 'label' => 'Rated load across ' . $ranges['count'] . ' loaders'],
-        default => ['value' => str_replace(' t', '', bl_load_range($ranges['load'])), 'unit' => 't', 'label' => 'Rated load across ' . $ranges['loaded'] . ' dumpers'],
+        'width' => ['value' => number_format($widths ? min($widths) : 0), 'unit' => 'mm', 'label' => $application['product'] === 'dumper' ? 'Narrowest dumper' : 'Narrowest loader, bucket fitted'],
+        default => ['value' => str_replace([' kg', ' t'], '', bl_load_range($load)), 'unit' => $load[1] < 1000 ? 'kg' : 't', 'label' => 'Rated load across ' . count($loads) . ' ' . $noun],
     };
 }

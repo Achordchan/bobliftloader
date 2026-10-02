@@ -27,7 +27,7 @@ function bl_content_schema(string $page): array
         ['key' => 'seo.image', 'label' => '分享图片', 'type' => 'image', 'preview' => 'images/share-default.jpg', 'help' => $share],
     ]];
     if ($page === 'applications') {
-        $names = ['landscaping' => '景观绿化', 'site-preparation' => '场地准备', 'material-transport' => '物料运输'];
+        $names = ['landscaping' => '景观绿化', 'site-preparation' => '场地准备', 'material-transport' => '物料运输', 'gardens-and-homesteads' => '园林家用', 'farms-and-orchards' => '农场果园', 'building-sites' => '工地'];
         $sections = [
             ['title' => '列表页首屏', 'note' => '“应用”列表页最上面的大标题和右侧说明；下面三张场景卡的图片和文字在各应用分区里改。', 'fields' => [
                 ['key' => 'hero.line1', 'label' => '大标题第一行', 'type' => 'text', 'help' => '普通实心字。'],
@@ -54,6 +54,7 @@ function bl_content_schema(string $page): array
                 ['key' => "jobs.$slug.description", 'label' => '介绍', 'type' => 'textarea', 'help' => '详情页首屏右侧和首页卡片上的说明。'],
                 ['key' => "jobs.$slug.image", 'group' => '场景图', 'label' => '图片', 'type' => 'image', 'preview' => substr($app['image'], strlen('/assets/')), 'help' => '留空使用主题自带的场景图（3:2 横图）。列表页三联图、首页卡片、详情页大图共用这一张。'],
                 ['key' => "jobs.$slug.alt", 'group' => '场景图', 'label' => '替代文字', 'type' => 'text', 'help' => $alt],
+                ['key' => "jobs.$slug.models", 'label' => '推荐机型', 'type' => 'text', 'help' => '详情页“机器”一节显示的型号，用英文逗号分隔，按显示顺序写（如 FC10, FY15）。留空则按这个应用的关键参数自动选同类前三款。'],
                 ['key' => "jobs.$slug.checks", 'group' => '询价前要确认的事', 'label' => '事项', 'type' => 'list', 'add' => '添加事项', 'summary' => ['title'], 'fields' => [
                     'title' => ['label' => '标题', 'type' => 'text'],
                     'text' => ['label' => '说明', 'type' => 'textarea'],
@@ -231,7 +232,7 @@ function bl_content_schema(string $page): array
             ['key' => 'range.assist', 'group' => '卡片下方', 'label' => '一句话', 'type' => 'text'],
             ['key' => 'range.assist_link', 'group' => '卡片下方', 'label' => '链接文字', 'type' => 'text'],
         ]],
-        ['title' => '02 应用场景', 'note' => '这里只改这一块的标题和说明；三个场景卡片的图片和文字在<a href="' . esc_url(admin_url('admin.php?page=bl-content-applications')) . '">应用场景</a>里改。', 'fields' => [
+        ['title' => '02 应用场景', 'note' => '这里只改这一块的标题和说明；各场景卡片的图片和文字在<a href="' . esc_url(admin_url('admin.php?page=bl-content-applications')) . '">应用场景</a>里改。', 'fields' => [
             ['key' => 'applications.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'applications.title', 'label' => '标题', 'type' => 'heading', 'help' => '换行即分行；*星号* 里的文字显示为描边字。'],
             ['key' => 'applications.description', 'label' => '标题旁说明', 'type' => 'rich', 'help' => $rich],

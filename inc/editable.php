@@ -323,7 +323,7 @@ function bl_applications_defaults(): array
     foreach ($bl_application_base as $app) {
         $checks = [];
         foreach ($app['checks'] as $check) $checks[] = ['title' => $check['title'], 'text' => $check['text'], 'measure' => $check['measure'], 'link_label' => $check['link'][1] ?? '', 'link_url' => $check['link'][0] ?? ''];
-        $jobs[bl_application_slug($app)] = ['title' => $app['title'], 'subtitle' => $app['subtitle'], 'description' => $app['description'], 'image' => '', 'alt' => $app['alt'], 'checks' => $checks];
+        $jobs[bl_application_slug($app)] = ['title' => $app['title'], 'subtitle' => $app['subtitle'], 'description' => $app['description'], 'image' => '', 'alt' => $app['alt'], 'models' => implode(', ', $app['models'] ?? []), 'checks' => $checks];
     }
     return [
         'seo' => [
@@ -363,6 +363,8 @@ function bl_apply_application_content(array $applications): array
         $job = $jobs[$slug] ?? null;
         if (!is_array($job)) continue;
         foreach (['title', 'subtitle', 'description', 'alt', 'image'] as $key) if (($job[$key] ?? '') !== '') $app[$key] = $job[$key];
+        // Named machines: a cleared field means none, so the page falls back to the family's first three.
+        if (array_key_exists('models', $job)) $app['models'] = array_values(array_filter(array_map('trim', explode(',', (string) $job['models']))));
         $checks = [];
         foreach ((array) ($job['checks'] ?? []) as $check) {
             $item = ['title' => (string) ($check['title'] ?? ''), 'text' => (string) ($check['text'] ?? ''), 'measure' => (string) ($check['measure'] ?? '')];
