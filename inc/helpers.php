@@ -12,6 +12,23 @@ function bl_asset(string $path): string
     return $base . ltrim($path, '/');
 }
 
+/* Stylesheets and scripts are served with a one-year cache, so their URLs carry the file's modification time to make browsers fetch each deployed change. */
+function bl_asset_versioned(string $path): string
+{
+    $file = __DIR__ . '/../assets/' . ltrim($path, '/');
+    return bl_asset($path) . (is_file($file) ? '?ver=' . filemtime($file) : '');
+}
+
+/* Maps every module URL to its versioned URL, so modules main.js imports by relative path are refreshed with it. */
+function bl_script_import_map(): string
+{
+    $imports = [];
+    foreach (glob(__DIR__ . '/../assets/js/*.js') ?: [] as $file) {
+        $imports[bl_asset('js/' . basename($file))] = bl_asset_versioned('js/' . basename($file));
+    }
+    return (string) json_encode(['imports' => $imports], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
+}
+
 function bl_url(string $path = '/'): string
 {
     return bl_is_wordpress() ? home_url('/' . ltrim($path, '/')) : '/' . ltrim($path, '/');

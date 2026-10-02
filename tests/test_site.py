@@ -1,5 +1,6 @@
 """Read-only checks for the routed frontend and its local WordPress rendering."""
 import json
+import os
 import re
 import sys
 import unittest
@@ -409,6 +410,20 @@ class WebsiteTests(unittest.TestCase):
             with OPENER.open(BASE + path, timeout=30) as response:
                 self.assertEqual(response.status, 200, path)
                 self.assertTrue(response.headers.get_content_type().startswith('image/'), path)
+
+    def test_styles_and_scripts_carry_a_version(self):
+        _, html, _ = fetch('/products/mini-dumpers/')
+        stylesheets = re.findall(r'<link rel="stylesheet" href="([^"]+)"', html)
+        self.assertIn('/assets/css/support.css', [urlsplit(href).path for href in stylesheets])
+        for href in stylesheets:
+            self.assertRegex(href, r'\.css\?ver=\d+$', href)
+        self.assertRegex(html, r'<script type="module" src="/assets/js/main\.js\?ver=\d+"></script>')
+        imports = json.loads(re.search(r'<script type="importmap">(.*?)</script>', html).group(1))['imports']
+        self.assertEqual(sorted(imports), sorted('/assets/js/' + name for name in os.listdir('assets/js') if name.endswith('.js')))
+        for module, url in imports.items():
+            self.assertRegex(url, '^' + re.escape(module) + r'\?ver=\d+$')
+            with OPENER.open(BASE + url, timeout=30) as response:
+                self.assertEqual(response.status, 200, url)
 
 
 if __name__ == '__main__':
