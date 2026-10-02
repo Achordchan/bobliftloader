@@ -31,14 +31,14 @@ $heading = $category === 'mini-dumpers' ? 'KEEP MATERIALS<br>MOVING.' : ($catego
   // Both families side by side at the top of the range: loaders, the main line, first and open by default; the other
   // family is one click away. On a search both show, neither current.
   $families = [
-      'skid-steer-loaders' => ['label' => 'Mini skid steer loaders', 'image' => 'images/range-loader-studio.webp', 'ranges' => bl_family_ranges('loader'), 'line' => static fn($r) => 'Rated ' . bl_load_range($r['load']) . ' · from ' . number_format($r['width'][0]) . ' mm wide'],
-      'mini-dumpers' => ['label' => 'Mini dumpers', 'image' => 'images/range-dumper-studio.webp', 'ranges' => bl_family_ranges('dumper'), 'line' => static fn($r) => 'Rated ' . bl_load_range($r['load']) . ' · tracked and wheeled'],
+      'skid-steer-loaders' => ['label' => 'Mini skid steer loaders', 'image' => bl_family_image('loader'), 'ranges' => bl_family_ranges('loader'), 'line' => static fn($r) => 'Rated ' . bl_load_range($r['load']) . ' · from ' . number_format($r['width'][0]) . ' mm wide'],
+      'mini-dumpers' => ['label' => 'Mini dumpers', 'image' => bl_family_image('dumper'), 'ranges' => bl_family_ranges('dumper'), 'line' => static fn($r) => 'Rated ' . bl_load_range($r['load']) . ' · tracked and wheeled'],
   ];
   ?>
   <nav class="bl-family-switch" aria-label="Equipment range">
     <?php foreach ($families as $key => $family): ?>
     <a href="<?= bl_escape(bl_url('/products/' . $key . '/')) ?>"<?= $category === $key ? ' aria-current="page"' : '' ?>>
-      <img src="<?= bl_escape(bl_asset($family['image'])) ?>" alt="" width="1374" height="1145">
+      <img src="<?= bl_escape($family['image']) ?>" alt="" width="1374" height="1145">
       <span><small><?= $family['ranges']['count'] ?> models</small><b><?= bl_escape($family['label']) ?></b><span><?= bl_escape($family['line']($family['ranges'])) ?></span></span>
       <?= bl_icon('arrow-up-right') ?>
     </a>

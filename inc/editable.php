@@ -476,6 +476,16 @@ function bl_image_attributes(array $image, string $sizes = ''): string
     return $html;
 }
 
+/**
+ * A family's picture (loader or dumper): the one chosen on the home screen's family card, else the theme's studio image.
+ * The home card, the Equipment menu and the family switch on the products pages all show it, so one change updates all.
+ */
+function bl_family_image(string $family): string
+{
+    $chosen = (string) (bl_editable('home')['families'][$family]['image'] ?? '');
+    return $chosen !== '' ? $chosen : bl_asset($family === 'dumper' ? 'images/range-dumper-studio.webp' : 'images/range-loader-studio.webp');
+}
+
 /** The home page's hero pictures: wide screens and phones, each falling back to the theme's own. */
 function bl_home_hero_images(): array
 {
