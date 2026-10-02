@@ -7,7 +7,13 @@ foreach (['loader' => ['01', 'images/range-loader-studio.webp'], 'dumper' => ['0
     $equipment[$key] = ['index' => $index] + $content['families'][$key];
     $equipment[$key]['image'] = $equipment[$key]['image'] ?: bl_asset($image);
 }
-$heroImages = bl_home_hero_images();
+// Hero slides: the loader picture as it has always been, then the mini dumper. The dumper slide only shows once it has a picture.
+$heroSlides = [];
+foreach (['loader' => ['hero', '/products/skid-steer-loaders/'], 'dumper' => ['hero_dumper', '/products/mini-dumpers/']] as $key => [$group, $path]) {
+    $images = bl_home_hero_images($group);
+    if (!$images) continue;
+    $heroSlides[] = ['key' => $key, 'images' => $images, 'url' => bl_url($path)] + $content[$group];
+}
 $approach = $content['approach'];
 $approachImage = bl_content_image($approach['image'], ['src' => bl_asset('images/about/people-1600.webp'), 'srcset' => bl_asset('images/about/people-900.webp') . ' 900w, ' . bl_asset('images/about/people-1600.webp') . ' 1600w, ' . bl_asset('images/about/people-2560.webp') . ' 2560w', 'width' => 2560, 'height' => 1707]);
 $familyFacts = [];
@@ -18,13 +24,34 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
     $familyFacts[$key] = ['count' => count($items), 'short' => $loads ? (max($loads) < 1000 ? min($loads) . '–' . max($loads) . ' kg' : (min($loads) / 1000) . '–' . (max($loads) / 1000) . ' t') : '', 'load' => $loads ? number_format(min($loads)) . '–' . number_format(max($loads)) . ' kg' : '', 'capacity' => $caps ? min($caps) . '–' . max($caps) . ' m³' : '', 'url' => bl_url('/products/' . $cat . '/')];
 }
 ?>
-<section class="bl-hero" aria-labelledby="hero-title">
-  <div class="bl-hero-media"><picture><source media="(min-width: 801px)" srcset="<?= bl_escape($heroImages['wide']) ?>"><img src="<?= bl_escape($heroImages['narrow']) ?>" alt="<?= bl_escape($content['hero']['alt']) ?>" fetchpriority="high" width="1942" height="809"></picture></div>
-  <div class="bl-hero-content bl-shell">
-    <p class="bl-eyebrow bl-hero-eyebrow"><span class="bl-status-dot"></span> <?= bl_escape($content['hero']['eyebrow']) ?></p>
-    <h1 id="hero-title"><?= bl_heading_lines($content['hero']['title'], true) ?></h1>
-    <div class="bl-hero-action"><a href="<?= bl_escape(bl_url('/products/skid-steer-loaders/')) ?>" class="bl-button bl-button-blue"><?= bl_escape($content['hero']['button']) ?> <?= bl_icon('arrow-up-right') ?></a><a href="<?= bl_escape(bl_url('/contact/')) ?>" class="bl-text-link"><?= bl_escape($content['hero']['link']) ?> <?= bl_icon('arrow-up-right') ?></a></div>
+<section class="bl-hero" aria-labelledby="hero-title" data-hero>
+  <?php /* One slide per family. The loader slide is the page's h1 and shows without the script; the script reveals the others and the switch. */ ?>
+  <div class="bl-hero-media">
+    <?php foreach ($heroSlides as $i => $slide): ?>
+    <picture class="bl-hero-picture<?= $i === 0 ? ' bl-active' : '' ?>" data-hero-picture<?= $i === 0 ? '' : ' aria-hidden="true"' ?>><source media="(min-width: 801px)" srcset="<?= bl_escape($slide['images']['wide']) ?>"><img src="<?= bl_escape($slide['images']['narrow']) ?>" alt="<?= bl_escape($slide['alt']) ?>" <?= $i === 0 ? 'fetchpriority="high"' : 'loading="lazy" decoding="async"' ?> width="1942" height="809"></picture>
+    <?php endforeach; ?>
   </div>
+  <div class="bl-hero-content bl-shell">
+    <div class="bl-hero-slides">
+      <?php foreach ($heroSlides as $i => $slide): ?>
+      <div class="bl-hero-slide<?= $i === 0 ? ' bl-active' : '' ?>" id="hero-slide-<?= $slide['key'] ?>" data-hero-slide<?= $i === 0 ? '' : ' hidden' ?>>
+        <p class="bl-eyebrow bl-hero-eyebrow"><span class="bl-status-dot"></span> <?= bl_escape($slide['eyebrow']) ?></p>
+        <?php if ($i === 0): ?><h1 id="hero-title" class="bl-hero-title"><?= bl_heading_lines($slide['title'], true) ?></h1><?php else: ?><h2 class="bl-hero-title"><?= bl_heading_lines($slide['title'], true) ?></h2><?php endif; ?>
+        <div class="bl-hero-action"><a href="<?= bl_escape($slide['url']) ?>" class="bl-button bl-button-blue"><?= bl_escape($slide['button']) ?> <?= bl_icon('arrow-up-right') ?></a><a href="<?= bl_escape(bl_url('/contact/')) ?>" class="bl-text-link"><?= bl_escape($slide['link']) ?> <?= bl_icon('arrow-up-right') ?></a></div>
+      </div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+  <?php if (count($heroSlides) > 1): ?>
+  <div class="bl-hero-switch-row bl-shell" data-hero-switch hidden>
+    <div class="bl-hero-switch" role="group" aria-label="Featured equipment">
+      <?php foreach ($heroSlides as $i => $slide): ?>
+      <button type="button" class="bl-hero-tab" aria-controls="hero-slide-<?= $slide['key'] ?>" aria-pressed="<?= $i === 0 ? 'true' : 'false' ?>" data-hero-tab><small><?= $equipment[$slide['key']]['index'] ?></small><span><?= bl_escape($equipment[$slide['key']]['label']) ?></span><i aria-hidden="true"></i></button>
+      <?php endforeach; ?>
+      <button type="button" class="bl-hero-pause" aria-label="Pause the slideshow" data-hero-pause><?= bl_icon('pause') ?><?= bl_icon('play') ?></button>
+    </div>
+  </div>
+  <?php endif; ?>
   <div class="bl-hero-entries bl-shell">
     <?php foreach ($equipment as $key => $item): $facts = $familyFacts[$key]; ?>
     <a class="bl-hero-entry" href="<?= bl_escape($facts['url']) ?>"><img src="<?= bl_escape($item['image']) ?>" alt="" width="240" height="200" loading="eager"><span><small><?= $item['index'] ?> / <?= $facts['count'] ?> models<?= $facts['short'] ? ' · ' . bl_escape($facts['short']) : '' ?></small><strong><?= bl_escape($item['label']) ?></strong></span><?= bl_icon('arrow-up-right') ?></a>

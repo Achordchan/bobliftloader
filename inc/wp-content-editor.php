@@ -212,6 +212,15 @@ function bl_content_schema(string $page): array
             ['key' => 'hero.image_mobile', 'group' => '大图', 'label' => '手机', 'type' => 'image', 'preview' => 'images/hero-real-loader.webp', 'help' => '留空时手机也用上面的宽屏图；两张都空则用主题自带的图。'],
             ['key' => 'hero.alt', 'group' => '大图', 'label' => '替代文字', 'type' => 'text', 'help' => $alt],
         ]],
+        ['title' => '首屏 · 迷你翻斗车', 'note' => '首屏第二张，访客可在首屏右上角切换，也会每隔几秒自动轮换（鼠标停在首屏上或点了切换按钮就停）。按钮进入迷你翻斗车栏目页。', 'fields' => [
+            ['key' => 'hero_dumper.eyebrow', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'hero_dumper.title', 'label' => '大标题', 'type' => 'heading', 'help' => '每行一段，最后的句号显示为蓝色。'],
+            ['key' => 'hero_dumper.button', 'label' => '按钮文字', 'type' => 'text', 'help' => '按钮进入迷你翻斗车栏目页。'],
+            ['key' => 'hero_dumper.link', 'label' => '链接文字', 'type' => 'text', 'help' => '链接去联系页。'],
+            ['key' => 'hero_dumper.image', 'group' => '大图', 'label' => '宽屏', 'type' => 'image', 'preview' => 'images/hero-dumper-2k.webp', 'help' => '留空使用主题自带的翻斗车首屏图。建议 2560×1067 左右的横图，车放在右侧三分之一。'],
+            ['key' => 'hero_dumper.image_mobile', 'group' => '大图', 'label' => '手机', 'type' => 'image', 'preview' => 'images/hero-dumper-mobile.webp', 'help' => '留空时手机也用上面的宽屏图；两张都空则用主题自带的图。'],
+            ['key' => 'hero_dumper.alt', 'group' => '大图', 'label' => '替代文字', 'type' => 'text', 'help' => $alt],
+        ]],
         $family('loader', '滑移装载机', 'images/range-loader-studio.webp'),
         $family('dumper', '迷你翻斗车', 'images/range-dumper-studio.webp'),
         ['title' => '简介', 'fields' => [

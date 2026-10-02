@@ -101,7 +101,7 @@
 
 /* ---- Hero / range / applications responsive composition ---- */
 @media(max-width:1150px){
-  .bl-site .bl-hero h1{max-width:72%}
+  .bl-site .bl-hero .bl-hero-title{max-width:72%}
   .bl-site .bl-hero-entries{grid-template-columns:1fr 1fr}
   .bl-site .bl-scroll-link{display:none}
   .bl-site .bl-application-tile{aspect-ratio:3/4}
@@ -111,7 +111,8 @@
   .bl-site .bl-hero-media img{object-position:72% 60%}
   .bl-site .bl-hero-media::after{background:linear-gradient(0deg,#081c2bf2 0%,#081c2bb3 45%,#081c2b59 100%)}
   .bl-site .bl-hero-content{padding-top:64px;padding-bottom:40px;min-height:520px;justify-content:flex-end}
-  .bl-site .bl-hero h1{max-width:100%;font-size:clamp(64px,13.5vw,120px)}
+  .bl-site .bl-hero-slide{align-self:end}
+  .bl-site .bl-hero .bl-hero-title{max-width:100%;font-size:clamp(64px,13.5vw,120px)}
   .bl-site .bl-hero-action{flex-wrap:wrap;gap:18px 28px}
   .bl-site .bl-hero-entries{grid-template-columns:1fr;gap:10px;padding-bottom:28px}
   .bl-site .bl-hero-entry{max-width:none}
@@ -125,9 +126,12 @@
 }
 @media(max-width:600px){
   .bl-site .bl-hero-content{padding-top:48px;min-height:460px}
-  .bl-site .bl-hero h1{font-size:clamp(56px,16.5vw,84px);letter-spacing:-.02em}
+  .bl-site .bl-hero .bl-hero-title{font-size:clamp(56px,16.5vw,84px);letter-spacing:-.02em}
   .bl-site .bl-hero-eyebrow{font-size:11px;letter-spacing:.1em;margin-bottom:22px}
   .bl-site .bl-hero-action .bl-text-link{display:none}
+  .bl-site .bl-hero-switch{gap:16px}
+  /* Only the current family's name shows; the others stay in the accessibility tree so every button keeps its name. */
+  .bl-site .bl-hero-tab[aria-pressed=false] span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
   .bl-site .bl-hero-entry>img{width:64px}
   .bl-site .bl-range-facts{grid-template-columns:1fr;gap:0;padding-top:0}
   .bl-site .bl-range-facts>div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-block:12px;border-bottom:1px solid var(--line)}

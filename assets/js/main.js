@@ -1,5 +1,6 @@
 import { initializeDialogs } from './dialogs.js';
 import { initializeEquipment, scrollBehavior } from './equipment.js';
+import { initializeHero } from './hero.js';
 import { initializeInquiry } from './inquiry.js';
 import { initializeMaking } from './making.js';
 import { initializeRuler } from './ruler.js';
@@ -9,6 +10,7 @@ import { initializeSectionNav } from './section-nav.js';
 
 initializeDialogs();
 initializeEquipment();
+initializeHero();
 initializeInquiry();
 initializeMaking();
 initializeRuler();
