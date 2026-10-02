@@ -32,7 +32,8 @@
 .bl-site .bl-hero-tab i::after{content:'';position:absolute;inset:0;background:white;transform:scaleX(0);transform-origin:left}
 .bl-site .bl-hero-tab[aria-pressed=true] i::after{transform:none}
 .bl-site .bl-hero[data-hero-playing] .bl-hero-tab[aria-pressed=true] i::after{animation:bl-hero-progress var(--hero-interval,7s) linear both}
-.bl-site .bl-hero[data-hero-playing]:is(:hover,:focus-within) .bl-hero-tab i::after{animation-play-state:paused}
+/* Hovering the hero, or focus on its links, holds the line; focus left on the switch itself does not, so pressing Play resumes at once. */
+.bl-site .bl-hero[data-hero-playing]:is(:hover,:has(.bl-hero-content :focus,.bl-hero-entries :focus)) .bl-hero-tab i::after{animation-play-state:paused}
 @keyframes bl-hero-progress{from{transform:scaleX(0)}to{transform:none}}
 .bl-site .bl-hero-pause{align-self:center;display:grid;place-items:center;width:32px;height:32px;border:1px solid #ffffff40;border-radius:50%;background:#081c2b59;color:white;cursor:pointer;transition:border-color .25s,background .25s}
 .bl-site .bl-hero-pause:hover{border-color:#ffffffa6;background:#081c2b99}
