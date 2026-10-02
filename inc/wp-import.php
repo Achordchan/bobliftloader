@@ -36,6 +36,7 @@ function bl_import_initial_content(): array
         $parents[$path] = $id;
         $counts['pages']++;
     }
+    update_option('bl_application_pages', bl_application_page_paths());
     update_option('show_on_front', 'page');
     update_option('page_on_front', $parents['home']);
     if (!get_option('permalink_structure')) update_option('permalink_structure', '/%postname%/');
@@ -70,3 +71,29 @@ add_action('admin_post_bl_import_sources', static function (): void {
     wp_safe_redirect(admin_url('tools.php?page=bl-site-setup&imported=1'));
     exit;
 });
+
+/** The URL path of every application job page, in the theme's order. */
+function bl_application_page_paths(): array
+{
+    return array_map(static fn($application) => 'applications/' . bl_application_slug($application), $GLOBALS['bl_application_base']);
+}
+
+/**
+ * Jobs added to the theme after a site was initialised get their pages on the next request, so their URLs are not 404s.
+ * Runs once per change to the list of jobs; a site that was never initialised (no Applications page) is left alone.
+ */
+function bl_application_make_pages(): void
+{
+    $paths = bl_application_page_paths();
+    if (get_option('bl_application_pages') === $paths) return;
+    $parent = get_page_by_path('applications');
+    if (!$parent) return;
+    foreach ($GLOBALS['bl_application_base'] as $application) {
+        $slug = bl_application_slug($application);
+        if (get_page_by_path('applications/' . $slug)) continue;
+        $id = wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => $application['title'], 'post_name' => $slug, 'post_parent' => $parent->ID], true);
+        if (is_wp_error($id)) return; // try again on the next request
+    }
+    update_option('bl_application_pages', $paths);
+}
+add_action('init', 'bl_application_make_pages', 20);

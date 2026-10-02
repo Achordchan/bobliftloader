@@ -26,5 +26,10 @@ $check(($index['bl-t500-hd']['model'] ?? '') === '500 Tracked', 'BL-T500-HD does
 $index = bl_dumper_model_index([$dumper('FY-20'), $dumper('FY20-4')]);
 $check(($index['fy-20']['model'] ?? '') === 'FY-20', 'an exact model name lost to an alias');
 
+// A job's headline figure covers only the named machines of its own family; another family's names fall back to the whole family.
+$landscaping = ['product' => 'loader', 'focus' => 'width'];
+$check(bl_application_focus($landscaping + ['models' => ['FC10']]) === bl_application_focus($landscaping), 'a dumper named on a loader job changes its headline');
+$check(bl_application_focus(['product' => 'dumper', 'focus' => 'width', 'models' => ['BL-T500-HD', 'FC10']])['value'] === '880', 'the named tracked dumper is not the narrowest');
+
 if ($failures) exit(1);
 echo "OK\n";

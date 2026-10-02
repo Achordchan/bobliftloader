@@ -435,7 +435,9 @@ function bl_application_models(array $application): array
  */
 function bl_application_focus(array $application): array
 {
-    $named = array_column(bl_application_models($application), 'slug');
+    // Only the named machines from the job's own family count, as on the job page; none left means the whole family.
+    $family = $application['product'] === 'dumper' ? 'mini-dumpers' : 'skid-steer-loaders';
+    $named = array_column(array_filter(bl_application_models($application), static fn($p) => $p['category'] === $family), 'slug');
     $models = array_values(array_filter(bl_model_dimensions(), static fn($m) => $m['family'] === $application['product'] && (!$named || in_array($m['slug'], $named, true))));
     $loads = array_filter(array_column($models, 'load'));
     $widths = array_column($models, 'width');
