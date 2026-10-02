@@ -6,7 +6,7 @@ import sys
 import unittest
 from html.parser import HTMLParser
 from urllib.error import HTTPError
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 from urllib.request import build_opener, ProxyHandler, HTTPRedirectHandler
 from xml.etree import ElementTree
 
@@ -413,18 +413,22 @@ class WebsiteTests(unittest.TestCase):
 
     def test_styles_and_scripts_carry_a_version(self):
         _, html, _ = fetch('/products/mini-dumpers/')
+        # The preview serves assets from /assets/, WordPress from /wp-content/themes/<theme>/assets/.
+        asset_path = lambda url: urlsplit(urljoin(BASE + '/', url)).path
         stylesheets = re.findall(r'<link rel="stylesheet" href="([^"]+)"', html)
-        self.assertIn('/assets/css/support.css', [urlsplit(href).path for href in stylesheets])
-        for href in stylesheets:
+        theme_styles = [href for href in stylesheets if '/assets/css/' in asset_path(href)]
+        self.assertTrue(any(asset_path(href).endswith('/assets/css/support.css') for href in theme_styles))
+        for href in theme_styles:
             self.assertRegex(href, r'\.css\?ver=\d+$', href)
-        self.assertRegex(html, r'<script type="module" src="/assets/js/main\.js\?ver=\d+"></script>')
+        entry = re.search(r'<script type="module" src="([^"]+)"></script>', html).group(1)
+        self.assertTrue(asset_path(entry).endswith('/assets/js/main.js'), entry)
+        self.assertRegex(entry, r'\?ver=\d+$')
         imports = json.loads(re.search(r'<script type="importmap">(.*?)</script>', html).group(1))['imports']
-        self.assertEqual(sorted(imports), sorted('/assets/js/' + name for name in os.listdir('assets/js') if name.endswith('.js')))
+        self.assertEqual(sorted(asset_path(module).rsplit('/assets/js/', 1)[1] for module in imports), sorted(name for name in os.listdir('assets/js') if name.endswith('.js')))
         for module, url in imports.items():
             self.assertRegex(url, '^' + re.escape(module) + r'\?ver=\d+$')
-            with OPENER.open(BASE + url, timeout=30) as response:
+            with OPENER.open(urljoin(BASE + '/', url), timeout=30) as response:
                 self.assertEqual(response.status, 200, url)
-
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
