@@ -29,10 +29,11 @@ if (bl_is_wordpress()) status_header($route['status']); else http_response_code(
   <link rel="preload" href="<?= bl_escape(bl_asset('fonts/barlow-condensed-700.ttf')) ?>" as="font" type="font/ttf" crossorigin>
   <?php if ($route['type'] === 'home'): $heroImages = bl_home_hero_images(); ?><link rel="preload" href="<?= bl_escape($heroImages['wide']) ?>" as="image" media="(min-width: 801px)" fetchpriority="high"><link rel="preload" href="<?= bl_escape($heroImages['narrow']) ?>" as="image" media="(max-width: 800px)" fetchpriority="high"><?php endif; ?>
   <?php if ($route['type'] === 'about'): ?><link rel="preload" as="image" imagesrcset="<?= bl_escape(bl_asset('images/about/hall-1200.webp')) ?> 1200w, <?= bl_escape(bl_asset('images/about/hall-2560.webp')) ?> 2560w" imagesizes="100vw" fetchpriority="high"><?php endif; ?>
-  <?php foreach (['base', 'home', 'components', 'responsive', 'pages', 'page-responsive', ...($route['type'] === 'about' ? ['about'] : []), ...(in_array($route['type'], ['applications', 'application', 'application_case'], true) ? ['applications'] : []), ...(in_array($route['type'], ['news', 'article', 'application_case'], true) ? ['news'] : [])] as $stylesheet): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset('css/' . $stylesheet . '.css')) ?>"><?php endforeach; ?>
-  <script type="module" src="<?= bl_escape(bl_asset('js/main.js')) ?>"></script>
+  <?php foreach (['base', 'home', 'components', 'responsive', 'pages', 'page-responsive', ...($route['type'] === 'about' ? ['about'] : []), ...(in_array($route['type'], ['applications', 'application', 'application_case'], true) ? ['applications'] : []), ...(in_array($route['type'], ['news', 'article', 'application_case'], true) ? ['news'] : [])] as $stylesheet): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset_versioned('css/' . $stylesheet . '.css')) ?>"><?php endforeach; ?>
+  <script type="importmap"><?= bl_script_import_map() ?></script>
+  <script type="module" src="<?= bl_escape(bl_asset_versioned('js/main.js')) ?>"></script>
   <?php if (bl_is_wordpress()) wp_head(); ?>
-  <?php /* Support page, and the parts of it that product and family pages share (attachments, videos, spec-sheet print). */ if (in_array($route['type'], ['support', 'products', 'product'], true)): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset('css/support.css')) ?>"><?php endif; ?>
+  <?php /* Support page, and the parts of it that product and family pages share (attachments, videos, spec-sheet print). */ if (in_array($route['type'], ['support', 'products', 'product'], true)): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset_versioned('css/support.css')) ?>"><?php endif; ?>
 </head>
 <body class="bl-site bl-page-<?= bl_escape($route['type']) ?><?= bl_is_wordpress() && is_admin_bar_showing() ? ' bl-wp-admin-bar' : '' ?>">
   <?php if (bl_is_wordpress()) wp_body_open(); ?>
