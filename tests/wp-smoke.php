@@ -133,6 +133,48 @@ try {
 }
 // The 网站内容 screens through REST: one bl_page_content item per screen; a write merges into the current content,
 // is cleaned like the screen, saves only what differs, and anonymous visitors can neither read nor write it.
+// Jobs added after a site was initialised get their pages on a later request; the import itself records the full list.
+bl_test_assert(get_option('bl_application_pages') === bl_application_page_paths(), 'The import did not record the application pages');
+foreach (bl_application_page_paths() as $path) bl_test_assert(get_page_by_path($path) instanceof WP_Post, "Missing page $path");
+wp_delete_post(get_page_by_path('applications/farms-and-orchards')->ID, true);
+update_option('bl_application_pages', array_slice(bl_application_page_paths(), 0, 3));
+// While another request holds the lock this one leaves the pages alone; once it is free the page is made exactly once.
+$heldBy = bl_lock_acquire('application_pages', 1);
+bl_application_make_pages();
+bl_test_assert(!get_page_by_path('applications/farms-and-orchards'), 'Pages were made while another request held the lock');
+bl_lock_release('application_pages', $heldBy);
+bl_application_make_pages();
+bl_application_make_pages();
+bl_test_assert(get_page_by_path('applications/farms-and-orchards') instanceof WP_Post && get_option('bl_application_pages') === bl_application_page_paths(), 'A new application page was not made on an initialised site');
+bl_test_assert(count(get_posts(['post_type' => 'page', 'name' => 'farms-and-orchards', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids'])) === 1, 'An application page was made twice');
+// A page an editor trashed for a job that was already there is not brought back.
+$landscapingPage = get_page_by_path('applications/landscaping')->ID;
+wp_trash_post($landscapingPage);
+update_option('bl_application_pages', array_slice(bl_application_page_paths(), 0, 5));
+bl_application_make_pages();
+bl_test_assert(count(get_posts(['post_type' => 'page', 'name' => 'landscaping', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids'])) === 0, 'A trashed application page was published again');
+wp_untrash_post($landscapingPage);
+wp_publish_post($landscapingPage);
+// A new job whose slug something else already holds is left alone, once, with no suffixed copies.
+$applicationsPage = get_page_by_path('applications');
+wp_delete_post(get_page_by_path('applications/building-sites')->ID, true);
+$blocker = wp_insert_attachment(['post_title' => 'building-sites', 'post_name' => 'building-sites', 'post_parent' => $applicationsPage->ID, 'post_mime_type' => 'image/webp', 'post_status' => 'inherit']);
+update_option('bl_application_pages', array_slice(bl_application_page_paths(), 0, 5));
+bl_application_make_pages();
+bl_application_make_pages();
+bl_test_assert(get_option('bl_application_pages') === bl_application_page_paths() && !get_posts(['post_type' => 'page', 'name' => 'building-sites-2', 'post_status' => 'any', 'fields' => 'ids']), 'A slug conflict left suffixed pages or kept retrying');
+wp_delete_post($blocker, true);
+update_option('bl_application_pages', array_slice(bl_application_page_paths(), 0, 5));
+bl_application_make_pages();
+bl_test_assert(get_page_by_path('applications/building-sites') instanceof WP_Post, 'The page was not made once its slug was free');
+// A trashed page for a new job (renamed to <slug>__trashed) also counts as the editor's choice.
+$farmsPage = get_page_by_path('applications/farms-and-orchards')->ID;
+wp_trash_post($farmsPage);
+update_option('bl_application_pages', array_slice(bl_application_page_paths(), 0, 3));
+bl_application_make_pages();
+bl_test_assert(!get_posts(['post_type' => 'page', 'name' => 'farms-and-orchards', 'post_status' => 'any', 'fields' => 'ids']) && get_post_status($farmsPage) === 'trash', 'A trashed new application page was replaced');
+wp_untrash_post($farmsPage);
+wp_publish_post($farmsPage);
 $contentItem = get_page_by_path('loaders', OBJECT, 'bl_page_content');
 bl_test_assert($contentItem instanceof WP_Post && count(get_posts(['post_type' => 'bl_page_content', 'post_status' => 'any', 'numberposts' => -1])) === count(BL_CONTENT_PAGES), 'Content items were not made one per screen');
 // A missing item is made again on a later request, as long as the marker was not set; a failed insert leaves it unset.

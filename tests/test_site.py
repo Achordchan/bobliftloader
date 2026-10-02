@@ -73,7 +73,7 @@ class WebsiteTests(unittest.TestCase):
     def setUpClass(cls):
         with open('inc/data/products.json') as source: cls.products = json.load(source)
         with open('inc/data/news.json') as source: cls.articles = json.load(source)
-        cls.paths = ['/', '/about/', '/products/skid-steer-loaders/', '/products/mini-dumpers/', '/applications/', '/applications/landscaping/', '/applications/site-preparation/', '/applications/material-transport/', '/news/', '/contact/', '/privacy/']
+        cls.paths = ['/', '/about/', '/products/skid-steer-loaders/', '/products/mini-dumpers/', '/applications/', '/applications/landscaping/', '/applications/site-preparation/', '/applications/material-transport/', '/applications/gardens-and-homesteads/', '/applications/farms-and-orchards/', '/applications/building-sites/', '/news/', '/contact/', '/privacy/']
         cls.paths += ['/product/' + p['slug'] + '/' for p in cls.products]
         cls.paths += ['/news/' + a['slug'] + '/' for a in cls.articles]
 
@@ -272,6 +272,22 @@ class WebsiteTests(unittest.TestCase):
         self.assertNotIn('type="range"', html.split('<main', 1)[1].split('</main>', 1)[0])
         _, html, _ = fetch('/applications/material-transport/')
         self.assertIn('/products/mini-dumpers/#about-the-range', html)
+        # A job that names its machines shows exactly those, in its order, whichever name (current or former) a record carries.
+        _, html, _ = fetch('/applications/farms-and-orchards/')
+        cards = re.findall(r'<article class="bl-product-card">\s*<a class="bl-product-card-image" href="/product/([^/]+)/', html)
+        self.assertEqual(cards, ['1-ton-mini-dumper', '1-5-ton-mini-dumper', '2-ton-mini-dumper-with-bucket'])
+        self.assertIn('Mini dumpers, chosen for this job.', html)
+        _, html, _ = fetch('/applications/gardens-and-homesteads/')
+        self.assertIn('500kg-tracked-mini-dumper', html)
+        _, html, _ = fetch('/applications/building-sites/')
+        self.assertIn('/products/mini-dumpers/#compare-mini-dumpers', html)
+        # Six jobs wrap into rows of three; each headline figure covers the machines its job names.
+        _, html, _ = fetch('/applications/')
+        self.assertIn('bl-apps-triptych bl-apps-triptych-rows', html)
+        self.assertEqual(html.count('class="bl-apps-panel-index"'), 6)
+        dumpers = {p['slug']: p for p in self.products if p['category'] == 'mini-dumpers'}
+        self.assertIn(f"{mm(dumpers['500kg-tracked-mini-dumper']['specs']['Standard dimensions'].split('×')[1]):,}<small>mm</small></b><span>Narrowest dumper", html)
+        self.assertIn('1–2<small>t</small></b><span>Rated load across 3 dumpers', html)
 
     def test_family_pages_introduce_their_range(self):
         loaders = [p for p in self.products if p['category'] == 'skid-steer-loaders']
