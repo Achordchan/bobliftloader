@@ -130,7 +130,8 @@
   .bl-site .bl-hero-eyebrow{font-size:11px;letter-spacing:.1em;margin-bottom:22px}
   .bl-site .bl-hero-action .bl-text-link{display:none}
   .bl-site .bl-hero-switch{gap:16px}
-  .bl-site .bl-hero-tab[aria-pressed=false] span{display:none}
+  /* Only the current family's name shows; the others stay in the accessibility tree so every button keeps its name. */
+  .bl-site .bl-hero-tab[aria-pressed=false] span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
   .bl-site .bl-hero-entry>img{width:64px}
   .bl-site .bl-range-facts{grid-template-columns:1fr;gap:0;padding-top:0}
   .bl-site .bl-range-facts>div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-block:12px;border-bottom:1px solid var(--line)}

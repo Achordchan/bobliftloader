@@ -33,7 +33,11 @@ export function initializeHero() {
       slide.classList.toggle('bl-active', active);
       slide.inert = !active;
     });
-    pictures.forEach((picture, index) => picture.classList.toggle('bl-active', index === next));
+    pictures.forEach((picture, index) => {
+      picture.classList.toggle('bl-active', index === next);
+      if (index === next) picture.removeAttribute('aria-hidden');
+      else picture.setAttribute('aria-hidden', 'true');
+    });
     tabs.forEach((tab, index) => tab.setAttribute('aria-pressed', String(index === next)));
   };
 

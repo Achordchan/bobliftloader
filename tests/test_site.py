@@ -336,6 +336,7 @@ class WebsiteTests(unittest.TestCase):
         self.assertEqual(hero.count('fetchpriority="high"'), 1)
         self.assertIn('images/hero-banner-2k.webp', hero.split('data-hero-picture', 2)[1])
         self.assertIn('images/hero-dumper-2k.webp', hero.split('data-hero-picture', 2)[2])
+        self.assertTrue(hero.split('data-hero-picture', 2)[2].startswith(' aria-hidden="true">'))
         self.assertIn('href="/products/mini-dumpers/" class="bl-button', hero)
         self.assertIn('data-hero-switch hidden', hero)
         self.assertEqual(hero.count('data-hero-tab'), 2)
