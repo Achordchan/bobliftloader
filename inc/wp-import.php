@@ -80,9 +80,13 @@ function bl_application_page_paths(): array
 
 /**
  * Jobs added to the theme after a site was initialised get their pages on the next request, so their URLs are not 404s.
- * Like the content items, under a lock with the check repeated inside it, so requests arriving together on deployment make
- * each page once; a request that finds the lock taken does not wait. The list is recorded only once every page is there
- * under its own slug, so a failed insert is tried again later. A site never initialised (no Applications page) is left alone.
+ * Only jobs new since the last recorded list are made: a page an editor trashed or deleted for an older job stays gone.
+ * Sites initialised before the list was recorded had the original three. Like the content items this runs under a lock,
+ * with the check repeated inside it, so requests arriving together on deployment make each page once; a request that
+ * finds the lock taken does not wait. Anything already holding a new job's slug under Applications (a page in any
+ * status, the trash included, or an attachment) is left as it is rather than worked around with a suffixed copy, and a
+ * page WordPress would only accept under a suffixed slug is removed again; either way that job is not tried again.
+ * Only a failed insert leaves the list unrecorded, to be tried on a later request.
  */
 function bl_application_make_pages(): void
 {
@@ -91,13 +95,17 @@ function bl_application_make_pages(): void
     try {
         $parent = get_page_by_path('applications');
         if (!$parent) return;
+        $known = get_option('bl_application_pages');
+        if (!is_array($known)) $known = ['applications/landscaping', 'applications/site-preparation', 'applications/material-transport'];
         $complete = true;
         foreach ($GLOBALS['bl_application_base'] as $application) {
             $slug = bl_application_slug($application);
-            $found = get_posts(['post_type' => 'page', 'name' => $slug, 'post_parent' => $parent->ID, 'post_status' => 'any', 'numberposts' => 1, 'fields' => 'ids', 'suppress_filters' => true, 'cache_results' => false]);
-            if ($found) continue;
+            if (in_array('applications/' . $slug, $known, true)) continue;
+            $taken = get_posts(['post_type' => 'any', 'name' => $slug, 'post_parent' => $parent->ID, 'post_status' => array_keys(get_post_stati()), 'numberposts' => 1, 'fields' => 'ids', 'suppress_filters' => true, 'cache_results' => false]);
+            if ($taken) continue;
             $id = wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => $application['title'], 'post_name' => $slug, 'post_parent' => $parent->ID], true);
-            if (is_wp_error($id) || !$id || get_post_field('post_name', (int) $id) !== $slug) $complete = false;
+            if (is_wp_error($id) || !$id) { $complete = false; continue; }
+            if (get_post_field('post_name', (int) $id) !== $slug) wp_delete_post((int) $id, true);
         }
         if ($complete) update_option('bl_application_pages', $paths);
     } finally {
