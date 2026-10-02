@@ -84,7 +84,7 @@ function bl_application_page_paths(): array
  * Sites initialised before the list was recorded had the original three. Like the content items this runs under a lock,
  * with the check repeated inside it, so requests arriving together on deployment make each page once; a request that
  * finds the lock taken does not wait. Anything already holding a new job's slug under Applications (a page in any
- * status, the trash included, or an attachment) is left as it is rather than worked around with a suffixed copy, and a
+ * status, a trashed one by the slug it had, or an attachment) is left as it is rather than worked around with a suffixed copy, and a
  * page WordPress would only accept under a suffixed slug is removed again; either way that job is not tried again.
  * Only a failed insert leaves the list unrecorded, to be tried on a later request.
  */
@@ -102,6 +102,8 @@ function bl_application_make_pages(): void
             $slug = bl_application_slug($application);
             if (in_array('applications/' . $slug, $known, true)) continue;
             $taken = get_posts(['post_type' => 'any', 'name' => $slug, 'post_parent' => $parent->ID, 'post_status' => array_keys(get_post_stati()), 'numberposts' => 1, 'fields' => 'ids', 'suppress_filters' => true, 'cache_results' => false]);
+            // Trashing renames a page to <slug>__trashed and keeps the slug it had in _wp_desired_post_slug.
+            $taken = $taken ?: get_posts(['post_type' => 'any', 'post_parent' => $parent->ID, 'post_status' => 'trash', 'meta_key' => '_wp_desired_post_slug', 'meta_value' => $slug, 'numberposts' => 1, 'fields' => 'ids', 'suppress_filters' => true, 'cache_results' => false]);
             if ($taken) continue;
             $id = wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => $application['title'], 'post_name' => $slug, 'post_parent' => $parent->ID], true);
             if (is_wp_error($id) || !$id) { $complete = false; continue; }

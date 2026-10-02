@@ -167,6 +167,14 @@ wp_delete_post($blocker, true);
 update_option('bl_application_pages', array_slice(bl_application_page_paths(), 0, 5));
 bl_application_make_pages();
 bl_test_assert(get_page_by_path('applications/building-sites') instanceof WP_Post, 'The page was not made once its slug was free');
+// A trashed page for a new job (renamed to <slug>__trashed) also counts as the editor's choice.
+$farmsPage = get_page_by_path('applications/farms-and-orchards')->ID;
+wp_trash_post($farmsPage);
+update_option('bl_application_pages', array_slice(bl_application_page_paths(), 0, 3));
+bl_application_make_pages();
+bl_test_assert(!get_posts(['post_type' => 'page', 'name' => 'farms-and-orchards', 'post_status' => 'any', 'fields' => 'ids']) && get_post_status($farmsPage) === 'trash', 'A trashed new application page was replaced');
+wp_untrash_post($farmsPage);
+wp_publish_post($farmsPage);
 $contentItem = get_page_by_path('loaders', OBJECT, 'bl_page_content');
 bl_test_assert($contentItem instanceof WP_Post && count(get_posts(['post_type' => 'bl_page_content', 'post_status' => 'any', 'numberposts' => -1])) === count(BL_CONTENT_PAGES), 'Content items were not made one per screen');
 // A missing item is made again on a later request, as long as the marker was not set; a failed insert leaves it unset.
