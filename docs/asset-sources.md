@@ -69,3 +69,7 @@
 codex-image（gpt-image-2.5-sunburst）改图，参考图两张：FY30 实拍 `assets/images/products/3-ton-mini-dumper.webp`（车型依据，保留车斗上的 BOB-LIFT 字样）和现有首屏 `hero-banner-2k.webp`（只作场景与调色参考）。PNG 原图在 `design-references/generated-scenes/hero-dumper-wide.png`、`hero-dumper-mobile.png`；全部候选和与实拍的左右对比图在 `design-references/hero-dumper-candidates/`。逐张对比：外形、顶棚、方向盘、轮胎与黄色轮辋、斗形、散热格栅、后部箱体与实拍一致，座椅保留实拍里的塑料膜；黄昏调色使车身比实拍略偏金黄。替代文字写明是示意图（Illustrative）。
 
 **提示词要点**：Place this exact yellow BOB-LIFT FY30 site dumper (first image) into the same dusk stone-quarry scene, lighting and colour grade as the second image … dumper on the right third, 3/4 front view, skip loaded with grey gravel, warm rim light; left 55% calm and dark for headline text. Keep the dumper's shape, yellow colour, canopy, seat, steering wheel, tyres, rims, skip shape and the BOB-LIFT lettering exactly as in the photo; no other text or logos, no people.
+
+## 产品目录 PDF（`assets/downloads/boblift-compact-equipment-catalogue.pdf`）
+
+2026-10-06 重做，替换原先 ImageMagick 拼成的无品牌供应商画册（纯图片、无文本层、含本站不卖的型号）。新版 27 页 A4：文本层可检索，带文档属性、书签、Tagged PDF 与图片替代文字，每款产品页有二维码和链接指向线上产品页。参数取自线上 18 款 `_bl_record`；图片全部为实拍（主题产品图、`assets/images/about/` 工厂照片、Mac `工作/滑移装载机(1)/照片/红色 360-460 站/` 原图、翻斗车画册 FY30 厂区图）。BL-T390-C / BL-T490-C 暂无实拍，页内放轮式 S390-C / S490-C 并注明。生成脚本与预览在项目共享文件夹 `bobliftloader/catalog-pdf/`。
