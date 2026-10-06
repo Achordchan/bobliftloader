@@ -309,3 +309,28 @@ add_filter('wpcf7_special_mail_tags', static function ($output, string $name, bo
 add_filter('wpcf7_mail_tag_replaced_textarea', static function ($replaced, $submitted, bool $html) {
     return $html && is_string($replaced) && bl_wp_inquiry_card_mail() ? str_replace(["\r", "\n"], '', nl2br($replaced, false)) : $replaced;
 }, 10, 3);
+
+/**
+ * The thank-you page the form leads to once the enquiry is sent (/thank-you/; words in 网站内容 → 询盘成功页). WordPress
+ * needs a page at that address; it is made once, and kept out of the sitemaps since the page is for people who just wrote.
+ */
+function bl_wp_thanks_page(): void
+{
+    if (get_option('bl_thanks_page') || !($token = bl_lock_acquire('thanks_page', 1))) return;
+    try {
+        $page = get_page_by_path('thank-you');
+        $id = $page ? $page->ID : wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Thank you', 'post_name' => 'thank-you'], true);
+        if (is_wp_error($id) || !$id) return;
+        if (get_post_field('post_name', (int) $id) !== 'thank-you') { wp_delete_post((int) $id, true); $id = -1; }
+        update_option('bl_thanks_page', (int) $id);
+    } finally {
+        bl_lock_release('thanks_page', $token);
+    }
+}
+add_action('init', 'bl_wp_thanks_page', 20);
+
+add_filter('wp_sitemaps_posts_query_args', static function (array $args, string $postType): array {
+    if ($postType === 'page' && ($id = (int) get_option('bl_thanks_page')) > 0) $args['post__not_in'] = array_merge($args['post__not_in'] ?? [], [$id]);
+    return $args;
+}, 10, 2);
+add_filter('jetpack_sitemap_skip_post', static fn($skip, $post) => $skip || (is_object($post) && (int) $post->ID === (int) get_option('bl_thanks_page')), 10, 2);
