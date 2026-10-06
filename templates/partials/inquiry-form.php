@@ -4,7 +4,7 @@ if (bl_inquiry_form_id()):
     $inquiryModel = !empty($selectedRecord) ? (string) $selectedRecord['model'] : '';
     $inquiryFamily = $selectedFamily ?? 'loader';
 ?>
-    <div class="bl-inquiry-cf7" data-model="<?= bl_escape($inquiryModel) ?>" data-model-family="<?= bl_escape($inquiryFamily) ?>">
+    <div class="bl-inquiry-cf7" data-thanks="<?= bl_escape(bl_url('/thank-you/')) ?>" data-model="<?= bl_escape($inquiryModel) ?>" data-model-family="<?= bl_escape($inquiryFamily) ?>">
       <?php if (!empty($selectedRecord)): ?><p class="bl-selected-model">Enquiring about: <strong><?= bl_escape($selectedRecord['name']) ?></strong></p><?php endif; ?>
       <?= bl_wp_inquiry_form(['product' => $inquiryFamily, 'model' => $inquiryModel, 'message' => $prefillMessage ?? '']) ?>
     </div>

@@ -436,6 +436,38 @@ function bl_apply_application_content(array $applications, ?array $content = nul
     return $applications;
 }
 
+/** The page a visitor lands on once the enquiry form has sent their message (/thank-you/, kept out of search). */
+function bl_thanks_defaults(): array
+{
+    return [
+        'seo' => [
+            'title' => 'Thank You for Your Enquiry',
+            'description' => 'Your enquiry has reached the BOB-LIFT loader team in Xuzhou. See what happens next, and send photos or download the catalogue while you wait.',
+            'image' => '',
+        ],
+        'hero' => [
+            'eyebrow' => 'ENQUIRY RECEIVED',
+            'title' => "THANK YOU.\n*IT’S WITH*\n*OUR TEAM.*",
+            'text' => 'Your enquiry has reached the BOB-LIFT team in Xuzhou, and a copy is kept on file so nothing gets lost. We will reply to the business email you gave us.',
+        ],
+        'next' => [
+            'eyebrow' => 'WHAT HAPPENS NEXT',
+            'title' => "FROM YOUR MESSAGE\nTO *A CLEAR ANSWER.*",
+            'items' => [
+                ['title' => 'We read your project', 'text' => 'Our team at info@boblift.com reads your equipment choice and the work you described.'],
+                ['title' => 'We reply by email', 'text' => 'You’ll get the models that fit your work, their specifications and quotation details, or with a question if we need to know more about your site. Office hours are Monday–Friday, 08:30–18:00 China time (UTC+8).'],
+                ['title' => 'Check your inbox', 'text' => 'Add info@boblift.com to your contacts so our reply reaches your inbox. If you can’t find it, check your spam or junk folder, or contact us by email or on WhatsApp +86 158 5249 9415.'],
+            ],
+        ],
+        'more' => [
+            'eyebrow' => 'WHILE YOU WAIT',
+            'whatsapp' => 'Send photos of the route and work area on WhatsApp',
+            'catalogue' => 'Download the equipment catalogue',
+            'range' => 'Browse the range',
+        ],
+    ];
+}
+
 function bl_content_defaults(string $page): array
 {
     return match ($page) {
@@ -443,6 +475,7 @@ function bl_content_defaults(string $page): array
         'applications' => bl_applications_defaults(),
         'loaders' => bl_loaders_defaults(),
         'dumpers' => bl_dumpers_defaults(),
+        'thanks' => bl_thanks_defaults(),
         default => bl_home_defaults(),
     };
 }

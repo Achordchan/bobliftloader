@@ -74,7 +74,7 @@ class WebsiteTests(unittest.TestCase):
     def setUpClass(cls):
         with open('inc/data/products.json') as source: cls.products = json.load(source)
         with open('inc/data/news.json') as source: cls.articles = json.load(source)
-        cls.paths = ['/', '/about/', '/products/skid-steer-loaders/', '/products/mini-dumpers/', '/applications/', '/applications/landscaping/', '/applications/site-preparation/', '/applications/material-transport/', '/applications/gardens-and-homesteads/', '/applications/farms-and-orchards/', '/applications/building-sites/', '/news/', '/contact/', '/privacy/']
+        cls.paths = ['/', '/about/', '/products/skid-steer-loaders/', '/products/mini-dumpers/', '/applications/', '/applications/landscaping/', '/applications/site-preparation/', '/applications/material-transport/', '/applications/gardens-and-homesteads/', '/applications/farms-and-orchards/', '/applications/building-sites/', '/news/', '/contact/', '/privacy/', '/thank-you/']
         cls.paths += ['/product/' + p['slug'] + '/' for p in cls.products]
         cls.paths += ['/news/' + a['slug'] + '/' for a in cls.articles]
 
@@ -435,6 +435,21 @@ class WebsiteTests(unittest.TestCase):
         self.assertNotIn('href="/products/"', html.split('<footer', 1)[1])
         _, sitemap, _ = fetch('/sitemap.xml')
         self.assertNotIn('/products/</loc>', sitemap)
+        self.assertNotIn('/thank-you/', sitemap)
+
+    def test_thank_you_page_follows_the_sent_enquiry(self):
+        status, html, _ = fetch('/thank-you/')
+        self.assertEqual(status, 200)
+        self.assertIn('class="bl-thanks-next"', html)
+        self.assertIn('https://wa.me/8615852499415', html)
+        page = html.split('class="bl-thanks', 1)[1].split('</section>', 1)[0]
+        self.assertIn('href="/products/skid-steer-loaders/"', page)
+        self.assertIn('href="/products/mini-dumpers/"', page)
+        self.assertNotIn('href="/products/"', page)
+        with open('inc/seo.php') as source: self.assertIn("$route['type'] !== 'thanks'", source.read())
+        with open('assets/js/inquiry.js') as source: script = source.read()
+        self.assertIn("'wpcf7mailsent'", script)
+        self.assertIn("event: 'generate_lead'", script)
 
     def test_news_has_sources_and_dates(self):
         for article in self.articles:

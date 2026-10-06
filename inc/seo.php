@@ -75,7 +75,7 @@ function bl_render_seo(array $route): void
     $title = $route['title'] . ' | BOB-LIFT';
     $canonical = bl_public_base() . $route['path'];
     $filtered = (bool) array_filter(['q', 'load', 'gear', 'operator', 'opening', 'payload', 'category'], static fn($key) => bl_query($key) !== '');
-    $robots = $route['status'] === 200 && bl_indexable() && !$filtered && empty($route['preview']) ? 'index, follow, max-image-preview:large' : 'noindex, follow';
+    $robots = $route['status'] === 200 && bl_indexable() && !$filtered && empty($route['preview']) && $route['type'] !== 'thanks' ? 'index, follow, max-image-preview:large' : 'noindex, follow';
     $image = bl_absolute_asset(bl_share_image($route));
     echo '<title>' . bl_escape($title) . '</title>';
     echo '<meta name="description" content="' . bl_escape($route['description']) . '">';

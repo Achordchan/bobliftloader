@@ -19,6 +19,7 @@ function bl_resolve_route(): array
         '/support/' => ['support', bl_editable('support')['seo']['title'], bl_editable('support')['seo']['description']],
         '/news/' => ['news', 'BOB-LIFT News & Company Updates', 'Read company and exhibition updates from BOB-LIFT, with links to original announcements on the main BOB-LIFT website.'],
         '/contact/' => ['contact', 'Contact BOB-LIFT Loader', 'Contact BOB-LIFT for skid steer loaders, mini dumpers, specifications and quotations. Reach our Xuzhou team by email, phone or WhatsApp.'],
+        '/thank-you/' => ['thanks', bl_editable('thanks')['seo']['title'], bl_editable('thanks')['seo']['description']],
         '/privacy/' => ['privacy', 'Privacy & Enquiry Information', 'How this BOB-LIFT website handles enquiry information and email drafts.'],
     ];
     $route = ['type' => '404', 'title' => 'Page not found', 'description' => 'The requested page could not be found.', 'path' => $path, 'status' => 404, 'category' => '', 'record' => null];

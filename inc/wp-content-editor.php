@@ -7,7 +7,7 @@ defined('ABSPATH') || exit;
  * what differs from the defaults in inc/editable.php, so text an editor never touched follows later theme updates.
  */
 
-const BL_CONTENT_PAGES = ['home' => ['title' => '首页内容', 'menu' => '首页', 'path' => '/'], 'support' => ['title' => '采购与售后（Support）页内容', 'menu' => '采购与售后 Support', 'path' => '/support/'], 'applications' => ['title' => '应用场景（Applications）页内容', 'menu' => '应用场景 Applications', 'path' => '/applications/'], 'loaders' => ['title' => '滑移装载机栏目内容', 'menu' => '滑移装载机', 'path' => '/products/skid-steer-loaders/'], 'dumpers' => ['title' => '迷你翻斗车栏目内容', 'menu' => '迷你翻斗车', 'path' => '/products/mini-dumpers/']];
+const BL_CONTENT_PAGES = ['home' => ['title' => '首页内容', 'menu' => '首页', 'path' => '/'], 'support' => ['title' => '采购与售后（Support）页内容', 'menu' => '采购与售后 Support', 'path' => '/support/'], 'applications' => ['title' => '应用场景（Applications）页内容', 'menu' => '应用场景 Applications', 'path' => '/applications/'], 'loaders' => ['title' => '滑移装载机栏目内容', 'menu' => '滑移装载机', 'path' => '/products/skid-steer-loaders/'], 'dumpers' => ['title' => '迷你翻斗车栏目内容', 'menu' => '迷你翻斗车', 'path' => '/products/mini-dumpers/'], 'thanks' => ['title' => '询盘成功页内容', 'menu' => '询盘成功页', 'path' => '/thank-you/']];
 
 /**
  * Field list per page. "group" only groups fields on the screen; "preview" is the theme's own image shown while a slot is
@@ -136,6 +136,31 @@ function bl_content_schema(string $page): array
         ['title' => '参数对比', 'fields' => [
             ['key' => 'compare.note', 'label' => '对比表说明', 'type' => 'textarea', 'help' => '对比表标题旁的说明，写参数出处。'],
         ]],        $productPage('dumper'),
+    ];
+    if ($page === 'thanks') return [
+        ['title' => '搜索结果显示', 'note' => '浏览器标签里的标题。这一页不让搜索引擎收录，也不在网站地图里。', 'fields' => [
+            ['key' => 'seo.title', 'label' => '页面标题', 'type' => 'text', 'help' => '标题后面会自动加“ | BOB-LIFT”。'],
+            ['key' => 'seo.description', 'label' => '页面描述', 'type' => 'textarea'],
+        ]],
+        ['title' => '首屏', 'note' => '询盘表单发送成功后跳转到的页面（/thank-you/）。', 'fields' => [
+            ['key' => 'hero.eyebrow', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'hero.title', 'label' => '大标题', 'type' => 'heading', 'help' => '每行一段；整行用 *星号* 包住显示为蓝色。'],
+            ['key' => 'hero.text', 'label' => '标题下说明', 'type' => 'textarea'],
+        ]],
+        ['title' => '接下来', 'note' => '右侧白底框里的步骤。', 'fields' => [
+            ['key' => 'next.eyebrow', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'next.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
+            ['key' => 'next.items', 'label' => '步骤', 'type' => 'list', 'add' => '添加步骤', 'summary' => ['title'], 'fields' => [
+                'title' => ['label' => '标题', 'type' => 'text'],
+                'text' => ['label' => '说明', 'type' => 'textarea'],
+            ]],
+        ]],
+        ['title' => '等待期间', 'note' => '标题下方的链接：WhatsApp、下载画册（读“资料下载”里设置的画册）、滑移装载机和迷你翻斗车两个栏目。文字留空则不显示该链接。', 'fields' => [
+            ['key' => 'more.eyebrow', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'more.whatsapp', 'label' => 'WhatsApp 链接文字', 'type' => 'text'],
+            ['key' => 'more.catalogue', 'label' => '画册链接文字', 'type' => 'text'],
+            ['key' => 'more.range', 'label' => '产品栏目链接文字', 'type' => 'text', 'help' => '两个栏目链接共用这句。'],
+        ]],
     ];
     if ($page === 'support') return [
         ['title' => '首屏', 'fields' => [
@@ -656,6 +681,7 @@ function bl_content_page_for_post(?WP_Post $post): string
     if ((int) get_option('page_on_front') === $post->ID) return 'home';
     if ($post->post_name === 'support' && !$post->post_parent) return 'support';
     if ($post->post_name === 'applications' && !$post->post_parent) return 'applications';
+    if ($post->post_name === 'thank-you' && !$post->post_parent) return 'thanks';
     // The three application pages sit under Applications and are edited on the same screen.
     $parent = $post->post_parent ? get_post($post->post_parent) : null;
     return $parent && $parent->post_name === 'applications' && !$parent->post_parent ? 'applications' : '';

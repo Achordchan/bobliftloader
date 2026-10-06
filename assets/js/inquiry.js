@@ -1,5 +1,7 @@
 import { openDialog } from './dialogs.js';
 
+const SENT_KEY = 'bl-enquiry-sent';
+
 // A message written for the model the visitor came from ("…a quotation for the FY-30") only fits that model's family:
 // it clears when they choose another family and comes back if they return, unless they have written their own.
 function syncPrefill(container, matches) {
@@ -27,9 +29,30 @@ function initializeSentInquiry(wrap) {
   wrap.querySelectorAll('input[name="product"]').forEach((radio) => radio.addEventListener('change', sync));
   wrap.addEventListener('wpcf7reset', () => setTimeout(sync));
   sync();
+  // Once the mail has gone, the visitor goes on to the thank-you page, which reports the enquiry (see reportSentInquiry).
+  // The values come from the submission itself, not the form, which the visitor may have changed while it was sending.
+  wrap.addEventListener('wpcf7mailsent', (event) => {
+    const sent = Object.fromEntries((event.detail?.inputs || []).map(({ name, value }) => [name, value]));
+    try { sessionStorage.setItem(SENT_KEY, JSON.stringify({ product: sent.product || '', model: sent.model || '' })); } catch { /* storage blocked: the page still loads */ }
+    if (wrap.dataset.thanks) window.location.assign(wrap.dataset.thanks);
+  });
+}
+
+// On the thank-you page: an enquiry this tab has just sent becomes one "generate_lead" event in the dataLayer, for whatever
+// tracking code is added later (Google Ads, GA4, Tag Manager). A reload or a visit without sending reports nothing.
+function reportSentInquiry() {
+  let sent = null;
+  try {
+    sent = JSON.parse(sessionStorage.getItem(SENT_KEY) || 'null');
+    sessionStorage.removeItem(SENT_KEY);
+  } catch { return; }
+  if (!sent) return;
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ event: 'generate_lead', form: 'enquiry', enquiry_product: sent.product || '', enquiry_model: sent.model || '' });
 }
 
 export function initializeInquiry() {
+  if (document.body.classList.contains('bl-page-thanks')) reportSentInquiry();
   const sent = document.querySelector('.bl-inquiry-cf7');
   if (sent) initializeSentInquiry(sent);
   const form = document.querySelector('#inquiry-form');
