@@ -14,7 +14,7 @@ $quickForm = bl_inquiry_form_id() ? bl_wp_inquiry_form(['product' => $quickFamil
   <button class="bl-quick-toggle" type="button" aria-expanded="false" aria-controls="quick-enquiry"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" d="M4 5h16v11H9l-5 4z"/><path fill="none" stroke="currentColor" stroke-width="1.6" d="M8 9.5h8M8 12.5h5"/></svg><span>Quote or question?</span></button>
   <section class="bl-quick-panel" id="quick-enquiry" aria-labelledby="quick-enquiry-title" hidden>
     <div class="bl-quick-head">
-      <div><p class="bl-eyebrow">QUICK ENQUIRY</p><h2 id="quick-enquiry-title">Tell us what you need.</h2><p>Our team in Xuzhou replies by email from info@boblift.com.</p></div>
+      <div><p class="bl-eyebrow">QUICK ENQUIRY</p><h2 id="quick-enquiry-title">Tell us what you need.</h2><p>Our team in Xuzhou replies by email from <?= bl_escape(bl_company('email')) ?>.</p></div>
       <button class="bl-quick-close" type="button" aria-label="Close quick enquiry"><?= bl_icon('x') ?></button>
     </div>
     <?php if ($quickForm): ?>
@@ -25,7 +25,7 @@ $quickForm = bl_inquiry_form_id() ? bl_wp_inquiry_form(['product' => $quickFamil
     <?php else: ?>
     <div class="bl-quick-fallback">
       <a class="bl-button bl-button-blue" href="<?= bl_escape(bl_url('/contact/')) ?><?= $quickRecord ? '?product=' . rawurlencode($quickRecord['slug']) : '' ?>#enquiry">Write your enquiry <?= bl_icon('arrow-up-right') ?></a>
-      <a class="bl-text-link" href="https://wa.me/8615852499415" target="_blank" rel="noopener">WhatsApp +86 158 5249 9415 <?= bl_icon('arrow-up-right') ?></a>
+      <a class="bl-text-link" href="<?= bl_escape(bl_company('sales_whatsapp_url')) ?>" target="_blank" rel="noopener">WhatsApp <?= bl_escape(bl_company('sales_whatsapp_label')) ?> <?= bl_icon('arrow-up-right') ?></a>
     </div>
     <?php endif; ?>
   </section>

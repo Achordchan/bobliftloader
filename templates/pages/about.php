@@ -54,7 +54,7 @@ foreach (bl_editable('about')['group']['product_links'] as $item) {
     <ol class="bl-about-promises">
       <li class="bl-reveal"><span>01</span><h3><?= bl_content_text('about', 'promises.company_title') ?></h3><p><?= bl_company_text('about', 'promises.company_text') ?></p></li>
       <li class="bl-reveal"><span>02</span><h3><?= bl_content_text('about', 'promises.order_title') ?></h3><p><?= bl_content_text('about', 'promises.order_text') ?></p></li>
-      <li class="bl-reveal"><span>03</span><h3><?= bl_content_text('about', 'promises.team_title') ?></h3><p><a href="mailto:<?= bl_escape(bl_company('email')) ?>"><?= bl_escape(bl_company('email')) ?></a><?= bl_content_text('about', 'promises.team_text') ?><a href="<?= bl_escape(bl_application_link(bl_content_value('about', 'promises.service_url'))) ?>"><?= bl_content_text('about', 'promises.service_label') ?></a><?= bl_content_text('about', 'promises.team_suffix') ?></p></li>
+      <li class="bl-reveal"><span>03</span><h3><?= bl_content_text('about', 'promises.team_title') ?></h3><p><a href="<?= bl_escape(bl_mailto(bl_company('email'))) ?>"><?= bl_escape(bl_company('email')) ?></a><?= bl_content_text('about', 'promises.team_text') ?><a href="<?= bl_escape(bl_application_link(bl_content_value('about', 'promises.service_url'))) ?>"><?= bl_content_text('about', 'promises.service_label') ?></a><?= bl_content_text('about', 'promises.team_suffix') ?></p></li>
     </ol>
   </div>
 </section>

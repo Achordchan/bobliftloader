@@ -223,9 +223,22 @@ function bl_page_content_current(string $page): array
 /** REST content and its revision must describe the same snapshot, even if another request saves during serialization. */
 function bl_rest_content_snapshot(string $page, bool $refresh = false): array
 {
-    static $snapshots = [];
-    if ($refresh || !isset($snapshots[$page])) $snapshots[$page] = bl_content_saved_now($page);
-    return $snapshots[$page];
+    return bl_rest_content_state($page, $refresh)['saved'];
+}
+
+/**
+ * The revision is taken together with the snapshot and before anything is resolved from it, as on the admin screen: if
+ * Support's number changes in between, the payload shows the newer number under an older token, so a client sending it
+ * back is refused as stale instead of freezing a number it never saw.
+ */
+function bl_rest_content_state(string $page, bool $refresh = false): array
+{
+    static $states = [];
+    if ($refresh || !isset($states[$page])) {
+        $saved = bl_content_saved_now($page);
+        $states[$page] = ['saved' => $saved, 'revision' => bl_content_revision($saved, $page)];
+    }
+    return $states[$page];
 }
 
 // One private item per screen (only editors see them in the API), made once and again whenever a screen is added. Under
@@ -291,7 +304,7 @@ add_action('rest_api_init', static function (): void {
     register_rest_field('bl_page_content', 'bl_content_revision', [
         'get_callback' => static function (array $post): string {
             $page = bl_page_content_key((int) $post['id']);
-            return $page ? bl_content_revision(bl_rest_content_snapshot($page), $page) : '';
+            return $page ? bl_rest_content_state($page)['revision'] : '';
         },
         'schema' => ['type' => 'string', 'context' => ['edit'], 'description' => '保存时回传此版本；过期版本返回 409，省略时按当前内容合并。'],
     ]);

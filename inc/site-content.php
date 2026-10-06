@@ -71,6 +71,12 @@ function bl_company(string $key): string
     };
 }
 
+/** A mailto: address with the characters a URL reads as syntax (%, ?, #, &) escaped; the address shown stays as typed. */
+function bl_mailto(string $address): string
+{
+    return 'mailto:' . str_replace(['%', '?', '#', '&'], ['%25', '%3F', '%23', '%26'], $address);
+}
+
 /** Company destinations are protocol-checked at output, including historical option values. */
 function bl_company_url(string $key): string
 {
