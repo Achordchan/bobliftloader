@@ -45,6 +45,11 @@ $check(substr_count($commented, 'Disallow:') === 1 && str_contains($commented, '
 $check(!str_contains($commented, 'keep out') && !str_contains($commented, 'ClaudeBot'), 'the removed group left text behind');
 $check(str_contains($commented, 'Sitemap: https://example.com/sitemap.xml'), 'Sitemap lost');
 
+// The platform also lists these two data scrapers (sentibot in two spellings); they go with the rest.
+$scrapers = bl_allow_ai_crawlers("User-agent: *\nDisallow: /wp-admin/\n\nUser-agent: omgili\nDisallow: /\n\nUser-agent: SentiBot\nDisallow: /\n\nUser-agent: sentibot\nDisallow: /\n");
+$check(stripos($scrapers, 'omgili') === false && stripos($scrapers, 'sentibot') === false, 'omgili or SentiBot still present');
+$check($scrapers === "User-agent: *\nDisallow: /wp-admin/\n", 'the wildcard group changed');
+
 // Nothing named: unchanged apart from layout.
 $plain = "User-agent: *\nDisallow: /private/\n";
 $check(bl_allow_ai_crawlers($plain) === $plain, 'a plain file changed');
