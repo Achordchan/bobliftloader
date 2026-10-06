@@ -126,15 +126,21 @@ function setMotionPreference() {
 setMotionPreference();
 reducedMotion.addEventListener('change', setMotionPreference);
 
+// Past the first screen or so, the phone bar's Top button shows (page-responsive.css).
+const markScroll = () => {
+  header.classList.toggle('bl-scrolled', window.scrollY > 30);
+  document.documentElement.classList.toggle('bl-past-fold', window.scrollY > 600);
+};
 let scheduled = false;
 window.addEventListener('scroll', () => {
   if (scheduled) return;
   scheduled = true;
   requestAnimationFrame(() => {
-    header.classList.toggle('bl-scrolled', window.scrollY > 30);
+    markScroll();
     scheduled = false;
   });
 }, { passive: true });
+markScroll();
 
 // The three support topics form one disclosure group, retaining native keyboard behavior.
 document.querySelectorAll('.bl-accordions details').forEach((detail) => {

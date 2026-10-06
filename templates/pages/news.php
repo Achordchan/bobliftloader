@@ -25,7 +25,9 @@ $articles = $current ? array_values(array_filter($allArticles, static fn($a) => 
   <ol class="bl-news-list">
     <?php foreach ($articles as $i => $article): $event = $article['event'] ?? []; $status = !empty($event['start']) ? bl_event_status($event) : null; ?>
     <li><a class="bl-news-item" href="<?= bl_escape(bl_article_url($article)) ?>">
-      <span class="bl-news-item-image"><img src="<?= bl_escape($article['image']) ?>" alt="" width="900" height="600"<?= $i ? ' loading="lazy"' : '' ?>></span>
+      <?php // Pictures far from the 3:2 frame (square posters, wide exhibition artwork) are shown whole on phones rather than cropped.
+      $file = strstr((string) parse_url($article['image'], PHP_URL_PATH), '/assets/'); $size = $file ? @getimagesize(dirname(__DIR__, 2) . $file) : false; $whole = $size && $size[1] && ($size[0] / $size[1] < 1.3 || $size[0] / $size[1] > 1.6); ?>
+      <span class="bl-news-item-image<?= $whole ? ' bl-news-item-image-whole' : '' ?>"><img src="<?= bl_escape($article['image']) ?>" alt="" width="900" height="600"<?= $i ? ' loading="lazy"' : '' ?>></span>
       <span class="bl-news-item-body">
         <span class="bl-news-item-meta"><span class="bl-news-tag<?= bl_news_category($article) ? '' : ' bl-news-tag-group' ?>"><?= bl_escape(bl_news_label($article)) ?></span><time datetime="<?= bl_escape($article['date']) ?>"><?= date('j M Y', strtotime($article['date'])) ?></time></span>
         <span class="bl-news-item-title"><?= bl_escape($article['title']) ?></span>

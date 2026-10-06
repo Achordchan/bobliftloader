@@ -46,7 +46,7 @@ $route = ['record' => bl_read_data('products')[0]];
 $route['record']['excerpt'] = bl_product_excerpt($route['record']);
 ob_start(); (static function (array $route) { require __DIR__ . '/../templates/pages/product.php'; })($route); $html = ob_get_clean();
 $check(substr_count($html, '>WhatsApp +44123456</a>') === 1 && substr_count($html, '>+44123456</a>') === 1, 'product WhatsApp labels disagree with destination');
-$check(substr_count($html, 'https://wa.me/44123456?text=') === 2, 'product WhatsApp URLs disagree');
+$check(substr_count($html, 'https://wa.me/44123456?text=') === 3, 'product WhatsApp URLs disagree');
 $result = bl_content_prepare('global', [], ['company' => ['sales_whatsapp' => '']]);
 $check(is_wp_error($result) && str_contains($result->get_error_message(), 'WhatsApp'), 'empty sales WhatsApp was accepted');
 $result = bl_content_prepare('global', [], ['company' => ['email' => 'info@boblift.com']]);

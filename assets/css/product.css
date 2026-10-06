@@ -8,7 +8,7 @@
 .bl-site .bl-product-main-image{overflow:hidden}
 .bl-site .bl-gallery-zoom{position:absolute;right:clamp(10px,.8vw,18px);bottom:clamp(10px,.8vw,18px);display:inline-flex;align-items:center;gap:10px;padding:9px 14px;background:#ffffffe6;border:1px solid var(--line);font-size:var(--fs-label);font-weight:700;transition:background .2s,border-color .2s}
 .bl-site .bl-gallery-zoom .bl-icon{width:16px;height:16px}
-.bl-site .bl-gallery-zoom:hover{background:#fff;border-color:var(--ink)}
+@media(hover:hover){.bl-site .bl-gallery-zoom:hover{background:#fff;border-color:var(--ink)}}
 .bl-site .bl-gallery-zoom[hidden]{display:none}
 .bl-site .bl-product-main-image #product-photo{cursor:zoom-in}
 
@@ -18,8 +18,9 @@
 .bl-site .bl-product-section-nav ol{display:flex;flex:1;min-width:0;gap:clamp(22px,2vw,52px);margin:0;padding:0;list-style:none;overflow-x:auto;scrollbar-width:none}
 .bl-site .bl-product-section-nav ol::-webkit-scrollbar{display:none}
 .bl-site .bl-product-section-nav ol a{display:block;padding:8px 0;white-space:nowrap;transition:color .2s}
-.bl-site .bl-product-section-nav ol a:hover{color:#7aa4ff}
+@media(hover:hover){.bl-site .bl-product-section-nav ol a:hover{color:#7aa4ff}}
 .bl-site .bl-product-section-nav .bl-section-nav-cta .bl-icon{width:16px;height:16px}
+.bl-site .bl-product-wa{display:none}
 
 /* Section heads: the small descriptive heading and the display line on the left, a sentence and a signpost on the right. */
 .bl-site .bl-product-section-head{display:grid;grid-template-columns:1fr 1.1fr;gap:9%;align-items:end;margin-bottom:clamp(32px,2.6vw,64px)}
@@ -40,7 +41,7 @@
 .bl-site .bl-spec-body-drawing .bl-spec-sheet,.bl-site .bl-spec-body-drawing .bl-spec-sheet[data-groups="3"]{grid-template-columns:repeat(2,minmax(0,1fr))}
 .bl-site .bl-spec-drawing{margin:clamp(40px,3.2vw,72px) 0 0;display:grid;gap:10px}
 .bl-site .bl-spec-drawing button{display:block;width:100%;background:#fff;padding:clamp(12px,1vw,24px);cursor:zoom-in;border:1px solid transparent;transition:border-color .2s}
-.bl-site .bl-spec-drawing button:hover{border-color:var(--ink)}
+@media(hover:hover){.bl-site .bl-spec-drawing button:hover{border-color:var(--ink)}}
 .bl-site .bl-spec-drawing figcaption{font-size:var(--fs-label);color:var(--muted)}
 
 /* Attachments (loaders) and jobs (dumpers). */
@@ -59,12 +60,12 @@
 /* Applications and cases. */
 .bl-site .bl-product-apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:clamp(14px,1.2vw,28px)}
 .bl-site .bl-product-apps a{display:grid;grid-template-columns:clamp(96px,8vw,180px) minmax(0,1fr) auto;align-items:center;gap:clamp(14px,1.2vw,28px);padding:clamp(10px,.8vw,16px);background:#fff;border:1px solid var(--line);transition:border-color .2s}
-.bl-site .bl-product-apps a:hover{border-color:var(--ink)}
+@media(hover:hover){.bl-site .bl-product-apps a:hover{border-color:var(--ink)}}
 .bl-site .bl-product-apps img{width:100%;aspect-ratio:3/2;object-fit:cover}
 .bl-site .bl-product-apps strong{display:block;font:700 var(--fs-h5)/1.05 var(--display)}
 .bl-site .bl-product-apps small{display:block;margin-top:6px;font-size:var(--fs-micro);font-weight:700;letter-spacing:.08em;color:var(--muted)}
 .bl-site .bl-product-apps .bl-icon{width:18px;height:18px;transition:transform .2s}
-.bl-site .bl-product-apps a:hover .bl-icon{transform:translate(3px,-3px)}
+@media(hover:hover){.bl-site .bl-product-apps a:hover .bl-icon{transform:translate(3px,-3px)}}
 .bl-site .bl-product-cases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(28px,2.2vw,56px) clamp(20px,1.4vw,36px);margin-top:clamp(36px,2.8vw,64px)}
 
 /* Photographs: a grid that opens the lightbox. */
@@ -72,7 +73,7 @@
 .bl-site .bl-product-photo-grid li{display:flex;flex-direction:column;gap:10px}
 .bl-site .bl-product-photo-grid button{display:block;overflow:hidden;background:var(--ink);cursor:zoom-in}
 .bl-site .bl-product-photo-grid img{width:100%;aspect-ratio:4/3;object-fit:cover;transition:transform .5s,opacity .3s}
-.bl-site .bl-product-photo-grid button:hover img{transform:scale(1.04);opacity:.92}
+@media(hover:hover){.bl-site .bl-product-photo-grid button:hover img{transform:scale(1.04);opacity:.92}}
 .bl-site .bl-product-photo-grid p{font-size:var(--fs-label);line-height:1.5;color:var(--muted)}
 
 /* Factory and inspection: the one dark band on the page. */
@@ -111,7 +112,7 @@
 .bl-site .bl-product-loading small,.bl-site p.bl-product-big small{font:600 var(--fs-h5)/1 var(--display);color:var(--muted)}
 .bl-site .bl-product-docs{display:grid;gap:10px;width:100%}
 .bl-site .bl-product-docs a,.bl-site .bl-product-docs button{display:flex;align-items:center;gap:14px;width:100%;padding:12px 14px;background:#fff;border:1px solid var(--line);text-align:left;font-size:var(--fs-small);font-weight:700;transition:border-color .2s}
-.bl-site .bl-product-docs a:hover,.bl-site .bl-product-docs button:hover{border-color:var(--ink)}
+@media(hover:hover){.bl-site .bl-product-docs a:hover,.bl-site .bl-product-docs button:hover{border-color:var(--ink)}}
 .bl-site .bl-product-docs small{display:block;font-size:var(--fs-micro);font-weight:600;color:var(--muted)}
 .bl-site .bl-product-docs .bl-icon{width:18px;height:18px}
 
@@ -127,7 +128,7 @@
 .bl-site .bl-product-faq-list summary::after{content:'+';font-size:24px;line-height:1;transition:transform .2s}
 .bl-site .bl-product-faq-list details[open] summary::after{content:'−'}
 .bl-site .bl-product-faq-list h3{font:700 var(--fs-h5)/1.15 var(--display)}
-.bl-site .bl-product-faq-list summary:hover h3{color:var(--blue)}
+@media(hover:hover){.bl-site .bl-product-faq-list summary:hover h3{color:var(--blue)}}
 .bl-site .bl-product-faq-list details>div{display:grid;justify-items:start;gap:14px;max-width:820px;padding-bottom:clamp(18px,1.4vw,30px);font-size:var(--fs-body);line-height:1.85;color:var(--muted)}
 .bl-site .bl-product-faq-list .bl-text-link{color:var(--ink);font-size:var(--fs-label)}
 
@@ -150,7 +151,7 @@
 .bl-site .bl-product-compare thead th{font:700 var(--fs-h5)/1 var(--display)}
 .bl-site .bl-product-compare thead th small{display:block;margin-top:4px;font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
 .bl-site .bl-product-compare thead a{border-bottom:1px solid currentColor}
-.bl-site .bl-product-compare thead a:hover{color:var(--blue)}
+@media(hover:hover){.bl-site .bl-product-compare thead a:hover{color:var(--blue)}}
 .bl-site .bl-product-compare tbody th{font-weight:600;color:var(--muted);width:24%}
 .bl-site .bl-product-compare [aria-current]{background:#fff}
 .bl-site .bl-product-compare td[aria-current]{font-weight:700}
@@ -170,8 +171,8 @@
 .bl-site .bl-lightbox-next{right:clamp(8px,1.4vw,32px)}
 .bl-site .bl-lightbox-next .bl-icon{transform:rotate(180deg)}
 .bl-site .bl-lightbox-step[hidden]{display:none}
-.bl-site .bl-lightbox-step:hover,.bl-site .bl-lightbox-close:hover{background:var(--blue);border-color:var(--blue)}
-.bl-site .bl-lightbox-step:hover{transform:translateY(-50%)}
+@media(hover:hover){.bl-site .bl-lightbox-step:hover,.bl-site .bl-lightbox-close:hover{background:var(--blue);border-color:var(--blue)}}
+@media(hover:hover){.bl-site .bl-lightbox-step:hover{transform:translateY(-50%)}}
 
 @media(max-width:1100px){
   .bl-site .bl-product-jobs,.bl-site .bl-product-checks,.bl-site .bl-product-cases{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -202,29 +203,34 @@
   .bl-site .bl-product-enquiry-form{padding:20px 16px}
   .bl-site .bl-lightbox-step,.bl-site .bl-lightbox-step:hover{top:auto;bottom:16px;transform:none}
   /* Hero: photograph, name, the three figures and the quote button share the first screen. */
-  .bl-site .bl-product-hero{gap:10px;padding-top:4px}
+  .bl-site .bl-product-hero{gap:8px;padding-top:4px}
   .bl-site .bl-product-gallery{gap:6px}
   .bl-site .bl-product-main-image{aspect-ratio:3/2}
   .bl-site .bl-product-main-image>img{padding:12px}
   .bl-site .bl-gallery-zoom{justify-content:center;min-width:44px;min-height:44px;padding:0 12px}
   .bl-site .bl-gallery-thumbs{gap:8px;padding-bottom:0;scroll-padding-inline:var(--gutter)}
-  .bl-site .bl-gallery-thumbs button{flex:0 0 48px;width:48px;padding:3px}
-  .bl-site .bl-product-intro h1{font-size:clamp(46px,13.4vw,56px);margin:8px 0 12px}
-  .bl-site .bl-product-intro h1>span{margin-top:8px;font-size:20px;line-height:1.2}
-  /* The name's key keeps its place under the name as one swipeable row (fading at the right edge, catalog.js), so the quote button stays in the first screen. */
-  .bl-site .bl-model-decode{flex-wrap:nowrap;gap:8px;margin:0 calc(-1 * var(--gutter)) 12px;padding:0 var(--gutter);overflow-x:auto;white-space:nowrap;scrollbar-width:none}
-  .bl-site .bl-model-decode::-webkit-scrollbar{display:none}
-  .bl-site .bl-model-decode>*{flex:none}
-  .bl-site .bl-model-decode span{padding:3px 10px 3px 3px}
-  .bl-site .bl-model-decode b{height:22px}
+  .bl-site .bl-gallery-thumbs button{flex:0 0 46px;width:46px;padding:3px}
+  .bl-site .bl-product-intro h1{font-size:var(--m-h1,clamp(48px,14vw,60px));margin:6px 0 10px}
+  .bl-site .bl-product-intro h1>span{margin-top:6px;font-size:20px;line-height:1.2}
+  /* The name's key: three equal chips under the name, the link to the key beneath them. */
+  .bl-site .bl-model-decode{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 10px;font-size:11.5px}
+  .bl-site .bl-model-decode span{gap:7px;min-width:0;padding:3px 6px 3px 3px;line-height:1.15}
+  .bl-site .bl-model-decode b{flex:none;height:22px;padding:0 5px}
+  .bl-site .bl-model-decode a{grid-column:1/-1;justify-self:start;margin:2px 0 0;font-size:12px;line-height:1.3}
   .bl-site .bl-model-decode a,.bl-site .bl-product-compare thead a{position:relative}
-  .bl-site .bl-model-decode a::after,.bl-site .bl-product-compare thead a::after{content:'';position:absolute;inset:-13px -6px}
+  .bl-site .bl-model-decode a::after,.bl-site .bl-product-compare thead a::after{content:'';position:absolute;inset:-14px -6px}
   /* The three figures: labels may run to two lines, the figures still share one line along the foot. */
-  .bl-site .bl-product-key-specs{gap:12px;padding:10px 0;margin:0}
+  .bl-site .bl-product-key-specs{gap:12px;padding:8px 0;margin:0}
   .bl-site .bl-product-key-specs>div{display:flex;flex-direction:column;justify-content:space-between;min-width:0}
   .bl-site .bl-product-key-specs dt{line-height:1.35;letter-spacing:.04em}
-  .bl-site .bl-product-key-specs dd{margin-top:8px}
-  .bl-site .bl-product-actions{margin-top:14px}
+  .bl-site .bl-product-key-specs dd{margin-top:6px}
+  .bl-site .bl-product-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 10px;margin-top:12px}
+  .bl-site .bl-product-actions>.bl-text-link{grid-column:1/-1;justify-self:start}
+  /* WhatsApp sits beside the quote button as a square of the same height; the line of contact links below it goes. */
+  .bl-site .bl-product-wa{display:grid;place-items:center;align-self:stretch;width:54px;background:#fff;border:1px solid #b9c4c9;color:#1fb457;transition:transform .12s,background .2s}
+  .bl-site .bl-product-wa svg{width:26px;height:26px}
+  .bl-site .bl-product-wa:active{transform:scale(.95);background:#effbf3}
+  .bl-site .bl-product-direct{display:none}
   /* WhatsApp, email and the terms link keep their look; an invisible layer makes each a 44px tall target. */
   .bl-site .bl-product-section-nav ol a{display:flex;align-items:center;min-height:44px;padding:0 10px;margin-inline:-10px}
   /* Factory checks: one number column, so every heading starts on the same line. */
@@ -237,6 +243,16 @@
   .bl-site .bl-product-compare thead th{vertical-align:bottom;font-size:clamp(15px,4.2vw,18px);line-height:1.05;white-space:nowrap}
   .bl-site .bl-product-compare thead th small{margin-top:5px;font-size:11px;letter-spacing:.04em;white-space:normal}
   .bl-site .bl-product-compare thead th[aria-current]{box-shadow:inset 0 3px var(--blue)}
+  .bl-site .bl-product-compare td.bl-compare-figure{white-space:nowrap}
+  /* Sections: one rhythm down the page; the related models are a swipeable row. */
+  .bl-site .bl-product-works,.bl-site .bl-product-where,.bl-site .bl-product-photos,.bl-site .bl-product-buying,.bl-site .bl-product-faq,.bl-site .bl-product-built,.bl-site .bl-product-enquiry{padding-block:var(--m-sec,56px)}
+  .bl-site .bl-product-enquiry{scroll-margin-top:var(--header-height)}
+  .bl-site .bl-product-compare{margin-bottom:36px}
+  .bl-site .bl-related .bl-product-grid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:72vw;gap:14px;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 4px;scroll-padding-inline:var(--gutter);scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none}
+  .bl-site .bl-related .bl-product-grid::-webkit-scrollbar{display:none}
+  .bl-site .bl-related .bl-product-card{scroll-snap-align:start}
+  .bl-site .bl-related .bl-product-card-image{aspect-ratio:4/3}
+  .bl-site .bl-related .bl-card-arrow{right:10px;bottom:10px;width:36px;height:36px}
 }
 /* Tablets upright: photograph and name side by side again, so the figures and the quote button share the first screen. */
 @media(min-width:601px) and (max-width:800px){

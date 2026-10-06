@@ -13,6 +13,22 @@ export function initializeCatalog() {
     [box, ...box.children].forEach((part) => sizes.observe(part));
     edge();
   });
+  // Phones show the comparison's first eight rows (pages.css); the button under it opens the rest.
+  document.querySelectorAll('.bl-compare-more').forEach((button) => {
+    const section = button.closest('.bl-compare');
+    const rows = section.querySelectorAll('tbody tr:not(.bl-compare-actions)');
+    if (rows.length <= 8) return;
+    section.classList.add('bl-compare-short');
+    button.hidden = false;
+    button.addEventListener('click', () => {
+      section.classList.remove('bl-compare-short');
+      button.setAttribute('aria-expanded', 'true');
+      button.hidden = true;
+      const next = rows[8].querySelector('th');
+      next.tabIndex = -1;
+      next.focus({ preventScroll: true });
+    });
+  });
   const form = document.querySelector('[data-catalog]');
   if (!form) return;
   const cards = [...document.querySelectorAll('[data-catalog-card]')];

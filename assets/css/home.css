@@ -27,7 +27,8 @@
 .bl-site .bl-hero-switch{display:flex;align-items:stretch;gap:clamp(18px,1.6vw,40px);pointer-events:auto}
 .bl-site .bl-hero-tab{position:relative;display:flex;align-items:baseline;gap:10px;padding:10px 0 14px;background:none;border:0;color:#9fb6c8;font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:color .25s}
 .bl-site .bl-hero-tab small{font:600 clamp(15px,.9vw,20px)/1 var(--display);letter-spacing:.02em;color:#78a1ff}
-.bl-site .bl-hero-tab:hover,.bl-site .bl-hero-tab[aria-pressed=true]{color:white}
+.bl-site .bl-hero-tab[aria-pressed=true]{color:white}
+@media(hover:hover){.bl-site .bl-hero-tab:hover{color:white}}
 .bl-site .bl-hero-tab i{position:absolute;left:0;right:0;bottom:0;height:2px;background:#ffffff2e;overflow:hidden}
 .bl-site .bl-hero-tab i::after{content:'';position:absolute;inset:0;background:white;transform:scaleX(0);transform-origin:left}
 .bl-site .bl-hero-tab[aria-pressed=true] i::after{transform:none}
@@ -36,14 +37,14 @@
 .bl-site .bl-hero[data-hero-playing]:is(:hover,:has(.bl-hero-content :focus,.bl-hero-scroll :focus)) .bl-hero-tab i::after{animation-play-state:paused}
 @keyframes bl-hero-progress{from{transform:scaleX(0)}to{transform:none}}
 .bl-site .bl-hero-pause{align-self:center;display:grid;place-items:center;width:32px;height:32px;border:1px solid #ffffff40;border-radius:50%;background:#081c2b59;color:white;cursor:pointer;transition:border-color .25s,background .25s}
-.bl-site .bl-hero-pause:hover{border-color:#ffffffa6;background:#081c2b99}
+@media(hover:hover){.bl-site .bl-hero-pause:hover{border-color:#ffffffa6;background:#081c2b99}}
 .bl-site .bl-hero-pause .bl-icon{grid-area:1/1;width:12px;height:12px;filter:invert(1)}
 .bl-site .bl-hero[data-hero-playing] .bl-hero-pause .bl-icon:last-child,.bl-site .bl-hero:not([data-hero-playing]) .bl-hero-pause .bl-icon:first-child{visibility:hidden}
 /* A compact scroll cue leads from the hero to the equipment range. */
 .bl-site .bl-hero-scroll{position:relative;z-index:1;width:100%;display:flex;justify-content:flex-end;flex-shrink:0;padding-bottom:clamp(24px,2vw,48px)}
 .bl-site .bl-scroll-link{display:flex;gap:14px;align-items:center;align-self:center;font-size:var(--fs-micro);letter-spacing:.12em;font-weight:700;color:#c7d3dc;white-space:nowrap;min-height:44px}
 .bl-site .bl-scroll-link .bl-icon{filter:invert(1)}
-.bl-site .bl-scroll-link:hover{color:white}
+@media(hover:hover){.bl-site .bl-scroll-link:hover{color:white}}
 
 /* ---------- The Range: both families side by side on studio backdrops ---------- */
 .bl-site .bl-range{padding-top:var(--sp-block);background:#f8f9f5}
@@ -52,7 +53,7 @@
 .bl-site .bl-range-card{display:flex;flex-direction:column;background:var(--paper);min-width:0}
 .bl-site .bl-range-visual{position:relative;display:block;aspect-ratio:1.3;overflow:hidden;background:#ececea}
 .bl-site .bl-range-visual>img{width:100%;height:100%;object-fit:cover;object-position:center 60%;transition:transform .9s cubic-bezier(.2,.7,.3,1)}
-.bl-site .bl-range-card:hover .bl-range-visual>img{transform:scale(1.03)}
+@media(hover:hover){.bl-site .bl-range-card:hover .bl-range-visual>img{transform:scale(1.03)}}
 .bl-site .bl-range-visual>.bl-circle-button{position:absolute;right:var(--gutter);bottom:clamp(20px,1.6vw,36px);background:#ffffffcc;color:var(--ink)}
 /* One column per card: heading, copy, specs, button. The heading gets the full card width, so each phrase holds one line. */
 .bl-site .bl-range-body{display:flex;flex-direction:column;align-items:flex-start;flex:1;padding:clamp(32px,2.6vw,64px) var(--gutter) clamp(40px,3vw,72px);color:var(--ink)}
@@ -66,7 +67,7 @@
 .bl-site .bl-range-facts dd{margin:8px 0 0;font:600 var(--fs-h5)/1.1 var(--display);white-space:nowrap}
 .bl-site .bl-range-body .bl-button{margin-top:clamp(28px,2.2vw,52px);color:white;background:var(--ink)}
 .bl-site .bl-range-body .bl-button .bl-icon{filter:invert(1)}
-.bl-site .bl-range-body .bl-button:hover{background:var(--blue)}
+@media(hover:hover){.bl-site .bl-range-body .bl-button:hover{background:var(--blue)}}
 /* Side by side, both cards share the same rows, so headings, specs and buttons line up whatever the copy length. */
 @supports (grid-template-rows:subgrid){
   .bl-site .bl-range-card{display:grid;grid-row:span 6;grid-template-rows:subgrid;row-gap:0}
@@ -85,16 +86,17 @@
 .bl-site .bl-application-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1vw,24px)}
 .bl-site .bl-application-tile{position:relative;display:block;aspect-ratio:4/5;overflow:hidden;background:#0f2537;color:white;min-width:0}
 .bl-site .bl-application-tile>img{width:100%;height:100%;object-fit:cover;transition:transform 1s cubic-bezier(.2,.7,.3,1)}
-.bl-site .bl-application-tile:hover>img{transform:scale(1.04)}
+@media(hover:hover){.bl-site .bl-application-tile:hover>img{transform:scale(1.04)}}
 .bl-site .bl-application-tile::after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,#03111ce6 0%,#03111c66 38%,#03111c00 65%);transition:background .3s}
 .bl-site .bl-application-tile-body{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:clamp(22px,1.8vw,44px);display:grid;grid-template-columns:1fr auto;gap:clamp(16px,1.2vw,28px);align-items:end}
 .bl-site .bl-application-tile-body .bl-eyebrow{font-size:var(--fs-label);color:#9fc0ff;margin-bottom:clamp(10px,.8vw,18px)}
 .bl-site .bl-application-tile-body h3{font-family:var(--display);font-size:var(--fs-h3);font-weight:600;line-height:.98;letter-spacing:-.3px}
 .bl-site .bl-application-tile-body p{font-size:var(--fs-small);line-height:1.75;color:#c9d5de;margin-top:clamp(10px,.8vw,18px);max-width:520px;max-height:0;opacity:0;overflow:hidden;transition:max-height .4s,opacity .4s,margin .4s}
-.bl-site .bl-application-tile:hover p,.bl-site .bl-application-tile:focus-visible p{max-height:8em;opacity:1}
+.bl-site .bl-application-tile:focus-visible p{max-height:8em;opacity:1}
+@media(hover:hover){.bl-site .bl-application-tile:hover p{max-height:8em;opacity:1}}
 .bl-site .bl-application-tile-body .bl-circle-button{color:white}
 .bl-site .bl-application-tile-body .bl-circle-button .bl-icon{filter:invert(1)}
-.bl-site .bl-application-tile:hover .bl-circle-button{background:var(--blue);border-color:var(--blue)}
+@media(hover:hover){.bl-site .bl-application-tile:hover .bl-circle-button{background:var(--blue);border-color:var(--blue)}}
 .bl-site .bl-application-tile-body .bl-tile-model{position:absolute;top:0;left:0;transform:translateY(-100%)}
 .bl-site .bl-photo-label{position:absolute;left:clamp(18px,1.4vw,32px);top:clamp(18px,1.4vw,32px);z-index:1;background:var(--paper);color:var(--ink);padding:8px 12px;font-size:var(--fs-micro);font-weight:700;letter-spacing:.1em}
 
@@ -116,7 +118,7 @@
 .bl-site .bl-approach-steps li{padding-top:clamp(18px,1.3vw,30px);border-top:1px solid var(--ink)}
 .bl-site .bl-approach-steps span{font-size:var(--fs-small);font-weight:700;color:var(--blue)}
 .bl-site .bl-approach-steps p a{border-bottom:1px solid currentColor;transition:color .2s}
-.bl-site .bl-approach-steps p a:hover{color:var(--blue)}
+@media(hover:hover){.bl-site .bl-approach-steps p a:hover{color:var(--blue)}}
 .bl-site .bl-approach-steps h3{margin:clamp(12px,.9vw,22px) 0 10px;font:600 var(--fs-h4)/1.05 var(--display)}
 .bl-site .bl-approach-steps p{max-width:32em;font-size:var(--fs-small);line-height:1.85;color:var(--muted)}
 /* The photograph drifts slightly as it passes through the viewport, where scroll timelines are supported. */
@@ -169,7 +171,7 @@
 .bl-site .bl-inquiry-form .wpcf7-radio input:checked+.wpcf7-list-item-label::after{visibility:visible}
 .bl-site .bl-inquiry-form .wpcf7-radio input:focus-visible+.wpcf7-list-item-label{outline:3px solid #cf8631;outline-offset:3px}
 .bl-site form.bl-inquiry-form input.wpcf7-submit,.bl-site .bl-contact-form-panel form.bl-inquiry-form input.wpcf7-submit,.bl-site .bl-contact-form-panel form.bl-inquiry-form input.wpcf7-submit:focus{width:auto;min-height:clamp(54px,2.7vw,70px);margin:0;padding:15px clamp(64px,3.4vw,84px) 15px clamp(23px,1.2vw,32px);border:1px solid transparent;color:white;background:var(--blue) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 17L17 7M8 7h9v9' fill='none' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E") right clamp(23px,1.2vw,32px) center/21px no-repeat;font:inherit;font-size:var(--fs-small);font-weight:700;text-align:left;cursor:pointer}
-.bl-site form.bl-inquiry-form input.wpcf7-submit:hover,.bl-site .bl-contact-form-panel form.bl-inquiry-form input.wpcf7-submit:hover{background-color:#1746ad}
+@media(hover:hover){.bl-site form.bl-inquiry-form input.wpcf7-submit:hover,.bl-site .bl-contact-form-panel form.bl-inquiry-form input.wpcf7-submit:hover{background-color:#1746ad}}
 .bl-site form.bl-inquiry-form input.wpcf7-submit:focus-visible{outline:3px solid #cf8631;outline-offset:3px}
 .bl-site .bl-inquiry-form .wpcf7-spinner{position:absolute;margin:0 0 0 12px}
 .bl-site .bl-inquiry-form .wpcf7-not-valid-tip{display:block;margin-top:6px;font-size:var(--fs-micro);font-weight:600;color:#b3261e}

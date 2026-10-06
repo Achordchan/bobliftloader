@@ -54,6 +54,7 @@
 .bl-site .bl-sup-table tbody th a:hover{color:var(--blue)}
 .bl-site .bl-sup-table tbody th small{display:block;margin-top:2px;font-size:var(--fs-micro);font-weight:500;color:var(--muted)}
 .bl-site .bl-sup-note{grid-column:2;font-size:var(--fs-micro);line-height:1.7;color:var(--muted)}
+.bl-site .bl-sup-fit-switch{display:none}
 
 /* 02 After delivery: a dark band with the warranty, the fault routine and spare parts. */
 .bl-site .bl-sup-after{padding-top:var(--sp-section);padding-bottom:var(--sp-section);background:var(--ink);color:var(--paper)}
@@ -189,13 +190,26 @@
   .bl-site .bl-sup-file-body{grid-template-columns:1fr;grid-template-areas:'kind' 'title' 'text'}
 }
 @media(max-width:600px){
-  .bl-site .bl-sup-hero h1{font-size:clamp(56px,17vw,92px)}
+  .bl-site .bl-sup-hero h1{font-size:var(--m-h1,clamp(48px,14vw,60px))}
   .bl-site .bl-sup-photo img{height:clamp(300px,80vw,440px)}
   .bl-site .bl-sup-plate>div{padding:18px 18px 20px}
   .bl-site .bl-sup-plate dd{font-size:clamp(30px,9vw,44px);white-space:normal}
-  .bl-site .bl-attachments-head h2{font-size:clamp(52px,15vw,72px)}
-  .bl-site .bl-sup-head h2,.bl-site .bl-sup-faq-aside h2{font-size:clamp(40px,11vw,56px)}
-  .bl-site .bl-sup-containers{padding:28px var(--gutter);margin-inline:calc(-1 * var(--gutter))}
+  .bl-site :is(.bl-attachments-head,.bl-sup-head,.bl-sup-faq-aside) h2{font-size:var(--m-h2,clamp(38px,11vw,46px))}
+  .bl-site .bl-sup-head{gap:20px;margin-bottom:32px}
+  .bl-site .bl-sup-containers{margin-top:var(--m-sec-tight,40px);padding:28px var(--gutter);margin-inline:calc(-1 * var(--gutter))}
+  .bl-site .bl-sup-containers-tables{gap:20px}
+  /* Machines per container: one family at a time, chosen with a two-part switch (both tables show where :has() is missing). */
+  @supports selector(:has(*)){
+    .bl-site .bl-sup-fit-switch{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink)}
+    .bl-site .bl-sup-fit-switch input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+    .bl-site .bl-sup-fit-switch label{display:flex;align-items:center;justify-content:center;min-height:44px;padding:0 10px;font-size:var(--fs-small);font-weight:700;text-align:center;cursor:pointer;transition:background .2s,color .2s}
+    .bl-site .bl-sup-fit-switch input:checked+label{background:var(--ink);color:#fff}
+    .bl-site .bl-sup-fit-switch input:focus-visible+label{outline:2px solid var(--blue);outline-offset:2px}
+    .bl-site .bl-sup-containers-tables:has(#sup-fit-loaders:checked) .bl-sup-table-dumpers,.bl-site .bl-sup-containers-tables:has(#sup-fit-dumpers:checked) .bl-sup-table-loaders{display:none}
+    .bl-site.bl-motion .bl-sup-containers-tables:has(.bl-sup-fit-switch)>.bl-reveal{opacity:1;transform:none}
+    .bl-site .bl-sup-containers:has(#sup-fit-loaders:checked) .bl-sup-note{display:none}
+    .bl-site .bl-sup-containers-tables:has(.bl-sup-fit-switch) caption{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  }
   .bl-site .bl-sup-table td,.bl-site .bl-sup-table thead th+th{width:3.4em}
   .bl-site .bl-sup-table tbody th{padding-right:12px}
   .bl-site .bl-sup-table tbody th small{white-space:nowrap}
@@ -212,9 +226,17 @@
   .bl-site .bl-sup-plate>div:nth-child(odd){padding-left:var(--gutter)}
   .bl-site .bl-sup-plate>div:nth-child(even){padding-right:var(--gutter)}
   .bl-site .bl-sup-after-grid{grid-template-columns:1fr}
+  .bl-site .bl-sup-after-grid>*{padding-right:0}
+  .bl-site .bl-sup-service li:last-child{padding-bottom:0}
   .bl-site .bl-sup-after-grid>*+*{padding-left:0;border-left:0;border-top:1px solid var(--night-line);margin-top:28px}
   .bl-site .bl-sup-parts{grid-template-columns:1fr}
   .bl-site .bl-sup-files a{grid-template-columns:minmax(0,1fr) auto}
+  .bl-site .bl-sup-file-title{font-size:var(--m-h3,28px)}
+  /* Section rhythm: a full step where the background changes, a short one between the two light sections at the end. */
+  .bl-site :is(.bl-sup-buying,.bl-sup-after){padding-top:var(--m-sec,56px);padding-bottom:var(--m-sec,56px)}
+  .bl-site .bl-sup-after-actions{margin-top:36px}
+  .bl-site .bl-sup-downloads{padding-top:var(--m-sec,56px);padding-bottom:0}
+  .bl-site .bl-sup-faq{gap:32px;padding-top:var(--m-sec-tight,40px);padding-bottom:var(--m-sec,56px)}
   .bl-site .bl-sup-faq-item>div{padding-right:0}
   /* Each kind of work becomes a strip that scrolls sideways, so 24 tools don't stack into a long column. */
   .bl-site .bl-attachments-group ul{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:42%;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 6px;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gutter);scrollbar-width:none}
