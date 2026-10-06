@@ -97,14 +97,15 @@ add_filter('wpcf7_spam', static fn(bool $spam): bool => $spam || trim((string) (
 
 /**
  * The notification the team receives: a card with the page the enquiry came from, the product (photo, name, model) and
- * the sender's details, with a button that starts the reply. Subject and body stay editable in the form's Mail tab; the
+ * the sender's details, with a button that starts the reply. The card is a fixed 660 px, like the original: phones
+ * shrink it to fit the screen instead of reflowing it. Subject and body stay editable in the form's Mail tab; the
  * [bl_…] tags below fill in what CF7 cannot.
  */
 function bl_wp_inquiry_mail(): array
 {
-    $label = 'padding:10px 16px 10px 10px;text-align:right;vertical-align:top;font-weight:bold;font-size:14px;width:120px;color:#333333;';
-    $value = 'padding:10px 16px 10px 0;vertical-align:top;font-size:14px;color:#333333;line-height:1.6;word-break:break-word;';
-    $row = static fn(string $name, string $tag): string => "<tr><td width=\"120\" style=\"{$label}\">{$name}</td><td style=\"{$value}\">{$tag}</td></tr>";
+    $label = 'padding:10px 20px;text-align:right;vertical-align:top;font-weight:bold;font-size:14px;width:140px;color:#333333;';
+    $value = 'padding:10px 20px 10px 0;vertical-align:top;font-size:14px;color:#333333;line-height:1.6;word-break:break-word;';
+    $row = static fn(string $name, string $tag): string => "<tr><td width=\"140\" style=\"{$label}\">{$name}</td><td style=\"{$value}\">{$tag}</td></tr>";
     // Each row is one line: with "exclude blank" on, CF7 drops the line of a field the sender left empty.
     $rows = implode("\n", [
         $row('Name', '[name]'),
@@ -116,14 +117,14 @@ function bl_wp_inquiry_mail(): array
         $row('来源国家:', '[bl_ip_country]'),
     ]);
     $body = <<<HTML
-<table width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:#ffffff;"><tr><td style="padding:16px 8px;">
-<table align="center" width="660" cellspacing="0" cellpadding="0" style="width:100%;max-width:660px;border:1px solid #d8dde6;border-collapse:separate;background:#ffffff;border-radius:3px;font-family:Arial,'Microsoft YaHei',sans-serif;color:#333333;">
+<table width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:#ffffff;"><tr><td style="padding:16px 0;">
+<table align="center" width="660" cellspacing="0" cellpadding="0" style="width:660px;border:1px solid #d8dde6;border-collapse:separate;background:#ffffff;border-radius:3px;font-family:Arial,'Microsoft YaHei',sans-serif;color:#333333;">
 <tr><td height="8" style="background:#1995f6;height:8px;font-size:0;line-height:0;border-radius:3px 3px 0 0;">&nbsp;</td></tr>
 <tr><td style="padding:20px 20px 0;font-size:20px;text-align:center;"><div style="border-bottom:1px solid #d8dde6;padding-bottom:20px;">新询盘通知</div></td></tr>
 <tr><td style="padding:20px;font-size:16px;line-height:1.6;">尊敬的管理员，<br>你有一封新询盘来自页面地址为<br>[bl_page_link]，内容如下：</td></tr>
 <tr><td style="padding:0 20px;">
-<table width="100%" cellspacing="0" cellpadding="0" style="width:100%;border:1px solid #d8dde6;background:#f4f6f9;">
-<tr><td width="120" style="padding:20px 16px 10px 10px;text-align:right;vertical-align:top;font-weight:bold;font-size:14px;width:120px;color:#333333;">产品信息</td><td style="padding:20px 16px 10px 0;vertical-align:top;font-size:14px;">[bl_product_card]</td></tr>
+<table width="618" cellspacing="0" cellpadding="0" style="width:618px;border:1px solid #d8dde6;background:#f4f6f9;">
+<tr><td width="140" style="padding:20px;text-align:right;vertical-align:top;font-weight:bold;font-size:14px;width:140px;color:#333333;">产品信息</td><td style="padding:20px 20px 10px 0;vertical-align:top;font-size:14px;">[bl_product_card]</td></tr>
 {$rows}
 <tr><td colspan="2" style="height:10px;font-size:0;line-height:0;">&nbsp;</td></tr>
 </table>
@@ -169,9 +170,8 @@ function bl_wp_inquiry_product_card(string $family, string $model): string
     $url = esc_url($product['url']);
     $name = esc_html($product['name']);
     $image = bl_wp_inquiry_thumbnail($product);
-    // Two inline blocks: side by side on a wide screen, the details under the photo on a phone.
-    $photo = $image ? '<div style="display:inline-block;vertical-align:top;width:80px;margin:0 14px 10px 0;"><a href="' . $url . '" target="_blank"><img src="' . esc_url($image) . '" width="80" height="80" alt="' . esc_attr($product['name']) . '" style="display:block;width:80px;height:80px;border:1px solid #eeeeee;border-radius:3px;object-fit:cover;"></a></div>' : '';
-    return $photo . '<div style="display:inline-block;vertical-align:top;max-width:280px;"><p style="margin:0 0 6px;font-size:14px;line-height:1.7;"><a href="' . $url . '" target="_blank" style="color:#1995f6;text-decoration:none;">' . $name . '</a></p>' . $details . '</div>';
+    $photo = $image ? '<td width="80" style="vertical-align:top;padding-right:20px;"><a href="' . $url . '" target="_blank"><img src="' . esc_url($image) . '" width="80" height="80" alt="' . esc_attr($product['name']) . '" style="display:block;width:80px;height:80px;border:1px solid #eeeeee;border-radius:3px;object-fit:cover;"></a></td>' : '';
+    return '<table cellspacing="0" cellpadding="0"><tr>' . $photo . '<td style="vertical-align:top;"><p style="margin:0 0 6px;font-size:14px;line-height:1.7;"><a href="' . $url . '" target="_blank" style="color:#1995f6;text-decoration:none;">' . $name . '</a></p>' . $details . '</td></tr></table>';
 }
 
 /**
