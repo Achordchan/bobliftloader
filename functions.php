@@ -17,6 +17,7 @@ require_once __DIR__ . '/inc/wp-product-page.php';
 require_once __DIR__ . '/inc/wp-content-editor.php';
 require_once __DIR__ . '/inc/wp-admin-ui.php';
 require_once __DIR__ . '/inc/wp-inquiry.php';
+require_once __DIR__ . '/inc/wp-inquiry-templates.php';
 require_once __DIR__ . '/inc/wp-rest.php';
 
 add_action('after_setup_theme', static function (): void {
