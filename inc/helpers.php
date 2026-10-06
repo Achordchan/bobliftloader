@@ -117,6 +117,15 @@ function bl_is_generated_product_excerpt(string $excerpt, array $names): bool
  * Loader names read BL-{running gear}{size class}-{operator position}, e.g. BL-T360-H: T tracked / S wheeled,
  * H hand (stand-on) / C cabin (seated), as set by BOB-LIFT on 2026-09-24. Other models return null.
  */
+/** Page title for a product: its name, plus the model when the name does not already carry it, so a search result
+ * reads "FY30 3 Ton Wheeled Mini Dumper | BOB-LIFT" rather than repeating "| FY30" before the brand. */
+function bl_product_page_title(array $product): string
+{
+    $name = (string) $product['name'];
+    $model = (string) ($product['model'] ?? '');
+    return $model === '' || stripos($name, $model) !== false ? $name : $name . ' | ' . $model;
+}
+
 function bl_model_parts(string $model): ?array
 {
     if (!preg_match('/^BL-([TS])(\d+)-([HC])$/', $model, $m)) return null;

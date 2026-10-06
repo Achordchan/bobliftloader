@@ -110,6 +110,8 @@ class WebsiteTests(unittest.TestCase):
             status, html, _ = fetch('/product/' + product['slug'] + '/')
             self.assertEqual(status, 200)
             self.assertIn(product['model'], html)
+            # The title names the model once, whether or not the product name already starts with it.
+            self.assertEqual(re.search(r'<title>(.*?)</title>', html).group(1).count(product['model']), 1)
             # Sources stay in the data for provenance; product pages do not send buyers to another site.
             if product['source']: self.assertNotIn('href="' + product['source'], html)
             for label, value in product['specs'].items():
