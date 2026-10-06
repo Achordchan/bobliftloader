@@ -429,9 +429,11 @@ function bl_content_screen(string $page): void
 {
     if (!isset(BL_CONTENT_PAGES[$page]) || !current_user_can('edit_pages')) wp_die('没有编辑权限。', '', ['response' => 403]);
     $info = BL_CONTENT_PAGES[$page];
-    $saved = bl_content_saved_now($page);
-    $values = bl_content_resolve($page, $saved);
-    $revision = bl_content_revision($saved);
+    $stored = bl_content_saved_now($page);
+    $values = bl_content_resolve($page, $stored);
+    // The revision describes what is stored; "changed" marks and reset follow the migrated content the screen shows.
+    $revision = bl_content_revision($stored);
+    $saved = bl_content_migrate($page, $stored);
     $recovery = bl_content_recovery($page);
     if ($recovery) {
         $values = bl_content_clean_all($page, $recovery['input']);
