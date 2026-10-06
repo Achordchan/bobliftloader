@@ -8,3 +8,4 @@ require_once __DIR__ . '/support.php';
 require_once __DIR__ . '/product-page.php';
 require_once __DIR__ . '/routes.php';
 require_once __DIR__ . '/seo.php';
+require_once __DIR__ . '/llms.php';
