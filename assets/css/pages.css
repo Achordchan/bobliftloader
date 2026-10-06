@@ -537,7 +537,7 @@
 .bl-site .bl-quick-toggle:hover{background:#1746ad;transform:translateY(-2px)}
 .bl-site .bl-quick-toggle:focus-visible{outline:3px solid #cf8631;outline-offset:3px}
 .bl-site .bl-quick-open .bl-quick-toggle{background:var(--ink);border-color:var(--ink)}
-.bl-site .bl-quick-panel{position:absolute;right:0;bottom:calc(100% + 12px);width:min(400px,calc(100vw - 32px));max-height:calc(100vh - 140px);overflow:auto;overscroll-behavior:contain;background:var(--white);color:var(--ink);border:1px solid #b5c2ca;box-shadow:0 24px 48px #081c2b40;animation:bl-quick-in .2s ease-out}
+.bl-site .bl-quick-panel{position:absolute;right:0;bottom:calc(100% + 12px);width:min(400px,calc(100vw - 32px));max-height:calc(100vh - 140px - var(--bl-quick-lift,0px));overflow:auto;overscroll-behavior:contain;background:var(--white);color:var(--ink);border:1px solid #b5c2ca;box-shadow:0 24px 48px #081c2b40;animation:bl-quick-in .2s ease-out}
 @keyframes bl-quick-in{from{opacity:0;transform:translateY(8px)}}
 .bl-site .bl-quick-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:22px 22px 18px;background:var(--ink);color:#fff}
 .bl-site .bl-quick-head .bl-eyebrow{font-size:var(--fs-micro);color:#8fb0ff}
