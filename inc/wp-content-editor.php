@@ -174,9 +174,6 @@ function bl_content_schema(string $page): array
             ['key' => 'downloads.catalogue_text', 'group' => '画册', 'label' => '说明', 'type' => 'text'],
             ['key' => 'downloads.sheets_title', 'group' => '规格表', 'label' => '名称', 'type' => 'text'],
             ['key' => 'downloads.sheets_text', 'group' => '规格表', 'label' => '说明', 'type' => 'text'],
-            ['key' => 'downloads.certificates_kind', 'group' => '证书', 'label' => '标签', 'type' => 'text'],
-            ['key' => 'downloads.certificates_title', 'group' => '证书', 'label' => '名称', 'type' => 'text'],
-            ['key' => 'downloads.certificates_text', 'group' => '证书', 'label' => '说明', 'type' => 'text'],
             ['key' => 'downloads.videos_title', 'group' => '视频', 'label' => '名称', 'type' => 'text'],
         ]],
         ['title' => '04 常见问题', 'note' => '问答也会作为 FAQ 结构化数据提供给搜索引擎。', 'fields' => [
@@ -223,17 +220,6 @@ function bl_content_schema(string $page): array
         ]],
         $family('loader', '滑移装载机', 'images/range-loader-studio.webp'),
         $family('dumper', '迷你翻斗车', 'images/range-dumper-studio.webp'),
-        ['title' => '简介', 'fields' => [
-            ['key' => 'intro.eyebrow', 'label' => '小标题', 'type' => 'text'],
-            ['key' => 'intro.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
-            ['key' => 'intro.text', 'label' => '介绍', 'type' => 'textarea'],
-            ['key' => 'intro.link', 'label' => '链接文字', 'type' => 'text'],
-            ['key' => 'intro.facts', 'label' => '公司数据', 'type' => 'list', 'add' => '添加一项', 'summary' => ['value', 'unit', 'label'], 'fields' => [
-                'value' => ['label' => '数字', 'type' => 'text'],
-                'unit' => ['label' => '单位', 'type' => 'text', 'help' => $optional],
-                'label' => ['label' => '说明', 'type' => 'text'],
-            ]],
-        ]],
         ['title' => '01 产品系列', 'fields' => [
             ['key' => 'range.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'range.title', 'label' => '标题', 'type' => 'heading', 'help' => '最后的句号显示为蓝色。'],
@@ -254,6 +240,11 @@ function bl_content_schema(string $page): array
             ['key' => 'approach.image', 'group' => '照片', 'label' => '图片', 'type' => 'image', 'preview' => 'images/about/people-1600.webp', 'help' => $image],
             ['key' => 'approach.alt', 'group' => '照片', 'label' => '替代文字', 'type' => 'text', 'help' => $alt],
             ['key' => 'approach.caption', 'group' => '照片', 'label' => '图片说明', 'type' => 'text'],
+            ['key' => 'approach.facts', 'group' => '公司数据', 'type' => 'list', 'add' => '添加一项', 'summary' => ['value', 'unit', 'label'], 'fields' => [
+                'value' => ['label' => '数字', 'type' => 'text'],
+                'unit' => ['label' => '单位', 'type' => 'text', 'help' => $optional],
+                'label' => ['label' => '说明', 'type' => 'text'],
+            ]],
             ['key' => 'approach.steps', 'group' => '三步', 'type' => 'list', 'add' => '添加一步', 'summary' => ['title'], 'fields' => [
                 'title' => ['label' => '标题', 'type' => 'text'],
                 'text' => ['label' => '说明', 'type' => 'rich', 'help' => $rich],

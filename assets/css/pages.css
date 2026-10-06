@@ -123,17 +123,29 @@
 .bl-site .bl-contact-form-panel .bl-inquiry-form input:not([type=radio]):focus,.bl-site .bl-contact-form-panel .bl-inquiry-form textarea:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 1px var(--blue)}
 .bl-site .bl-contact-form-panel .bl-message-label{margin-top:clamp(19px,calc(14.7px + 0.64vw),28px)}
 .bl-site .bl-contact-form-panel .bl-form-bottom{margin-top:clamp(20px,1.6vw,36px)}
-/* Company band: address, hours and business contact in one dark line-up. */
-.bl-site .bl-contact-company{background:var(--ink);color:var(--white)}
-.bl-site .bl-contact-company-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:clamp(32px,4vw,110px);padding-top:clamp(40px,3.2vw,84px)}
-.bl-site .bl-contact-company .bl-eyebrow{font-size:var(--fs-micro);color:#8fa9bb;margin-bottom:18px}
-.bl-site .bl-contact-company h2{font:600 var(--fs-h5)/1.15 var(--display);margin-bottom:16px}
-.bl-site .bl-contact-company address,.bl-site .bl-contact-company-grid p:not(.bl-eyebrow){font-size:var(--fs-small);line-height:1.9;font-style:normal;color:#b7cbd8}
-.bl-site .bl-contact-company-link{display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:var(--fs-body);color:var(--white)}
-.bl-site .bl-contact-company-link .bl-icon{filter:invert(1);width:16px;height:16px}
-.bl-site .bl-contact-company-link:hover{text-decoration:underline;text-underline-offset:4px}
-.bl-site .bl-contact-company-note{margin-top:clamp(32px,2.6vw,64px);padding:clamp(20px,1.5vw,32px) 0 clamp(28px,2.2vw,56px);border-top:1px solid #2b4456;font-size:var(--fs-label);line-height:1.8;color:#91aabb}
-.bl-site .bl-contact-company-note a{color:var(--white);text-decoration:underline;text-underline-offset:4px}
+/* Factory visit: an actual loader workshop photograph paired with practical arrival information. */
+.bl-site .bl-contact-visit{padding-block:var(--sp-section);border-top:1px solid var(--line);background:#f8f9f5}
+.bl-site .bl-contact-visit-heading{margin-bottom:clamp(32px,3vw,64px)}
+.bl-site .bl-contact-visit-heading h2{margin-top:20px;font:600 clamp(44px,5.2vw,112px)/.95 var(--display);letter-spacing:-.015em}
+.bl-site .bl-contact-visit-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(32px,4vw,96px);align-items:start}
+.bl-site .bl-contact-visit-photo{margin:0;min-width:0}
+.bl-site .bl-contact-visit-photo img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover}
+.bl-site .bl-contact-visit-photo figcaption{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px;padding-block:16px;border-bottom:1px solid var(--line);font-size:var(--fs-micro);letter-spacing:.05em}
+.bl-site .bl-contact-visit-photo figcaption span{color:var(--muted);letter-spacing:0}
+.bl-site .bl-contact-visit-info{min-width:0}
+.bl-site .bl-contact-visit-info>.bl-eyebrow{color:var(--blue)}
+.bl-site .bl-contact-visit-info h3{font:600 clamp(32px,3vw,64px)/1.05 var(--display);margin:18px 0}
+.bl-site .bl-contact-visit-lede{font-size:var(--fs-body);line-height:1.75;color:var(--muted);max-width:40em}
+.bl-site .bl-contact-visit-details{margin:28px 0 0}
+.bl-site .bl-contact-visit-details>div{padding-block:20px;border-top:1px solid var(--line)}
+.bl-site .bl-contact-visit-details dt{font-size:var(--fs-micro);font-weight:700;letter-spacing:.08em;margin-bottom:10px}
+.bl-site .bl-contact-visit-details dd{margin:0;font-size:var(--fs-small);line-height:1.8}
+.bl-site .bl-contact-visit-details strong{display:block;font-weight:600}
+.bl-site .bl-contact-visit-details address{font-style:normal;color:var(--muted)}
+.bl-site .bl-contact-visit-details dd>span{display:block;color:var(--muted)}
+.bl-site .bl-contact-visit-actions{display:flex;align-items:center;flex-wrap:wrap;gap:20px 28px;margin-top:12px}
+.bl-site .bl-contact-visit-business{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px;margin-top:clamp(40px,4vw,80px);padding-top:28px;border-top:1px solid var(--line)}
+.bl-site .bl-contact-visit-business p:not(.bl-eyebrow){margin-top:10px;font-size:var(--fs-small);color:var(--muted)}
 /* The quick-contact stack repeats this page and would sit on the form. */
 .bl-site.bl-page-contact .bl-side-contact{display:none}
 .bl-site .bl-privacy-content{max-width:850px;margin:auto;padding:0 30px 80px}
@@ -275,7 +287,7 @@
 .bl-site .bl-product-section-nav>a:hover{color:#7aa4ff}
 
 /* ---------- Persistent quick-contact stack: icon-only, labels fly out on hover ---------- */
-.bl-site .bl-side-contact{position:fixed;right:clamp(16px,1.2vw,32px);bottom:clamp(16px,1.2vw,32px);z-index:15;display:flex;flex-direction:column;gap:6px}
+.bl-site .bl-side-contact{position:fixed;right:clamp(16px,1.2vw,32px);top:50%;transform:translateY(-50%);z-index:15;display:flex;flex-direction:column;gap:6px}
 .bl-site .bl-side-contact a{position:relative;display:grid;place-items:center;width:clamp(48px,2.4vw,60px);height:clamp(48px,2.4vw,60px);background:var(--ink);color:#e6edf2;border:1px solid #ffffff1f;box-shadow:0 8px 24px #081c2b33;transition:background .2s,color .2s,transform .2s}
 .bl-site .bl-side-contact a:hover{background:var(--blue);color:white;transform:translateX(-2px)}
 .bl-site .bl-side-contact a:first-child:hover{background:#25d366;color:#04130a}

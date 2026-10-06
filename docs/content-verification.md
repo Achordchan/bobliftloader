@@ -6,7 +6,7 @@
 
 用户明确说明新站是 BOB-LIFT 公司旗下的事业站。公司名称、地址、联系方式使用 `https://www.boblift.com/aboutus.html` 和 `https://www.boblift.com/contactus.html` 核对。
 
-- 对外身份：Xuzhou BOB-LIFT Construction Machinery Co., Ltd. 的 compact equipment business website。
+- 对外身份：Xuzhou BOB-LIFT Construction Machinery Co., Ltd. 的 loader equipment business website。
 - 公司介绍、全站页脚、联系页都明确显示这一身份，并提供通往主站的普通可抓取链接。
 - JSON-LD 使用同一个公司 Organization 标识 `https://www.boblift.com/#organization` 作为本站 WebSite 的 publisher。没有虚构另一家法人或把事业站写成独立子公司。
 - 同公司另一产品站 `https://www.bobliftcrane.com/` 用作 sameAs 及装载机产品来源。

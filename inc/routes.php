@@ -11,14 +11,14 @@ function bl_resolve_route(): array
     if ($path === '//') $path = '/';
     $pages = [
         '/' => ['home', bl_editable('home')['seo']['title'], bl_editable('home')['seo']['description']],
-        '/about/' => ['about', 'About BOB-LIFT Compact Equipment', 'BOB-LIFT Compact Equipment is the mini skid steer loader and mini dumper line of Xuzhou BOB-LIFT Construction Machinery Co., Ltd., built to order at its factory in Xuzhou.'],
+        '/about/' => ['about', 'About BOB-LIFT Loader', 'BOB-LIFT Loader is the mini skid steer loader and mini dumper line of Xuzhou BOB-LIFT Construction Machinery Co., Ltd., built to order at its factory in Xuzhou.'],
         '/products/' => ['products', 'Skid Steer Loaders & Mini Dumpers', 'Explore BOB-LIFT compact equipment. Compare skid steer loader and mini dumper specifications side by side, then discuss your configuration with our team.'],
         '/products/skid-steer-loaders/' => ['products', 'Skid Steer Loaders', 'Compare BOB-LIFT mini skid steer loaders rated from 200 to 500 kg: stand-on, tracked and wheeled seated models with published specifications.'],
         '/products/mini-dumpers/' => ['products', 'Mini Dumpers | 0.5–5 Ton Range', 'Browse BOB-LIFT mini dumpers rated from 0.5 to 5 tonnes, including tracked and mixer models. View model specifications, bucket capacities and enquiry options.'],
         '/applications/' => ['applications', bl_editable('applications')['seo']['title'], bl_editable('applications')['seo']['description']],
         '/support/' => ['support', bl_editable('support')['seo']['title'], bl_editable('support')['seo']['description']],
         '/news/' => ['news', 'BOB-LIFT News & Company Updates', 'Read company and exhibition updates from BOB-LIFT, with links to original announcements on the main BOB-LIFT website.'],
-        '/contact/' => ['contact', 'Contact BOB-LIFT Compact Equipment', 'Contact BOB-LIFT for skid steer loaders, mini dumpers, specifications and quotations. Reach our Xuzhou team by email, phone or WhatsApp.'],
+        '/contact/' => ['contact', 'Contact BOB-LIFT Loader', 'Contact BOB-LIFT for skid steer loaders, mini dumpers, specifications and quotations. Reach our Xuzhou team by email, phone or WhatsApp.'],
         '/privacy/' => ['privacy', 'Privacy & Enquiry Information', 'How this BOB-LIFT website handles enquiry information and email drafts.'],
     ];
     $route = ['type' => '404', 'title' => 'Page not found', 'description' => 'The requested page could not be found.', 'path' => $path, 'status' => 404, 'category' => '', 'record' => null];

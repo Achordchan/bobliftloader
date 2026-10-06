@@ -78,7 +78,7 @@ fresh_install=0
 if ! wpcli core is-installed >/dev/null 2>&1; then
     fresh_install=1
     admin_password="$(php -r 'echo bin2hex(random_bytes(10));')"
-    wpcli core install --url="${SITE_URL}" --title="BOB-LIFT Compact Equipment" \
+    wpcli core install --url="${SITE_URL}" --title="BOB-LIFT Loader" \
         --admin_user="${ADMIN_USER}" --admin_password="${admin_password}" --admin_email="${ADMIN_EMAIL}" --skip-email
     umask 077
     printf 'WordPress admin (local only)\nURL: %s/wp-admin/\nUser: %s\nPassword: %s\n' \

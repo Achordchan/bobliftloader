@@ -53,13 +53,29 @@ if ($selectedFamily === 'service') $prefillMessage = "Model:\nSerial number:\nWh
     </div>
   </div>
 </section>
-<section class="bl-contact-company" aria-label="Company">
-  <div class="bl-shell">
-    <div class="bl-contact-company-grid">
-      <div><p class="bl-eyebrow">OUR COMPANY</p><h2>Xuzhou BOB-LIFT<br>Construction Machinery Co., Ltd.</h2><address>No. 79, Zone B, Jingluotuo Industrial Park,<br>Yunlong District, Xuzhou, Jiangsu, China</address></div>
-      <div><p class="bl-eyebrow">OFFICE HOURS</p><p>Monday–Friday<br>08:30–18:00<br>China Standard Time (UTC+8)</p></div>
-      <div><p class="bl-eyebrow">BUSINESS COOPERATION</p><a class="bl-contact-company-link" href="mailto:business@boblift.com">business@boblift.com <?= bl_icon('arrow-up-right') ?></a><a class="bl-contact-company-link" href="https://www.boblift.com/contactus.html" target="_blank" rel="noopener">Main company contact page <?= bl_icon('arrow-up-right') ?></a></div>
+<section class="bl-contact-visit bl-shell" id="visit" aria-labelledby="visit-title">
+  <div class="bl-contact-visit-heading"><p class="bl-eyebrow">MEET US IN XUZHOU</p><h2 id="visit-title">COME SEE<br><span class="bl-blue-text">WHERE IT STARTS.</span></h2></div>
+  <div class="bl-contact-visit-grid">
+    <figure class="bl-contact-visit-photo">
+      <img src="<?= bl_escape(bl_asset('images/about/hall-1200.webp')) ?>" srcset="<?= bl_escape(bl_asset('images/about/hall-1200.webp')) ?> 1200w, <?= bl_escape(bl_asset('images/about/hall-2560.webp')) ?> 2560w" sizes="(max-width: 900px) 100vw, 55vw" width="2560" height="1707" loading="lazy" alt="Finished skid steer loaders at the BOB-LIFT factory in Xuzhou">
+      <figcaption>BOB-LIFT · XUZHOU, CHINA<span>Inside our skid steer loader workshop</span></figcaption>
+    </figure>
+    <div class="bl-contact-visit-info">
+      <p class="bl-eyebrow">PLAN YOUR VISIT</p>
+      <h3>A conversation.<br>A closer look.</h3>
+      <p class="bl-contact-visit-lede">Contact our team with your preferred dates and the equipment you would like to discuss. Please confirm your appointment and arrival details before travelling.</p>
+      <dl class="bl-contact-visit-details">
+        <div><dt>COMPANY &amp; ADDRESS</dt><dd><strong>Xuzhou BOB-LIFT Construction Machinery Co., Ltd.</strong><address>No. 79, Zone B, Jingluotuo Industrial Park,<br>Yunlong District, Xuzhou, Jiangsu, China</address></dd></div>
+        <div><dt>OFFICE HOURS</dt><dd>Monday–Friday · 08:30–18:00<span>China Standard Time (UTC+8)</span></dd></div>
+      </dl>
+      <div class="bl-contact-visit-actions">
+        <a class="bl-button bl-button-blue" href="mailto:info@boblift.com?subject=<?= rawurlencode('Factory visit enquiry') ?>&amp;body=<?= rawurlencode("Preferred visit dates:
+Number of visitors:
+Equipment of interest:
+") ?>">Arrange a visit <?= bl_icon('arrow-up-right') ?></a>
+        <a class="bl-text-link" href="https://www.google.com/maps/search/?api=1&amp;query=<?= rawurlencode('No. 79, Zone B, Jingluotuo Industrial Park, Yunlong District, Xuzhou, Jiangsu, China') ?>" target="_blank" rel="noopener">View address on map <?= bl_icon('arrow-up-right') ?></a>
+      </div>
     </div>
-    <p class="bl-contact-company-note">This compact equipment website is operated for <strong>Xuzhou BOB-LIFT Construction Machinery Co., Ltd.</strong> Explore the wider company at <a href="https://www.boblift.com/" target="_blank" rel="noopener">boblift.com</a>.</p>
   </div>
+  <div class="bl-contact-visit-business"><div><p class="bl-eyebrow">BUSINESS COOPERATION</p><p>For distribution and business partnerships</p></div><a class="bl-text-link" href="mailto:business@boblift.com">business@boblift.com <?= bl_icon('arrow-up-right') ?></a></div>
 </section>

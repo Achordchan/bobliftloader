@@ -4,13 +4,6 @@ $companyFacts = [
     ['label' => 'Factory', 'value' => 'Xuzhou', 'unit' => 'China'],
     ['label' => 'Factory area', 'value' => '37,000', 'unit' => 'm²'],
     ['label' => 'Countries & regions served', 'value' => '200+', 'unit' => ''],
-    ['label' => 'Quality system', 'value' => 'ISO 9001', 'unit' => ''],
-];
-$certificates = [
-    ['file' => 'cert-iso9001', 'label' => 'ISO 9001 quality management'],
-    ['file' => 'cert-ce-1', 'label' => 'CE certification'],
-    ['file' => 'cert-ce-2', 'label' => 'CE certification'],
-    ['file' => 'cert-eac', 'label' => 'EAC certification'],
 ];
 $families = [];
 foreach (['skid-steer-loaders' => 'Mini skid steer loaders', 'mini-dumpers' => 'Mini dumpers'] as $key => $label) {
@@ -22,11 +15,11 @@ foreach (['skid-steer-loaders' => 'Mini skid steer loaders', 'mini-dumpers' => '
     <?php bl_breadcrumbs([['label' => 'About us']]); ?>
     <div class="bl-about-hero-grid">
       <div>
-        <p class="bl-eyebrow"><span class="bl-status-dot"></span> ABOUT US / COMPACT EQUIPMENT</p>
+        <p class="bl-eyebrow"><span class="bl-status-dot"></span> ABOUT US / LOADER</p>
         <h1 id="about-title"><span>SMALL MACHINES.</span><span class="bl-outline-text">BACKED BY</span><span class="bl-blue-text">BOB-LIFT.</span></h1>
       </div>
       <div class="bl-about-hero-side">
-        <p>We are the compact equipment line of Xuzhou BOB-LIFT Construction Machinery Co., Ltd.: mini skid steer loaders and mini dumpers, each one configured to its order.</p>
+        <p>We are the loader equipment line of Xuzhou BOB-LIFT Construction Machinery Co., Ltd.: mini skid steer loaders and mini dumpers, each one configured to its order.</p>
         <a class="bl-text-link" href="#how-we-fit">How we fit into BOB-LIFT <?= bl_icon('arrow-down') ?></a>
       </div>
     </div>
@@ -57,7 +50,7 @@ foreach (['skid-steer-loaders' => 'Mini skid steer loaders', 'mini-dumpers' => '
         </div>
         <ul class="bl-tree-branches">
           <li class="bl-tree-branch"><span>LIFTING EQUIPMENT</span><h3>CRANES</h3><p>Truck-mounted, marine and pickup cranes.</p></li>
-          <li class="bl-tree-branch bl-tree-here" aria-current="page"><span>COMPACT EQUIPMENT <small>YOU ARE HERE</small></span><h3>LOADERS &amp; DUMPERS</h3><p>The line this website is for: small machines, published specifications and a direct line to the team.</p><div class="bl-tree-here-links"><?php foreach ($families as $family): ?><a href="<?= bl_escape($family['url']) ?>"><b><?= $family['count'] ?></b> <?= bl_escape($family['label']) ?> <?= bl_icon('arrow-up-right') ?></a><?php endforeach; ?></div></li>
+          <li class="bl-tree-branch bl-tree-here" aria-current="page"><span>LOADER <small>YOU ARE HERE</small></span><h3>LOADERS &amp; DUMPERS</h3><p>The line this website is for: small machines, published specifications and a direct line to the team.</p><div class="bl-tree-here-links"><?php foreach ($families as $family): ?><a href="<?= bl_escape($family['url']) ?>"><b><?= $family['count'] ?></b> <?= bl_escape($family['label']) ?> <?= bl_icon('arrow-up-right') ?></a><?php endforeach; ?></div></li>
         </ul>
       </li>
     </ul>
@@ -83,8 +76,4 @@ foreach (['skid-steer-loaders' => 'Mini skid steer loaders', 'mini-dumpers' => '
   </div>
 </section>
 
-<section class="bl-about-certs bl-shell" id="certificates" aria-labelledby="certificates-title">
-  <div class="bl-about-certs-head bl-reveal"><p class="bl-eyebrow">03 / PAPERWORK</p><h2 id="certificates-title">CERTIFIED<br>TO EXPORT.</h2><p>Certificates held by Xuzhou BOB-LIFT Construction Machinery Co., Ltd. Ask which documents cover your model, and request current copies with your enquiry.</p></div>
-  <ul class="bl-about-cert-list"><?php foreach ($certificates as $cert): ?><li class="bl-reveal"><img src="<?= bl_escape(bl_asset('images/company/' . $cert['file'] . '.webp')) ?>" alt="<?= bl_escape($cert['label']) ?> certificate" width="452" height="640" loading="lazy"><span><?= bl_escape($cert['label']) ?></span></li><?php endforeach; ?></ul>
-</section>
 <?php require __DIR__ . '/../partials/page-cta.php'; ?>

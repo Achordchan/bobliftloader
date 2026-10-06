@@ -13,7 +13,7 @@ function bl_structured_data(array $route): array
         'address' => ['@type' => 'PostalAddress', 'streetAddress' => 'No. 79, Zone B, Jingluotuo Industrial Park, Yunlong District', 'addressLocality' => 'Xuzhou', 'addressRegion' => 'Jiangsu', 'addressCountry' => 'CN'],
     ];
     $graph = [$organization,
-        ['@type' => 'WebSite', '@id' => $base . '/#website', 'url' => $base . '/', 'name' => 'BOB-LIFT Compact Equipment', 'description' => 'The compact equipment business website of Xuzhou BOB-LIFT Construction Machinery Co., Ltd.', 'publisher' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
+        ['@type' => 'WebSite', '@id' => $base . '/#website', 'url' => $base . '/', 'name' => 'BOB-LIFT Loader', 'description' => 'The loader equipment business website of Xuzhou BOB-LIFT Construction Machinery Co., Ltd.', 'publisher' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
         ['@type' => $route['type'] === 'about' ? 'AboutPage' : ($route['type'] === 'contact' ? 'ContactPage' : 'WebPage'), '@id' => $base . $route['path'] . '#webpage', 'url' => $base . $route['path'], 'name' => $route['title'], 'description' => $route['description'], 'isPartOf' => ['@id' => $base . '/#website'], 'about' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
     ];
     if ($route['type'] === 'product' && $route['record']['model'] !== '') {
@@ -79,7 +79,16 @@ function bl_render_seo(array $route): void
     echo '<meta name="description" content="' . bl_escape($route['description']) . '">';
     echo '<meta name="robots" content="' . $robots . '">';
     if ($route['status'] === 200 && empty($route['preview'])) echo '<link rel="canonical" href="' . bl_escape($canonical) . '">';
-    foreach (['og:type' => in_array($route['type'], ['article', 'application_case'], true) ? 'article' : 'website', 'og:title' => $title, 'og:description' => $route['description'], 'og:url' => $canonical, 'og:image' => $image, 'og:site_name' => 'BOB-LIFT Compact Equipment', 'og:locale' => 'en_US'] as $key => $value) echo '<meta property="' . $key . '" content="' . bl_escape($value) . '">';
+    foreach (['og:type' => in_array($route['type'], ['article', 'application_case'], true) ? 'article' : 'website', 'og:title' => $title, 'og:description' => $route['description'], 'og:url' => $canonical, 'og:image' => $image, 'og:site_name' => 'BOB-LIFT Loader', 'og:locale' => 'en_US'] as $key => $value) echo '<meta property="' . $key . '" content="' . bl_escape($value) . '">';
     echo '<meta name="twitter:card" content="summary_large_image">';
     if ($route['status'] === 200 && empty($route['preview'])) echo '<script type="application/ld+json">' . json_encode(bl_structured_data($route), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>';
+}
+
+/** robots.txt without the blocks that shut named AI crawlers out; the rules for every other agent stay as they are. */
+function bl_allow_ai_crawlers(string $robots): string
+{
+    $bots = 'GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|Claude-SearchBot|anthropic-ai|Google-Extended|Applebot-Extended|PerplexityBot|Perplexity-User|meta-externalagent|Bytespider|CCBot|Amazonbot|cohere-ai|Diffbot|FacebookBot|ImagesiftBot|Omgilibot|YouBot';
+    $robots = preg_replace('/^User-agent:[ \t]*(?:' . $bots . ')[ \t]*\R(?:(?:Disallow|Allow|Crawl-delay):[^\r\n]*\R?)*\R*/mi', '', $robots) ?? $robots;
+    $robots = preg_replace('/^#[^\r\n]*AI crawlers[^\r\n]*\R*/mi', '', $robots) ?? $robots;
+    return rtrim($robots) . "\n";
 }

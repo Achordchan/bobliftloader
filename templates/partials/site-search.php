@@ -30,7 +30,7 @@ foreach ($applications as $app) {
 foreach (bl_application_cases() as $case) {
     $searchIndex[] = ['kind' => 'Application', 'title' => $case['title'], 'text' => $case['excerpt'], 'url' => bl_case_url($case)];
 }
-foreach ([['/about/', 'About us', 'Company, factory in Xuzhou, certificates'], ['/support/', 'Buying & support', 'Ordering, lead time, shipping, warranty, spare parts, downloads, FAQ'], ['/products/skid-steer-loaders/#attachments', 'Loader attachments', 'Pallet forks, augers, breakers, sweepers and more'], ['/contact/', 'Contact', 'Enquiries, quotations, parts and service'], ['/news/', 'News & updates', 'Company stories and exhibitions']] as [$path, $title, $text]) {
+foreach ([['/about/', 'About us', 'Company and factory in Xuzhou'], ['/support/', 'Buying & support', 'Ordering, lead time, shipping, warranty, spare parts, downloads, FAQ'], ['/products/skid-steer-loaders/#attachments', 'Loader attachments', 'Pallet forks, augers, breakers, sweepers and more'], ['/contact/', 'Contact', 'Enquiries, quotations, parts and service'], ['/news/', 'News & updates', 'Company stories and exhibitions']] as [$path, $title, $text]) {
     $searchIndex[] = ['kind' => 'Page', 'title' => $title, 'text' => $text, 'url' => bl_url($path)];
 }
 foreach (bl_articles() as $article) {

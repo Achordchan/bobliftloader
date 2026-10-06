@@ -33,35 +33,17 @@
 .bl-site .bl-hero-tab[aria-pressed=true] i::after{transform:none}
 .bl-site .bl-hero[data-hero-playing] .bl-hero-tab[aria-pressed=true] i::after{animation:bl-hero-progress var(--hero-interval,7s) linear both}
 /* Hovering the hero, or focus on its links, holds the line; focus left on the switch itself does not, so pressing Play resumes at once. */
-.bl-site .bl-hero[data-hero-playing]:is(:hover,:has(.bl-hero-content :focus,.bl-hero-entries :focus)) .bl-hero-tab i::after{animation-play-state:paused}
+.bl-site .bl-hero[data-hero-playing]:is(:hover,:has(.bl-hero-content :focus,.bl-hero-scroll :focus)) .bl-hero-tab i::after{animation-play-state:paused}
 @keyframes bl-hero-progress{from{transform:scaleX(0)}to{transform:none}}
 .bl-site .bl-hero-pause{align-self:center;display:grid;place-items:center;width:32px;height:32px;border:1px solid #ffffff40;border-radius:50%;background:#081c2b59;color:white;cursor:pointer;transition:border-color .25s,background .25s}
 .bl-site .bl-hero-pause:hover{border-color:#ffffffa6;background:#081c2b99}
 .bl-site .bl-hero-pause .bl-icon{grid-area:1/1;width:12px;height:12px;filter:invert(1)}
 .bl-site .bl-hero[data-hero-playing] .bl-hero-pause .bl-icon:last-child,.bl-site .bl-hero:not([data-hero-playing]) .bl-hero-pause .bl-icon:first-child{visibility:hidden}
-/* Two real entry cards for the two product families, replacing the old 8px text links. */
-.bl-site .bl-hero-entries{position:relative;z-index:1;width:100%;display:grid;grid-template-columns:1fr 1fr auto;gap:clamp(12px,1vw,24px);align-items:stretch;padding-bottom:clamp(24px,2vw,48px)}
-.bl-site .bl-hero-entry{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:clamp(16px,1.2vw,28px);padding:clamp(12px,.9vw,20px) clamp(18px,1.4vw,32px) clamp(12px,.9vw,20px) clamp(12px,.9vw,20px);background:#0d2438e6;border:1px solid #ffffff1f;backdrop-filter:blur(10px);transition:background .25s,border-color .25s;max-width:560px}
-.bl-site .bl-hero-entry:hover{background:#14304ae6;border-color:#ffffff40}
-.bl-site .bl-hero-entry>img:not(.bl-icon){width:clamp(72px,5vw,124px);aspect-ratio:1.2;object-fit:contain;background:#f1f2ed;padding:6px}
-.bl-site .bl-hero-entry>span{display:flex;flex-direction:column;gap:6px;min-width:0}
-.bl-site .bl-hero-entry small{font-size:var(--fs-micro);letter-spacing:.12em;text-transform:uppercase;color:#9fb6c8;font-weight:700}
-.bl-site .bl-hero-entry strong{font-family:var(--display);font-size:var(--fs-h4);font-weight:600;line-height:1;color:white}
-.bl-site .bl-hero-entry>.bl-icon{filter:invert(1);transition:transform .25s}
-.bl-site .bl-hero-entry:hover>.bl-icon{transform:translate(3px,-3px)}
-.bl-site .bl-scroll-link{display:flex;gap:14px;align-items:center;align-self:center;font-size:var(--fs-micro);letter-spacing:.12em;font-weight:700;color:#c7d3dc;white-space:nowrap;padding-left:clamp(12px,1.5vw,40px)}
+/* A compact scroll cue leads from the hero to the equipment range. */
+.bl-site .bl-hero-scroll{position:relative;z-index:1;width:100%;display:flex;justify-content:flex-end;flex-shrink:0;padding-bottom:clamp(24px,2vw,48px)}
+.bl-site .bl-scroll-link{display:flex;gap:14px;align-items:center;align-self:center;font-size:var(--fs-micro);letter-spacing:.12em;font-weight:700;color:#c7d3dc;white-space:nowrap;min-height:44px}
 .bl-site .bl-scroll-link .bl-icon{filter:invert(1)}
 .bl-site .bl-scroll-link:hover{color:white}
-
-/* ---------- Intro ---------- */
-/* Intro: an editorial statement on the left, company facts set like a spec plate on the right. */
-.bl-site .bl-intro{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);column-gap:clamp(48px,6vw,160px);align-items:start;padding-top:var(--sp-section);padding-bottom:calc(var(--sp-section) * 1.12)}
-.bl-site .bl-intro>.bl-eyebrow{grid-column:1/-1;margin-bottom:clamp(28px,2.4vw,60px);font-size:var(--fs-label)}
-.bl-site .bl-intro>.bl-eyebrow .bl-status-dot{background:var(--blue)}
-.bl-site .bl-intro h2{font:600 clamp(60px,6.4vw,150px)/.9 var(--display);letter-spacing:-.015em}
-.bl-site .bl-intro h2 .bl-blue-text{color:var(--blue)}
-.bl-site .bl-intro-copy{margin-top:clamp(28px,2.3vw,56px);max-width:31em;font-size:var(--fs-lead);line-height:1.7;color:var(--muted);text-wrap:pretty}
-.bl-site .bl-intro-copy .bl-text-link{margin-top:clamp(22px,1.6vw,36px);color:var(--ink)}
 
 /* ---------- The Range: both families side by side on studio backdrops ---------- */
 .bl-site .bl-range{padding-top:var(--sp-block);background:#f8f9f5}
@@ -125,6 +107,11 @@
 .bl-site .bl-approach-photo{position:relative;margin:0;aspect-ratio:21/9;overflow:hidden;background:var(--ink)}
 .bl-site .bl-approach-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 40%}
 .bl-site .bl-approach-photo figcaption{position:absolute;left:clamp(16px,1.4vw,32px);bottom:clamp(16px,1.4vw,32px);padding:8px 12px;background:#081c2bb3;color:#dbe4ea;font-size:var(--fs-micro);font-weight:600;letter-spacing:.6px;backdrop-filter:blur(6px)}
+.bl-site .bl-approach-facts{display:grid;grid-template-columns:repeat(var(--facts,3),minmax(0,1fr));gap:clamp(28px,3vw,80px);margin:clamp(40px,3vw,72px) 0 0;padding:0;list-style:none}
+.bl-site .bl-approach-facts li{display:flex;flex-direction:column;gap:clamp(10px,.8vw,18px);padding-top:clamp(18px,1.3vw,30px);border-top:1px solid var(--ink)}
+.bl-site .bl-approach-facts strong{font:700 clamp(48px,4.6vw,112px)/.86 var(--display);letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bl-site .bl-approach-facts strong small{font-size:.4em;font-weight:600;margin-left:.14em;vertical-align:top;line-height:1.3}
+.bl-site .bl-approach-facts span{max-width:16em;font-size:var(--fs-small);line-height:1.5;color:var(--muted)}
 .bl-site .bl-approach-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(28px,3vw,80px);margin:clamp(40px,3vw,72px) 0 0;padding:0;list-style:none}
 .bl-site .bl-approach-steps li{padding-top:clamp(18px,1.3vw,30px);border-top:1px solid var(--ink)}
 .bl-site .bl-approach-steps span{font-size:var(--fs-small);font-weight:700;color:var(--blue)}
@@ -167,25 +154,6 @@
 .bl-site .bl-form-bottom p{font-size:var(--fs-micro);color:#576a7b;line-height:1.7}
 @keyframes bl-panel-in{from{opacity:.3;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 
-/* The rows share the statement's height, so the last rule lands on the link's underline. */
-.bl-site .bl-intro-facts{position:relative;align-self:stretch;display:grid;grid-template-rows:repeat(3,minmax(0,1fr));margin-top:clamp(10px,.9vw,22px)}
-.bl-site .bl-intro-facts::before,.bl-site .bl-intro-facts li::after{content:'';position:absolute;left:0;right:0;height:1px;transform-origin:left}
-.bl-site .bl-intro-facts::before{top:0;background:var(--ink)}
-.bl-site .bl-intro-facts li{position:relative;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:end;gap:clamp(16px,1.4vw,36px);padding-block:clamp(18px,1.2vw,28px)}
-.bl-site .bl-intro-facts li::after{bottom:0;background:var(--line)}
-.bl-site .bl-intro-facts strong{font:700 clamp(44px,4.4vw,112px)/.84 var(--display);letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
-.bl-site .bl-intro-facts strong small{font-size:.4em;font-weight:600;margin-left:.14em;vertical-align:top;line-height:1.3}
-.bl-site .bl-intro-facts span{max-width:15em;font-size:var(--fs-small);line-height:1.45;color:var(--muted)}
-/* Rules draw left to right, then each fact settles in, one after another. */
-.bl-site.bl-motion .bl-intro-facts.bl-reveal{opacity:1;transform:none}
-.bl-site.bl-motion .bl-intro-facts::before,.bl-site.bl-motion .bl-intro-facts li::after{transform:scaleX(0);transition:transform 1.1s cubic-bezier(.2,.6,.2,1)}
-.bl-site.bl-motion .bl-intro-facts li>*{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .8s cubic-bezier(.2,.6,.2,1)}
-.bl-site.bl-motion .bl-intro-facts.bl-visible::before,.bl-site.bl-motion .bl-intro-facts.bl-visible li::after,.bl-site.bl-motion .bl-intro-facts.bl-visible li>*{opacity:1;transform:none}
-.bl-site.bl-motion .bl-intro-facts li:nth-child(2)::after,.bl-site.bl-motion .bl-intro-facts li:nth-child(2)>*{transition-delay:.12s}
-.bl-site.bl-motion .bl-intro-facts li:nth-child(3)::after,.bl-site.bl-motion .bl-intro-facts li:nth-child(3)>*{transition-delay:.24s}
-.bl-site.bl-motion .bl-intro-facts li>span{transition-delay:.08s}
-.bl-site.bl-motion .bl-intro-facts li:nth-child(2)>span{transition-delay:.2s}
-.bl-site.bl-motion .bl-intro-facts li:nth-child(3)>span{transition-delay:.32s}
 /* The enquiry form sent through Contact Form 7 looks like the theme's own form above. */
 .bl-site .bl-inquiry-form .hidden-fields-container{display:none}
 .bl-site .bl-inquiry-form .wpcf7-form-control-wrap{display:block;color:var(--ink)}
