@@ -62,7 +62,7 @@ class SupportTests(unittest.TestCase):
     def test_attachments_sit_on_the_loader_page_only(self):
         _, html, _ = fetch('/products/skid-steer-loaders/')
         section = re.search(r'<section class="bl-attachments.*?</section>', html, re.S).group(0)
-        images = re.findall(r'src="(/assets/images/attachments/[a-z0-9-]+\.webp)"', section)
+        images = re.findall(r'src="(/assets/images/attachments/[a-z0-9-]+\.webp)\?ver=[0-9a-f]{8}"', section)
         self.assertEqual(len(images), 24)
         for image in images: self.assertEqual(fetch(image)[0], 200, image)
         self.assertIn('href="#attachments" data-section-link', html)

@@ -493,6 +493,15 @@ class WebsiteTests(unittest.TestCase):
                 self.assertEqual(response.status, 200, path)
                 self.assertTrue(response.headers.get_content_type().startswith('image/'), path)
 
+    def test_theme_images_carry_a_content_version(self):
+        # A redrawn scene keeps its file name, so the address has to change with the picture or browsers keep the old one for a year.
+        _, html, _ = fetch('/')
+        images = re.findall(r'src="([^"]*/assets/images/(?!icons/)[^"]+)"', html)
+        self.assertTrue(any('/app-transport.webp' in src for src in images), images)
+        # Only files that exist get a version, so a version also proves the image is there.
+        for src in images:
+            self.assertRegex(src, r'\?ver=[0-9a-f]{8}$', src)
+
     def test_styles_and_scripts_carry_a_version(self):
         _, html, _ = fetch('/products/mini-dumpers/')
         # The preview serves assets from /assets/, WordPress from /wp-content/themes/<theme>/assets/.

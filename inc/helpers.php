@@ -8,8 +8,25 @@ function bl_is_wordpress(): bool
 
 function bl_asset(string $path): string
 {
+    $path = ltrim($path, '/');
     $base = bl_is_wordpress() ? get_template_directory_uri() . '/assets/' : '/assets/';
-    return $base . ltrim($path, '/');
+    return $base . $path . (str_starts_with($path, 'images/') && !str_starts_with($path, 'images/icons/') ? bl_image_version($path) : '');
+}
+
+/* Theme images are served with a one-year cache under fixed names, so a redrawn image kept showing the old picture to returning visitors. Their URLs carry a short hash of the file's content: it changes only when the image does, not on every deploy. Site icons keep their plain addresses. */
+function bl_image_version(string $path): string
+{
+    static $versions = [];
+    if (isset($versions[$path])) return $versions[$path];
+    $file = __DIR__ . '/../assets/' . $path;
+    if (!is_file($file)) return $versions[$path] = '';
+    $key = md5($path . '|' . filemtime($file) . '|' . filesize($file));
+    $hash = function_exists('wp_cache_get') ? wp_cache_get($key, 'bl_image_version') : false;
+    if (!is_string($hash)) {
+        $hash = (string) hash_file('crc32b', $file);
+        if (function_exists('wp_cache_set')) wp_cache_set($key, $hash, 'bl_image_version', 86400);
+    }
+    return $versions[$path] = '?ver=' . $hash;
 }
 
 /* Stylesheets and scripts are served with a one-year cache, so their URLs carry the file's modification time to make browsers fetch each deployed change. */
