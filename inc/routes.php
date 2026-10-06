@@ -28,7 +28,7 @@ function bl_resolve_route(): array
         if ($type === 'products' && $path !== '/products/') $route['category'] = explode('/', trim($path, '/'))[1];
     } elseif (preg_match('~^/product/([a-z0-9-]+)/$~', $path, $matches)) {
         $product = bl_find_record(bl_products(), $matches[1]);
-        if ($product) $route = array_replace($route, ['type' => 'product', 'title' => $product['name'] . ($product['model'] ? ' | ' . $product['model'] : ''), 'description' => $product['excerpt'], 'record' => $product, 'status' => 200]);
+        if ($product) $route = array_replace($route, ['type' => 'product', 'title' => bl_product_page_title($product), 'description' => $product['excerpt'], 'record' => $product, 'status' => 200]);
     } elseif (preg_match('~^/news/([a-z0-9-]+)/$~', $path, $matches)) {
         $article = bl_find_record(bl_articles(), $matches[1]);
         if ($article) $route = array_replace($route, ['type' => 'article', 'title' => $article['title'], 'description' => $article['excerpt'], 'record' => $article, 'status' => 200]);

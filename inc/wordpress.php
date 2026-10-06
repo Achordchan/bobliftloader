@@ -127,7 +127,7 @@ function bl_wp_preview(): ?array
     $slug = $post->post_name ?: (string) $post->ID;
     if ($post->post_type === 'bl_product') {
         $record = bl_wp_product_record($post);
-        return ['type' => 'product', 'title' => $record['name'] . ($record['model'] ? ' | ' . $record['model'] : ''), 'record' => $record, 'path' => '/product/' . $slug . '/'];
+        return ['type' => 'product', 'title' => bl_product_page_title($record), 'record' => $record, 'path' => '/product/' . $slug . '/'];
     }
     if ($post->post_type === 'bl_news') {
         $record = bl_wp_article_record($post);
