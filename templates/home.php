@@ -21,7 +21,7 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
     $items = array_values(array_filter($allProducts, static fn($p) => $p['category'] === $cat));
     $loads = array_filter(array_column($items, 'load'));
     $caps = array_filter(array_column($items, 'capacity'));
-    $familyFacts[$key] = ['count' => count($items), 'short' => $loads ? (max($loads) < 1000 ? min($loads) . '–' . max($loads) . ' kg' : (min($loads) / 1000) . '–' . (max($loads) / 1000) . ' t') : '', 'load' => $loads ? number_format(min($loads)) . '–' . number_format(max($loads)) . ' kg' : '', 'capacity' => $caps ? min($caps) . '–' . max($caps) . ' m³' : '', 'url' => bl_url('/products/' . $cat . '/')];
+    $familyFacts[$key] = ['count' => count($items), 'load' => $loads ? number_format(min($loads)) . '–' . number_format(max($loads)) . ' kg' : '', 'capacity' => $caps ? min($caps) . '–' . max($caps) . ' m³' : '', 'url' => bl_url('/products/' . $cat . '/')];
 }
 ?>
 <section class="bl-hero" aria-labelledby="hero-title" data-hero>
@@ -52,22 +52,9 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
     </div>
   </div>
   <?php endif; ?>
-  <div class="bl-hero-entries bl-shell">
-    <?php foreach ($equipment as $key => $item): $facts = $familyFacts[$key]; ?>
-    <a class="bl-hero-entry" href="<?= bl_escape($facts['url']) ?>"><img src="<?= bl_escape($item['image']) ?>" alt="" width="240" height="200" loading="eager"><span><small><?= $item['index'] ?> / <?= $facts['count'] ?> models<?= $facts['short'] ? ' · ' . bl_escape($facts['short']) : '' ?></small><strong><?= bl_escape($item['label']) ?></strong></span><?= bl_icon('arrow-up-right') ?></a>
-    <?php endforeach; ?>
-    <a href="#intro" class="bl-scroll-link">SCROLL <?= bl_icon('arrow-down') ?></a>
+  <div class="bl-hero-scroll bl-shell">
+    <a href="#equipment" class="bl-scroll-link">SCROLL <?= bl_icon('arrow-down') ?></a>
   </div>
-</section>
-
-<section class="bl-intro bl-shell" id="intro" aria-labelledby="intro-title">
-  <p class="bl-eyebrow bl-reveal"><span class="bl-status-dot"></span> <?= bl_escape($content['intro']['eyebrow']) ?></p>
-  <div class="bl-intro-lead">
-    <h2 id="intro-title" class="bl-reveal"><?= bl_heading($content['intro']['title']) ?></h2>
-    <div class="bl-intro-copy bl-reveal"><p><?= bl_escape($content['intro']['text']) ?></p><a href="#equipment" class="bl-text-link"><?= bl_escape($content['intro']['link']) ?> <?= bl_icon('arrow-up-right') ?></a></div>
-  </div>
-  <?php /* Company-level facts only: model counts and load ranges already sit in the hero cards and The Range just below. */ ?>
-  <ul class="bl-intro-facts bl-reveal" aria-label="BOB-LIFT at a glance"><?php foreach ($content['intro']['facts'] as $fact): ?><li><strong><?= bl_escape($fact['value']) ?><?php if ($fact['unit'] !== ''): ?><small><?= bl_escape($fact['unit']) ?></small><?php endif; ?></strong><span><?= bl_escape($fact['label']) ?></span></li><?php endforeach; ?></ul>
 </section>
 
 <section class="bl-range" id="equipment" aria-labelledby="range-title">
@@ -108,6 +95,8 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
   </div>
   <?php /* A fixed landscape frame: the photograph keeps its shape at every width instead of stretching to a column height. */ ?>
   <figure class="bl-approach-photo bl-reveal"><img<?= bl_image_attributes($approachImage, '(max-width: 2240px) 100vw, 2240px') ?> alt="<?= bl_escape($approach['alt']) ?>" loading="lazy"><?php if ($approach['caption'] !== ''): ?><figcaption><?= bl_escape($approach['caption']) ?></figcaption><?php endif; ?></figure>
+  <?php /* Company-level facts only: model counts and load ranges already sit in The Range above. */ ?>
+  <?php if ($approach['facts']): ?><ul class="bl-approach-facts bl-reveal" style="--facts:<?= max(3, count($approach['facts'])) ?>" aria-label="BOB-LIFT at a glance"><?php foreach ($approach['facts'] as $fact): ?><li><strong><?= bl_escape($fact['value']) ?><?php if ($fact['unit'] !== ''): ?><small><?= bl_escape($fact['unit']) ?></small><?php endif; ?></strong><span><?= bl_escape($fact['label']) ?></span></li><?php endforeach; ?></ul><?php endif; ?>
   <ol class="bl-approach-steps">
     <?php foreach ($approach['steps'] as $i => $step): ?>
     <li class="bl-reveal"><span><?= sprintf('%02d', $i + 1) ?></span><h3><?= bl_escape($step['title']) ?></h3><p><?= bl_rich($step['text']) ?></p></li>

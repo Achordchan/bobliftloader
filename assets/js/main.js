@@ -47,11 +47,11 @@ document.addEventListener('focusin', (event) => {
 });
 window.matchMedia('(min-width: 601px)').addEventListener('change', () => closeNavigation());
 
-// Site switch: a <details>, so it opens without the script; this closes it on Escape, an outside click or focus leaving
-// it, and keeps it and the phone menu from being open together.
-const siteSwitch = header.querySelector('.bl-site-switch');
-if (siteSwitch) {
+// Site switch (header, and the footer's copy that opens upward): a <details>, so it opens without the script; this closes it
+// on Escape, an outside click or focus leaving it, and keeps the header one and the phone menu from being open together.
+document.querySelectorAll('.bl-site-switch').forEach((siteSwitch) => {
   const summary = siteSwitch.querySelector('summary');
+  const inHeader = header.contains(siteSwitch);
   const closeSwitch = (event) => { if (siteSwitch.open && !siteSwitch.contains(event.target)) siteSwitch.open = false; };
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape' || !siteSwitch.open) return;
@@ -60,9 +60,10 @@ if (siteSwitch) {
   });
   document.addEventListener('click', closeSwitch);
   document.addEventListener('focusin', closeSwitch);
+  if (!inHeader) return;
   siteSwitch.addEventListener('toggle', () => { if (siteSwitch.open) closeNavigation(); });
   menuToggle.addEventListener('click', () => { siteSwitch.open = false; });
-}
+});
 
 // The Equipment panel opens on hover or focus (CSS). Escape hides it without moving the pointer or focus; it comes back
 // on the next hover of Equipment, or the next time focus arrives there after leaving.

@@ -17,11 +17,11 @@ function bl_home_defaults(): array
     return [
         'seo' => [
             'title' => 'Small size. Serious capability.',
-            'description' => 'Explore BOB-LIFT skid steer loaders and mini dumpers. A dedicated compact equipment business website of Xuzhou BOB-LIFT Construction Machinery Co., Ltd.',
+            'description' => 'Explore BOB-LIFT skid steer loaders and mini dumpers. A dedicated loader equipment business website of Xuzhou BOB-LIFT Construction Machinery Co., Ltd.',
             'image' => '',
         ],
         'hero' => [
-            'eyebrow' => 'COMPACT EQUIPMENT. OPEN POSSIBILITIES.',
+            'eyebrow' => 'LOADER EQUIPMENT. OPEN POSSIBILITIES.',
             'title' => "SMALL SIZE.\nSERIOUS\nCAPABILITY.",
             'button' => 'Explore the range',
             'link' => 'Talk to our team',
@@ -55,17 +55,6 @@ function bl_home_defaults(): array
                 'alt' => 'Studio view of a yellow BOB-LIFT site mini dumper, based on FY-30 product photography',
             ],
         ],
-        'intro' => [
-            'eyebrow' => 'MADE FOR YOUR EVERYDAY',
-            'title' => "Less space.\n*More possibilities.*",
-            'text' => 'Great work doesn’t always come with plenty of room. Find compact equipment for the ground you’re breaking, the materials you’re moving and the next job on your list.',
-            'link' => 'Meet your next machine',
-            'facts' => [
-                ['value' => '37,000', 'unit' => 'm²', 'label' => 'Own factory in Xuzhou, China'],
-                ['value' => '200+', 'unit' => '', 'label' => 'Countries and regions served'],
-                ['value' => 'ISO 9001', 'unit' => '', 'label' => 'Certified quality management'],
-            ],
-        ],
         'range' => [
             'eyebrow' => '01 / THE EQUIPMENT',
             'title' => 'THE RANGE.',
@@ -86,6 +75,10 @@ function bl_home_defaults(): array
             'image' => '',
             'alt' => 'A BOB-LIFT technician assembling a tracked loader at the factory in Xuzhou',
             'caption' => 'Loader assembly · BOB-LIFT factory, Xuzhou',
+            'facts' => [
+                ['value' => '37,000', 'unit' => 'm²', 'label' => 'Own factory in Xuzhou, China'],
+                ['value' => '200+', 'unit' => '', 'label' => 'Countries and regions served'],
+            ],
             'steps' => [
                 ['title' => 'Start with the right fit.', 'text' => 'Your site, your materials, your priorities. Tell us what you need to do and we’ll discuss the equipment options with you.'],
                 ['title' => 'Know what you’re choosing.', 'text' => 'Ask for model specifications, configuration options and product documentation before you decide, and confirm the details that matter to your work.'],
@@ -189,9 +182,6 @@ function bl_support_defaults(): array
             'catalogue_text' => 'The range in print, with specification tables and the attachments.',
             'sheets_title' => 'Specification sheets',
             'sheets_text' => 'Open any model and save its specification sheet as a PDF, straight from the page.',
-            'certificates_kind' => 'ISO 9001 · CE · EAC',
-            'certificates_title' => 'Certificates',
-            'certificates_text' => 'The quality and export certificates held by Xuzhou BOB-LIFT Construction Machinery Co., Ltd.',
             'videos_title' => 'Machine videos',
         ],
         'faq' => [
@@ -219,7 +209,6 @@ function bl_support_default_faq(): array
             ['Which attachments can I use?', 'Our loaders take a range of attachments, from pallet forks and augers to sweepers and breakers. We confirm which suit your model when we quote the machine.', 'See the attachments', $loaders . '#attachments'],
         ],
         'Shipping & paperwork' => [
-            ['Which certificates do you hold?', 'Xuzhou BOB-LIFT Construction Machinery Co., Ltd. holds ISO 9001, CE and EAC certificates. Ask which documents cover your model and market.', 'View the certificates', bl_url('/about/') . '#certificates'],
             ['Can we visit the factory before ordering?', 'Yes. Tell us your dates and we will arrange a visit to our factory in Xuzhou, Jiangsu.', 'Plan a visit', bl_url('/contact/') . '#enquiry'],
         ],
         'Parts & service' => [
@@ -397,6 +386,19 @@ function bl_content_defaults(string $page): array
     };
 }
 
+/**
+ * The home page's company figures moved from Intro to the team section. Figures saved before the move carry over unless the new
+ * list was already saved; certification figures (the certificates on file cover cranes only) are left behind. A list the editor
+ * emptied on purpose stays empty (the figures stay hidden); a list holding only certification figures falls back to the defaults.
+ */
+function bl_migrate_home_facts(array $saved): array
+{
+    if (isset($saved['approach']['facts']) || !is_array($saved['intro']['facts'] ?? null)) return $saved;
+    $kept = array_values(array_filter($saved['intro']['facts'], static fn($fact) => is_array($fact) && !preg_match('/\bISO\b|\bCE\b|\bEAC\b|certif/i', ($fact['value'] ?? '') . ' ' . ($fact['label'] ?? ''))));
+    if ($kept || !$saved['intro']['facts']) $saved['approach']['facts'] = $kept;
+    return $saved;
+}
+
 /** A page's content: the defaults with the editor's saved changes laid over them. */
 function bl_editable(string $page): array
 {
@@ -405,6 +407,7 @@ function bl_editable(string $page): array
     $content = bl_content_defaults($page);
     $saved = bl_is_wordpress() ? get_option('bl_content_' . $page) : [];
     if (is_array($saved) && $saved) {
+        if ($page === 'home') $saved = bl_migrate_home_facts($saved);
         $content = bl_merge_content($content, $saved);
         // Loading figures are keyed by product, so models added in WordPress after these defaults are kept as well.
         if ($page === 'support' && is_array($saved['containers']['loading'] ?? null)) {

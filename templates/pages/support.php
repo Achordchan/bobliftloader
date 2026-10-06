@@ -22,7 +22,6 @@ $files = $content['downloads'];
 $downloads = [
     ['kind' => 'PDF' . ($catalogue['size'] ? ' · ' . $catalogue['size'] : ''), 'title' => $files['catalogue_title'], 'text' => $files['catalogue_text'], 'url' => $catalogue['url'], 'download' => true],
     ['kind' => count(bl_products()) . ' models', 'title' => $files['sheets_title'], 'text' => $files['sheets_text'], 'url' => bl_url('/products/skid-steer-loaders/')],
-    ['kind' => $files['certificates_kind'], 'title' => $files['certificates_title'], 'text' => $files['certificates_text'], 'url' => bl_url('/about/') . '#certificates'],
 ];
 if ($filmed) $downloads[] = ['kind' => 'Video', 'title' => $files['videos_title'], 'text' => 'Watch the ' . $filmedModels . ' at work, in ' . (count($filmed) > 1 ? 'their product galleries.' : 'its product gallery.'), 'url' => bl_product_url($filmed[0])];
 $hero = $content['hero'];

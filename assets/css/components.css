@@ -14,7 +14,7 @@
 .bl-site .bl-menu-toggle{display:none}
 .bl-site .bl-footer{background:var(--ink);color:var(--paper)}
 .bl-site .bl-footer-top{padding-top:clamp(44px,calc(33.8px + 1.47vw),72px);padding-bottom:clamp(32px,calc(24.6px + 1.07vw),52px);display:flex;align-items:center;justify-content:space-between;gap:clamp(24px,calc(18.4px + 0.80vw),39px);border-bottom:1px solid #425360}
-.bl-site .bl-footer-top>.bl-brand img{width:160px}
+.bl-site .bl-footer-top .bl-brand img{width:160px}
 .bl-site .bl-footer-top>p{font-family:var(--display);font-size:var(--fs-h4);font-weight:600;line-height:1.1;margin-left:auto;margin-right:12%}
 .bl-site .bl-footer-top .bl-circle-button{color:#6b7e8c}
 .bl-site .bl-footer-top .bl-icon{filter:invert(1);transform:rotate(-45deg)}
@@ -129,7 +129,7 @@
   .bl-site .bl-nav .bl-nav-contact{display:none}
 }
 
-/* Site switch: the "Compact equipment" label beside the logo opens the three BOB-LIFT websites. The panel hangs from the
+/* Site switch: the website label beside the logo opens the three BOB-LIFT websites. The panel hangs from the
    header (its containing block, being sticky), lined up with the logo. */
 .bl-site .bl-brand-group{display:flex;align-items:center;gap:18px;flex-shrink:0}
 .bl-site .bl-site-switch>summary{display:flex;align-items:center;gap:12px;padding:6px 10px 6px 17px;border-left:1px solid #71808a;font-size:var(--fs-micro);letter-spacing:1.15px;line-height:1.45;list-style:none;cursor:pointer;transition:background .2s}
@@ -166,4 +166,13 @@
   .bl-site .bl-site-panel{left:0;width:100%;border-inline:0}
   .bl-site .bl-site-panel b{font-size:19px}
 }
+/* In the footer the same switch opens upward, and keeps its label at every width (there is room). */
+.bl-site .bl-footer .bl-brand-group{position:relative}
+.bl-site .bl-footer .bl-site-panel{top:auto;bottom:calc(100% + 14px);left:0;width:min(430px,calc(100vw - 2 * var(--gutter)));border:1px solid #2b4456;animation-name:bl-site-panel-up}
+.bl-site .bl-footer .bl-site-switch>summary>span{display:block}
+.bl-site .bl-footer .bl-site-switch>summary>i{margin-top:4px;transform:rotate(-135deg)}
+.bl-site .bl-footer .bl-site-switch[open]>summary>i{margin-top:-4px;transform:rotate(45deg)}
+@keyframes bl-site-panel-up{from{opacity:0;transform:translateY(6px)}}
+.bl-site .bl-footer-top .bl-site-panel .bl-icon{transform:none}
+.bl-site .bl-footer-top .bl-site-panel a:hover .bl-icon{transform:translate(2px,-2px)}
 @media(prefers-reduced-motion:reduce){.bl-site .bl-site-panel{animation:none}}

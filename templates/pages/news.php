@@ -12,7 +12,7 @@ $articles = $current ? array_values(array_filter($allArticles, static fn($a) => 
   <?php bl_breadcrumbs($current ? [['label' => 'News', 'url' => bl_url('/news/')], ['label' => BL_NEWS_CATEGORIES[$current]]] : [['label' => 'News']]); ?>
   <div class="bl-news-head-row">
     <h1 id="news-title"><?= $current ? bl_escape(BL_NEWS_CATEGORIES[$current]) : 'News' ?></h1>
-    <p>Product news, customer stories and industry news from the BOB-LIFT compact equipment team.</p>
+    <p>Product news, customer stories and industry news from the BOB-LIFT Loader team.</p>
   </div>
   <nav class="bl-category-nav bl-news-tabs" aria-label="News sections">
     <a href="<?= bl_escape(bl_url('/news/')) ?>"<?= $current ? '' : ' aria-current="page"' ?>>All <small><?= count($allArticles) ?></small></a>
@@ -36,7 +36,7 @@ $articles = $current ? array_values(array_filter($allArticles, static fn($a) => 
     <?php endforeach; ?>
   </ol>
   <?php else: ?>
-  <div class="bl-empty"><h2>No stories yet.</h2><p>News from the compact equipment team will appear here.</p></div>
+  <div class="bl-empty"><h2>No stories yet.</h2><p>News from the BOB-LIFT Loader team will appear here.</p></div>
   <?php endif; ?>
 </section>
 <?php require __DIR__ . '/../partials/page-cta.php'; ?>

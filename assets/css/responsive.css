@@ -26,7 +26,7 @@
   .bl-site .bl-product-choices{gap:10px}
   .bl-site .bl-product-choices span{font-size:12px;padding:12px 15px}
   .bl-site .bl-footer-top>p{margin:0;font-size:25px}
-  .bl-site .bl-footer-top>.bl-brand img{width:125px}
+  .bl-site .bl-footer-top .bl-brand img{width:125px}
   .bl-site .bl-footer-links{grid-template-columns:1fr 1fr;row-gap:32px}
   .bl-site .bl-footer-domain{border:0;padding:0}
   .bl-site .bl-footer-bottom>span:nth-child(2){display:none}
@@ -77,7 +77,7 @@
   .bl-site .bl-form-bottom p{font-size:12px;margin-bottom:18px}
   .bl-site .bl-form-bottom .bl-button{width:100%}
   .bl-site .bl-footer-top{padding-block:35px;flex-wrap:wrap;gap:25px}
-  .bl-site .bl-footer-top>.bl-brand img{width:115px}
+  .bl-site .bl-footer-top .bl-brand img{width:115px}
   .bl-site .bl-footer-top>p{order:3;width:100%;font-size:28px}
   .bl-site .bl-footer-top>.bl-circle-button{width:42px;height:42px}
   .bl-site .bl-footer-links{padding-block:30px;gap:28px 20px}
@@ -102,8 +102,6 @@
 /* ---- Hero / range / applications responsive composition ---- */
 @media(max-width:1150px){
   .bl-site .bl-hero .bl-hero-title{max-width:72%}
-  .bl-site .bl-hero-entries{grid-template-columns:1fr 1fr}
-  .bl-site .bl-scroll-link{display:none}
   .bl-site .bl-application-tile{aspect-ratio:3/4}
 }
 @media(max-width:800px){
@@ -114,8 +112,6 @@
   .bl-site .bl-hero-slide{align-self:end}
   .bl-site .bl-hero .bl-hero-title{max-width:100%;font-size:clamp(64px,13.5vw,120px)}
   .bl-site .bl-hero-action{flex-wrap:wrap;gap:18px 28px}
-  .bl-site .bl-hero-entries{grid-template-columns:1fr;gap:10px;padding-bottom:28px}
-  .bl-site .bl-hero-entry{max-width:none}
   .bl-site .bl-range-duo{grid-template-columns:1fr;row-gap:2px}
   .bl-site .bl-range-card,.bl-site .bl-range-body{display:flex;grid-row:auto}
   .bl-site .bl-range-body h3{font-size:clamp(36px,7vw,56px)}
@@ -132,30 +128,10 @@
   .bl-site .bl-hero-switch{gap:16px}
   /* Only the current family's name shows; the others stay in the accessibility tree so every button keeps its name. */
   .bl-site .bl-hero-tab[aria-pressed=false] span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-  .bl-site .bl-hero-entry>img{width:64px}
   .bl-site .bl-range-facts{grid-template-columns:1fr;gap:0;padding-top:0}
   .bl-site .bl-range-facts>div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-block:12px;border-bottom:1px solid var(--line)}
   .bl-site .bl-range-facts dd{margin:0;font-size:20px}
   .bl-site .bl-application-tile{aspect-ratio:4/5}
-}
-
-/* Intro: statement and facts stack below 1000px; the facts stay as number / label rows. */
-@media(max-width:1000px){
-  .bl-site .bl-intro{grid-template-columns:minmax(0,1fr)}
-  .bl-site .bl-intro h2{font-size:clamp(40px,11vw,96px)}
-  .bl-site .bl-intro-copy{max-width:34em}
-  .bl-site .bl-intro-facts{margin-top:clamp(44px,7vw,64px)}
-  .bl-site .bl-intro-facts li{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)}
-  .bl-site .bl-intro-facts strong{font-size:clamp(40px,8vw,72px)}
-}
-@media(max-width:600px){
-  .bl-site .bl-intro{padding-top:56px;padding-bottom:60px}
-  .bl-site .bl-intro>.bl-eyebrow{font-size:11px;margin-bottom:22px}
-  .bl-site .bl-intro h2{font-size:clamp(40px,13.4vw,64px);line-height:.92}
-  .bl-site .bl-intro-copy{margin-top:22px;font-size:15px}
-  .bl-site .bl-intro-facts li{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;padding-block:18px}
-  .bl-site .bl-intro-facts strong{font-size:clamp(34px,11vw,46px)}
-  .bl-site .bl-intro-facts span{font-size:13px}
 }
 
 /* Range: two narrow cards side by side, the widest spec (1,000–5,000 kg) steps down to keep one line. */
@@ -165,6 +141,10 @@
   .bl-site .bl-approach .bl-section-top{flex-direction:column;align-items:flex-start;gap:22px}
   .bl-site .bl-approach-intro{max-width:560px}
   .bl-site .bl-approach-photo{aspect-ratio:3/2}
+  .bl-site .bl-approach-facts{grid-template-columns:1fr;gap:0}
+  .bl-site .bl-approach-facts li{flex-direction:row;justify-content:space-between;align-items:baseline;gap:16px;padding-block:16px}
+  .bl-site .bl-approach-facts strong{font-size:clamp(38px,9vw,56px)}
+  .bl-site .bl-approach-facts span{max-width:11em;text-align:right}
   .bl-site .bl-approach-steps{grid-template-columns:1fr;gap:26px}
 }
 @media(max-width:600px){

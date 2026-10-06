@@ -16,7 +16,7 @@
 .bl-site .bl-about-hero-photo figcaption{position:absolute;right:var(--gutter);top:clamp(18px,1.4vw,32px);padding:8px 12px;background:#081c2bb3;color:#dbe4ea;font-size:var(--fs-micro);font-weight:600;letter-spacing:.6px;backdrop-filter:blur(6px)}
 .bl-site .bl-about-hero-stage{position:relative}
 /* The plate rises out of the dark section below into the bottom of the photograph. */
-.bl-site .bl-about-plate{position:absolute;z-index:1;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0 auto;padding-top:0;padding-bottom:0}
+.bl-site .bl-about-plate{position:absolute;z-index:1;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:0 auto;padding-top:0;padding-bottom:0}
 .bl-site .bl-about-plate>div{background:var(--ink);color:var(--paper);padding:clamp(20px,1.6vw,40px) clamp(20px,1.6vw,40px) clamp(22px,1.8vw,44px)}
 .bl-site .bl-about-plate>div+div{border-left:1px solid var(--night-line)}
 .bl-site .bl-about-plate>div:last-child{background:var(--blue)}
@@ -101,16 +101,6 @@
 .bl-site .bl-about-factory-photos img{width:100%;height:100%;object-fit:cover;background:#e3e6e1}
 .bl-site .bl-about-factory-photos img:first-child{grid-row:span 2;aspect-ratio:4/3}
 
-/* Paperwork: the group's certificates. */
-.bl-site .bl-about-certs{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1.5fr);gap:clamp(40px,5vw,140px);align-items:end;padding-top:var(--sp-section);padding-bottom:var(--sp-block)}
-.bl-site .bl-about-certs-head h2{margin:clamp(18px,1.3vw,30px) 0 clamp(18px,1.4vw,32px);font:700 var(--fs-h2)/.9 var(--display);letter-spacing:-.01em}
-.bl-site .bl-about-certs-head>p:last-child{max-width:30em;font-size:var(--fs-small);line-height:1.8;color:var(--muted)}
-.bl-site .bl-about-cert-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,1.2vw,28px)}
-.bl-site .bl-about-cert-list li{display:flex;flex-direction:column;gap:clamp(10px,.8vw,16px);padding:clamp(10px,.8vw,18px);background:#fff;border:1px solid var(--line);transition:border-color .2s,transform .25s}
-.bl-site .bl-about-cert-list li:hover{border-color:var(--blue);transform:translateY(-4px)}
-.bl-site .bl-about-cert-list img{width:100%;aspect-ratio:452/640;object-fit:cover;object-position:top}
-.bl-site .bl-about-cert-list span{font-size:var(--fs-label);font-weight:600;line-height:1.4}
-
 /* Scroll-linked: the hero photo opens from the page margins to full bleed. Browsers without view timelines keep it full bleed. */
 @supports (animation-timeline:view()){
   .bl-site.bl-motion .bl-about-hero-photo{animation:bl-about-open linear both;animation-timeline:view();animation-range:entry 20% cover 42%}
@@ -126,16 +116,15 @@
   .bl-site .bl-tree-link .bl-icon{justify-self:end}
 }
 @media(max-width:1000px){
-  .bl-site .bl-about-hero-grid,.bl-site .bl-about-group-head,.bl-site .bl-about-factory,.bl-site .bl-about-certs{grid-template-columns:1fr}
+  .bl-site .bl-about-hero-grid,.bl-site .bl-about-group-head,.bl-site .bl-about-factory{grid-template-columns:1fr}
   .bl-site .bl-about-hero-side{max-width:560px}
   .bl-site .bl-about-plate{position:static;grid-template-columns:repeat(2,minmax(0,1fr));padding:0}
   .bl-site .bl-about-plate>div:nth-child(3){border-left:0}
   .bl-site .bl-about-plate>div:nth-child(n+3){border-top:1px solid var(--night-line)}
-  .bl-site .bl-about-plate>div:last-child{border-top-color:var(--blue)}
+  .bl-site .bl-about-plate>div:last-child{grid-column:1/-1;border-top-color:var(--blue)}
   .bl-site .bl-about-promises{grid-template-columns:1fr;gap:28px}
 }
 @media(max-width:800px){
-  .bl-site .bl-about-cert-list{grid-template-columns:repeat(2,minmax(0,1fr))}
   .bl-site .bl-tree-root-card{grid-template-columns:1fr}
   .bl-site .bl-tree-root-photo img{aspect-ratio:16/7;min-height:0}
   /* The tree turns into a spine down the left edge. */
@@ -163,5 +152,4 @@
   .bl-site .bl-tree-branch{padding:24px 22px 26px}
   .bl-site .bl-tree-branch h3{font-size:clamp(40px,11vw,56px)}
   .bl-site .bl-tree-here>span{flex-wrap:wrap}
-  .bl-site .bl-about-cert-list{gap:10px}
 }

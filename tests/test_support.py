@@ -93,7 +93,7 @@ class SupportTests(unittest.TestCase):
             _, html, _ = fetch(path)
             self.assertIn('href="/support/#after-delivery"', html, path)
         _, html, _ = fetch('/about/')
-        self.assertIn('id="certificates"', html)
+        self.assertNotIn('id="certificates"', html)  # the certificates on file cover cranes only
         _, html, _ = fetch('/sitemap.xml')
         self.assertIn('/support/</loc>', html)
 

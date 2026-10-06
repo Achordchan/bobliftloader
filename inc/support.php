@@ -56,10 +56,17 @@ function bl_catalogue(): array
  * Questions the sections above don't already answer, in page order: each run of consecutive questions with the same group
  * name becomes one group ['title', 'items'], so a group name may appear more than once. Answers may carry one link: [text, url].
  */
+/** The certificate question was withdrawn (the certificates on file cover cranes only); an installation that saved the old stock list still has it. */
+function bl_support_faq_retired(array $item): bool
+{
+    return stripos((string) ($item['q'] ?? ''), 'Which certificates do you hold') === 0 || str_contains((string) ($item['link_url'] ?? ''), '#certificates');
+}
+
 function bl_support_faq(): array
 {
     $groups = [];
     foreach (bl_editable('support')['faq']['items'] as $item) {
+        if (bl_support_faq_retired($item)) continue;
         $row = ['q' => $item['q'], 'a' => $item['a']];
         if ($item['link_label'] !== '' && $item['link_url'] !== '') $row['link'] = [$item['link_label'], $item['link_url']];
         if (!$groups || end($groups)['title'] !== $item['group']) $groups[] = ['title' => $item['group'], 'items' => []];

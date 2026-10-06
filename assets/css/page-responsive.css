@@ -18,8 +18,6 @@
   .bl-site .bl-news-card h2{font-size:31px}
   .bl-site .bl-contact-grid{grid-template-columns:1fr;grid-template-areas:"intro" "form" "prepare";grid-template-rows:auto;row-gap:36px}
   .bl-site .bl-contact-prepare ol{grid-template-columns:1fr 1fr}
-  .bl-site .bl-contact-company-grid{grid-template-columns:1fr 1fr;gap:32px}
-  .bl-site .bl-contact-company-grid>div:first-child{grid-column:1/-1}
 }
 @media(max-width:600px){
   .bl-site .bl-nav>a{font-size:34px}
@@ -62,8 +60,6 @@
   .bl-site .bl-contact-prepare ol{grid-template-columns:1fr}
   .bl-site .bl-contact-form-panel{padding:26px 18px;margin-inline:-10px}
   .bl-site .bl-contact-form-panel>h2{font-size:38px}
-  .bl-site .bl-contact-company-grid{grid-template-columns:1fr;gap:28px}
-  .bl-site .bl-contact-company-note{font-size:12px}
   .bl-site .bl-not-found{padding-block:70px}
   .bl-site .bl-not-found>div{flex-direction:column;align-items:flex-start}
 }
@@ -84,7 +80,7 @@
   .bl-site .bl-gallery-thumbs button{width:72px}
   .bl-site .bl-product-intro h1{font-size:84px}
   .bl-site .bl-product-section-nav{position:static}
-  .bl-site .bl-side-contact{bottom:0;left:0;right:0;flex-direction:row;gap:0;background:var(--ink);border-top:1px solid #ffffff1f}
+  .bl-site .bl-side-contact{top:auto;bottom:0;left:0;right:0;transform:none;flex-direction:row;gap:0;background:var(--ink);border-top:1px solid #ffffff1f}
   .bl-site .bl-side-contact a{flex:1;width:auto;height:auto;display:flex;flex-direction:column;gap:4px;padding:10px 4px;border:0;border-right:1px solid #ffffff1f;box-shadow:none;font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
   .bl-site .bl-side-contact a:last-child{border-right:0}
   .bl-site .bl-side-contact span{position:static;transform:none;opacity:1;background:none;padding:0;font-size:10px;pointer-events:auto}
@@ -100,3 +96,12 @@
   .bl-site .bl-product-actions{gap:16px}
 }
 
+
+@media(max-width:900px){
+  .bl-site .bl-contact-visit-grid{grid-template-columns:1fr;gap:32px}
+}
+@media(max-width:600px){
+  .bl-site .bl-contact-visit{padding-block:48px}
+  .bl-site .bl-contact-visit-actions{align-items:flex-start;flex-direction:column}
+  .bl-site .bl-contact-visit-business{align-items:flex-start;flex-direction:column}
+}
