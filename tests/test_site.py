@@ -140,6 +140,14 @@ class WebsiteTests(unittest.TestCase):
             self.assertEqual(items, list(range(len(items))))
             for opened in re.findall(r'data-lightbox-open="(\d+)"', main):
                 self.assertLess(int(opened), len(items))
+            # Each action appears once: the specification sheet is saved from Documents only, and the cards under the
+            # comparison table start with models the table does not already show.
+            self.assertLessEqual(main.count('data-print-sheet'), 1)
+            table = main.split('class="bl-product-compare"', 1)[1].split('</table>', 1)[0] if 'class="bl-product-compare"' in main else ''
+            cards = main.split('class="bl-product-grid"', 1)[1]
+            first = re.search(r'href="/product/([\w-]+)/"', cards)
+            if first and table.count('href="/product/') < len([p for p in self.products if p['category'] == product['category']]) - 1:
+                self.assertNotIn('href="/product/' + first.group(1) + '/"', table, product['slug'])
             # The quote form sits on the page with this model chosen, and at most five questions are answered.
             self.assertIn('<input type="hidden" name="model" value="' + product['model'] + '"', main)
             self.assertLessEqual(main.split('class="bl-product-faq-list"', 1)[-1].split('</section>', 1)[0].count('<details'), 5)

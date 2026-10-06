@@ -29,6 +29,14 @@ remove_action('wp_head', 'wp_robots');
 // The icons are the theme's own (index.php): drop the platform's default site icon so only ours is advertised, and point /favicon.ico at ours.
 remove_action('wp_head', 'wp_site_icon', 99);
 add_filter('get_site_icon_url', static fn($url, $size = 512) => bl_asset((int) $size >= 180 ? 'images/icons/icon-192.png' : 'images/icons/icon-32.png'), 99, 2);
+// The theme lists its own related products, articles and cases, so the platform's "Related" block (Jetpack) stays out of
+// the content it filters; otherwise it shows a second, Chinese-labelled list inside product overviews.
+add_filter('jetpack_relatedposts_filter_enabled_for_request', '__return_false');
+add_action('wp', static function (): void {
+    if (!class_exists('Jetpack_RelatedPosts')) return;
+    $related = Jetpack_RelatedPosts::init();
+    remove_filter('the_content', [$related, 'filter_add_target_to_dom'], 40);
+}, 20);
 // Search and AI crawlers are welcome: drop the per-bot blocks the platform adds to robots.txt.
 add_filter('robots_txt', 'bl_allow_ai_crawlers', 99999);
 add_action('init', 'bl_register_content_types');

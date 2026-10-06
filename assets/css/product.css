@@ -9,7 +9,7 @@
 .bl-site .bl-gallery-zoom{position:absolute;right:clamp(10px,.8vw,18px);bottom:clamp(10px,.8vw,18px);display:inline-flex;align-items:center;gap:10px;padding:9px 14px;background:#ffffffe6;border:1px solid var(--line);font-size:var(--fs-label);font-weight:700;transition:background .2s,border-color .2s}
 .bl-site .bl-gallery-zoom .bl-icon{width:16px;height:16px}
 .bl-site .bl-gallery-zoom:hover{background:#fff;border-color:var(--ink)}
-.bl-site .bl-gallery-zoom[hidden],.bl-site .bl-gallery-playing .bl-gallery-zoom{display:none}
+.bl-site .bl-gallery-zoom[hidden]{display:none}
 .bl-site .bl-product-main-image #product-photo{cursor:zoom-in}
 
 /* The on-page bar: pinned under the header, with the quote button at its end. */
@@ -32,6 +32,7 @@
 .bl-site .bl-product-highlights{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:1px;margin-top:clamp(28px,2.2vw,48px);background:var(--line);border:1px solid var(--line)}
 .bl-site .bl-product-highlights li{display:flex;flex-direction:column;gap:8px;padding:clamp(18px,1.4vw,30px);background:var(--paper)}
 .bl-site .bl-product-highlights strong{font:700 var(--fs-h5)/1.1 var(--display)}
+.bl-site .bl-product-highlights-stacked{grid-template-columns:1fr}
 .bl-site .bl-product-highlights p{font-size:var(--fs-small);line-height:1.65;color:var(--muted)}
 
 /* Specification with a dimension drawing beside it. */

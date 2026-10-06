@@ -130,17 +130,17 @@
 .bl-site .bl-attachments-group span{font-size:var(--fs-micro);line-height:1.5;color:var(--muted)}
 .bl-site .bl-attachments-note{margin-top:clamp(20px,1.4vw,32px);padding-top:clamp(16px,1.2vw,26px);border-top:1px solid var(--line);font-size:var(--fs-small);color:var(--muted)}
 
-/* Product page: videos under the stage, played in it; buying terms under the contact line. */
-.bl-site .bl-gallery-videos{grid-column:2;min-width:0}
-.bl-site .bl-gallery-videos .bl-eyebrow small{margin-left:10px;font-size:var(--fs-micro);color:var(--muted);letter-spacing:1px}
-.bl-site .bl-gallery-videos ul{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(150px,11vw,260px);gap:clamp(8px,.6vw,14px);margin-top:12px;overflow-x:auto;scrollbar-width:thin;padding-bottom:6px}
+/* Product page: the films play in their own player in the overview's left column; buying terms under the contact line. */
+.bl-site .bl-product-film{display:grid;gap:clamp(12px,.9vw,18px);margin-top:clamp(28px,2.2vw,48px);min-width:0}
+.bl-site .bl-product-film-stage{position:relative;aspect-ratio:16/9;background:var(--ink)}
+.bl-site .bl-product-film-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--ink)}
+.bl-site .bl-product-film .bl-eyebrow small{margin-left:10px;font-size:var(--fs-micro);color:var(--muted);letter-spacing:1px}
+.bl-site .bl-gallery-videos{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,96px),1fr));gap:clamp(8px,.6vw,14px)}
 .bl-site .bl-gallery-videos a{display:flex;flex-direction:column;gap:8px;font-size:var(--fs-micro);font-weight:600;line-height:1.4}
 .bl-site .bl-gallery-video-poster{position:relative;display:block;aspect-ratio:16/9;background:var(--ink);border:2px solid transparent;transition:border-color .2s}
 .bl-site .bl-gallery-video-poster img{width:100%;height:100%;object-fit:cover}
-.bl-site .bl-gallery-video-poster .bl-gallery-play{position:absolute;left:50%;top:50%;width:clamp(34px,2.2vw,48px);height:clamp(34px,2.2vw,48px);padding:clamp(9px,.6vw,13px);translate:-50% -50%;border-radius:50%;background:#081c2bcc;filter:invert(1);transition:background .2s}
+.bl-site .bl-gallery-video-poster .bl-gallery-play{position:absolute;left:50%;top:50%;width:clamp(30px,2vw,44px);height:clamp(30px,2vw,44px);padding:clamp(8px,.55vw,12px);translate:-50% -50%;border-radius:50%;background:#081c2bcc;filter:invert(1);transition:background .2s}
 .bl-site .bl-gallery-videos a:hover .bl-gallery-video-poster,.bl-site .bl-gallery-videos a[aria-pressed=true] .bl-gallery-video-poster{border-color:var(--blue)}
-.bl-site .bl-product-main-image.bl-gallery-playing{background:var(--ink)}
-.bl-site .bl-product-main-image video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--ink)}
 .bl-site .bl-gallery-caption{position:absolute;left:14px;top:14px;z-index:1;padding:6px 10px;background:#081c2bb3;color:#dbe4ea;font-size:var(--fs-micro);font-weight:600;pointer-events:none}
 .bl-site .bl-product-terms{display:flex;flex-wrap:wrap;gap:8px 0;margin-top:clamp(18px,1.4vw,30px);padding-top:clamp(14px,1vw,22px);border-top:1px solid var(--line);font-size:var(--fs-label);color:var(--muted)}
 .bl-site .bl-product-terms li{display:flex;align-items:center;gap:6px}
@@ -178,7 +178,6 @@
   .bl-site .bl-attachments-group{grid-template-columns:1fr}
   .bl-site .bl-attachments-jobs ul{grid-template-columns:repeat(2,minmax(0,1fr))}
   .bl-site .bl-attachments-group ul{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .bl-site .bl-gallery-videos{grid-column:1}
 }
 @media(max-width:800px){
   .bl-site .bl-sup-containers-tables{grid-template-columns:1fr}
@@ -212,13 +211,12 @@
   @page{margin:14mm}
   .bl-site{background:#fff;font-size:10pt}
   .bl-site .bl-header,.bl-site .bl-footer,.bl-site .bl-side-contact,.bl-site .bl-breadcrumbs,.bl-site .bl-product-section-nav,.bl-site .bl-related,.bl-site .bl-page-cta,
-  .bl-site .bl-gallery-thumbs,.bl-site .bl-gallery-videos,.bl-site .bl-product-actions,.bl-site .bl-product-direct,.bl-site .bl-product-terms a,.bl-site .bl-spec-notes .bl-text-link,.bl-site .bl-model-decode a,.bl-site .bl-skip,.bl-site dialog{display:none!important}
+  .bl-site .bl-gallery-thumbs,.bl-site .bl-product-film,.bl-site .bl-product-actions,.bl-site .bl-product-direct,.bl-site .bl-product-terms a,.bl-site .bl-spec-notes .bl-text-link,.bl-site .bl-model-decode a,.bl-site .bl-skip,.bl-site dialog{display:none!important}
   .bl-site .bl-shell{padding-inline:0;max-width:none}
   .bl-site .bl-product-hero{display:grid;grid-template-columns:40% 1fr;gap:8mm;padding:0;align-items:start}
   .bl-site .bl-product-gallery{display:block}
   .bl-site .bl-product-main-image{aspect-ratio:auto;background:none}
   .bl-site .bl-product-main-image>img{position:static;padding:0}
-  .bl-site .bl-product-main-image video{display:none}
   .bl-site .bl-product-intro h1{font-size:30pt}
   .bl-site .bl-product-intro::after{content:'BOB-LIFT Loader · info@boblift.com · +86 158 5249 9415 · bobliftloader.com';display:block;margin-top:6mm;font-size:8pt;color:#56616b}
   .bl-site .bl-specifications{padding:6mm 0 0;break-inside:auto}

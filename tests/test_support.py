@@ -77,6 +77,10 @@ class SupportTests(unittest.TestCase):
             status, _, headers = fetch(video)
             self.assertEqual((status, headers['Content-Type']), (200, 'video/mp4'), video)
         self.assertIn('<video id="product-video"', html)
+        # The films play beside the overview, not under the photograph stage.
+        overview = html.split('id="overview"', 1)[1].split('</section>', 1)[0]
+        self.assertIn('<video id="product-video"', overview)
+        self.assertNotIn('data-gallery-video', html.split('class="bl-product-hero', 1)[1].split('</section>', 1)[0])
         self.assertIn('whole-machine warranty', html)
         self.assertIn('href="/support/">How buying works', html)
         self.assertIn('data-print-sheet hidden', html)
