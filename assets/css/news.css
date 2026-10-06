@@ -51,7 +51,6 @@
 .bl-site .bl-story-text{max-width:none}
 .bl-site .bl-story-text :is(ul,ol){margin:0 0 1.2em;padding-left:1.4em;font-size:var(--fs-body);line-height:1.85;color:#3f4c57}
 .bl-site .bl-story-text ul{list-style:disc}
-.bl-site .bl-story-text ol{list-style:decimal}
 .bl-site .bl-story-text li+li{margin-top:.35em}
 .bl-site .bl-story-text .bl-wp-article-content p{margin:0 0 1em}
 .bl-site .bl-story-text li::marker{color:var(--blue)}
