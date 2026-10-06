@@ -53,8 +53,8 @@ function reportSentInquiry() {
 
 export function initializeInquiry() {
   if (document.body.classList.contains('bl-page-thanks')) reportSentInquiry();
-  const sent = document.querySelector('.bl-inquiry-cf7');
-  if (sent) initializeSentInquiry(sent);
+  // The page's own form and the quick enquiry in the corner are both Contact Form 7 forms.
+  document.querySelectorAll('.bl-inquiry-cf7').forEach(initializeSentInquiry);
   const form = document.querySelector('#inquiry-form');
   if (!form) return;
   const dialog = document.querySelector('#inquiry-dialog');

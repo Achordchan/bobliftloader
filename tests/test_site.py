@@ -437,6 +437,20 @@ class WebsiteTests(unittest.TestCase):
         self.assertNotIn('/products/</loc>', sitemap)
         self.assertNotIn('/thank-you/', sitemap)
 
+    def test_quick_enquiry_in_the_corner(self):
+        _, html, _ = fetch('/about/')
+        self.assertIn('class="bl-quick-toggle"', html)
+        self.assertIn('id="quick-enquiry" aria-labelledby="quick-enquiry-title" hidden', html)
+        self.assertIn('href="/contact/#enquiry" data-quick', html)
+        _, html, _ = fetch('/product/bl-t360-h-mini-skid-steer-loader/')
+        self.assertIn('/contact/?product=bl-t360-h-mini-skid-steer-loader#enquiry', html.split('class="bl-quick"', 1)[1])
+        for path in ('/contact/', '/thank-you/'):
+            _, html, _ = fetch(path)
+            self.assertNotIn('class="bl-quick"', html)
+        # The company line is only hidden while it is optional, so a form saved with [text* company] stays submittable.
+        _, css, _ = fetch('/assets/css/pages.css')
+        self.assertIn('label:has([name="company"]):not(:has([aria-required="true"])){display:none}', css)
+
     def test_header_language_switch_placeholder(self):
         _, html, _ = fetch('/about/')
         nav = html.split('id="main-navigation"', 1)[1].split('</nav>', 1)[0]

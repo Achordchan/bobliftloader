@@ -528,3 +528,43 @@
   .bl-site .bl-thanks-next{padding:26px 18px;margin-inline:-10px}
   .bl-site .bl-thanks-next>h2{font-size:38px}
 }
+/* Quick enquiry (templates/partials/quick-enquiry.php): a button in the bottom-right corner, under the contact rail, that
+   opens the enquiry form in a short panel above it. Up to 800 px the rail is a bottom bar whose Enquiry opens the panel as
+   a sheet, so the corner button gives way. */
+.bl-site .bl-quick{position:fixed;right:clamp(16px,1.2vw,32px);bottom:calc(clamp(16px,1.4vw,32px) + var(--bl-quick-lift,0px));z-index:16;transition:bottom .2s}
+.bl-site .bl-quick-toggle{display:flex;align-items:center;gap:10px;min-height:clamp(48px,2.4vw,60px);padding:0 clamp(18px,1vw,24px) 0 clamp(14px,.8vw,20px);background:var(--blue);color:#fff;border:1px solid var(--blue);box-shadow:0 10px 28px #081c2b40;font-size:var(--fs-small);font-weight:700;transition:background .2s,transform .2s}
+.bl-site .bl-quick-toggle svg{width:clamp(20px,1.05vw,26px);height:clamp(20px,1.05vw,26px)}
+.bl-site .bl-quick-toggle:hover{background:#1746ad;transform:translateY(-2px)}
+.bl-site .bl-quick-toggle:focus-visible{outline:3px solid #cf8631;outline-offset:3px}
+.bl-site .bl-quick-open .bl-quick-toggle{background:var(--ink);border-color:var(--ink)}
+.bl-site .bl-quick-panel{position:absolute;right:0;bottom:calc(100% + 12px);width:min(400px,calc(100vw - 32px));max-height:calc(100vh - 140px - var(--bl-quick-lift,0px));overflow:auto;overscroll-behavior:contain;background:var(--white);color:var(--ink);border:1px solid #b5c2ca;box-shadow:0 24px 48px #081c2b40;animation:bl-quick-in .2s ease-out}
+@keyframes bl-quick-in{from{opacity:0;transform:translateY(8px)}}
+.bl-site .bl-quick-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:22px 22px 18px;background:var(--ink);color:#fff}
+.bl-site .bl-quick-head .bl-eyebrow{font-size:var(--fs-micro);color:#8fb0ff}
+.bl-site .bl-quick-head h2{margin:8px 0 6px;font:600 clamp(28px,1.6vw,36px)/1 var(--display)}
+.bl-site .bl-quick-head p:last-child{font-size:var(--fs-label);color:#b7c9d5}
+.bl-site .bl-quick-close{display:grid;place-items:center;flex-shrink:0;width:36px;height:36px;margin:-6px -8px 0 0;border:1px solid #ffffff33;transition:background .2s}
+.bl-site .bl-quick-close .bl-icon{width:18px;height:18px;filter:invert(1)}
+.bl-site .bl-quick-close:hover{background:#173346}
+.bl-site .bl-quick-form,.bl-site .bl-quick-fallback{padding:18px 22px 22px}
+.bl-site .bl-quick-form .bl-selected-model{margin-bottom:12px}
+/* The same form, shortened: no step headings, no company line (unless the saved form makes it required), a smaller message box, the button across the panel. */
+.bl-site .bl-quick-form .bl-inquiry-form legend,.bl-site .bl-quick-form .bl-form-grid label:has([name="company"]):not(:has([aria-required="true"])){display:none}
+.bl-site .bl-quick-form .bl-inquiry-form fieldset{margin:0 0 14px}
+.bl-site .bl-quick-form .wpcf7-radio{gap:6px}
+.bl-site .bl-quick-form .wpcf7-list-item-label{padding:8px 10px;font-size:var(--fs-micro)}
+.bl-site .bl-quick-form .bl-form-grid{display:grid;grid-template-columns:1fr;gap:4px;margin-top:6px}
+.bl-site .bl-quick-form .bl-form-grid label,.bl-site .bl-quick-form .bl-message-label{font-size:var(--fs-micro)}
+.bl-site .bl-quick-form .bl-inquiry-form input:not([type=radio]),.bl-site .bl-quick-form .bl-inquiry-form textarea{padding:9px 0;font-size:16px}
+.bl-site .bl-quick-form .bl-inquiry-form textarea{min-height:64px;height:64px}
+.bl-site .bl-quick-form .bl-form-bottom{display:flex;flex-direction:column-reverse;align-items:stretch;gap:12px}
+.bl-site .bl-quick-form .bl-form-bottom p{font-size:var(--fs-micro);line-height:1.5;color:var(--muted)}
+.bl-site .bl-quick-form .bl-form-bottom p br{display:none}
+.bl-site .bl-quick-form form.bl-inquiry-form input.wpcf7-submit{width:100%;min-height:52px}
+.bl-site .bl-quick-fallback{display:grid;gap:16px;justify-items:start}
+@media(max-width:800px){
+  .bl-site .bl-quick{right:0;left:0;bottom:var(--bl-bar-height,62px);z-index:16;transition:none}
+  .bl-site .bl-quick-toggle{display:none}
+  .bl-site .bl-quick-panel{position:static;width:100%;max-height:calc(100svh - var(--bl-bar-height,62px) - 56px);border-inline:0;border-bottom:0;box-shadow:0 -16px 40px #081c2b40}
+}
+@media print{.bl-site .bl-quick{display:none}}
