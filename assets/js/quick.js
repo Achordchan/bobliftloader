@@ -12,8 +12,29 @@ export function initializeQuick() {
   const sheet = window.matchMedia(SHEET);
   const barEnquiry = document.querySelector('.bl-side-contact a[data-quick]');
   let opener = toggle;
+  let muted = [];
+  // In the sheet the page behind leaves the accessibility tree too (a screen reader's cursor can't wander out); the bar
+  // stays reachable so its Enquiry can close the sheet again.
+  const mute = (on) => {
+    muted.forEach((element) => { element.inert = false; });
+    muted = [];
+    if (!on) return;
+    for (let node = quick; node.parentElement && node !== document.body; node = node.parentElement) {
+      for (const sibling of node.parentElement.children) {
+        if (sibling === node || sibling.inert || (barEnquiry && sibling.contains(barEnquiry)) || ['SCRIPT', 'STYLE', 'LINK'].includes(sibling.tagName)) continue;
+        sibling.inert = true;
+        muted.push(sibling);
+      }
+    }
+  };
+  const setModal = (on) => {
+    if (on) { panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true'); }
+    else { panel.removeAttribute('role'); panel.removeAttribute('aria-modal'); }
+    mute(on);
+  };
   const setOpen = (open, from = toggle) => {
     panel.hidden = !open;
+    setModal(open && sheet.matches);
     toggle.setAttribute('aria-expanded', String(open));
     quick.classList.toggle('bl-quick-open', open);
     document.documentElement.classList.toggle('bl-quick-on', open);

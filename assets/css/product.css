@@ -230,8 +230,7 @@
   /* Factory checks: one number column, so every heading starts on the same line. */
   .bl-site .bl-product-checks li{grid-template-columns:2em minmax(0,1fr);column-gap:12px;padding-bottom:20px}
   .bl-site .bl-product-checks span{font-variant-numeric:tabular-nums}
-  /* The model and its neighbours fit the width, the current one in the middle and marked, so nothing hides off screen. */
-  .bl-site .bl-product-compare{overflow:visible}
+  /* The model and its neighbours fit the width, the current one in the middle and marked; a longer row still scrolls. */
   .bl-site .bl-product-compare table{min-width:0;font-size:13.5px}
   .bl-site .bl-product-compare th,.bl-site .bl-product-compare td{padding:11px 8px;vertical-align:top}
   .bl-site .bl-product-compare tbody th{width:27%;padding-left:0;font-size:13px}
