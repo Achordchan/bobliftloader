@@ -25,13 +25,16 @@ function bl_content_value(string $page, string $path): string
     return is_scalar($value) ? (string) $value : '';
 }
 
-/** Unchanged literal text keeps historical entity spelling; edited text is always escaped. */
+/**
+ * Unchanged literal text keeps historical entity spelling; edited text is always escaped. A few defaults are written with
+ * &amp;, and an editor who keeps it while rewording would otherwise see it double-encoded, so edited text is decoded first.
+ */
 function bl_content_text(string $page, string $path): string
 {
     $value = bl_content_value($page, $path);
     $default = bl_content_defaults($page);
     foreach (explode('.', $path) as $key) $default = $default[$key] ?? '';
-    return $value === $default ? $value : bl_escape($value);
+    return $value === $default ? $value : bl_escape(html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 }
 
 function bl_content_html(string $page, string $path): string
