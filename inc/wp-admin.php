@@ -2,6 +2,8 @@
 declare(strict_types=1);
 defined('ABSPATH') || exit;
 
+require_once __DIR__ . '/wp-product-save.php';
+
 /**
  * Edit screens for products and news. Products use the classic screen so their data (model, specs, photos, videos)
  * leads the page, in boxes placed under the title; news keeps the block editor for writing, with its settings in the
@@ -222,11 +224,18 @@ function bl_admin_product_checklist(WP_Post $post, string $intro): void
     $chosen = (array) (bl_admin_record($post)['products'] ?? []);
     echo '<p class="bl-field-help bl-box-intro">' . esc_html($intro) . '</p>';
     $groups = ['skid-steer-loaders' => ['滑移装载机', ''], 'mini-dumpers' => ['迷你翻斗车', '']];
-    foreach (get_posts(['post_type' => 'bl_product', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'menu_order title', 'order' => 'ASC']) as $product) {
+    $products = get_posts(['post_type' => 'bl_product', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'menu_order title', 'order' => 'ASC']);
+    $shown = array_column($products, 'post_name');
+    foreach ($chosen as $slug) {
+        if (!is_string($slug) || in_array($slug, $shown, true)) continue;
+        $product = get_page_by_path($slug, OBJECT, 'bl_product');
+        $products[] = $product ?: (object) ['ID' => 0, 'post_name' => $slug, 'post_title' => $slug, 'post_status' => 'draft'];
+    }
+    foreach ($products as $product) {
         $meta = get_post_meta($product->ID, '_bl_record', true);
         $group = is_array($meta) && ($meta['category'] ?? '') === 'mini-dumpers' ? 'mini-dumpers' : 'skid-steer-loaders';
         $slug = $product->post_name;
-        $groups[$group][1] .= '<li><label><input type="checkbox" name="bl_record[products][]" value="' . esc_attr($slug) . '"' . checked(in_array($slug, $chosen, true), true, false) . '> ' . esc_html(get_the_title($product)) . '</label></li>';
+        $groups[$group][1] .= '<li><label><input type="checkbox" name="bl_record[products][]" value="' . esc_attr($slug) . '"' . checked(in_array($slug, $chosen, true), true, false) . '> ' . esc_html($product->post_title) . ($product->post_status !== 'publish' ? ' <span class="bl-chip bl-chip-warn">未发布</span>' : '') . '</label></li>';
     }
     echo '<div class="bl-checklist">';
     foreach ($groups as [$title, $items]) if ($items) echo '<p class="bl-subgroup-title">' . esc_html($title) . '</p><ul>' . $items . '</ul>';
@@ -319,6 +328,7 @@ add_action('save_post', static function (int $postId): void {
     if (!in_array(get_post_type($postId), ['bl_product', 'bl_news', 'bl_application'], true) || wp_is_post_revision($postId) || wp_is_post_autosave($postId)) return;
     if (!current_user_can('edit_post', $postId) || !isset($_POST['bl_record_nonce']) || !is_string($_POST['bl_record_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['bl_record_nonce'])), 'bl_save_record')) return;
     if (!isset($_POST['bl_record']) || !is_array($_POST['bl_record'])) return;
+    if (get_post_type($postId) === 'bl_product' && !bl_product_submission_complete()) return;
     $input = wp_unslash($_POST['bl_record']);
     $text = static fn(string $key): string => isset($input[$key]) && is_scalar($input[$key]) ? sanitize_text_field((string) $input[$key]) : '';
     $record = get_post_meta($postId, '_bl_record', true);
@@ -354,14 +364,12 @@ add_action('save_post', static function (int $postId): void {
         $record = bl_product_derived($record);
     } elseif (get_post_type($postId) === 'bl_application') {
         $record['hub'] = isset(bl_case_hubs()[$text('hub')]) ? $text('hub') : '';
-        $known = array_map(static fn($p) => $p->post_name, get_posts(['post_type' => 'bl_product', 'post_status' => 'publish', 'numberposts' => -1]));
-        $record['products'] = array_values(array_intersect(array_map('sanitize_title', (array) ($input['products'] ?? [])), $known));
+        $record['products'] = bl_rest_product_slugs($input['products'] ?? [], (array) ($record['products'] ?? []));
         $record['facts'] = [];
         foreach (['location', 'customer', 'task', 'site', 'duration', 'result'] as $key) $record['facts'][$key] = isset($input['facts'][$key]) && is_scalar($input['facts'][$key]) ? sanitize_text_field((string) $input['facts'][$key]) : '';
     } else {
         $record['category'] = isset(BL_NEWS_CATEGORIES[$text('category')]) ? $text('category') : '';
-        $known = array_map(static fn($p) => $p->post_name, get_posts(['post_type' => 'bl_product', 'post_status' => 'publish', 'numberposts' => -1]));
-        $record['products'] = array_values(array_intersect(array_map('sanitize_title', (array) ($input['products'] ?? [])), $known));
+        $record['products'] = bl_rest_product_slugs($input['products'] ?? [], (array) ($record['products'] ?? []));
         $record['line'] = $text('line') === 'group' ? 'group' : 'compact';
         $record['caption'] = $text('caption');
         $event = [];

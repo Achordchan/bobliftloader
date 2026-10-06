@@ -32,10 +32,10 @@ function bl_rest_clean_url($value): string
 }
 
 /** Product slugs that exist, as the news and case boxes keep them. */
-function bl_rest_product_slugs($value): array
+function bl_rest_product_slugs($value, array $existing = []): array
 {
     $known = array_map(static fn($p) => $p->post_name, get_posts(['post_type' => 'bl_product', 'post_status' => 'publish', 'numberposts' => -1]));
-    return array_values(array_intersect(array_map(static fn($slug): string => sanitize_title(is_scalar($slug) ? (string) $slug : ''), (array) $value), $known));
+    return array_values(array_intersect(array_map(static fn($slug): string => sanitize_title(is_scalar($slug) ? (string) $slug : ''), (array) $value), array_merge($known, $existing)));
 }
 
 /**
@@ -158,7 +158,7 @@ foreach (array_keys(BL_REST_FIELDS) as $bl_rest_type) {
         $id = (int) $request->get_param('id');
         $record = $id ? get_post_meta($id, '_bl_record', true) : [];
         if (!is_array($record)) $record = [];
-        foreach (BL_REST_FIELDS[$type] as $key) if (array_key_exists($key, $sent)) $record[$key] = bl_rest_field($type, $key, $sent[$key]);
+        foreach (BL_REST_FIELDS[$type] as $key) if (array_key_exists($key, $sent)) $record[$key] = $key === 'products' ? bl_rest_product_slugs($sent[$key], (array) ($record['products'] ?? [])) : bl_rest_field($type, $key, $sent[$key]);
         if ($type === 'bl_product') $record = bl_product_derived($record);
         $meta['_bl_record'] = $record;
         $request->set_param('meta', $meta);
@@ -208,8 +208,15 @@ function bl_page_content_key(int $postId): string
 function bl_page_content_current(string $page): array
 {
     $saved = get_option('bl_content_' . $page);
-    $content = bl_content_defaults($page);
-    return is_array($saved) && $saved ? bl_merge_content($content, $saved) : $content;
+    return bl_content_resolve($page, is_array($saved) ? $saved : []);
+}
+
+/** REST content and its revision must describe the same snapshot, even if another request saves during serialization. */
+function bl_rest_content_snapshot(string $page, bool $refresh = false): array
+{
+    static $snapshots = [];
+    if ($refresh || !isset($snapshots[$page])) $snapshots[$page] = bl_content_saved_now($page);
+    return $snapshots[$page];
 }
 
 // One private item per screen (only editors see them in the API), made once and again whenever a screen is added. Under
@@ -244,7 +251,7 @@ add_filter('wp_insert_post_data', static function (array $data, array $postarr):
 
 add_filter('get_post_metadata', static function ($value, $postId, $key, $single) {
     if ($key !== '_bl_content' || !($page = bl_page_content_key((int) $postId))) return $value;
-    return [bl_page_content_current($page)];
+    return [bl_content_resolve($page, bl_rest_content_snapshot($page))];
 }, 10, 4);
 
 // Nothing is ever stored on the item itself.
@@ -259,12 +266,23 @@ add_filter('rest_pre_insert_bl_page_content', static function ($prepared, WP_RES
     if (!is_array($sent)) return new WP_Error('bl_content_invalid', 'The content must be an object.', ['status' => 400]);
     // Starting from the content saved right now keeps everything not sent, loading figures of unpublished models included;
     // the lock keeps two writes to the same page from both starting from the same content.
-    $saved = bl_content_locked($page, static function (array $previous) use ($page, $sent): array {
-        $current = bl_merge_content(bl_content_defaults($page), $previous);
-        return bl_content_diff(bl_content_clean_all($page, bl_merge_content($current, $sent)), bl_content_clean_all($page, bl_content_defaults($page)));
-    });
-    if (!$saved) return new WP_Error('bl_content_busy', 'Another save of this page is in progress; nothing was saved. Try again.', ['status' => 409]);
+    $expected = $request->get_param('bl_content_revision');
+    if ($expected !== null && !is_string($expected)) return new WP_Error('bl_content_revision_invalid', '内容版本无效。', ['status' => 400]);
+    $saved = bl_content_locked($page, static fn(array $previous): array => bl_content_prepare($page, $previous, $sent), $expected);
+    if (is_wp_error($saved)) return $saved;
+    bl_rest_content_snapshot($page, true);
     unset($meta['_bl_content']);
     $request->set_param('meta', $meta);
     return $prepared;
 }, 10, 2);
+
+// Existing clients may omit the token for partial updates; clients editing a full snapshot can opt into conflict checks.
+add_action('rest_api_init', static function (): void {
+    register_rest_field('bl_page_content', 'bl_content_revision', [
+        'get_callback' => static function (array $post): string {
+            $page = bl_page_content_key((int) $post['id']);
+            return $page ? bl_content_revision(bl_rest_content_snapshot($page)) : '';
+        },
+        'schema' => ['type' => 'string', 'context' => ['edit'], 'description' => '保存时回传此版本；过期版本返回 409，省略时按当前内容合并。'],
+    ]);
+});

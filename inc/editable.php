@@ -410,16 +410,19 @@ function bl_applications_defaults(): array
     ];
 }
 
-/** $applications with the words and pictures an editor saved laid over the theme's own; a cleared field falls back to the theme's. */
-function bl_apply_application_content(array $applications): array
+require_once __DIR__ . '/content-state.php';
+
+/** Apply migrated content; explicit empty descriptions and checklists remain empty. */
+function bl_apply_application_content(array $applications, ?array $content = null): array
 {
-    $jobs = bl_editable('applications')['jobs'];
+    $jobs = ($content ?? bl_editable('applications'))['jobs'];
     foreach ($applications as &$app) {
         $slug = bl_application_slug($app);
         $app['slug'] = $slug;
         $job = $jobs[$slug] ?? null;
         if (!is_array($job)) continue;
-        foreach (['title', 'subtitle', 'description', 'alt', 'image'] as $key) if (($job[$key] ?? '') !== '') $app[$key] = $job[$key];
+        foreach (['title', 'alt', 'image'] as $key) if (($job[$key] ?? '') !== '') $app[$key] = $job[$key];
+        foreach (['subtitle', 'description'] as $key) if (array_key_exists($key, $job)) $app[$key] = $job[$key];
         // Named machines: a cleared field means none, so the page falls back to the family's first three.
         if (array_key_exists('models', $job)) $app['models'] = array_values(array_filter(array_map('trim', explode(',', (string) $job['models']))));
         $checks = [];
@@ -428,7 +431,7 @@ function bl_apply_application_content(array $applications): array
             if (($check['link_url'] ?? '') !== '' && ($check['link_label'] ?? '') !== '') $item['link'] = [$check['link_url'], $check['link_label']];
             $checks[] = $item;
         }
-        if ($checks) $app['checks'] = $checks;
+        if (array_key_exists('checks', $job)) $app['checks'] = $checks;
     }
     return $applications;
 }
@@ -462,26 +465,22 @@ function bl_editable(string $page): array
 {
     static $cache = [];
     if (isset($cache[$page])) return $cache[$page];
-    $content = bl_content_defaults($page);
     $saved = bl_is_wordpress() ? get_option('bl_content_' . $page) : [];
-    if (is_array($saved) && $saved) {
-        if ($page === 'home') $saved = bl_migrate_home_facts($saved);
-        $content = bl_merge_content($content, $saved);
-        // Loading figures are keyed by product, so models added in WordPress after these defaults are kept as well.
-        if ($page === 'support' && is_array($saved['containers']['loading'] ?? null)) {
-            foreach ($saved['containers']['loading'] as $slug => $fit) if (is_array($fit)) $content['containers']['loading'][$slug] = $fit;
-        }
-    }
-    return $cache[$page] = $content;
+    return $cache[$page] = bl_content_resolve($page, is_array($saved) ? $saved : []);
 }
 
-/** Saved values replace defaults of the same kind; groups merge key by key, lists are replaced whole. */
-function bl_merge_content(array $defaults, array $saved): array
+/** Saved values replace defaults of the same kind; only declared maps accept dynamic keys. */
+function bl_merge_content(array $defaults, array $saved, array $dynamic = [], string $path = ''): array
 {
     foreach ($saved as $key => $value) {
+        if (in_array($path, $dynamic, true)) {
+            if (is_array($value)) $defaults[$key] = $value;
+            continue;
+        }
         if (!array_key_exists($key, $defaults)) continue;
         $default = $defaults[$key];
-        if (is_array($default) && !array_is_list($default) && is_array($value)) $defaults[$key] = bl_merge_content($default, $value);
+        $child = $path === '' ? (string) $key : $path . '.' . $key;
+        if (is_array($default) && (!array_is_list($default) || in_array($child, $dynamic, true)) && is_array($value)) $defaults[$key] = bl_merge_content($default, $value, $dynamic, $child);
         elseif (is_array($default) === is_array($value)) $defaults[$key] = $value;
     }
     return $defaults;

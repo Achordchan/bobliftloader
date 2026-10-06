@@ -26,7 +26,11 @@ try {
     wp_set_current_user(1);
     // The edit screen posts spec and video rows as parallel lists and the gallery as one field per image.
     $specs = ['key' => array_keys($original['specs']), 'value' => array_values($original['specs'])];
-    $_POST = ['bl_record_nonce' => wp_create_nonce('bl_save_record'), 'bl_record' => ['model' => 'QA-PERSISTENCE', 'category' => 'skid-steer-loaders', 'source' => $original['source'], 'spec_source' => 'QA spec sheet', 'image' => $original['image'], 'gallery' => $original['gallery'], 'specs' => $specs],
+    // A submission cut short by max_input_vars lacks the form's last field and saves nothing.
+    $_POST = ['bl_record_nonce' => wp_create_nonce('bl_save_record'), 'bl_record' => ['model' => 'QA-TRUNCATED'] + $original];
+    wp_update_post(['ID' => $post->ID, 'post_title' => $post->post_title]);
+    bl_test_assert(get_post_meta($post->ID, '_bl_record', true)['model'] === $original['model'], 'A truncated product form was saved');
+    $_POST = ['bl_product_complete' => '1', 'bl_record_nonce' => wp_create_nonce('bl_save_record'), 'bl_record' => ['model' => 'QA-PERSISTENCE', 'category' => 'skid-steer-loaders', 'source' => $original['source'], 'spec_source' => 'QA spec sheet', 'image' => $original['image'], 'gallery' => $original['gallery'], 'specs' => $specs],
         'bl_videos_nonce' => wp_create_nonce('bl_save_videos'), 'bl_videos' => ['src' => ['videos/bucket.mp4', ''], 'poster' => ['videos/bucket.webp', ''], 'caption' => ['QA clip', '']]];
     wp_update_post(['ID' => $post->ID, 'post_title' => $post->post_title]);
     $saved = get_post_meta($post->ID, '_bl_record', true);

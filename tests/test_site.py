@@ -10,8 +10,9 @@ from urllib.parse import urljoin, urlsplit
 from urllib.request import build_opener, ProxyHandler, HTTPRedirectHandler
 from xml.etree import ElementTree
 
-BASE = sys.argv[1].rstrip('/') if len(sys.argv) > 1 else 'http://127.0.0.1:4173'
-sys.argv = [sys.argv[0]]
+BASE = sys.argv[1].rstrip('/') if __name__ == '__main__' and len(sys.argv) > 1 else 'http://127.0.0.1:4173'
+if __name__ == '__main__':
+    sys.argv = [sys.argv[0]]
 OPENER = build_opener(ProxyHandler({}))
 
 
