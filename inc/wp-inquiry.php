@@ -29,6 +29,15 @@ function bl_wp_inquiry_form_id(): int
 }
 
 /** An explicit global email override applies only to the theme's primary notification. Legacy plugin recipients remain intact until then. */
+/** Where enquiry notifications go right now: the chosen sales email once one was chosen, else the form's own recipient. */
+function bl_wp_inquiry_current_recipient(): string
+{
+    $saved = get_option('bl_content_global', []);
+    if (is_array($saved) && (!empty($saved['_bl_email_explicit']) || (is_array($saved['company'] ?? null) && array_key_exists('email', $saved['company'])))) return bl_content_resolve('global', $saved)['company']['email'];
+    $form = class_exists('WPCF7_ContactForm') && bl_inquiry_form_id() ? WPCF7_ContactForm::get_instance(bl_inquiry_form_id()) : null;
+    return $form ? (string) ($form->prop('mail')['recipient'] ?? '') : '';
+}
+
 function bl_wp_inquiry_recipient(array $components, $form, $mail): array
 {
     if (!$form || !$mail || (int) $form->id() !== (int) get_option('bl_inquiry_form') || $mail->name() !== 'mail') return $components;
@@ -287,7 +296,8 @@ add_filter('wpcf7_special_mail_tags', static function ($output, string $name, bo
     if ($name === 'bl_logo') {
         // Mail clients have no page to resolve a root-relative address against, so it gets the site's own origin.
         $src = bl_brand_logo();
-        if (str_starts_with($src, '/') && !str_starts_with($src, '//')) {
+        if (str_starts_with($src, '//')) $src = (wp_parse_url(home_url(), PHP_URL_SCHEME) ?: 'https') . ':' . $src;
+        elseif (str_starts_with($src, '/')) {
             $home = wp_parse_url(home_url());
             $src = ($home['scheme'] ?? 'https') . '://' . ($home['host'] ?? '') . (isset($home['port']) ? ':' . $home['port'] : '') . $src;
         }

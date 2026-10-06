@@ -55,7 +55,7 @@ return [
         [
             'title' => '公司与联系方式',
             'fields' => [
-                ['key' => 'company.email', 'label' => '销售邮箱', 'type' => 'email', 'help' => '必填，请填写有效邮箱。保存本页后，主题询盘主通知使用此邮箱（包括默认地址）；从未设置时保留插件已有收件人。'],
+                ['key' => 'company.email', 'label' => '销售邮箱', 'type' => 'email', 'help' => '必填。网站上显示的联系邮箱。改成新地址并保存后，询盘通知也改发到这里；没改过时，询盘通知沿用询盘表单里原有的收件人（本页顶部显示当前发往哪里）。'],
                 ['key' => 'company.business_email', 'label' => '商务合作邮箱', 'type' => 'email', 'help' => ''],
                 ['key' => 'company.phone', 'label' => '电话（含国家码）', 'type' => 'text', 'help' => ''],
                 ['key' => 'company.sales_whatsapp', 'label' => '销售 WhatsApp 号码', 'type' => 'digits', 'help' => '必填。带国家区号，只写数字，例如 8615852499415；全站 WhatsApp 按钮都用它。'],

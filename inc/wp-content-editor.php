@@ -494,6 +494,7 @@ function bl_content_screen(string $page): void
     if (isset($_GET['bl_saved'])) echo '<p role="status"><span class="bl-chip">已保存</span></p>';
     if (isset($_GET['bl_reset'])) echo '<p role="status"><span class="bl-chip">已恢复为主题默认内容</span></p>';
     if ($recovery) echo '<p role="alert"><span class="bl-chip bl-chip-warn">未保存</span> ' . esc_html($recovery['message']) . ' 输入已保留 24 小时；请在新标签页打开最新内容，对照后再编辑保存。<a target="_blank" rel="noopener" href="' . esc_url(admin_url('admin.php?page=bl-content-' . $page)) . '">打开最新内容</a></p>';
+    if ($page === 'global' && function_exists('bl_wp_inquiry_current_recipient') && ($recipient = bl_wp_inquiry_current_recipient()) !== '') echo '<p><span class="bl-chip">询盘通知当前发往：' . esc_html($recipient) . '</span></p>';
     if ($page === 'privacy') echo '<p><span class="bl-chip">当前模式：' . (bl_inquiry_form_id() ? '站内提交' : '邮件草稿') . '</span> 两种模式分别编辑，前台按询盘插件的启用状态自动选择。启用统计代码后，请同步更新外部服务说明。</p>';
     if ($page === 'about') echo '<p>公司介绍仍在原生关于页面正文中编辑。</p>';
     $open = count($sections) === 1;
