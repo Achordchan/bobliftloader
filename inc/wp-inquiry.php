@@ -12,8 +12,9 @@ declare(strict_types=1);
 const BL_ENQUIRY_EMAIL = 'info@boblift.com';
 // Raised when the theme's form or notification email changes, so the form the theme made earlier gets the new one once
 // (2: the HTML card; 3: no country field, the card shows the country of the sender's IP address instead; 4: the card
-// redesigned in the site's colours; 5: the country in Chinese, the same text size on phones, the sender named in Chinese).
-const BL_ENQUIRY_MAIL_VERSION = 5;
+// redesigned in the site's colours; 5: the country in Chinese, the same text size on phones;
+// 6: the sender is the site title again; the country names come from the theme's own table).
+const BL_ENQUIRY_MAIL_VERSION = 6;
 // Marks the notification card in the form's Mail body; only that layout is sent without CF7's automatic paragraphs.
 const BL_ENQUIRY_CARD_MARKER = '<!-- bl-inquiry-card -->';
 
@@ -165,10 +166,10 @@ const BL_ENQUIRY_MAIL_V1 = [
 // The HTML bodies the theme gave its form before (md5 of the trimmed body): version 2 with a country row, 3 and 4.
 const BL_ENQUIRY_MAIL_EARLIER = ['7c345410a541a4ed5e5c6272d3971e19', '2c56857cde1a7dbe0e2e46d2db972231', '09a877efb12c5f681d0e55a193888211'];
 
-/** Who the notification comes from. The address stays on the site's own domain, so mail servers accept it. */
+/** Who the notification comes from: the site title, at the site's own domain so mail servers accept it. */
 function bl_wp_inquiry_sender(): string
 {
-    return 'BOB-LIFT 询盘通知 <wordpress@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>';
+    return '[_site_title] <wordpress@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>';
 }
 
 /**
@@ -189,7 +190,8 @@ add_action('init', static function (): void {
         $changes += ['body' => $new['body'], 'use_html' => true];
     }
     if ($same($mail['subject'] ?? '', BL_ENQUIRY_MAIL_V1['subject'])) $changes['subject'] = $new['subject'];
-    if ($same($mail['sender'] ?? '', '[_site_title] <wordpress@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>')) $changes['sender'] = bl_wp_inquiry_sender();
+    // Version 5 named the sender in Chinese for a while; that name goes back to the site title.
+    if ($same($mail['sender'] ?? '', 'BOB-LIFT 询盘通知 <wordpress@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>')) $changes['sender'] = bl_wp_inquiry_sender();
     $properties = $changes ? ['mail' => array_replace($mail, $changes)] : [];
     // The country field goes only when no mail that stays (an edited body or subject, the autoresponder) still uses it.
     $kept = [$properties['mail'] ?? $mail, (array) $form->prop('mail_2')];
@@ -263,9 +265,10 @@ function bl_wp_ip_country(string $ip): string
         set_transient($key, $code, $code ? WEEK_IN_SECONDS : HOUR_IN_SECONDS);
     }
     if ($code === '') return '';
-    // ICU's names (PHP intl) are the mapping; without intl the two-letter code is shown.
-    $name = class_exists('Locale') ? (string) Locale::getDisplayRegion('-' . $code, 'zh_Hans_CN') : '';
-    return $name !== '' && $name !== $code ? $name : $code;
+    // The theme's own table: the server's intl may lack Chinese names and fall back to English. Unknown codes show as is.
+    static $names = null;
+    $names ??= require __DIR__ . '/country-names-zh.php';
+    return $names[$code] ?? $code;
 }
 
 // The notification's own tags. CF7 asks for them only when the mail names them, so other forms are not affected.
