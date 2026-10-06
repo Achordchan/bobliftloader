@@ -138,11 +138,17 @@
   .bl-site.bl-motion .bl-about-tree .bl-tree-branch::before{transform:scaleX(0)}
 }
 @media(max-width:600px){
-  .bl-site .bl-about-factory-copy h2{font-size:clamp(52px,15vw,72px)}
+  .bl-site :is(.bl-about-factory-copy,.bl-about-group) h2{font-size:var(--m-h2,clamp(38px,11vw,46px))}
+  /* Section rhythm: a full step for the dark band and the factory after it; shorter steps between the parts inside the band. */
+  .bl-site .bl-about-group{padding-top:var(--m-sec,56px);padding-bottom:var(--m-sec,56px)}
+  .bl-site .bl-about-group-head{gap:28px}
+  .bl-site .bl-about-tree{margin-top:var(--m-sec-tight,40px)}
+  .bl-site .bl-about-promises{margin-top:var(--m-sec-tight,40px)}
+  .bl-site .bl-about-factory{gap:32px;padding-top:var(--m-sec,56px);padding-bottom:var(--m-sec,56px)}
   .bl-site .bl-about-factory-photos{grid-template-columns:1fr 1fr;grid-template-rows:auto}
   .bl-site .bl-about-factory-photos img:first-child{grid-column:1/-1;grid-row:auto;aspect-ratio:3/2}
   .bl-site .bl-about-factory-photos img{aspect-ratio:3/2}
-  .bl-site .bl-about-hero h1{font-size:clamp(56px,17vw,92px)}
+  .bl-site .bl-about-hero h1{font-size:var(--m-h1,clamp(48px,14vw,60px))}
   .bl-site .bl-about-hero h1 .bl-outline-text{-webkit-text-stroke-width:1.5px}
   .bl-site .bl-about-hero-photo img{height:clamp(300px,92vw,460px)}
   .bl-site .bl-about-plate>div{padding:18px 18px 20px}
@@ -158,10 +164,9 @@
   /* A place name sits smaller than the figures; every value keeps to the foot of its cell, so the two in a row share a baseline. */
   .bl-site .bl-about-plate>div{display:flex;flex-direction:column;justify-content:space-between}
   .bl-site .bl-about-plate dd.bl-about-plate-word{font-size:clamp(24px,7vw,32px);line-height:1}
-  .bl-site .bl-about-group h2{font-size:clamp(44px,12.4vw,64px)}
-  .bl-site .bl-tree-root-name h3{font-size:56px}
+  .bl-site .bl-tree-root-name h3{font-size:calc(var(--m-h3,28px) + 6px)}
   .bl-site .bl-tree-branch{padding:24px 22px 26px}
-  .bl-site .bl-tree-branch h3{font-size:clamp(40px,11vw,56px)}
+  .bl-site .bl-tree-branch h3{font-size:var(--m-h3,28px)}
   .bl-site .bl-tree-here>span{flex-wrap:wrap}
   .bl-site .bl-tree-here-links a{min-height:44px}
 }

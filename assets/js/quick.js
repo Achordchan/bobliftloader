@@ -66,9 +66,18 @@ export function initializeQuick() {
   document.addEventListener('focusin', (event) => {
     if (!panel.hidden && sheet.matches && !quick.contains(event.target) && event.target !== barEnquiry) panel.querySelector('.bl-quick-close').focus({ preventScroll: true });
   });
+  // A product page has its own enquiry form, so there the bar's Enquiry goes down to it instead of opening the sheet.
+  const pageForm = document.querySelector('.bl-product-enquiry');
   barEnquiry?.addEventListener('click', (event) => {
     if (!sheet.matches) return;
     event.preventDefault();
+    if (pageForm && panel.hidden) {
+      const title = pageForm.querySelector('h2') || pageForm;
+      if (!title.hasAttribute('tabindex')) title.tabIndex = -1;
+      pageForm.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      title.focus({ preventScroll: true });
+      return;
+    }
     setOpen(panel.hidden, barEnquiry);
   });
   // Turning the phone past the sheet's limits leaves a dimmed, locked page behind: close it instead.

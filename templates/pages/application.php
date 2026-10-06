@@ -73,7 +73,7 @@ $machines = $named ?: array_slice($family, 0, 3);
     <div><p class="bl-eyebrow">02 / THE MACHINES</p><h2 id="machines-title">BUILT FOR<br><span class="bl-blue-text"><?= bl_escape(strtoupper($application['title'])) ?>.</span></h2></div>
     <div><p><?= bl_escape($familyLabel) ?>, <?= bl_escape(strtolower($order['label'])) ?>. Every figure is from the model’s published specifications.</p><a class="bl-text-link" href="<?= bl_escape(bl_url('/products/' . $category . '/' . $order['link'][0])) ?>"><?= bl_escape($order['link'][1]) ?> <?= bl_icon('arrow-up-right') ?></a></div>
   </div>
-  <div class="bl-product-grid"><?php foreach ($machines as $product) bl_product_card($product); ?></div>
+  <div class="bl-product-grid" role="region" aria-labelledby="machines-title" data-swipe-row><?php foreach ($machines as $product) bl_product_card($product); ?></div>
 </section>
 
 <?php $cases = bl_application_cases($slug); if ($cases): ?>
@@ -87,7 +87,7 @@ $machines = $named ?: array_slice($family, 0, 3);
 <?php endif; ?>
 <section class="bl-app-more bl-shell" aria-labelledby="more-title">
   <div class="bl-app-more-head bl-reveal"><div><p class="bl-eyebrow"><?= $cases ? '04' : '03' ?> / OTHER JOBS</p><h2 id="more-title">MORE WORK.<br>SAME TEAM.</h2></div><a class="bl-text-link" href="<?= bl_escape(bl_url('/products/' . $category . '/')) ?>">All <?= bl_escape(strtolower($familyLabel)) ?> <?= bl_icon('arrow-up-right') ?></a></div>
-  <ul class="bl-app-more-list">
+  <ul class="bl-app-more-list" aria-labelledby="more-title" data-swipe-row>
     <?php foreach ($others as $other): $focus = bl_application_focus($other); ?>
     <li class="bl-reveal"><a href="<?= bl_escape(bl_url('/applications/' . bl_application_slug($other) . '/')) ?>">
       <span class="bl-app-more-photo"><img src="<?= bl_escape($other['image']) ?>" alt="<?= bl_escape($other['alt']) ?>" width="1586" height="992" loading="lazy"></span>

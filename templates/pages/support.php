@@ -85,8 +85,9 @@ $partsImage = bl_content_image($after['parts_image'], ['src' => bl_asset('images
       <p><?= bl_escape($content['containers']['text']) ?></p>
     </div>
     <div class="bl-sup-containers-tables">
+      <?php if ($containerGroups['skid-steer-loaders'] && $containerGroups['mini-dumpers']): ?><div class="bl-sup-fit-switch" role="radiogroup" aria-labelledby="containers-title"><input type="radio" name="sup-fit" id="sup-fit-loaders" checked><label for="sup-fit-loaders">Skid steer loaders</label><input type="radio" name="sup-fit" id="sup-fit-dumpers"><label for="sup-fit-dumpers">Mini dumpers</label></div><?php endif; ?>
       <?php foreach ($containerGroups as $category => $rows): if (!$rows) continue; ?>
-      <table class="bl-sup-table bl-reveal">
+      <table class="bl-sup-table bl-sup-table-<?= $category === 'mini-dumpers' ? 'dumpers' : 'loaders' ?> bl-reveal">
         <caption><?= $category === 'mini-dumpers' ? 'Mini dumpers' : 'Mini skid steer loaders' ?></caption>
         <thead><tr><th scope="col">Model</th><th scope="col"><abbr title="20-foot standard container">20GP</abbr></th><th scope="col"><abbr title="40-foot high-cube container">40HQ</abbr></th></tr></thead>
         <tbody>

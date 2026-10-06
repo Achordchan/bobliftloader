@@ -127,11 +127,18 @@
   .bl-site .bl-story-pager{grid-template-columns:1fr}
   .bl-site .bl-story-pager-older{grid-column:auto;align-items:flex-start;text-align:left}
   .bl-site .bl-story-poster{float:none;width:auto;max-width:340px;margin:24px auto}
-  /* One column: each picture keeps its own shape, so posters are never cropped through their lettering. */
-  .bl-site .bl-news-item-image{aspect-ratio:auto}
-  .bl-site .bl-news-item-image img{height:auto}
+  /* One column: each picture near 3:2 in a frame of its own shape (news.php); posters sit whole on a light mat in a 3:2 frame, so lettering is never cropped. */
+  .bl-site .bl-news-item-image{aspect-ratio:var(--bl-news-ratio,3/2)}
+  .bl-site .bl-news-item-image-whole{background:#e9edf0}
+  .bl-site .bl-news-item-image-whole img{object-fit:contain}
 }
 @media(max-width:600px){
+  .bl-site .bl-story-head h1{font-size:clamp(36px,10vw,44px);line-height:1.02}
+  .bl-site .bl-news-head h1{font-size:var(--m-h1,clamp(48px,14vw,60px));line-height:.9;letter-spacing:-.015em;text-transform:uppercase}
+  .bl-site .bl-news-head-row{gap:16px;padding-top:28px}
+  .bl-site .bl-news-list-section{padding-bottom:var(--m-sec,56px)}
+  .bl-site .bl-news-item-event>.bl-news-when{flex-basis:100%;margin-top:4px}
+  .bl-site .bl-news-item-event>.bl-news-when::before{display:none}
   .bl-site .bl-news-tabs>a::before{content:'';position:absolute;inset:0 -10px}
   .bl-site a.bl-story-category{position:relative}
   .bl-site a.bl-story-category::before{content:'';position:absolute;inset:-10px -6px}

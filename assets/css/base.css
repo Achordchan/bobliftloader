@@ -13,7 +13,9 @@
 /* Phones: a shorter header, and no caption or label below 12px, no running text below 14px. */
 @media(max-width:800px){.bl-site{--header-height:73px}}
 @media(min-width:801px) and (max-width:1000px) and (max-height:500px){.bl-site{--header-height:64px}}
-@media(max-width:600px){.bl-site{--header-height:60px;--fs-micro:12px;--fs-label:13px;--fs-small:14px}}
+/* Phones also share one type scale (page title, section heading, card title) and two section rhythms: --m-sec between
+   sections, --m-sec-tight where two sections of the same ground meet. */
+@media(max-width:600px){.bl-site{--header-height:60px;--fs-micro:12px;--fs-label:13px;--fs-small:14px;--m-h1:clamp(48px,14vw,60px);--m-h2:clamp(38px,11vw,46px);--m-h3:28px;--m-sec:56px;--m-sec-tight:40px}}
 .bl-site *,.bl-site *::before,.bl-site *::after{box-sizing:border-box}
 .bl-site ::selection{background:var(--blue);color:white}
 .bl-site [hidden]{display:none!important}
@@ -27,6 +29,7 @@
 .bl-site img{display:block;max-width:100%;height:auto}
 .bl-site ul{margin:0;padding:0;list-style:none}
 .bl-site :focus-visible{outline:3px solid #efaa49;outline-offset:5px}
+.bl-site [data-swipe-row]:focus-visible{outline-offset:2px}
 .bl-site section[id]{scroll-margin-top:clamp(67px,calc(51.6px + 2.25vw),109px)}
 .bl-site .bl-shell{padding-left:var(--gutter);padding-right:var(--gutter);max-width:var(--frame-width);margin-inline:auto}
 .bl-site .bl-icon{display:inline-block;width:clamp(20px,1vw,26px);height:clamp(20px,1vw,26px);flex-shrink:0;vertical-align:middle}
@@ -36,20 +39,20 @@
 .bl-site .bl-rule{width:36px;height:1px;background:currentColor;display:inline-block;margin-left:18px;vertical-align:middle}
 .bl-site .bl-button{min-height:clamp(54px,2.7vw,70px);display:inline-flex;align-items:center;justify-content:space-between;gap:clamp(22px,calc(17.2px + 0.75vw),36px);padding:15px clamp(23px,1.2vw,32px);font-size:var(--fs-small);font-weight:700;line-height:1.4;border:1px solid transparent;transition:background .2s,color .2s,border-color .2s;position:relative}
 .bl-site .bl-button .bl-icon{width:21px;height:21px;transition:transform .25s}
-.bl-site .bl-button:hover .bl-icon{transform:translate(3px,-3px)}
+@media(hover:hover){.bl-site .bl-button:hover .bl-icon{transform:translate(3px,-3px)}}
 .bl-site .bl-button-blue{color:white;background:var(--blue)}
-.bl-site .bl-button-blue:hover{background:#1746ad}
+@media(hover:hover){.bl-site .bl-button-blue:hover{background:#1746ad}}
 .bl-site .bl-button-blue .bl-icon{filter:invert(1)}
 .bl-site .bl-button-outline{color:white;border-color:#6f7c86}
 .bl-site .bl-button-outline .bl-icon{filter:invert(1)}
-.bl-site .bl-button-outline:hover{background:white;color:var(--ink);border-color:white}
-.bl-site .bl-button-outline:hover .bl-icon{filter:none}
+@media(hover:hover){.bl-site .bl-button-outline:hover{background:white;color:var(--ink);border-color:white}}
+@media(hover:hover){.bl-site .bl-button-outline:hover .bl-icon{filter:none}}
 .bl-site .bl-text-link{display:inline-flex;align-items:center;gap:20px;font-size:var(--fs-small);font-weight:700;padding-bottom:7px;border-bottom:1px solid currentColor;line-height:1.3}
 .bl-site .bl-text-link .bl-icon{width:18px;height:18px;transition:transform .2s}
-.bl-site .bl-text-link:hover .bl-icon{transform:translate(3px,-3px)}
+@media(hover:hover){.bl-site .bl-text-link:hover .bl-icon{transform:translate(3px,-3px)}}
 .bl-site .bl-circle-button{display:flex;align-items:center;justify-content:center;width:clamp(52px,2.6vw,66px);height:clamp(52px,2.6vw,66px);border:1px solid currentColor;border-radius:50%;transition:background .2s,color .2s,transform .2s;flex-shrink:0}
-.bl-site .bl-circle-button:hover{background:var(--blue);border-color:var(--blue);color:white;transform:rotate(5deg)}
-.bl-site .bl-circle-button:hover .bl-icon{filter:invert(1)}
+@media(hover:hover){.bl-site .bl-circle-button:hover{background:var(--blue);border-color:var(--blue);color:white;transform:rotate(5deg)}}
+@media(hover:hover){.bl-site .bl-circle-button:hover .bl-icon{filter:invert(1)}}
 .bl-site .bl-skip{position:fixed;left:24px;top:-90px;z-index:100;padding:12px 20px;background:white;color:var(--ink)}
 .bl-site .bl-skip:focus{top:12px}
 .bl-site .bl-status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#739dff;margin-right:10px;vertical-align:middle}
@@ -61,4 +64,21 @@
 @media (prefers-reduced-motion:reduce){
   .bl-site *,.bl-site *::before,.bl-site *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
   .bl-site.bl-motion .bl-reveal{opacity:1;transform:none}
+}
+/* Phones: headings balance their lines, and a button takes the full width unless it shares a row. */
+@media(max-width:600px){
+  .bl-site :is(h1,h2,h3,.bl-display){text-wrap:balance}
+  .bl-site .bl-button{width:100%}
+  .bl-site :is(.bl-hero-action,.bl-review-actions) .bl-button{width:auto}
+}
+/* Touch screens: no hover to lean on, so a tap answers at once (buttons press in, cards and links dim). */
+@media(hover:none){
+  .bl-site .bl-button{transition:background .2s,color .2s,border-color .2s,transform .12s,filter .12s}
+  .bl-site .bl-button:active{transform:scale(.97);filter:brightness(.86)}
+  .bl-site .bl-button-outline:active{background:#ffffff1f}
+  .bl-site .bl-circle-button:active{transform:scale(.92)}
+  .bl-site .bl-nav-direct a:active{background:#173346}
+  .bl-site :is(.bl-text-link,.bl-contact-email,.bl-nav>a,.bl-nav-panel a,.bl-footer-links a,.bl-footer-bottom>a,.bl-breadcrumbs a,.bl-search-result a,.bl-news-card h2 a,.bl-news-card h3 a):active{opacity:.6}
+  .bl-site :is(.bl-range-visual,.bl-application-tile,.bl-product-card-image,.bl-news-card-image,.bl-site-panel a,.bl-lang-panel a):active{opacity:.85}
+  .bl-site :is(.bl-text-link,.bl-nav>a,.bl-nav-panel a,.bl-footer-links a,.bl-range-visual,.bl-application-tile,.bl-product-card-image,.bl-news-card-image){transition:opacity .12s}
 }

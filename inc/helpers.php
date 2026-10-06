@@ -266,6 +266,31 @@ function bl_articles(): array
     return $articles;
 }
 
+/**
+ * A news picture's width over height, from its WordPress attachment or, for pictures shipped with the theme, from the
+ * file; null when it cannot be read (the list then shows the picture whole, never cropped through its lettering).
+ */
+function bl_news_image_ratio(array $article): ?float
+{
+    $size = null;
+    $id = (int) ($article['image_id'] ?? 0);
+    // A featured image is shown at 'large' (which a site may hard-crop), so that rendition is measured.
+    if ($id && function_exists('wp_get_attachment_image_src') && ($src = wp_get_attachment_image_src($id, 'large'))) {
+        if (!empty($src[1]) && !empty($src[2])) $size = [(int) $src[1], (int) $src[2]];
+    }
+    // Any other upload is measured as the very file its URL names: the original or one of its sizes.
+    if (!$id && function_exists('attachment_url_to_postid') && str_contains((string) $article['image'], '/wp-content/uploads/')
+        && ($upload = (int) attachment_url_to_postid($article['image'])) && ($meta = wp_get_attachment_metadata($upload))) {
+        $name = basename((string) parse_url((string) $article['image'], PHP_URL_PATH));
+        foreach (array_merge([['file' => basename((string) ($meta['file'] ?? '')), 'width' => $meta['width'] ?? 0, 'height' => $meta['height'] ?? 0]], $meta['sizes'] ?? []) as $rendition) {
+            if (($rendition['file'] ?? '') === $name) { $size = [(int) $rendition['width'], (int) $rendition['height']]; break; }
+        }
+    }
+    $file = $size ? false : strstr((string) parse_url((string) $article['image'], PHP_URL_PATH), '/assets/');
+    if ($file && ($info = @getimagesize(dirname(__DIR__) . $file))) $size = $info;
+    return $size && !empty($size[0]) && !empty($size[1]) ? $size[0] / $size[1] : null;
+}
+
 /** "15–19 October 2026", or "30 October – 2 November 2026" across months. */
 function bl_event_dates(array $event): string
 {

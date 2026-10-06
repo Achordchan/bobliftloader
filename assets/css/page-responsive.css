@@ -31,7 +31,7 @@
   .bl-site .bl-breadcrumbs a{display:inline-flex;align-items:center;min-height:44px;padding-inline:6px;margin-inline:-6px}
   .bl-site .bl-breadcrumbs li+li::before{margin-right:8px}
   .bl-site .bl-page-heading{padding-top:24px;gap:25px}
-  .bl-site .bl-page-heading h1{font-size:clamp(53px,15.3vw,85px);letter-spacing:-.8px;overflow-wrap:anywhere}
+  .bl-site .bl-page-heading h1{font-size:var(--m-h1,clamp(48px,14vw,60px));letter-spacing:-.8px;overflow-wrap:anywhere}
   .bl-site .bl-page-heading .bl-eyebrow{font-size:12px;margin-bottom:22px}
   .bl-site .bl-page-heading>p{font-size:14px;line-height:1.85}
   .bl-site .bl-page-hero{padding-bottom:38px}
@@ -41,30 +41,29 @@
   .bl-site .bl-catalog-status{width:100%;margin-left:0;min-height:0;padding-top:14px;border-top:1px solid var(--line);font-size:13px}
   .bl-site .bl-catalog-clear{margin-left:auto}
   .bl-site .bl-catalog-filters{flex-direction:column;gap:18px}
-  .bl-site .bl-product-card-content :is(h2,h3){font-size:32px}
+  .bl-site .bl-product-card-content :is(h2,h3){font-size:var(--m-h3,28px)}
   .bl-site .bl-product-card-content dl{gap:45px}
-  .bl-site .bl-catalog{padding-bottom:55px}
-  .bl-site .bl-page-cta{align-items:flex-start;flex-direction:column;padding-block:45px}
-  .bl-site .bl-page-cta h2{font-size:48px}
-  .bl-site .bl-product-display{font-size:47px}
+  .bl-site .bl-catalog{padding-bottom:var(--m-sec,56px)}
+  .bl-site .bl-page-cta{align-items:stretch;flex-direction:column;padding-block:var(--m-sec,56px)}
+  .bl-site .bl-page-cta h2{font-size:var(--m-h2,clamp(38px,11vw,46px))}
+  .bl-site .bl-product-display{font-size:var(--m-h2,clamp(38px,11vw,46px))}
   .bl-site .bl-prose{font-size:14px}
   .bl-site .bl-prose .bl-lead{font-size:17px}
   .bl-site .bl-product-main-image>img{padding:15px}
   .bl-site .bl-product-intro h1>span{font-size:25px}
   .bl-site .bl-product-excerpt{font-size:14px}
   .bl-site .bl-product-section-nav{gap:25px;min-height:62px;font-size:13px}
-  .bl-site .bl-related{padding-block:50px}
+  .bl-site .bl-product-overview,.bl-site .bl-specifications{padding-block:var(--m-sec,56px)}
+  .bl-site .bl-related{padding-block:var(--m-sec,56px)}
   .bl-site .bl-small-section-heading{flex-direction:column;align-items:flex-start;gap:22px}
-  .bl-site .bl-small-section-heading h2{font-size:45px}
+  .bl-site .bl-small-section-heading h2{font-size:var(--m-h2,clamp(38px,11vw,46px))}
   .bl-site .bl-news-grid{grid-template-columns:1fr;gap:40px}
-  .bl-site .bl-news-card :is(h2,h3){font-size:36px}
-  .bl-site .bl-home-journal{padding-block:50px}
-  .bl-site .bl-contact-main{padding-bottom:50px}
-  .bl-site .bl-contact-intro h1{font-size:64px}
+  .bl-site .bl-news-card :is(h2,h3){font-size:var(--m-h3,28px)}
+  .bl-site .bl-home-journal{padding-block:var(--m-sec,56px)}
+  .bl-site .bl-contact-main{padding-bottom:var(--m-sec,56px)}
+  .bl-site .bl-contact-intro h1{font-size:var(--m-h1,clamp(48px,14vw,60px))}
   .bl-site .bl-contact-channels b{font-size:24px}
   .bl-site .bl-contact-prepare ol{grid-template-columns:1fr}
-  .bl-site .bl-contact-form-panel{padding:26px 18px;margin-inline:-10px}
-  .bl-site .bl-contact-form-panel>h2{font-size:38px}
   .bl-site .bl-not-found{padding-block:70px}
   .bl-site .bl-not-found>div{flex-direction:column;align-items:flex-start}
 }
@@ -100,15 +99,32 @@
   .bl-site .bl-side-contact svg{width:20px;height:20px}
   .bl-site .bl-side-contact span,.bl-site .bl-side-contact a:is(:hover,:focus-visible) span{position:static;transform:none;opacity:1;background:none;padding:0;font-size:12px;line-height:1.2;pointer-events:auto}
   .bl-site .bl-side-contact a:hover{transform:none}
-  /* While the quick enquiry is open, its bar button reads as the current one. */
-  .bl-quick-on .bl-site .bl-side-contact a[data-quick]{background:var(--blue);color:#fff}
+  /* Three cells, Enquiry the widest and always blue; Top leaves the bar for a small round button above its right end,
+     shown once the page has scrolled a screen or so (main.js marks the root), and out of the way of the quick enquiry. */
+  .bl-site .bl-side-contact .bl-side-wa svg{color:#25d366}
+  .bl-site .bl-side-contact .bl-side-enquiry{flex:1.4;flex-direction:row;gap:9px;background:var(--blue);color:#fff;border-right:0;font-size:13px}
+  .bl-site .bl-side-contact .bl-side-enquiry span{font-size:13px}
+  .bl-quick-on .bl-site .bl-side-contact .bl-side-enquiry{background:#1746ad}
+  .bl-site .bl-side-contact .bl-side-top{position:fixed;right:16px;bottom:calc(var(--bl-bar-height) + env(safe-area-inset-bottom,0px) + 14px);flex:none;width:44px;height:44px;padding:0;border:1px solid #ffffff2e;border-radius:50%;background:#081c2bdb;color:#fff;box-shadow:0 6px 20px #081c2b40;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .25s,transform .25s,visibility 0s linear .25s}
+  .bl-site .bl-side-contact a.bl-side-top span{display:none}
+  .bl-past-fold .bl-site .bl-side-contact .bl-side-top{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+  /* It also steps aside while the menu or the quick enquiry is open, or while it would cover a control (main.js). */
+  :is(.bl-quick-on,.bl-menu-on,.bl-top-aside) .bl-site .bl-side-contact .bl-side-top{opacity:0;visibility:hidden;transition:opacity .2s,visibility 0s linear .2s}
+  /* At the foot of the page the Top button settles beside Privacy rather than over it. */
+  .bl-site .bl-footer-bottom{padding-right:76px}
   .bl-site .bl-footer{padding-bottom:calc(var(--bl-bar-height) + env(safe-area-inset-bottom,0px))}
   .bl-site .bl-footer-top>.bl-circle-button{display:none}
+}
+/* A tap leaves :hover behind on touch screens: the rail's hover colours would stick to the last button pressed. */
+@media(hover:none){
+  .bl-site .bl-side-contact a:not(.bl-side-enquiry):hover{background:var(--ink);color:#e6edf2}
+  .bl-site .bl-side-contact a:active{background:#173346}
+  .bl-site .bl-side-contact .bl-side-enquiry:active{background:#1746ad}
 }
 @media(max-width:600px){
   .bl-site .bl-catalog .bl-product-grid,.bl-site .bl-product-grid{grid-template-columns:1fr;gap:32px}
   .bl-site .bl-product-card-content dl{gap:8px}
-  .bl-site .bl-product-intro h1{font-size:clamp(60px,17vw,74px)}
+  .bl-site .bl-product-intro h1{font-size:var(--m-h1,clamp(48px,14vw,60px))}
   .bl-site .bl-product-key-specs{gap:10px}
   .bl-site .bl-product-key-specs dd{font-size:26px}
   .bl-site .bl-product-actions{gap:16px}
@@ -119,7 +135,7 @@
   .bl-site .bl-contact-visit-grid{grid-template-columns:1fr;gap:32px}
 }
 @media(max-width:600px){
-  .bl-site .bl-contact-visit{padding-block:48px}
+  .bl-site .bl-contact-visit{padding-block:var(--m-sec,56px)}
   .bl-site .bl-contact-visit-actions{align-items:flex-start;flex-direction:column}
   .bl-site .bl-contact-visit-business{align-items:flex-start;flex-direction:column}
 }

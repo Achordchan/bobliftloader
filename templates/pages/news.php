@@ -25,7 +25,10 @@ $articles = $current ? array_values(array_filter($allArticles, static fn($a) => 
   <ol class="bl-news-list">
     <?php foreach ($articles as $i => $article): $event = $article['event'] ?? []; $status = !empty($event['start']) ? bl_event_status($event) : null; ?>
     <li><a class="bl-news-item" href="<?= bl_escape(bl_article_url($article)) ?>">
-      <span class="bl-news-item-image"><img src="<?= bl_escape($article['image']) ?>" alt="" width="900" height="600"<?= $i ? ' loading="lazy"' : '' ?>></span>
+      <?php // On phones a picture near 3:2 fills a frame of its own shape, so nothing is cropped; one far from it (a square
+      // poster, wide artwork) or of unknown size sits whole in the 3:2 frame.
+      $ratio = bl_news_image_ratio($article); $whole = !$ratio || $ratio < 1.3 || $ratio > 1.8; ?>
+      <span class="bl-news-item-image<?= $whole ? ' bl-news-item-image-whole' : '' ?>"<?= !$whole && abs($ratio - 1.5) > .02 ? ' style="--bl-news-ratio:' . round($ratio, 3) . '"' : '' ?>><img src="<?= bl_escape($article['image']) ?>" alt="" width="900" height="600"<?= $i ? ' loading="lazy"' : '' ?>></span>
       <span class="bl-news-item-body">
         <span class="bl-news-item-meta"><span class="bl-news-tag<?= bl_news_category($article) ? '' : ' bl-news-tag-group' ?>"><?= bl_escape(bl_news_label($article)) ?></span><time datetime="<?= bl_escape($article['date']) ?>"><?= date('j M Y', strtotime($article['date'])) ?></time></span>
         <span class="bl-news-item-title"><?= bl_escape($article['title']) ?></span>

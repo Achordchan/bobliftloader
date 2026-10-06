@@ -126,15 +126,72 @@ function setMotionPreference() {
 setMotionPreference();
 reducedMotion.addEventListener('change', setMotionPreference);
 
+// Past the first screen or so, the phone bar's Top button shows (page-responsive.css).
+const markScroll = () => {
+  header.classList.toggle('bl-scrolled', window.scrollY > 30);
+  document.documentElement.classList.toggle('bl-past-fold', window.scrollY > 600);
+};
 let scheduled = false;
 window.addEventListener('scroll', () => {
   if (scheduled) return;
   scheduled = true;
   requestAnimationFrame(() => {
-    header.classList.toggle('bl-scrolled', window.scrollY > 30);
+    markScroll();
     scheduled = false;
   });
 }, { passive: true });
+markScroll();
+
+// Rows that scroll sideways on phones take keyboard focus, so the arrow keys can scroll them, but only while they do scroll.
+const swipeRows = [...document.querySelectorAll('[data-swipe-row]')];
+if (swipeRows.length) {
+  const markRows = () => swipeRows.forEach((row) => {
+    if (row.scrollWidth > row.clientWidth + 1) row.tabIndex = 0;
+    else row.removeAttribute('tabindex');
+  });
+  new ResizeObserver(markRows).observe(document.documentElement);
+  markRows();
+}
+
+// The phone bar's Top button never covers something to press or type in: it steps aside while a field has focus, or
+// while a link, button or control passes beneath it, and comes back once the spot is clear.
+const topButton = document.querySelector('.bl-side-top');
+if (topButton) {
+  const controls = 'a[href],button,input,select,textarea,summary,label,[role=button],[role=tab],[tabindex]:not([tabindex="-1"])';
+  let pending = false;
+  const checkTop = () => {
+    pending = false;
+    const root = document.documentElement;
+    if (getComputedStyle(topButton).position !== 'fixed' || window.scrollY <= 600) {
+      root.classList.remove('bl-top-aside');
+      return;
+    }
+    const typing = Boolean(document.activeElement?.matches('input,select,textarea'));
+    const box = topButton.getBoundingClientRect();
+    const pad = 6;
+    const xs = [box.left - pad, box.left + 4, box.left + box.width / 2, box.right - 4, box.right + pad];
+    const ys = [box.top - pad, box.top + 4, box.top + box.height / 2, box.bottom - 4, box.bottom + pad];
+    const covered = !typing && xs.some((x) => ys.some((y) => {
+      const element = document.elementsFromPoint(x, y).find((item) => !item.closest('.bl-side-contact'));
+      const control = element?.closest(controls);
+      if (!control) return false;
+      // It may sit over the photograph of a large card, which stays easy to tap around it; never over a card's words,
+      // or over anything button-sized.
+      return control.getBoundingClientRect().height < 160 || !(element.matches('img') && element.getBoundingClientRect().width > 120);
+    }));
+    root.classList.toggle('bl-top-aside', typing || covered);
+  };
+  const scheduleTop = () => {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(checkTop);
+  };
+  ['scroll', 'focusin', 'focusout', 'toggle', 'transitionend'].forEach((type) => document.addEventListener(type, scheduleTop, { capture: true, passive: true }));
+  window.addEventListener('resize', scheduleTop, { passive: true });
+  new ResizeObserver(scheduleTop).observe(document.body);
+  document.addEventListener('click', () => setTimeout(scheduleTop, 50), { passive: true });
+  scheduleTop();
+}
 
 // The three support topics form one disclosure group, retaining native keyboard behavior.
 document.querySelectorAll('.bl-accordions details').forEach((detail) => {

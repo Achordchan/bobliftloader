@@ -23,6 +23,7 @@
 .bl-site .bl-apps-panel-index{position:absolute;left:clamp(20px,1.6vw,40px);top:clamp(18px,1.4vw,34px);font:700 clamp(44px,3.4vw,92px)/.8 var(--display);-webkit-text-stroke:1.5px #ffffffcc;color:transparent}
 .bl-site .bl-apps-panel-body{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:flex-start;padding:clamp(22px,1.8vw,48px)}
 .bl-site .bl-apps-panel-family{font-size:var(--fs-micro);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#d6e2ff}
+.bl-site .bl-apps-panel-no{display:none}
 .bl-site .bl-apps-panel-title{margin-top:clamp(8px,.6vw,14px);font:700 var(--fs-h3)/.95 var(--display);letter-spacing:-.005em}
 .bl-site .bl-apps-panel-focus{display:flex;align-items:flex-end;gap:clamp(12px,1vw,24px);margin-top:clamp(18px,1.4vw,36px);padding-top:clamp(14px,1vw,24px);border-top:1px solid #ffffff4d;align-self:stretch}
 .bl-site .bl-apps-panel-focus b{font:700 clamp(52px,4.4vw,124px)/.8 var(--display);letter-spacing:-.01em;white-space:nowrap}
@@ -122,13 +123,18 @@
   .bl-site .bl-app-more-head{flex-direction:column;align-items:flex-start}
 }
 @media(max-width:600px){
-  .bl-site .bl-apps-hero h1{font-size:clamp(56px,17vw,92px)}
-  .bl-site .bl-app-hero h1{font-size:clamp(44px,12.4vw,72px)}
+  .bl-site .bl-apps-hero h1,.bl-site .bl-app-hero h1{font-size:var(--m-h1,clamp(48px,14vw,60px))}
   .bl-site .bl-apps-hero h1 .bl-outline-text{-webkit-text-stroke-width:1.5px}
   .bl-site .bl-apps-triptych>li{height:clamp(360px,104vw,480px)}
   .bl-site .bl-apps-panel-focus b{font-size:clamp(48px,14vw,64px)}
-  .bl-site .bl-apps-send h2,.bl-site .bl-app-checks-head h2{font-size:clamp(52px,15vw,72px)}
-  .bl-site .bl-apps-send-list{grid-template-columns:1fr}
+  .bl-site :is(.bl-apps-send,.bl-app-checks-head,.bl-app-machines-head,.bl-app-more-head) h2{font-size:var(--m-h2,clamp(38px,11vw,46px))}
+  .bl-site .bl-apps-send{gap:36px;padding-top:var(--m-sec,56px);padding-bottom:var(--m-sec,56px)}
+  /* Four things to send: the number beside the title, as in the contact page's list. */
+  .bl-site .bl-apps-send-list{grid-template-columns:1fr;gap:28px}
+  .bl-site .bl-apps-send-list li{display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:12px;align-items:baseline;padding-top:0;border-top:0}
+  .bl-site .bl-apps-send-list span{font-size:36px;line-height:1;font-variant-numeric:tabular-nums}
+  .bl-site .bl-apps-send-list h3{margin:0;font-size:var(--fs-h5);line-height:1.1}
+  .bl-site .bl-apps-send-list p{grid-column:2;margin-top:6px}
   .bl-site .bl-app-photo img{height:clamp(300px,80vw,440px)}
   .bl-site .bl-app-plate>div{padding:18px 18px 20px}
   .bl-site .bl-app-plate dd{font-size:clamp(30px,9vw,44px);white-space:normal}
@@ -137,7 +143,7 @@
   .bl-site .bl-apps-hero h1{margin-top:16px}
   .bl-site .bl-apps-hero-side{padding-bottom:0}
   .bl-site .bl-apps-hero-side p{line-height:1.7}
-  .bl-site .bl-app-subtitle{margin-top:10px}
+  .bl-site .bl-app-subtitle{margin-top:10px;text-wrap:balance}
   .bl-site .bl-app-eyebrow-family{display:block;padding-left:20px;color:var(--muted)}
   .bl-site .bl-app-eyebrow-family>span{display:none}
   .bl-site .bl-app-hero-actions{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:22px}
@@ -151,10 +157,12 @@
   /* Each value keeps to the foot of its cell, so a two-line label beside a one-line one leaves the figures on one baseline. */
   .bl-site .bl-app-plate>div{display:flex;flex-direction:column;justify-content:space-between}
   .bl-site .bl-app-plate dd.bl-app-plate-word{font-size:clamp(24px,7vw,32px);line-height:1}
-  /* Index panels: a smaller number on a shaded top edge; the family line in white so it holds on any colour of machine. */
-  .bl-site .bl-apps-triptych a::after{background:linear-gradient(180deg,#081c2b99 0%,#081c2b00 22%,#081c2b00 30%,#081c2bb3 50%,#081c2bf2 100%)}
-  .bl-site .bl-apps-panel-index{top:18px;font-size:36px;-webkit-text-stroke-width:1px}
+  /* Index panels: the number joins the family line, which is white so it holds on any colour of machine. */
+  .bl-site .bl-apps-triptych a::after{background:linear-gradient(180deg,#081c2b00 0%,#081c2b00 32%,#081c2bb3 54%,#081c2bf2 100%)}
+  .bl-site .bl-apps-panel-index{display:none}
+  .bl-site .bl-apps-panel-no{display:inline}
   .bl-site .bl-apps-panel-family{color:#fff;text-shadow:0 1px 8px #081c2b99}
+  .bl-site .bl-apps-panel-title{font-size:var(--m-h3,28px)}
   /* Machines for this job: a sideways strip of compact cards instead of three full-width ones. */
   .bl-site .bl-app-machines .bl-product-grid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:76%;gap:14px;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 4px;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gutter);scrollbar-width:none}
   .bl-site .bl-app-machines .bl-product-grid::-webkit-scrollbar{display:none}
@@ -162,6 +170,25 @@
   .bl-site .bl-app-machines .bl-product-card-content :is(h2,h3){font-size:26px}
   .bl-site .bl-app-machines .bl-product-card-line{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;white-space:normal;line-height:1.45}
   .bl-site .bl-app-machines .bl-product-card-content dl>div{display:flex;flex-direction:column;justify-content:space-between}
+  /* Section rhythm: a full step after the dark plate, a short one between the light sections that follow. */
+  .bl-site .bl-app-checks{padding-top:var(--m-sec,56px)}
+  .bl-site .bl-app-checks-head{padding-bottom:32px}
+  .bl-site .bl-app-checks-list{gap:40px;padding-top:32px}
+  .bl-site :is(.bl-app-machines,.bl-app-cases){padding-top:var(--m-sec-tight,40px)}
+  .bl-site .bl-app-machines-head{gap:20px;padding-bottom:24px}
+  .bl-site .bl-app-more{padding-bottom:var(--m-sec,56px)}
+  .bl-site .bl-app-more-head{gap:20px;padding-top:var(--m-sec-tight,40px);padding-bottom:24px}
+  /* Other jobs: a sideways strip of cards, the next one showing at the edge. */
+  .bl-site .bl-app-more-list{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:72vw;gap:14px;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 4px;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gutter);scrollbar-width:none}
+  .bl-site .bl-app-more-list::-webkit-scrollbar{display:none}
+  .bl-site .bl-app-more-list>li{scroll-snap-align:start}
+  .bl-site.bl-motion .bl-app-more-list>.bl-reveal{opacity:1;transform:none}
+  .bl-site .bl-app-more-list a{height:100%;grid-template-rows:auto 1fr;gap:16px}
+  .bl-site .bl-app-more-photo{aspect-ratio:3/2}
+  .bl-site .bl-app-more-body{align-self:start;gap:6px;padding:0 0 18px 18px}
+  .bl-site .bl-app-more-title{font-size:var(--m-h3,26px);line-height:1}
+  .bl-site .bl-app-more-list .bl-circle-button{align-self:end;width:44px;height:44px;margin:0 16px 16px 0}
+  .bl-site .bl-app-more-list .bl-circle-button .bl-icon{width:20px;height:20px}
 }
 
 /* Application case page: the "similar job" box in the story side column. */

@@ -24,7 +24,7 @@ $send = $content['send'];
         <img src="<?= bl_escape($application['image']) ?>" alt="<?= bl_escape($application['alt']) ?>" width="1586" height="992"<?= $i ? ' loading="lazy"' : ' fetchpriority="high"' ?>>
         <span class="bl-apps-panel-index">0<?= $i + 1 ?></span>
         <span class="bl-apps-panel-body">
-          <span class="bl-apps-panel-family"><?= bl_escape($application['product'] === 'dumper' ? 'Mini dumpers' : 'Mini skid steer loaders') ?></span>
+          <span class="bl-apps-panel-family"><span class="bl-apps-panel-no" aria-hidden="true">0<?= $i + 1 ?> · </span><?= bl_escape($application['product'] === 'dumper' ? 'Mini dumpers' : 'Mini skid steer loaders') ?></span>
           <span class="bl-apps-panel-title"><?= bl_escape($application['title']) ?></span>
           <span class="bl-apps-panel-focus"><b><?= bl_escape($focus['value']) ?><small><?= bl_escape($focus['unit']) ?></small></b><span><?= bl_escape($focus['label']) ?></span></span>
           <span class="bl-apps-panel-more">Explore <?= bl_icon('arrow-up-right') ?></span>

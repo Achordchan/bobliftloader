@@ -51,22 +51,26 @@
   .bl-site .bl-nav-index{display:block;font:13px var(--sans);color:#8ca3b5}
   .bl-site .bl-nav>a:not(.bl-nav-contact)::after{display:none}
   .bl-site .bl-nav .bl-nav-contact{font:600 15px var(--sans);min-height:54px;padding:0 20px;margin-top:24px;justify-content:space-between;background:var(--blue);border-color:var(--blue)}
-  .bl-site .bl-range{padding-top:28px}
+  .bl-site .bl-nav-direct{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .bl-site .bl-nav-direct a{display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px;border:1px solid #425766;font:600 15px var(--sans);color:#e6edf2}
+  .bl-site .bl-nav-direct svg{width:20px;height:20px}
+  .bl-site .bl-nav-direct a:first-child svg{color:#25d366}
+  .bl-site .bl-range{padding-top:var(--m-sec,56px)}
   .bl-site .bl-range .bl-section-top{padding-bottom:24px;gap:20px}
   .bl-site .bl-section-top .bl-eyebrow{font-size:12px;margin-bottom:16px}
-  .bl-site .bl-display{font-size:clamp(52px,15.5vw,64px);letter-spacing:-.8px}
+  .bl-site .bl-display{font-size:var(--m-h2,clamp(38px,11vw,46px));letter-spacing:-.5px}
   .bl-site .bl-machine-description{font-size:14px;max-width:100%}
   .bl-site .bl-range-assist{flex-wrap:wrap;font-size:14px;gap:4px 15px;padding-top:16px;padding-bottom:16px}
   .bl-site .bl-range-assist .bl-text-link{min-height:44px;font-size:14px;gap:10px;white-space:nowrap}
   .bl-site .bl-range-assist .bl-icon{width:15px;height:15px}
-  .bl-site .bl-applications{padding-block:55px}
+  .bl-site .bl-applications{padding-block:var(--m-sec,56px)}
   .bl-site .bl-applications .bl-section-top{flex-direction:column;align-items:flex-start;gap:24px;margin-bottom:22px}
-  .bl-site .bl-applications .bl-display{font-size:clamp(52px,15.5vw,64px);line-height:.9;letter-spacing:-.8px}
+  .bl-site .bl-applications .bl-display{font-size:var(--m-h2,clamp(38px,11vw,46px));line-height:.9;letter-spacing:-.5px}
   .bl-site .bl-applications .bl-section-description{max-width:100%;font-size:14px}
   .bl-site .bl-applications .bl-section-description br{display:none}
-  .bl-site .bl-contact{padding-block:55px}
+  .bl-site .bl-contact{padding-block:var(--m-sec,56px)}
   .bl-site .bl-contact-layout{gap:40px}
-  .bl-site .bl-contact-copy h2{font-size:92px}
+  .bl-site .bl-contact-copy h2{font-size:var(--m-h1,clamp(48px,14vw,60px));letter-spacing:-.8px}
   .bl-site .bl-contact-copy>.bl-eyebrow{font-size:12px;margin-bottom:24px}
   .bl-site .bl-contact-email{font-size:16px;margin-top:23px}
   /* Text links keep their look; an invisible layer gives them a 44px tall target. */
@@ -87,24 +91,30 @@
   .bl-site .bl-form-bottom{display:block}
   .bl-site .bl-form-bottom p{font-size:13px;margin-bottom:18px}
   .bl-site .bl-form-bottom .bl-button{width:100%}
-  .bl-site .bl-footer-top{padding-block:35px;flex-wrap:wrap;gap:25px}
-  .bl-site .bl-footer-top .bl-brand img{width:115px}
-  .bl-site .bl-footer-top>p{order:3;width:100%;font-size:28px}
-  .bl-site .bl-footer-links{padding-block:26px 30px;gap:24px 20px}
+  /* A compact footer: the tagline stays for wider screens; the three link groups pack into two columns
+     (Equipment over Contact, beside Explore), the business block runs underneath. */
+  .bl-site .bl-footer-top{padding-block:22px;flex-wrap:wrap;gap:16px}
+  .bl-site .bl-footer-top .bl-brand img{width:104px}
+  .bl-site .bl-footer-top>p{display:none}
+  .bl-site .bl-footer-links{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"equip explore" "contact explore" "domain domain";padding-block:20px 22px;gap:14px 20px}
+  .bl-site .bl-footer-links>div:nth-child(1){grid-area:equip}
+  .bl-site .bl-footer-links>div:nth-child(2){grid-area:explore}
+  .bl-site .bl-footer-links>div:nth-child(3){grid-area:contact}
   .bl-site .bl-footer-links>div{font-size:14px;gap:0}
-  .bl-site .bl-footer-links>div>a{display:inline-flex;align-items:center;min-height:44px}
-  .bl-site .bl-footer-links .bl-eyebrow{font-size:12px;margin-bottom:2px}
-  /* The business block takes the full row, so its link and arrow keep one line. */
-  .bl-site .bl-footer-domain{grid-column:1/-1}
-  .bl-site .bl-footer-domain>a{white-space:nowrap}
-  .bl-site .bl-footer-domain>p{margin-bottom:2px;line-height:1.5}
-  .bl-site .bl-footer-domain>span:last-child{font-size:13px}
-  .bl-site .bl-footer-bottom{font-size:12px;min-height:65px}
+  .bl-site .bl-footer-links>div>a{display:inline-flex;align-items:center;min-height:44px;max-width:100%;overflow-wrap:anywhere}
+  .bl-site .bl-footer-links .bl-eyebrow{font-size:12px;margin-bottom:0}
+  .bl-site .bl-footer-links>.bl-footer-domain{grid-area:domain;min-width:0;display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;column-gap:16px;padding-top:14px;border-top:1px solid #425360}
+  .bl-site .bl-footer-domain>.bl-eyebrow,.bl-site .bl-footer-domain>p{flex-basis:100%}
+  .bl-site .bl-footer-domain>a{min-width:0;overflow-wrap:anywhere}
+  .bl-site .bl-footer-domain>a .bl-icon{flex-shrink:0}
+  .bl-site .bl-footer-links>.bl-footer-domain>p{max-width:none;margin:6px 0 0;font-size:13px;line-height:1.5}
+  .bl-site .bl-footer-domain>span:last-child{min-width:0;margin-left:auto;font-size:13px;text-align:right;overflow-wrap:anywhere}
+  .bl-site .bl-footer-bottom{font-size:12px;min-height:56px;padding-block:6px}
   .bl-site .bl-footer-bottom>a{display:inline-flex;align-items:center;min-height:44px;padding-left:8px;margin-left:-8px}
   .bl-site .bl-dialog{max-width:calc(100% - 24px);max-height:calc(100svh - 24px)}
   .bl-site .bl-dialog-close{top:8px;right:8px;width:44px;height:44px}
   .bl-site .bl-inquiry-dialog{padding:45px 23px 25px}
-  .bl-site .bl-inquiry-dialog h2{font-size:65px}
+  .bl-site .bl-inquiry-dialog h2{font-size:var(--m-h2,clamp(38px,11vw,46px))}
   .bl-site .bl-inquiry-dialog>p:not(.bl-eyebrow){font-size:14px}
   .bl-site .bl-inquiry-summary>div{grid-template-columns:75px 1fr;font-size:13px}
   .bl-site .bl-review-actions .bl-button{font-size:14px;gap:15px;padding:13px 16px}
@@ -156,6 +166,8 @@
   .bl-site .bl-application-tile::after{background:linear-gradient(0deg,#03111cf5 0%,#03111cd9 34%,#03111c73 60%,#03111c00 80%)}
   .bl-site .bl-application-tile-body .bl-eyebrow{color:#e3ebf7;font-size:12px;text-shadow:0 1px 12px #03111c}
   .bl-site .bl-photo-label{font-size:12px}
+  .bl-site .bl-range-body h3{font-size:var(--m-h3,28px)}
+  .bl-site .bl-application-tile-body h3{font-size:var(--m-h3,28px)}
 }
 
 /* Range: two narrow cards side by side, the widest spec (1,000–5,000 kg) steps down to keep one line. */
@@ -172,8 +184,14 @@
   .bl-site .bl-approach-steps{grid-template-columns:1fr;gap:26px}
 }
 @media(max-width:600px){
-  .bl-site .bl-approach{padding-top:55px;padding-bottom:55px}
-  .bl-site .bl-approach .bl-display{font-size:clamp(50px,14.4vw,66px);letter-spacing:-.8px}
+  .bl-site .bl-approach{padding-top:var(--m-sec,56px);padding-bottom:var(--m-sec,56px)}
+  .bl-site .bl-approach .bl-display{font-size:var(--m-h2,clamp(38px,11vw,46px));letter-spacing:-.5px}
   .bl-site .bl-approach-photo{aspect-ratio:4/3}
-  .bl-site .bl-approach-steps h3{font-size:26px}
+  .bl-site .bl-approach-steps h3{font-size:var(--m-h3,28px)}
+  /* The two figures stand side by side, figure over label, so neither row trails a half-empty line. */
+  .bl-site .bl-approach-facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px;margin-top:32px}
+  .bl-site .bl-approach-facts li{flex-direction:column;justify-content:flex-start;align-items:flex-start;gap:10px;padding-block:16px 0}
+  .bl-site .bl-approach-facts strong{font-size:clamp(36px,10vw,42px)}
+  .bl-site .bl-approach-facts span{max-width:none;text-align:left}
+  .bl-site .bl-approach-steps{margin-top:40px}
 }
