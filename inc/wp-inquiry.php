@@ -172,7 +172,10 @@ add_action('init', static function (): void {
     }
     if ($same($mail['subject'] ?? '', BL_ENQUIRY_MAIL_V1['subject'])) $changes['subject'] = $new['subject'];
     $properties = $changes ? ['mail' => array_replace($mail, $changes)] : [];
-    if ($same($form->prop('form'), bl_wp_inquiry_template(true))) $properties['form'] = bl_wp_inquiry_template();
+    // The country field goes only when no mail that stays (an edited body or subject, the autoresponder) still uses it.
+    $kept = [$properties['mail'] ?? $mail, (array) $form->prop('mail_2')];
+    $usesCountry = (bool) array_filter($kept, static fn(array $m): bool => !empty($m['active']) && (bool) preg_match('/\[_?(?:raw_|format_)?country\b/', implode("\n", array_map('strval', array_filter($m, 'is_scalar')))));
+    if (!$usesCountry && $same($form->prop('form'), bl_wp_inquiry_template(true))) $properties['form'] = bl_wp_inquiry_template();
     if ($properties) {
         $form->set_properties($properties);
         $form->save();
