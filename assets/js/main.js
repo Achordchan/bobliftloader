@@ -8,6 +8,7 @@ import { initializeRuler } from './ruler.js';
 import { initializeCatalog } from './catalog.js';
 import { initializeSearch } from './search.js';
 import { initializeSectionNav } from './section-nav.js';
+import { initializeQuick } from './quick.js';
 
 initializeDialogs();
 initializeEquipment();
@@ -19,6 +20,7 @@ initializeRuler();
 initializeCatalog();
 initializeSearch();
 initializeSectionNav();
+initializeQuick();
 
 const menuToggle = document.querySelector('.bl-menu-toggle');
 const navigation = document.querySelector('.bl-nav');
