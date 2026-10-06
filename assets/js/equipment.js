@@ -106,6 +106,16 @@ export function initializeEquipment() {
     window.addEventListener('resize', later);
     window.addEventListener('load', later);
     document.fonts?.ready.then(later);
+    // Text that changes size after load (browser translation, late fonts) rebalances too. Only the description and the
+    // heading are watched: they keep their size when the highlights move, so moving them does not set this off again.
+    if ('ResizeObserver' in window) {
+      const heights = new WeakMap();
+      const watch = new ResizeObserver((entries) => {
+        if (entries.some((entry) => heights.get(entry.target) !== entry.contentRect.height)) later();
+        entries.forEach((entry) => heights.set(entry.target, entry.contentRect.height));
+      });
+      [overview.querySelector('.bl-prose'), lead.querySelector('.bl-product-display')].forEach((item) => item && watch.observe(item));
+    }
   }
   // The specification sheet prints from the page itself (assets/css/support.css holds the print layout).
   document.querySelectorAll('[data-print-sheet]').forEach((button) => {
