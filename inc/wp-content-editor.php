@@ -507,6 +507,9 @@ function bl_content_screen(string $page): void
     echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="bl-ce-form"><input type="hidden" name="action" value="bl_save_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
     wp_nonce_field('bl_save_content_' . $page);
     echo bl_content_revision_input($revision);
+    // The service number shown here may be inherited from Support; the form says which value it showed, so leaving it
+    // untouched keeps the inheritance even if Support changes before this form is saved.
+    if ($page === 'global' && !$recovery && bl_content_get($saved, 'company.service_whatsapp') === null) echo '<input type="hidden" name="bl_inherited[service_whatsapp]" value="' . esc_attr($values['company']['service_whatsapp']) . '">';
     foreach ($sections as $i => $section) {
         $n = $count($section);
         echo '<details class="bl-panel bl-ce-section" data-bl-card id="bl-ce-' . $i . '"' . ($open ? ' open' : '') . '><summary class="bl-panel-head">';
