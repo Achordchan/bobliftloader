@@ -11,8 +11,9 @@ declare(strict_types=1);
 
 const BL_ENQUIRY_EMAIL = 'info@boblift.com';
 // Raised when the theme's form or notification email changes, so the form the theme made earlier gets the new one once
-// (2: the HTML card; 3: no country field, the card shows the country of the sender's IP address instead).
-const BL_ENQUIRY_MAIL_VERSION = 3;
+// (2: the HTML card; 3: no country field, the card shows the country of the sender's IP address instead; 4: the card
+// redesigned in the site's colours).
+const BL_ENQUIRY_MAIL_VERSION = 4;
 // Marks the notification card in the form's Mail body; only that layout is sent without CF7's automatic paragraphs.
 const BL_ENQUIRY_CARD_MARKER = '<!-- bl-inquiry-card -->';
 
@@ -102,41 +103,47 @@ add_filter('wpcf7_autop_or_not', static function (bool $autop, $options = []): b
 add_filter('wpcf7_spam', static fn(bool $spam): bool => $spam || trim((string) ($_POST['bl_website'] ?? '')) !== '');
 
 /**
- * The notification the team receives: a card with the page the enquiry came from, the product (photo, name, model) and
- * the sender's details, with a button that starts the reply. The card is a fixed 660 px, like the original: phones
- * shrink it to fit the screen instead of reflowing it. Subject and body stay editable in the form's Mail tab; the
- * [bl_…] tags below fill in what CF7 cannot.
+ * The notification the team receives: the BOB-LIFT logo, the page the enquiry came from, the product (photo, name,
+ * model), the sender's details and message, where the sender is (IP country), and a button that starts the reply. The
+ * card is a fixed 660 px: phones shrink it to fit the screen instead of reflowing it. Subject and body stay editable in
+ * the form's Mail tab; the [bl_…] tags below fill in what CF7 cannot.
  */
-function bl_wp_inquiry_mail(bool $withCountry = false): array
+function bl_wp_inquiry_mail(): array
 {
-    $label = 'padding:10px 20px;text-align:right;vertical-align:top;font-weight:bold;font-size:14px;width:140px;color:#333333;';
-    $value = 'padding:10px 20px 10px 0;vertical-align:top;font-size:14px;color:#333333;line-height:1.6;word-break:break-word;';
-    $row = static fn(string $name, string $tag): string => "<tr><td width=\"140\" style=\"{$label}\">{$name}</td><td style=\"{$value}\">{$tag}</td></tr>";
-    // Each row is one line: with "exclude blank" on, CF7 drops the line of a field the sender left empty.
-    $rows = implode("\n", array_filter([
-        $row('Name', '[name]'),
-        $row('E-mail', '<a href="mailto:[email]" style="color:#1995f6;text-decoration:none;">[email]</a>'),
-        $row('Company Name', '[company]'),
-        $withCountry ? $row('Country / region', '[country]') : '',
-        $row('Message', '[message]'),
-        $row('IP:', '[_remote_ip]'),
-        $row('来源国家:', '[bl_ip_country]'),
-    ]));
+    $font = "font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei','Helvetica Neue',Arial,sans-serif;";
+    // The message's heading shares its line with the message, so both go when the sender wrote none.
+    $heading = static fn(string $text): string => '<tr><td style="padding:28px 36px 12px;font-size:13px;font-weight:bold;letter-spacing:1px;color:#64748b;">' . $text . '</td></tr>';
+    $row = static fn(string $name, string $tag): string => '<tr><td width="96" style="width:96px;padding:13px 0;border-bottom:1px solid #edf0f4;font-size:14px;color:#64748b;vertical-align:top;">' . $name . '</td><td style="padding:13px 0;border-bottom:1px solid #edf0f4;font-size:15px;color:#0b1f33;line-height:1.6;vertical-align:top;word-break:break-word;">' . $tag . '</td></tr>';
+    $meta = static fn(string $name, string $tag): string => '<td width="33%" style="width:33%;padding:16px 18px;vertical-align:top;"><div style="font-size:12px;color:#64748b;padding-bottom:4px;">' . $name . '</div><div style="font-size:15px;font-weight:bold;color:#0b1f33;line-height:1.4;word-break:break-word;">' . $tag . '</div></td>';
+    // Each table row (and each cell of the strip) is one line: with "exclude blank" on, CF7 drops the line of a field
+    // the sender left empty.
+    $rows = implode("\n", [
+        $row('姓名', '[name]'),
+        $row('邮箱', '<a href="mailto:[email]" style="color:#215bdb;text-decoration:none;">[email]</a>'),
+        $row('公司', '[company]'),
+    ]);
+    $strip = implode("\n", [$meta('来源国家', '[bl_ip_country]'), $meta('IP 地址', '[_remote_ip]'), $meta('提交时间', '[bl_time]')]);
     $body = BL_ENQUIRY_CARD_MARKER . "\n" . <<<HTML
-<table width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:#ffffff;"><tr><td style="padding:16px 0;">
-<table align="center" width="660" cellspacing="0" cellpadding="0" style="width:660px;border:1px solid #d8dde6;border-collapse:separate;background:#ffffff;border-radius:3px;font-family:Arial,'Microsoft YaHei',sans-serif;color:#333333;">
-<tr><td height="8" style="background:#1995f6;height:8px;font-size:0;line-height:0;border-radius:3px 3px 0 0;">&nbsp;</td></tr>
-<tr><td style="padding:20px 20px 0;font-size:20px;text-align:center;"><div style="border-bottom:1px solid #d8dde6;padding-bottom:20px;">新询盘通知</div></td></tr>
-<tr><td style="padding:20px;font-size:16px;line-height:1.6;">尊敬的管理员，<br>你有一封新询盘来自页面地址为<br>[bl_page_link]，内容如下：</td></tr>
-<tr><td style="padding:0 20px;">
-<table width="618" cellspacing="0" cellpadding="0" style="width:618px;border:1px solid #d8dde6;background:#f4f6f9;">
-<tr><td width="140" style="padding:20px;text-align:right;vertical-align:top;font-weight:bold;font-size:14px;width:140px;color:#333333;">产品信息</td><td style="padding:20px 20px 10px 0;vertical-align:top;font-size:14px;">[bl_product_card]</td></tr>
+<table width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:#eef1f5;{$font}"><tr><td align="center" style="padding:32px 0;">
+<table width="660" cellspacing="0" cellpadding="0" style="width:660px;background:#ffffff;border:1px solid #e3e8ef;border-radius:10px;border-collapse:separate;overflow:hidden;text-align:left;">
+<tr><td height="6" style="height:6px;background:#215bdb;font-size:0;line-height:0;border-radius:10px 10px 0 0;">&nbsp;</td></tr>
+<tr><td style="padding:22px 36px;border-bottom:1px solid #edf0f4;"><table width="100%" cellspacing="0" cellpadding="0"><tr><td style="vertical-align:middle;">[bl_logo]</td><td align="right" style="vertical-align:middle;font-size:13px;color:#64748b;">[bl_time]</td></tr></table></td></tr>
+<tr><td style="padding:30px 36px 0;"><div style="font-size:26px;line-height:1.3;font-weight:bold;color:#0b1f33;">新询盘通知</div><div style="padding-top:10px;font-size:15px;line-height:1.7;color:#475569;">尊敬的管理员，你有一封新询盘，内容如下，请及时跟进。</div></td></tr>
+<tr><td style="padding:20px 36px 0;"><table width="100%" cellspacing="0" cellpadding="0" style="background:#f5f7fa;border-radius:8px;"><tr><td style="padding:14px 18px;"><div style="font-size:12px;color:#64748b;padding-bottom:6px;">来源页面 &nbsp;<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:#e3ebfc;color:#215bdb;font-size:12px;font-weight:bold;">[bl_enquiry_kind]</span></div><div style="font-size:14px;line-height:1.6;word-break:break-all;">[bl_page_url]</div></td></tr></table></td></tr>
+{$heading('产品信息')}
+<tr><td style="padding:0 36px;">[bl_product_card]</td></tr>
+{$heading('客户信息')}
+<tr><td style="padding:0 36px;"><table width="100%" cellspacing="0" cellpadding="0" style="border-top:1px solid #edf0f4;">
 {$rows}
-<tr><td colspan="2" style="height:10px;font-size:0;line-height:0;">&nbsp;</td></tr>
+</table></td></tr>
+{$heading('留言')}<tr><td style="padding:0 36px;"><div style="padding:16px 20px;background:#f5f7fa;border-left:3px solid #215bdb;border-radius:0 8px 8px 0;font-size:15px;line-height:1.75;color:#0b1f33;word-break:break-word;">[message]</div></td></tr>
+<tr><td style="padding:24px 36px 0;"><table width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #edf0f4;border-radius:8px;border-collapse:separate;"><tr>
+{$strip}
+</tr></table></td></tr>
+<tr><td align="center" style="padding:32px 36px 12px;"><table cellspacing="0" cellpadding="0"><tr><td align="center" style="background:#215bdb;border-radius:8px;"><a href="mailto:[email]" style="display:inline-block;width:260px;line-height:50px;font-size:17px;font-weight:bold;color:#ffffff;text-decoration:none;text-align:center;letter-spacing:1px;">立即回复客户</a></td></tr></table></td></tr>
+<tr><td align="center" style="padding:0 36px 32px;font-size:13px;line-height:1.6;color:#64748b;">也可以直接回复这封邮件，回信会发到 [email]</td></tr>
 </table>
-</td></tr>
-<tr><td align="center" style="padding:24px 20px;"><table cellspacing="0" cellpadding="0"><tr><td align="center" style="background:#1995f6;border-radius:3px;"><a href="mailto:[email]" style="display:inline-block;width:200px;line-height:40px;font-size:18px;color:#ffffff;text-decoration:none;text-align:center;">立即回复</a></td></tr></table></td></tr>
-</table>
+<table width="660" cellspacing="0" cellpadding="0" style="width:660px;"><tr><td align="center" style="padding:18px 36px 0;font-size:12px;line-height:1.7;color:#94a3b8;">此邮件由 [bl_site] 询盘表单自动发送 · 副本见网站后台「Flamingo → 收到的消息」</td></tr></table>
 </td></tr></table>
 HTML;
     return [
@@ -154,6 +161,9 @@ const BL_ENQUIRY_MAIL_V1 = [
     'body' => "Equipment: [_raw_product]\nModel: [model]\nName: [name]\nEmail: [email]\nCountry: [country]\nCompany: [company]\n\nProject:\n[message]\n\n-- \nSent from [_site_url] on [_date] at [_time]",
 ];
 
+// The HTML bodies the theme gave its form before (md5 of the trimmed body): version 2 with a country row, version 3.
+const BL_ENQUIRY_MAIL_EARLIER = ['7c345410a541a4ed5e5c6272d3971e19', '2c56857cde1a7dbe0e2e46d2db972231'];
+
 /**
  * Bring the form the theme made earlier up to date, once. Only what still is one of the theme's earlier defaults is
  * replaced: a form, body or subject an editor changed is kept (the new version can then be pasted in by hand), and who
@@ -167,7 +177,8 @@ add_action('init', static function (): void {
     $mail = (array) $form->prop('mail');
     $new = bl_wp_inquiry_mail();
     $changes = [];
-    if (($same($mail['body'] ?? '', BL_ENQUIRY_MAIL_V1['body']) && empty($mail['use_html'])) || $same($mail['body'] ?? '', bl_wp_inquiry_mail(true)['body'])) {
+    $body = trim(str_replace("\r\n", "\n", (string) ($mail['body'] ?? '')));
+    if (($body === BL_ENQUIRY_MAIL_V1['body'] && empty($mail['use_html'])) || in_array(md5($body), BL_ENQUIRY_MAIL_EARLIER, true)) {
         $changes += ['body' => $new['body'], 'use_html' => true];
     }
     if ($same($mail['subject'] ?? '', BL_ENQUIRY_MAIL_V1['subject'])) $changes['subject'] = $new['subject'];
@@ -196,18 +207,18 @@ function bl_wp_inquiry_product_card(string $family, string $model): string
 {
     $product = null;
     if ($model !== '') foreach (bl_products() as $record) if (strcasecmp((string) $record['model'], $model) === 0) { $product = $record; break; }
-    $line = static fn(string $label, string $text): string => '<p style="margin:0 0 4px;font-size:14px;color:#333333;"><span>' . $label . '</span>' . esc_html($text) . '</p>';
-    $details = $line('Type: ', $family !== '' ? $family : '—') . ($model !== '' ? $line('Model: ', $model) : '') . $line('Brand: ', 'BOB-LIFT');
-    if (!$product) return $details;
+    $pill = static fn(string $label, string $text): string => '<span style="display:inline-block;margin:0 6px 6px 0;padding:4px 10px;border-radius:6px;background:#f1f4f9;font-size:13px;color:#334155;white-space:nowrap;"><span style="color:#64748b;">' . $label . '</span> ' . esc_html($text) . '</span>';
+    $pills = ($model !== '' ? $pill('型号', $model) : '') . $pill('类型', $family !== '' ? $family : '—') . $pill('品牌', 'BOB-LIFT');
+    $box = static fn(string $inner): string => '<table width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #e3e8ef;border-radius:8px;border-collapse:separate;"><tr>' . $inner . '</tr></table>';
+    if (!$product) return $box('<td style="padding:16px 18px 10px;">' . $pills . '</td>');
     $url = esc_url($product['url']);
-    $name = esc_html($product['name']);
     $image = bl_wp_inquiry_thumbnail($product);
-    $photo = $image ? '<td width="80" style="vertical-align:top;padding-right:20px;"><a href="' . $url . '" target="_blank"><img src="' . esc_url($image) . '" width="80" height="80" alt="' . esc_attr($product['name']) . '" style="display:block;width:80px;height:80px;border:1px solid #eeeeee;border-radius:3px;object-fit:cover;"></a></td>' : '';
-    return '<table cellspacing="0" cellpadding="0"><tr>' . $photo . '<td style="vertical-align:top;"><p style="margin:0 0 6px;font-size:14px;line-height:1.7;"><a href="' . $url . '" target="_blank" style="color:#1995f6;text-decoration:none;">' . $name . '</a></p>' . $details . '</td></tr></table>';
+    $photo = $image ? '<td width="104" style="width:104px;padding:16px 0 16px 16px;vertical-align:top;"><a href="' . $url . '" target="_blank"><img src="' . esc_url($image) . '" width="104" height="104" alt="' . esc_attr($product['name']) . '" style="display:block;width:104px;height:104px;border-radius:6px;border:1px solid #edf0f4;object-fit:cover;"></a></td>' : '';
+    return $box($photo . '<td style="padding:16px 18px 10px;vertical-align:top;"><a href="' . $url . '" target="_blank" style="display:block;padding-bottom:10px;font-size:17px;line-height:1.45;font-weight:bold;color:#0b1f33;text-decoration:none;">' . esc_html($product['name']) . '</a>' . $pills . '<div style="padding-top:4px;font-size:13px;"><a href="' . $url . '" target="_blank" style="color:#215bdb;text-decoration:none;">查看产品页 →</a></div></td>');
 }
 
 /**
- * An 80 px square of the product's photo (its featured image, else the theme's own catalogue image), saved once as a JPEG
+ * A square of the product's photo (twice its 104 px size, for sharp screens ), from its featured image, else the theme's own catalogue image, saved once as a JPEG
  * in the uploads: product photos are WebP, which some desktop mail programs do not show. Falls back to the image as it is.
  */
 function bl_wp_inquiry_thumbnail(array $product): string
@@ -222,11 +233,11 @@ function bl_wp_inquiry_thumbnail(array $product): string
     }
     if (!$file || !is_file($file)) return (string) $product['image'];
     $uploads = wp_upload_dir();
-    $name = 'bl-mail/' . substr(md5($file . filemtime($file)), 0, 12) . '-160.jpg';
+    $name = 'bl-mail/' . substr(md5($file . filemtime($file)), 0, 12) . '-208.jpg';
     $path = trailingslashit($uploads['basedir']) . $name;
     if (!is_file($path)) {
         $editor = wp_get_image_editor($file);
-        if (is_wp_error($editor) || is_wp_error($editor->resize(160, 160, true)) || is_wp_error($editor->save($path, 'image/jpeg'))) return (string) $product['image'];
+        if (is_wp_error($editor) || is_wp_error($editor->resize(208, 208, true)) || is_wp_error($editor->save($path, 'image/jpeg'))) return (string) $product['image'];
     }
     return trailingslashit($uploads['baseurl']) . $name;
 }
@@ -250,15 +261,28 @@ function bl_wp_ip_country(string $ip): string
 
 // The notification's own tags. CF7 asks for them only when the mail names them, so other forms are not affected.
 add_filter('wpcf7_special_mail_tags', static function ($output, string $name, bool $html) {
-    if (!in_array($name, ['bl_page_link', 'bl_product_card', 'bl_ip_country'], true)) return $output;
+    if (!in_array($name, ['bl_page_link', 'bl_page_url', 'bl_enquiry_kind', 'bl_logo', 'bl_site', 'bl_time', 'bl_product_card', 'bl_ip_country'], true)) return $output;
+    if ($name === 'bl_site') return (string) wp_parse_url(home_url(), PHP_URL_HOST);
+    if ($name === 'bl_logo') {
+        $logo = '<img src="' . esc_url(bl_asset('images/logo.png')) . '" width="112" height="45" alt="BOB-LIFT" style="display:block;width:112px;height:45px;border:0;">';
+        return $html ? $logo : 'BOB-LIFT';
+    }
     $submission = WPCF7_Submission::get_instance();
     if (!$submission) return '';
+    // In the site's time zone, written the same way whatever the admin's date format.
+    if ($name === 'bl_time') return wp_date('Y-m-d H:i', (int) ($submission->get_meta('timestamp') ?: time()));
     if ($name === 'bl_ip_country') {
         $ip = (string) $submission->get_meta('remote_ip');
         $country = $ip === '' ? '' : (bl_wp_ip_country($ip) ?: '未能识别');
         return $html ? esc_html($country) : $country;
     }
     $model = trim((string) $submission->get_posted_string('model'));
+    if ($name === 'bl_enquiry_kind') return $model !== '' ? '产品询盘' : '询盘表单';
+    if ($name === 'bl_page_url') {
+        $url = (string) $submission->get_meta('url');
+        return $html ? '<a href="' . esc_url($url) . '" target="_blank" style="color:#215bdb;text-decoration:none;">' . esc_html($url) . '</a>' : $url;
+    }
+    // Kept for a Mail body an editor built on the version 2 card.
     if ($name === 'bl_page_link') {
         $url = (string) $submission->get_meta('url');
         $kind = $model !== '' ? '（产品询盘）' : '（询盘表单）';
