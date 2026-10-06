@@ -57,6 +57,8 @@
 .bl-site .bl-spec-sheet[data-groups="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
 .bl-site .bl-spec-sheet[data-groups="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
 .bl-site .bl-spec-sheet[data-groups="1"]{grid-template-columns:minmax(0,1fr);max-width:640px}
+/* Each column stacks one or more groups (bl_spec_columns) so the columns end at about the same height. */
+.bl-site .bl-spec-column{display:grid;align-content:start;gap:clamp(24px,2.4vw,40px);min-width:0}
 .bl-site .bl-spec-block h3{padding-bottom:10px;border-bottom:1px solid var(--ink);font-size:var(--fs-micro);font-weight:700;letter-spacing:.12em;text-transform:uppercase}
 .bl-site .bl-spec-block dl{margin:0}
 .bl-site .bl-spec-block summary{display:block;list-style:none;cursor:default}
@@ -69,6 +71,7 @@
 @media(max-width:800px){.bl-site .bl-spec-head{grid-template-columns:1fr;gap:20px}}
 @media(max-width:600px){
   .bl-site .bl-spec-sheet,.bl-site .bl-spec-sheet[data-groups]{grid-template-columns:minmax(0,1fr);gap:0}
+  .bl-site .bl-spec-column{display:contents}
   /* Stacked groups become an accordion: the performance group starts open (equipment.js), the rest on tap. */
   .bl-site .bl-spec-block summary{cursor:pointer}
   .bl-site .bl-spec-block h3{display:flex;justify-content:space-between;align-items:center;padding:16px 0 12px}

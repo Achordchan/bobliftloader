@@ -141,8 +141,9 @@
 .bl-site .bl-product-film .bl-eyebrow small{margin-left:10px;font-size:var(--fs-micro);color:var(--muted);letter-spacing:1px}
 .bl-site .bl-gallery-videos{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,96px),1fr));gap:clamp(8px,.6vw,14px)}
 .bl-site .bl-gallery-videos a{display:flex;flex-direction:column;gap:8px;font-size:var(--fs-micro);font-weight:600;line-height:1.4}
-.bl-site .bl-gallery-video-poster{position:relative;display:block;aspect-ratio:16/9;background:var(--ink);border:2px solid transparent;transition:border-color .2s}
-.bl-site .bl-gallery-video-poster img{width:100%;height:100%;object-fit:cover}
+/* Every poster sits in the same 16:9 frame, whatever the shape of its image (the 3D renders are squarer than the films). */
+.bl-site .bl-gallery-video-poster{position:relative;display:block;aspect-ratio:16/9;overflow:hidden;background:var(--ink);border:2px solid transparent;transition:border-color .2s}
+.bl-site .bl-gallery-video-poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .bl-site .bl-gallery-video-poster .bl-gallery-play{position:absolute;left:50%;top:50%;width:clamp(30px,2vw,44px);height:clamp(30px,2vw,44px);padding:clamp(8px,.55vw,12px);translate:-50% -50%;border-radius:50%;background:#081c2bcc;filter:invert(1);transition:background .2s}
 .bl-site .bl-gallery-videos a:hover .bl-gallery-video-poster,.bl-site .bl-gallery-videos a[aria-pressed=true] .bl-gallery-video-poster{border-color:var(--blue)}
 .bl-site .bl-gallery-caption{position:absolute;left:14px;top:14px;z-index:1;padding:6px 10px;background:#081c2bb3;color:#dbe4ea;font-size:var(--fs-micro);font-weight:600;pointer-events:none}
