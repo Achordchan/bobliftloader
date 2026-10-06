@@ -37,3 +37,13 @@
 .bl-setup .bl-panel-body li { margin: 0 0 6px; }
 .bl-setup .bl-setup-action { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px 0 4px; }
 .bl-setup .bl-setup-action .submit { margin: 0; padding: 0; }
+
+/* 询盘邮件: one card per template. */
+.bl-mail-templates{display:grid;gap:10px}
+.bl-mail-template{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px solid #dcdcde;border-radius:8px;background:#fff;cursor:pointer}
+.bl-mail-template:hover{border-color:#8c8f94}
+.bl-mail-template.is-current,.bl-mail-template:has(input:checked){border-color:#215bdb;box-shadow:0 0 0 1px #215bdb}
+.bl-mail-template input{margin-top:3px}
+.bl-mail-template-text{display:grid;gap:4px}
+.bl-mail-template-text>span{color:#50575e}
+.bl-mail-template-links{font-size:12px}
