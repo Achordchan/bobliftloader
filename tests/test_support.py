@@ -80,6 +80,8 @@ class SupportTests(unittest.TestCase):
         # The films play beside the overview, not under the photograph stage.
         overview = html.split('id="overview"', 1)[1].split('</section>', 1)[0]
         self.assertIn('<video id="product-video"', overview)
+        # The text column is named, so the script can hand the highlights to whichever side is shorter.
+        self.assertIn('class="bl-product-overview-body"', overview)
         self.assertNotIn('data-gallery-video', html.split('class="bl-product-hero', 1)[1].split('</section>', 1)[0])
         self.assertIn('whole-machine warranty', html)
         self.assertIn('href="/support/">How buying works', html)

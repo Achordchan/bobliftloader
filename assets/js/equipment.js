@@ -72,6 +72,41 @@ export function initializeEquipment() {
     });
     video.addEventListener('play', () => caption?.setAttribute('hidden', ''));
   }
+  // Overview: the highlights go under whichever column leaves the two sides closest in height, and the shorter side is
+  // centred against the other (assets/css/support.css), so a long or a short description never leaves one side empty.
+  // Without videos they stack under the heading; under a video they sit in a row.
+  const overview = document.querySelector('[data-overview-balance]');
+  const points = overview?.querySelector('.bl-product-highlights');
+  if (points) {
+    const lead = overview.querySelector('.bl-product-overview-lead');
+    const body = overview.querySelector('.bl-product-overview-body');
+    const stack = !lead.querySelector('video');
+    const put = (inLead) => {
+      (inLead ? lead : body).append(points);
+      points.classList.toggle('bl-product-highlights-stacked', inLead && stack);
+      return Math.abs(lead.offsetHeight - body.offsetHeight);
+    };
+    const balance = () => {
+      if (getComputedStyle(overview).gridTemplateColumns.split(' ').length < 2) { // one column: after the text
+        put(false);
+        overview.classList.remove('bl-product-overview-follow');
+        return;
+      }
+      if (put(true) <= put(false)) put(true);
+      // Much longer text: the heading, films and highlights stay in view beside it while it is read, if they fit the screen.
+      const follow = body.offsetHeight > lead.offsetHeight * 1.25;
+      overview.classList.toggle('bl-product-overview-follow', follow);
+      const fits = () => lead.offsetHeight + parseFloat(getComputedStyle(lead).top || '0') <= window.innerHeight;
+      if (follow && !fits() && lead.contains(points)) put(false); // give the highlights to the text if that lets the rest fit
+      if (!fits()) overview.classList.remove('bl-product-overview-follow');
+    };
+    let frame = 0;
+    const later = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(balance); };
+    balance();
+    window.addEventListener('resize', later);
+    window.addEventListener('load', later);
+    document.fonts?.ready.then(later);
+  }
   // The specification sheet prints from the page itself (assets/css/support.css holds the print layout).
   document.querySelectorAll('[data-print-sheet]').forEach((button) => {
     button.hidden = false;
