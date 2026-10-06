@@ -175,6 +175,7 @@
   .bl-site .bl-gallery-thumbs button{flex:0 0 72px;scroll-snap-align:start}
 }
 @media(max-width:600px){
+  .bl-site .bl-spec-body-drawing .bl-spec-sheet{grid-template-columns:minmax(0,1fr)} /* one stacked list on phones, drawing or not */
   .bl-site .bl-product-jobs,.bl-site .bl-product-checks,.bl-site .bl-product-cases{grid-template-columns:1fr}
   .bl-site .bl-product-tools{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:46%;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 6px;scroll-snap-type:x mandatory;scrollbar-width:none}
   .bl-site .bl-product-tools li{scroll-snap-align:start}

@@ -196,6 +196,44 @@ function bl_spec_groups(array $specs): array
     return $result;
 }
 
+/**
+ * Splits the spec groups into side-by-side columns whose heights come out as even as possible, so a short group does
+ * not leave a gap under it. Heights are counted in rows: a heading is 0.8 of a row and the space between two groups
+ * 0.9, and a row whose label and value will not fit on one line at that column width counts twice. Every way of
+ * sharing the groups out is tried, keeping reading order inside a column; the most columns win among layouts that
+ * end within a row of each other, otherwise the most even layout does.
+ *
+ * @param array<string, array<string, string>> $groups
+ * @return list<list<string>> group names per column, the first group in the first column
+ */
+function bl_spec_columns(array $groups, int $max = 4): array
+{
+    $names = array_keys($groups);
+    $max = max(1, min($max, count($names)));
+    $best = null;
+    for ($count = $max; $count >= min(2, $max); $count--) { // one column only when there is one group
+        $fits = [4 => 34, 3 => 44][$count] ?? 70; // characters of label and value that fit on one line
+        $heights = array_map(static fn($rows) => 0.8 + array_sum(array_map(static fn($label, $value) => strlen($label . $value) > $fits ? 2 : 1, array_keys($rows), $rows)), array_values($groups));
+        $layout = null;
+        for ($code = 0, $total = $count ** count($names); $code < $total; $code++) {
+            $columns = array_fill(0, $count, []);
+            $height = array_fill(0, $count, -0.9);
+            for ($i = 0, $rest = $code; $i < count($names); $i++, $rest = intdiv($rest, $count)) {
+                $columns[$rest % $count][] = $names[$i];
+                $height[$rest % $count] += $heights[$i] + 0.9;
+            }
+            if (in_array([], $columns, true) || $columns[0][0] !== $names[0]) continue;
+            $spread = max($height) - min($height);
+            if ($layout === null || $spread < $layout[0] - 0.01) $layout = [$spread, $columns];
+        }
+        if ($layout === null) continue;
+        if ($best === null || $layout[0] < $best[0] - 0.01) $best = $layout;
+        if ($layout[0] <= 1) break;
+    }
+    usort($best[1], static fn($a, $b) => array_search($a[0], $names, true) <=> array_search($b[0], $names, true));
+    return $best[1];
+}
+
 function bl_articles(): array
 {
     if (bl_is_wordpress()) {
