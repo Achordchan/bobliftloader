@@ -10,8 +10,9 @@ declare(strict_types=1);
  */
 
 const BL_ENQUIRY_EMAIL = 'info@boblift.com';
-// Raised when the theme's notification email changes, so the form the theme made earlier gets the new one once.
-const BL_ENQUIRY_MAIL_VERSION = 2;
+// Raised when the theme's form or notification email changes, so the form the theme made earlier gets the new one once
+// (2: the HTML card; 3: no country field, the card shows the country of the sender's IP address instead).
+const BL_ENQUIRY_MAIL_VERSION = 3;
 // Marks the notification card in the form's Mail body; only that layout is sent without CF7's automatic paragraphs.
 const BL_ENQUIRY_CARD_MARKER = '<!-- bl-inquiry-card -->';
 
@@ -34,8 +35,10 @@ function bl_wp_inquiry_form(array $atts): string
     return $form ? $form->form_html($atts + ['html_class' => 'bl-inquiry-form']) : '';
 }
 
-function bl_wp_inquiry_template(): string
+/** The form's fields. Until version 3 the sender also typed a country; $withCountry gives that form, to recognise it. */
+function bl_wp_inquiry_template(bool $withCountry = false): string
 {
+    $country = $withCountry ? "\n" . '<label>Country / region <span>*</span>[text* country autocomplete:country-name maxlength:100 placeholder "Where will you use the equipment?"]</label>' : '';
     $privacy = esc_url(wp_make_link_relative(home_url('/privacy/')));
     return <<<HTML
 <fieldset><legend>01 / YOUR EQUIPMENT</legend>
@@ -43,8 +46,7 @@ function bl_wp_inquiry_template(): string
 [hidden model default:shortcode_attr]</fieldset>
 <fieldset><legend>02 / A LITTLE ABOUT YOU</legend><div class="bl-form-grid">
 <label>Your name <span>*</span>[text* name autocomplete:name maxlength:100 placeholder "Full name"]</label>
-<label>Business email <span>*</span>[email* email autocomplete:email maxlength:200 placeholder "you@company.com"]</label>
-<label>Country / region <span>*</span>[text* country autocomplete:country-name maxlength:100 placeholder "Where will you use the equipment?"]</label>
+<label>Business email <span>*</span>[email* email autocomplete:email maxlength:200 placeholder "you@company.com"]</label>{$country}
 <label>Company[text company autocomplete:organization maxlength:150 placeholder "Company name"]</label>
 </div>
 <label class="bl-message-label">Your project[textarea message rows:3 maxlength:2000 default:shortcode_attr placeholder "What work do you need to get done?"]</label>
@@ -105,21 +107,21 @@ add_filter('wpcf7_spam', static fn(bool $spam): bool => $spam || trim((string) (
  * shrink it to fit the screen instead of reflowing it. Subject and body stay editable in the form's Mail tab; the
  * [bl_…] tags below fill in what CF7 cannot.
  */
-function bl_wp_inquiry_mail(): array
+function bl_wp_inquiry_mail(bool $withCountry = false): array
 {
     $label = 'padding:10px 20px;text-align:right;vertical-align:top;font-weight:bold;font-size:14px;width:140px;color:#333333;';
     $value = 'padding:10px 20px 10px 0;vertical-align:top;font-size:14px;color:#333333;line-height:1.6;word-break:break-word;';
     $row = static fn(string $name, string $tag): string => "<tr><td width=\"140\" style=\"{$label}\">{$name}</td><td style=\"{$value}\">{$tag}</td></tr>";
     // Each row is one line: with "exclude blank" on, CF7 drops the line of a field the sender left empty.
-    $rows = implode("\n", [
+    $rows = implode("\n", array_filter([
         $row('Name', '[name]'),
         $row('E-mail', '<a href="mailto:[email]" style="color:#1995f6;text-decoration:none;">[email]</a>'),
         $row('Company Name', '[company]'),
-        $row('Country / region', '[country]'),
+        $withCountry ? $row('Country / region', '[country]') : '',
         $row('Message', '[message]'),
         $row('IP:', '[_remote_ip]'),
         $row('来源国家:', '[bl_ip_country]'),
-    ]);
+    ]));
     $body = BL_ENQUIRY_CARD_MARKER . "\n" . <<<HTML
 <table width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:#ffffff;"><tr><td style="padding:16px 0;">
 <table align="center" width="660" cellspacing="0" cellpadding="0" style="width:660px;border:1px solid #d8dde6;border-collapse:separate;background:#ffffff;border-radius:3px;font-family:Arial,'Microsoft YaHei',sans-serif;color:#333333;">
@@ -153,22 +155,26 @@ const BL_ENQUIRY_MAIL_V1 = [
 ];
 
 /**
- * Give the form the theme made before this email existed the new mail, once. Only what still is the theme's old default
- * is replaced: a body or subject an editor changed in the Mail tab is kept (the new layout can then be pasted in by hand),
- * and who receives the mail is never touched.
+ * Bring the form the theme made earlier up to date, once. Only what still is one of the theme's earlier defaults is
+ * replaced: a form, body or subject an editor changed is kept (the new version can then be pasted in by hand), and who
+ * receives the mail is never touched.
  */
 add_action('init', static function (): void {
     if ((int) get_option('bl_inquiry_mail_version') >= BL_ENQUIRY_MAIL_VERSION || !($id = bl_wp_inquiry_form_id())) return;
     $form = WPCF7_ContactForm::get_instance($id);
     if (!$form) return;
+    $same = static fn($saved, string $default): bool => trim(str_replace("\r\n", "\n", (string) $saved)) === trim($default);
     $mail = (array) $form->prop('mail');
     $new = bl_wp_inquiry_mail();
-    $untouched = static fn(string $key): bool => trim(str_replace("\r\n", "\n", (string) ($mail[$key] ?? ''))) === BL_ENQUIRY_MAIL_V1[$key];
     $changes = [];
-    if ($untouched('body') && empty($mail['use_html'])) $changes += ['body' => $new['body'], 'use_html' => true];
-    if ($untouched('subject')) $changes['subject'] = $new['subject'];
-    if ($changes) {
-        $form->set_properties(['mail' => array_replace($mail, $changes)]);
+    if (($same($mail['body'] ?? '', BL_ENQUIRY_MAIL_V1['body']) && empty($mail['use_html'])) || $same($mail['body'] ?? '', bl_wp_inquiry_mail(true)['body'])) {
+        $changes += ['body' => $new['body'], 'use_html' => true];
+    }
+    if ($same($mail['subject'] ?? '', BL_ENQUIRY_MAIL_V1['subject'])) $changes['subject'] = $new['subject'];
+    $properties = $changes ? ['mail' => array_replace($mail, $changes)] : [];
+    if ($same($form->prop('form'), bl_wp_inquiry_template(true))) $properties['form'] = bl_wp_inquiry_template();
+    if ($properties) {
+        $form->set_properties($properties);
         $form->save();
     }
     update_option('bl_inquiry_mail_version', BL_ENQUIRY_MAIL_VERSION);
@@ -245,7 +251,8 @@ add_filter('wpcf7_special_mail_tags', static function ($output, string $name, bo
     $submission = WPCF7_Submission::get_instance();
     if (!$submission) return '';
     if ($name === 'bl_ip_country') {
-        $country = bl_wp_ip_country((string) $submission->get_meta('remote_ip'));
+        $ip = (string) $submission->get_meta('remote_ip');
+        $country = $ip === '' ? '' : (bl_wp_ip_country($ip) ?: '未能识别');
         return $html ? esc_html($country) : $country;
     }
     $model = trim((string) $submission->get_posted_string('model'));

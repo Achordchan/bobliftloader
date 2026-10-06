@@ -143,6 +143,8 @@
 .bl-site .bl-product-choices input:checked+span .bl-icon{visibility:visible;filter:invert(1)}
 .bl-site .bl-product-choices input:focus-visible+span{outline:3px solid #cf8631;outline-offset:3px}
 .bl-site .bl-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:23px 24px}
+/* An odd last field (Company, once Country left the form) takes the whole row. */
+.bl-site .bl-form-grid>label:last-child:nth-child(odd){grid-column:1/-1}
 .bl-site .bl-form-grid label,.bl-site .bl-message-label{display:block;font-size:var(--fs-small);font-weight:600;line-height:1.5}
 .bl-site .bl-form-grid label>span{color:var(--blue)}
 .bl-site .bl-inquiry-form input:not([type=radio]),.bl-site .bl-inquiry-form textarea{border:0;border-bottom:1px solid #abb7c0;background:transparent;border-radius:0;padding:13px 0;width:100%;font-size:var(--fs-body);color:var(--ink);font-weight:400;transition:border-color .2s}
