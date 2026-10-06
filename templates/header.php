@@ -9,8 +9,8 @@
     <a href="<?= bl_escape(bl_url($nav[0])) ?>" <?= in_array($activeType, $nav[2], true) ? 'aria-current="page"' : '' ?>><?= $nav[1] ?><span class="bl-nav-index">0<?= $i + 1 ?></span></a>
     <?php if ($i === 0): /* Equipment opens on the loaders; this panel names both families (hover or keyboard focus; a sub-list in the phone menu). */ ?>
     <div class="bl-nav-panel">
-      <?php foreach (['skid-steer-loaders' => ['Mini skid steer loaders', 'range-loader-studio.webp', 'loader'], 'mini-dumpers' => ['Mini dumpers', 'range-dumper-studio.webp', 'dumper']] as $key => [$label, $image, $family]): $ranges = bl_family_ranges($family); ?>
-      <a href="<?= bl_escape(bl_url('/products/' . $key . '/')) ?>"><img src="<?= bl_escape(bl_asset('images/' . $image)) ?>" alt="" width="1374" height="1145" loading="lazy"><span><b><?= $label ?></b><small><?= $ranges['count'] ?> models · rated <?= bl_escape(bl_load_range($ranges['load'])) ?></small></span></a>
+      <?php foreach (['skid-steer-loaders' => ['Mini skid steer loaders', 'loader'], 'mini-dumpers' => ['Mini dumpers', 'dumper']] as $key => [$label, $family]): $ranges = bl_family_ranges($family); ?>
+      <a href="<?= bl_escape(bl_url('/products/' . $key . '/')) ?>"><img src="<?= bl_escape(bl_family_image($family)) ?>" alt="" width="1374" height="1145" loading="lazy"><span><b><?= $label ?></b><small><?= $ranges['count'] ?> models · rated <?= bl_escape(bl_load_range($ranges['load'])) ?></small></span></a>
       <?php endforeach; ?>
     </div>
     <?php endif; ?>

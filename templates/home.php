@@ -3,9 +3,8 @@ $content = bl_editable('home');
 $allProducts = bl_products();
 // Family cards: words from the editable content, the studio photograph unless another was chosen.
 $equipment = [];
-foreach (['loader' => ['01', 'images/range-loader-studio.webp'], 'dumper' => ['02', 'images/range-dumper-studio.webp']] as $key => [$index, $image]) {
-    $equipment[$key] = ['index' => $index] + $content['families'][$key];
-    $equipment[$key]['image'] = $equipment[$key]['image'] ?: bl_asset($image);
+foreach (['loader' => '01', 'dumper' => '02'] as $key => $index) {
+    $equipment[$key] = ['index' => $index, 'image' => bl_family_image($key)] + $content['families'][$key];
 }
 // Hero slides: the loader picture as it has always been, then the mini dumper. The dumper slide only shows once it has a picture.
 $heroSlides = [];
