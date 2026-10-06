@@ -1,5 +1,17 @@
 import { openDialog } from './dialogs.js';
 
+// A message written for the model the visitor came from ("…a quotation for the FY-30") only fits that model's family:
+// it clears when they choose another family and comes back if they return, unless they have written their own.
+function syncPrefill(container, matches) {
+  const message = container.querySelector('textarea[name="message"]');
+  if (!message) return;
+  if (message.dataset.prefill === undefined) message.dataset.prefill = message.defaultValue;
+  const prefill = message.dataset.prefill;
+  if (!prefill) return;
+  if (!matches && message.value === prefill) message.value = '';
+  else if (matches && message.value === '') message.value = prefill;
+}
+
 // Enquiry sent through Contact Form 7: the model the visitor came from only travels with their equipment choice.
 function initializeSentInquiry(wrap) {
   const familyLabels = { loader: 'Skid steer loader', dumper: 'Mini dumper', service: 'Parts & service' };
@@ -10,6 +22,7 @@ function initializeSentInquiry(wrap) {
     const matches = chosen === familyLabels[wrap.dataset.modelFamily];
     if (note) note.hidden = !matches;
     if (model) model.value = matches ? wrap.dataset.model : '';
+    if (wrap.dataset.model) syncPrefill(wrap, matches);
   };
   wrap.querySelectorAll('input[name="product"]').forEach((radio) => radio.addEventListener('change', sync));
   wrap.addEventListener('wpcf7reset', () => setTimeout(sync));
@@ -31,6 +44,7 @@ export function initializeInquiry() {
   if (modelNote) {
     form.querySelectorAll('[name="product"]').forEach((radio) => radio.addEventListener('change', () => {
       modelNote.hidden = form.querySelector('[name="product"]:checked').value !== modelNote.dataset.modelFamily;
+      syncPrefill(form, !modelNote.hidden);
     }));
   }
 

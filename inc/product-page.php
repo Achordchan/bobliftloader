@@ -58,10 +58,10 @@ function bl_product_gallery(array $product): array
     return $images;
 }
 
-/** Where the main image sits in the gallery, matched by file (WordPress serves sized copies such as name-1024x768.webp). */
+/** Where the main image sits in the gallery, matched by path (WordPress serves sized copies such as name-1024x768.webp beside the file). */
 function bl_product_main_index(array $product, array $images): ?int
 {
-    $file = static fn(string $url): string => preg_replace('/-\d+x\d+(?=\.\w+$)/', '', basename((string) parse_url($url, PHP_URL_PATH)));
+    $file = static fn(string $url): string => (string) preg_replace('/-\d+x\d+(?=\.\w+$)/', '', (string) parse_url($url, PHP_URL_PATH));
     $main = $file((string) $product['image']);
     foreach ($images as $i => $image) if ($file($image['src']) === $main) return $i;
     return null;
