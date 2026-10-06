@@ -136,7 +136,7 @@ function bl_wp_inquiry_mail(): array
 <tr><td style="padding:0 36px;"><table width="100%" cellspacing="0" cellpadding="0" style="border-top:1px solid #edf0f4;">
 {$rows}
 </table></td></tr>
-{$heading('留言')}<tr><td style="padding:0 36px;"><div style="padding:16px 20px;background:#f5f7fa;border-left:3px solid #215bdb;border-radius:0 8px 8px 0;font-size:15px;line-height:1.75;color:#0b1f33;word-break:break-word;">[message]</div></td></tr>
+{$heading('留言')}<tr><td style="padding:0 36px;"><div style="padding:16px 20px;background:#f5f7fa;border-radius:8px;font-size:15px;line-height:1.75;color:#0b1f33;word-break:break-word;">[message]</div></td></tr>
 <tr><td style="padding:24px 36px 0;"><table width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #edf0f4;border-radius:8px;border-collapse:separate;"><tr>
 {$strip}
 </tr></table></td></tr>
