@@ -386,19 +386,20 @@ function bl_content_defaults(string $page): array
     };
 }
 
-/** A page's content: the defaults with the editor's saved changes laid over them. */
 /**
  * The home page's company figures moved from Intro to the team section. Figures saved before the move carry over unless the new
- * list was already saved; certification figures (the certificates on file cover cranes only) are left behind.
+ * list was already saved; certification figures (the certificates on file cover cranes only) are left behind. A list the editor
+ * emptied on purpose stays empty (the figures stay hidden); a list holding only certification figures falls back to the defaults.
  */
 function bl_migrate_home_facts(array $saved): array
 {
     if (isset($saved['approach']['facts']) || !is_array($saved['intro']['facts'] ?? null)) return $saved;
     $kept = array_values(array_filter($saved['intro']['facts'], static fn($fact) => is_array($fact) && !preg_match('/\bISO\b|\bCE\b|\bEAC\b|certif/i', ($fact['value'] ?? '') . ' ' . ($fact['label'] ?? ''))));
-    if ($kept) $saved['approach']['facts'] = $kept;
+    if ($kept || !$saved['intro']['facts']) $saved['approach']['facts'] = $kept;
     return $saved;
 }
 
+/** A page's content: the defaults with the editor's saved changes laid over them. */
 function bl_editable(string $page): array
 {
     static $cache = [];

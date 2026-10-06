@@ -20,6 +20,11 @@ $check(bl_migrate_home_facts($saved) === $saved, 'saved approach facts were over
 // Nothing to carry over: left alone, so the defaults show.
 $check(bl_migrate_home_facts(['hero' => ['title' => 'x']]) === ['hero' => ['title' => 'x']], 'unrelated content changed');
 $check(!isset(bl_migrate_home_facts(['intro' => ['facts' => [$facts[1]]]])['approach']['facts']), 'an all-certificate list became an empty list');
+// A list the editor emptied on purpose stays empty, so the figures stay hidden instead of coming back from the defaults.
+$emptied = bl_migrate_home_facts(['intro' => ['facts' => []]]);
+$check(array_key_exists('facts', $emptied['approach'] ?? []) && $emptied['approach']['facts'] === [], 'an emptied list did not stay empty');
+$merged = bl_merge_content(bl_home_defaults(), $emptied);
+$check($merged['approach']['facts'] === [], 'the defaults brought the figures back after an emptied list');
 
 // The withdrawn FAQ goes whether it came from the old stock list or a custom link; other questions stay.
 $check(bl_support_faq_retired(['q' => 'Which certificates do you hold?', 'a' => '…']), 'stock certificate question kept');
