@@ -7,7 +7,7 @@ return static function (array $d): string {
     $empty = static fn(string $text): string => '<span style="color:#9aa6b4;">' . $text . '</span>';
     $chip = static fn(string $text, string $bg, string $color): string => '<span style="display:inline-block;padding:3px 10px;border-radius:999px;background:' . $bg . ';color:' . $color . ';' . $f . 'font-size:13px;font-weight:600;line-height:20px;">' . esc_html($text) . '</span>';
     $section = static fn(string $num, string $title): string => '<tr><td colspan="2" style="padding:26px 0 10px;' . $f . 'font-size:13px;font-weight:700;letter-spacing:1px;color:#215bdb;border-bottom:1px solid #e3e8ef;"><span style="' . $mono . '">' . $num . '</span>&nbsp;&nbsp;' . $title . '</td></tr>';
-    $row = static fn(string $label, string $value, string $font = ''): string => '<tr><td width="112" valign="top" style="padding:12px 0;border-bottom:1px solid #eef1f5;' . $f . 'font-size:14px;color:#6b7a8c;">' . $label . '</td><td valign="top" style="padding:12px 0;border-bottom:1px solid #eef1f5;' . ($font ?: $f) . 'font-size:16px;line-height:24px;color:#0b1f33;word-break:break-word;">' . $value . '</td></tr>';
+    $row = static fn(string $label, string $value, string $font = ''): string => '<tr><td width="88" valign="top" style="padding:12px 0;border-bottom:1px solid #eef1f5;' . $f . 'font-size:14px;color:#6b7a8c;">' . $label . '</td><td valign="top" style="padding:12px 0;border-bottom:1px solid #eef1f5;' . ($font ?: $f) . 'font-size:16px;line-height:24px;color:#0b1f33;word-break:break-word;">' . $value . '</td></tr>';
 
     $rows = $section('01', '来源页面');
     if ($d['url'] !== '') $rows .= $row('页面', '<a href="' . esc_url($d['url']) . '" style="color:#215bdb;text-decoration:none;word-break:break-all;">' . $e($d['url']) . '</a>');
@@ -42,7 +42,7 @@ return static function (array $d): string {
 <table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0" style="width:660px;background:#ffffff;border:1px solid #dbe2ea;border-radius:10px;border-collapse:separate;overflow:hidden;text-align:left;">
 <tr><td bgcolor="#ffffff" style="background:#ffffff;padding:18px 36px;border-bottom:4px solid #215bdb;border-radius:10px 10px 0 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
 <td valign="middle"><img src="{$logo}" width="112" height="45" alt="BOB-LIFT" style="display:block;width:112px;height:45px;border:0;"></td>
-<td align="right" valign="middle" style="{$f}font-size:13px;color:#6b7a8c;">提交于 <span style="{$mono}color:#0b1f33;">{$e($d['time'])}</span></td></tr></table></td></tr>
+<td align="right" valign="middle" style="{$f}font-size:13px;color:#6b7a8c;white-space:nowrap;">提交于 <span style="{$mono}color:#0b1f33;">{$e($d['time'])}</span></td></tr></table></td></tr>
 <tr><td style="padding:32px 36px 8px;{$f}">
 <div style="font-size:28px;font-weight:800;line-height:36px;color:#0b1f33;">新询盘通知</div>
 <div style="padding-top:8px;font-size:16px;line-height:26px;color:#4a5a6c;">你好，管理员：网站刚收到一条新询盘，以下是客户提交的全部信息。</div>
