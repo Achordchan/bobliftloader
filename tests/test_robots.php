@@ -3,6 +3,10 @@ declare(strict_types=1);
 // php tests/test_robots.php — AI crawlers are let back in; everything else in robots.txt stays.
 require __DIR__ . '/../inc/seo.php';
 
+$failures = [];
+$check = static function (bool $ok, string $message) use (&$failures): void { if (!$ok) $failures[] = $message; };
+
+// The platform's file: separate one-agent groups behind a comment.
 $platform = <<<TXT
 User-agent: *
 Disallow: /wp-admin/
@@ -23,12 +27,27 @@ Disallow: /
 
 Sitemap: https://bobliftloader.com/wp-sitemap.xml
 TXT;
-
 $out = bl_allow_ai_crawlers($platform);
-$failures = [];
-foreach (['GPTBot', 'ClaudeBot', 'Google-Extended', 'CCBot', 'AI crawlers'] as $gone) if (stripos($out, $gone) !== false) $failures[] = "$gone still present";
-foreach (['User-agent: *', 'Disallow: /wp-admin/', 'Allow: /wp-admin/admin-ajax.php', 'Sitemap: https://bobliftloader.com/wp-sitemap.xml'] as $kept) if (!str_contains($out, $kept)) $failures[] = "$kept lost";
-if (bl_allow_ai_crawlers($out) !== $out) $failures[] = 'not idempotent';
-if (str_contains(bl_allow_ai_crawlers("User-agent: *\nDisallow: /private/\n"), 'Disallow: /private/') === false) $failures[] = 'generic rule dropped';
+foreach (['GPTBot', 'ClaudeBot', 'Google-Extended', 'CCBot', 'AI crawlers'] as $gone) $check(stripos($out, $gone) === false, "$gone still present");
+foreach (['User-agent: *', 'Disallow: /wp-admin/', 'Allow: /wp-admin/admin-ajax.php', 'Sitemap: https://bobliftloader.com/wp-sitemap.xml'] as $kept) $check(str_contains($out, $kept), "$kept lost");
+$check(substr_count($out, 'Disallow: /') === 1 && !str_contains($out, "Disallow: /\n"), 'a blocking rule is left behind');
+$check(bl_allow_ai_crawlers($out) === $out, 'not idempotent');
+
+// One group shared by several agents: the other agent keeps the rule.
+$shared = bl_allow_ai_crawlers("User-agent: OtherBot\nUser-agent: GPTBot\nDisallow: /\n\nUser-agent: *\nDisallow: /wp-admin/\n");
+$check(str_contains($shared, "User-agent: OtherBot\nDisallow: /"), 'shared group lost OtherBot or its rule');
+$check(!str_contains($shared, 'GPTBot'), 'GPTBot left in the shared group');
+$check(str_contains($shared, "User-agent: *\nDisallow: /wp-admin/"), 'wildcard group changed');
+
+// A comment between the agent and its rules does not strand the rule on the group above.
+$commented = bl_allow_ai_crawlers("User-agent: *\nDisallow: /wp-admin/\n\nUser-agent: ClaudeBot\n# keep out\nDisallow: /\n\nSitemap: https://example.com/sitemap.xml\n");
+$check(substr_count($commented, 'Disallow:') === 1 && str_contains($commented, 'Disallow: /wp-admin/'), 'an orphaned rule stayed behind');
+$check(!str_contains($commented, 'keep out') && !str_contains($commented, 'ClaudeBot'), 'the removed group left text behind');
+$check(str_contains($commented, 'Sitemap: https://example.com/sitemap.xml'), 'Sitemap lost');
+
+// Nothing named: unchanged apart from layout.
+$plain = "User-agent: *\nDisallow: /private/\n";
+$check(bl_allow_ai_crawlers($plain) === $plain, 'a plain file changed');
+
 if ($failures) { fwrite(STDERR, implode("\n", $failures) . "\n"); exit(1); }
 echo "robots ok\n";

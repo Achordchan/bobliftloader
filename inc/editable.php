@@ -387,6 +387,18 @@ function bl_content_defaults(string $page): array
 }
 
 /** A page's content: the defaults with the editor's saved changes laid over them. */
+/**
+ * The home page's company figures moved from Intro to the team section. Figures saved before the move carry over unless the new
+ * list was already saved; certification figures (the certificates on file cover cranes only) are left behind.
+ */
+function bl_migrate_home_facts(array $saved): array
+{
+    if (isset($saved['approach']['facts']) || !is_array($saved['intro']['facts'] ?? null)) return $saved;
+    $kept = array_values(array_filter($saved['intro']['facts'], static fn($fact) => is_array($fact) && !preg_match('/\bISO\b|\bCE\b|\bEAC\b|certif/i', ($fact['value'] ?? '') . ' ' . ($fact['label'] ?? ''))));
+    if ($kept) $saved['approach']['facts'] = $kept;
+    return $saved;
+}
+
 function bl_editable(string $page): array
 {
     static $cache = [];
@@ -394,6 +406,7 @@ function bl_editable(string $page): array
     $content = bl_content_defaults($page);
     $saved = bl_is_wordpress() ? get_option('bl_content_' . $page) : [];
     if (is_array($saved) && $saved) {
+        if ($page === 'home') $saved = bl_migrate_home_facts($saved);
         $content = bl_merge_content($content, $saved);
         // Loading figures are keyed by product, so models added in WordPress after these defaults are kept as well.
         if ($page === 'support' && is_array($saved['containers']['loading'] ?? null)) {

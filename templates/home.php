@@ -96,7 +96,7 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
   <?php /* A fixed landscape frame: the photograph keeps its shape at every width instead of stretching to a column height. */ ?>
   <figure class="bl-approach-photo bl-reveal"><img<?= bl_image_attributes($approachImage, '(max-width: 2240px) 100vw, 2240px') ?> alt="<?= bl_escape($approach['alt']) ?>" loading="lazy"><?php if ($approach['caption'] !== ''): ?><figcaption><?= bl_escape($approach['caption']) ?></figcaption><?php endif; ?></figure>
   <?php /* Company-level facts only: model counts and load ranges already sit in The Range above. */ ?>
-  <ul class="bl-approach-facts bl-reveal" style="--facts:<?= max(3, count($approach['facts'])) ?>" aria-label="BOB-LIFT at a glance"><?php foreach ($approach['facts'] as $fact): ?><li><strong><?= bl_escape($fact['value']) ?><?php if ($fact['unit'] !== ''): ?><small><?= bl_escape($fact['unit']) ?></small><?php endif; ?></strong><span><?= bl_escape($fact['label']) ?></span></li><?php endforeach; ?></ul>
+  <?php if ($approach['facts']): ?><ul class="bl-approach-facts bl-reveal" style="--facts:<?= max(3, count($approach['facts'])) ?>" aria-label="BOB-LIFT at a glance"><?php foreach ($approach['facts'] as $fact): ?><li><strong><?= bl_escape($fact['value']) ?><?php if ($fact['unit'] !== ''): ?><small><?= bl_escape($fact['unit']) ?></small><?php endif; ?></strong><span><?= bl_escape($fact['label']) ?></span></li><?php endforeach; ?></ul><?php endif; ?>
   <ol class="bl-approach-steps">
     <?php foreach ($approach['steps'] as $i => $step): ?>
     <li class="bl-reveal"><span><?= sprintf('%02d', $i + 1) ?></span><h3><?= bl_escape($step['title']) ?></h3><p><?= bl_rich($step['text']) ?></p></li>

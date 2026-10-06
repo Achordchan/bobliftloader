@@ -84,11 +84,65 @@ function bl_render_seo(array $route): void
     if ($route['status'] === 200 && empty($route['preview'])) echo '<script type="application/ld+json">' . json_encode(bl_structured_data($route), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>';
 }
 
-/** robots.txt without the blocks that shut named AI crawlers out; the rules for every other agent stay as they are. */
+/**
+ * robots.txt without the rules that shut named AI crawlers out. The file is read as groups (one or more User-agent lines and the
+ * rules under them): a named crawler's User-agent line is removed from its group, and a group left with no agent goes with its rules
+ * and the comments written for it. Groups that also name another agent, and every other group, keep what they have.
+ */
 function bl_allow_ai_crawlers(string $robots): string
 {
-    $bots = 'GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|Claude-SearchBot|anthropic-ai|Google-Extended|Applebot-Extended|PerplexityBot|Perplexity-User|meta-externalagent|Bytespider|CCBot|Amazonbot|cohere-ai|Diffbot|FacebookBot|ImagesiftBot|Omgilibot|YouBot';
-    $robots = preg_replace('/^User-agent:[ \t]*(?:' . $bots . ')[ \t]*\R(?:(?:Disallow|Allow|Crawl-delay):[^\r\n]*\R?)*\R*/mi', '', $robots) ?? $robots;
-    $robots = preg_replace('/^#[^\r\n]*AI crawlers[^\r\n]*\R*/mi', '', $robots) ?? $robots;
-    return rtrim($robots) . "\n";
+    $bots = array_map('strtolower', ['GPTBot', 'ChatGPT-User', 'OAI-SearchBot', 'ClaudeBot', 'Claude-Web', 'Claude-SearchBot', 'anthropic-ai', 'Google-Extended', 'Applebot-Extended', 'PerplexityBot', 'Perplexity-User', 'meta-externalagent', 'Bytespider', 'CCBot', 'Amazonbot', 'cohere-ai', 'Diffbot', 'FacebookBot', 'ImagesiftBot', 'Omgilibot', 'YouBot']);
+    $blocks = [];     // each: ['lines' => [...], 'agents' => n, 'kept' => n, 'rules' => bool]
+    $global = [];     // Sitemap lines and the like belong to no group
+    $pending = [];    // comments and blank lines after a group's rules: they lead the next group if one starts, else stay with this one
+    $block = null;
+    foreach (preg_split('/\R/', $robots) as $line) {
+        $trim = trim($line);
+        if (preg_match('/^user-agent[ \t]*:[ \t]*(.*)$/i', $trim, $m)) {
+            if ($block === null || $block['rules']) {
+                if ($block !== null) $blocks[] = $block;
+                $block = ['lines' => $pending, 'agents' => 0, 'kept' => 0, 'rules' => false];
+                $pending = [];
+            } else {
+                $block['lines'] = array_merge($block['lines'], $pending);
+                $pending = [];
+            }
+            $block['agents']++;
+            $ai = in_array(strtolower(trim(preg_replace('/\s*#.*$/', '', $m[1]))), $bots, true);
+            if (!$ai) {
+                $block['kept']++;
+                $block['lines'][] = $line;
+            }
+        } elseif ($trim === '' || $trim[0] === '#') {
+            if ($block !== null && $block['rules']) $pending[] = $line;
+            elseif ($block !== null) $block['lines'][] = $line;
+            else $global[] = $line;
+        } elseif (preg_match('/^sitemap[ \t]*:/i', $trim)) {
+            $global[] = $line;
+        } else {
+            if ($block === null) {
+                $global[] = $line;
+                continue;
+            }
+            $block['lines'] = array_merge($block['lines'], $pending);
+            $pending = [];
+            $block['rules'] = true;
+            $block['lines'][] = $line;
+        }
+    }
+    if ($block !== null) {
+        $block['lines'] = array_merge($block['lines'], $pending);
+        $blocks[] = $block;
+    }
+    $out = [];
+    foreach ($blocks as $b) {
+        if ($b['agents'] > 0 && $b['kept'] === 0) continue;
+        $text = trim(implode("\n", $b['lines']), "\r\n");
+        if ($text !== '') $out[] = $text;
+    }
+    $sitemaps = array_filter($global, static fn($l) => preg_match('/^\s*sitemap\s*:/i', $l));
+    $others = array_filter($global, static fn($l) => !preg_match('/^\s*sitemap\s*:/i', $l) && trim($l) !== '');
+    if ($others) array_unshift($out, implode("\n", $others));
+    if ($sitemaps) $out[] = implode("\n", $sitemaps);
+    return implode("\n\n", $out) . "\n";
 }

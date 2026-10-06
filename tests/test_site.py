@@ -352,6 +352,17 @@ class WebsiteTests(unittest.TestCase):
         # The logo still goes home on its own.
         self.assertIn('<a class="bl-brand" href="/" aria-label="BOB-LIFT home">', html)
 
+    def test_advertised_icons_load(self):
+        # Every icon the head advertises is a real image (the preview router once refused .ico).
+        _, html, _ = fetch('/')
+        hrefs = re.findall(r'<link rel="(?:icon|apple-touch-icon)" href="([^"]+)"', html)
+        self.assertTrue(any(href.endswith('.ico') for href in hrefs) and any(href.endswith('apple-touch-icon.png') for href in hrefs), hrefs)
+        for href in hrefs:
+            with OPENER.open(BASE + href, timeout=30) as response:
+                self.assertEqual(response.status, 200, href)
+                self.assertTrue(response.headers.get('Content-Type', '').startswith('image/'), href)
+                self.assertGreater(len(response.read()), 100, href)
+
     def test_range_opens_on_the_loaders(self):
         # /products/ goes straight to the loaders, the main line; a header search there still spans both families.
         class Stay(HTTPRedirectHandler):
