@@ -18,10 +18,19 @@ add_action('init', static function (): void {
             'single' => true,
             'description' => 'BOB-LIFT record: model, category, specs (label => value), images, videos, event and links.',
             // Edit context only: the record also holds where product data came from, which the site never shows.
-            'show_in_rest' => ['schema' => ['type' => 'object', 'context' => ['edit'], 'additionalProperties' => true]],
+            'show_in_rest' => ['schema' => ['type' => 'object', 'context' => ['edit'], 'additionalProperties' => true, 'properties' => $type === 'bl_application' ? ['image' => ['type' => 'string', 'deprecated' => true, 'description' => '已弃用：封面以特色图片 featured_media 为准；此字段仅保留历史数据。']] : []]],
             'auth_callback' => static fn(bool $allowed, string $key, int $postId): bool => current_user_can('edit_post', $postId),
         ]);
     }
+});
+
+add_action('init', static function (): void {
+    register_meta('user', 'bl_title', [
+        'type' => 'string', 'single' => true, 'show_in_rest' => true,
+        'description' => '新闻作者职位，显示在文章署名中。',
+        'sanitize_callback' => 'sanitize_text_field',
+        'auth_callback' => static fn($allowed, $key, $userId): bool => current_user_can('edit_user', (int) $userId),
+    ]);
 });
 
 /** A theme path (images/…, videos/…) or an http(s) address, as the edit screens accept. */
@@ -229,6 +238,7 @@ function bl_page_content_make_items(): void
         // The marker is set only once every item is there under its own slug, so a failed insert is tried again later.
         $complete = true;
         foreach (BL_CONTENT_PAGES as $page => $info) {
+            $page = (string) $page;
             $found = get_posts(['post_type' => 'bl_page_content', 'name' => $page, 'post_status' => 'any', 'numberposts' => 1, 'fields' => 'ids', 'suppress_filters' => true, 'cache_results' => false]);
             if ($found) continue;
             $id = wp_insert_post(['post_type' => 'bl_page_content', 'post_status' => 'private', 'post_name' => $page, 'post_title' => $info['title']], true);
@@ -268,7 +278,7 @@ add_filter('rest_pre_insert_bl_page_content', static function ($prepared, WP_RES
     // the lock keeps two writes to the same page from both starting from the same content.
     $expected = $request->get_param('bl_content_revision');
     if ($expected !== null && !is_string($expected)) return new WP_Error('bl_content_revision_invalid', '内容版本无效。', ['status' => 400]);
-    $saved = bl_content_locked($page, static fn(array $previous): array => bl_content_prepare($page, $previous, $sent), $expected);
+    $saved = bl_content_locked($page, static fn(array $previous): array|WP_Error => bl_content_prepare($page, $previous, $sent), $expected);
     if (is_wp_error($saved)) return $saved;
     bl_rest_content_snapshot($page, true);
     unset($meta['_bl_content']);
@@ -281,7 +291,7 @@ add_action('rest_api_init', static function (): void {
     register_rest_field('bl_page_content', 'bl_content_revision', [
         'get_callback' => static function (array $post): string {
             $page = bl_page_content_key((int) $post['id']);
-            return $page ? bl_content_revision(bl_rest_content_snapshot($page)) : '';
+            return $page ? bl_content_revision(bl_rest_content_snapshot($page), $page) : '';
         },
         'schema' => ['type' => 'string', 'context' => ['edit'], 'description' => '保存时回传此版本；过期版本返回 409，省略时按当前内容合并。'],
     ]);

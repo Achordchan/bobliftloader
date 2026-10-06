@@ -411,6 +411,7 @@ function bl_applications_defaults(): array
 }
 
 require_once __DIR__ . '/content-state.php';
+require_once __DIR__ . '/site-content.php';
 
 /** Apply migrated content; explicit empty descriptions and checklists remain empty. */
 function bl_apply_application_content(array $applications, ?array $content = null): array
@@ -470,14 +471,21 @@ function bl_thanks_defaults(): array
 
 function bl_content_defaults(string $page): array
 {
-    return match ($page) {
+    $extra = bl_site_content_definition($page)['defaults'] ?? [];
+    if ($page === 'global') {
+        $support = bl_is_wordpress() ? get_option('bl_content_support', []) : [];
+        $extra['company']['service_whatsapp'] = bl_content_resolve('support', is_array($support) ? $support : [])['after']['whatsapp_number'];
+    }
+    if ($page === 'tracking') return ['head' => '', 'body_open' => '', 'footer' => ''];
+    if ($extra && !in_array($page, ['loaders', 'dumpers'], true)) return $extra;
+    return array_replace_recursive(match ($page) {
         'support' => bl_support_defaults(),
         'applications' => bl_applications_defaults(),
         'loaders' => bl_loaders_defaults(),
         'dumpers' => bl_dumpers_defaults(),
         'thanks' => bl_thanks_defaults(),
         default => bl_home_defaults(),
-    };
+    }, $extra);
 }
 
 /**

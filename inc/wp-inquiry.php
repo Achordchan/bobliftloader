@@ -9,7 +9,6 @@ declare(strict_types=1);
  * switched on in Contact → Integration with the site's own keys.
  */
 
-const BL_ENQUIRY_EMAIL = 'info@boblift.com';
 // Raised when the theme's form or notification email changes, so the form the theme made earlier gets the new one once
 // (2: the HTML card; 3: no country field, the card shows the country of the sender's IP address instead; 4: the card
 // redesigned in the site's colours; 5: the country in Chinese, the same text size on phones;
@@ -28,6 +27,16 @@ function bl_wp_inquiry_form_id(): int
     $id = (int) get_option('bl_inquiry_form');
     return $id && get_post_type($id) === 'wpcf7_contact_form' && get_post_status($id) === 'publish' ? $id : 0;
 }
+
+/** An explicit global email override applies only to the theme's primary notification. Legacy plugin recipients remain intact until then. */
+function bl_wp_inquiry_recipient(array $components, $form, $mail): array
+{
+    if (!$form || !$mail || (int) $form->id() !== (int) get_option('bl_inquiry_form') || $mail->name() !== 'mail') return $components;
+    $saved = get_option('bl_content_global', []);
+    if (is_array($saved) && (!empty($saved['_bl_email_explicit']) || (is_array($saved['company'] ?? null) && array_key_exists('email', $saved['company'])))) $components['recipient'] = bl_content_resolve('global', $saved)['company']['email'];
+    return $components;
+}
+add_filter('wpcf7_mail_components', 'bl_wp_inquiry_recipient', 10, 3);
 
 /** The form for one page: $atts carry the choices the page already made (product family, model, message). */
 function bl_wp_inquiry_form(array $atts): string
@@ -74,7 +83,7 @@ add_action('admin_init', static function (): void {
         'mail' => [
             'active' => true,
             'sender' => bl_wp_inquiry_sender(),
-            'recipient' => BL_ENQUIRY_EMAIL,
+            'recipient' => bl_company('email'),
             'additional_headers' => 'Reply-To: [name] <[email]>',
             'attachments' => '',
         ] + bl_wp_inquiry_mail(),
@@ -276,7 +285,7 @@ add_filter('wpcf7_special_mail_tags', static function ($output, string $name, bo
     if (!in_array($name, ['bl_page_link', 'bl_page_url', 'bl_enquiry_kind', 'bl_logo', 'bl_site', 'bl_time', 'bl_product_card', 'bl_ip_country'], true)) return $output;
     if ($name === 'bl_site') return (string) wp_parse_url(home_url(), PHP_URL_HOST);
     if ($name === 'bl_logo') {
-        $logo = '<img src="' . esc_url(bl_asset('images/logo.png')) . '" width="112" height="45" alt="BOB-LIFT" style="display:block;width:112px;height:45px;border:0;">';
+        $logo = '<img src="' . esc_url(bl_brand_logo()) . '" width="112" height="45" alt="BOB-LIFT" style="display:block;width:112px;height:45px;border:0;">';
         return $html ? $logo : 'BOB-LIFT';
     }
     $submission = WPCF7_Submission::get_instance();

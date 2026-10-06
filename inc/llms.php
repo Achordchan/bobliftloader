@@ -56,8 +56,8 @@ function bl_llms_txt(): string
             bl_llms_txt_link('About BOB-LIFT Loader', '/about/', 'The company, factory and team behind the machines'),
             bl_llms_txt_link('Support', '/support/', 'Ordering, shipping, warranty, parts and after-delivery service'),
             bl_llms_txt_link('Contact', '/contact/', 'Enquiry form for quotations and specifications'),
-            '- Email: info@boblift.com',
-            '- Phone and WhatsApp: +86 158 5249 9415',
+            '- Email: ' . bl_company('email'),
+            '- Phone and WhatsApp: ' . bl_company('phone'),
             '- Parent company website: https://www.boblift.com/',
         ],
     ];

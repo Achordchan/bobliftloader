@@ -124,7 +124,7 @@ $partsImage = bl_content_image($after['parts_image'], ['src' => bl_asset('images
     </div>
     <div class="bl-sup-after-actions bl-reveal">
       <a class="bl-button bl-button-blue" href="<?= bl_escape($serviceUrl) ?>"><?= bl_escape($after['button']) ?> <?= bl_icon('arrow-up-right') ?></a>
-      <?php if ($after['whatsapp_number'] !== ''): ?><a class="bl-text-link" href="https://wa.me/<?= bl_escape($after['whatsapp_number']) ?>?text=<?= rawurlencode($after['whatsapp_message']) ?>" target="_blank" rel="noopener"><?= bl_escape($after['whatsapp_label']) ?> <?= bl_icon('arrow-up-right') ?></a><?php endif; ?>
+      <?php if (bl_company('service_whatsapp') !== ''): ?><a class="bl-text-link" href="https://wa.me/<?= bl_escape(bl_company('service_whatsapp')) ?>?text=<?= rawurlencode($after['whatsapp_message']) ?>" target="_blank" rel="noopener"><?= bl_escape($after['whatsapp_label']) ?> <?= bl_icon('arrow-up-right') ?></a><?php endif; ?>
     </div>
   </div>
 </section>

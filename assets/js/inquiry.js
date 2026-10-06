@@ -60,6 +60,7 @@ export function initializeInquiry() {
   const dialog = document.querySelector('#inquiry-dialog');
   const summary = document.querySelector('#inquiry-summary');
   const emailLink = document.querySelector('#inquiry-email');
+  const recipient = form.dataset.email ?? document.querySelector('.bl-side-contact a[href^="mailto:"]').getAttribute('href').slice(7).split('?')[0];
   const copyStatus = document.querySelector('#copy-status');
   const productLabels = { loader: 'Skid steer loader', dumper: 'Mini dumper', help: 'Help choosing equipment', service: 'Parts & service' };
   let emailBody = '';
@@ -108,7 +109,7 @@ export function initializeInquiry() {
     const service = fields.get('product') === 'service';
     emailBody = `Hello BOB-LIFT team,\n\n${service ? 'I need help with a machine I already have.' : "I'd like to discuss the following equipment enquiry."}\n\n${entries.map(([label, value]) => `${label}: ${value}`).join('\n')}\n\n${service ? 'Please let me know how you can help.' : 'Please let me know about available models, specifications and quotation details.'}\n\nThank you.`;
     const subject = service ? 'Parts & service request' : `Equipment enquiry — ${productLabels[fields.get('product')]}`;
-    emailLink.href = `mailto:info@boblift.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+    emailLink.href = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
     copyStatus.textContent = '';
     openDialog(dialog, form.querySelector('[type="submit"]'));
   });
@@ -116,9 +117,9 @@ export function initializeInquiry() {
   document.querySelector('#copy-inquiry').addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(emailBody);
-      copyStatus.textContent = 'Enquiry copied. Paste it into an email to info@boblift.com.';
+      copyStatus.textContent = `Enquiry copied. Paste it into an email to ${recipient}.`;
     } catch {
-      copyStatus.textContent = 'Your browser could not copy automatically. Select and copy the details above, then email info@boblift.com.';
+      copyStatus.textContent = `Your browser could not copy automatically. Select and copy the details above, then email ${recipient}.`;
     }
   });
 }

@@ -3,11 +3,24 @@ declare(strict_types=1);
 defined('ABSPATH') || exit;
 
 /**
- * "网站内容" screens for the home, Support, Applications, skid steer loader and mini dumper pages. Each screen is built from the field list below; saving keeps only
+ * "网站内容" screens share the schemas below and in content-*.php; saving keeps only
  * what differs from the defaults in inc/editable.php, so text an editor never touched follows later theme updates.
  */
 
-const BL_CONTENT_PAGES = ['home' => ['title' => '首页内容', 'menu' => '首页', 'path' => '/'], 'support' => ['title' => '采购与售后（Support）页内容', 'menu' => '采购与售后 Support', 'path' => '/support/'], 'applications' => ['title' => '应用场景（Applications）页内容', 'menu' => '应用场景 Applications', 'path' => '/applications/'], 'loaders' => ['title' => '滑移装载机栏目内容', 'menu' => '滑移装载机', 'path' => '/products/skid-steer-loaders/'], 'dumpers' => ['title' => '迷你翻斗车栏目内容', 'menu' => '迷你翻斗车', 'path' => '/products/mini-dumpers/'], 'thanks' => ['title' => '询盘成功页内容', 'menu' => '询盘成功页', 'path' => '/thank-you/']];
+const BL_CONTENT_PAGES = [
+    'home' => ['title' => '首页内容', 'menu' => '首页', 'path' => '/'],
+    'support' => ['title' => '采购与售后内容', 'menu' => '采购与售后', 'path' => '/support/'],
+    'applications' => ['title' => '应用场景内容', 'menu' => '应用场景', 'path' => '/applications/'],
+    'loaders' => ['title' => '滑移装载机栏目内容', 'menu' => '滑移装载机', 'path' => '/products/skid-steer-loaders/'],
+    'dumpers' => ['title' => '迷你翻斗车栏目内容', 'menu' => '迷你翻斗车', 'path' => '/products/mini-dumpers/'],
+    'global' => ['title' => '全站设置', 'menu' => '全站设置', 'path' => '/'],
+    'about' => ['title' => '关于我们', 'menu' => '关于我们', 'path' => '/about/'],
+    'contact' => ['title' => '联系我们', 'menu' => '联系我们', 'path' => '/contact/'],
+    'privacy' => ['title' => '隐私说明', 'menu' => '隐私说明', 'path' => '/privacy/'],
+    'news' => ['title' => '新闻列表', 'menu' => '新闻列表', 'path' => '/news/'],
+    '404' => ['title' => '未找到页面', 'menu' => '未找到页面', 'path' => '/404/'],
+    'thanks' => ['title' => '询盘成功页内容', 'menu' => '询盘成功页', 'path' => '/thank-you/'],
+];
 
 /**
  * Field list per page. "group" only groups fields on the screen; "preview" is the theme's own image shown while a slot is
@@ -15,6 +28,9 @@ const BL_CONTENT_PAGES = ['home' => ['title' => '首页内容', 'menu' => '首�
  */
 function bl_content_schema(string $page): array
 {
+    $extra = bl_site_content_definition($page)['sections'] ?? [];
+    if ($page === 'tracking') return [['title' => '统计与跟踪代码', 'fields' => array_map(static fn($key) => ['key' => $key, 'type' => 'raw', 'label' => $key], ['head', 'body_open', 'footer'])]];
+    if ($extra && !in_array($page, ['loaders', 'dumpers'], true)) return $extra;
     $heading = '换行即分行；用 *星号* 包住的文字显示为强调色。';
     $rich = '换行即分行；可以用 &lt;a href="…"&gt;链接&lt;/a&gt;、&lt;strong&gt;加粗&lt;/strong&gt;。';
     $image = '留空使用主题自带的照片。建议上传宽度 1600px 以上的横图。';
@@ -90,7 +106,7 @@ function bl_content_schema(string $page): array
         $sections[] = $seo('');
         return $sections;
     }
-    if ($page === 'loaders') return [
+    if ($page === 'loaders') return [...$extra,
         ['title' => '适用场景', 'note' => '滑移装载机栏目页属具上方的“用在哪里”，常见问题“什么是滑移装载机”链接到这里（#loader-jobs）。全部删掉则不显示这一块。', 'fields' => [
             ['key' => 'jobs.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'jobs.items', 'label' => '场景', 'type' => 'list', 'add' => '添加场景', 'summary' => ['title'], 'fields' => [
@@ -112,7 +128,7 @@ function bl_content_schema(string $page): array
             ['key' => 'attachments.note', 'label' => '底部备注', 'type' => 'textarea', 'help' => $optional],
         ]],        $productPage('loader'),
     ];
-    if ($page === 'dumpers') return [
+    if ($page === 'dumpers') return [...$extra,
         ['title' => '栏目介绍与配置', 'note' => '翻斗车栏目页产品列表下方的介绍（#about-the-range）：标题、介绍和下面一排配置说明。中间的载荷图由产品数据自动生成。', 'fields' => [
             ['key' => 'about.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'about.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
@@ -211,7 +227,7 @@ function bl_content_schema(string $page): array
             ['key' => 'after.parts_text', 'group' => '配件', 'label' => '说明', 'type' => 'textarea'],
             ['key' => 'after.button', 'group' => '报修按钮与 WhatsApp', 'label' => '报修按钮文字', 'type' => 'text'],
             ['key' => 'after.whatsapp_label', 'group' => '报修按钮与 WhatsApp', 'label' => 'WhatsApp 链接文字', 'type' => 'text'],
-            ['key' => 'after.whatsapp_number', 'group' => '报修按钮与 WhatsApp', 'label' => 'WhatsApp 号码', 'type' => 'digits', 'help' => '含国家码，只填数字。留空则不显示 WhatsApp 链接。'],
+            ['key' => 'after.whatsapp_number', 'group' => '报修按钮与 WhatsApp', 'label' => 'WhatsApp 号码', 'type' => 'digits', 'help' => '含国家码，只填数字。全站设置未覆盖售后号码时使用此值；统一号码在“网站内容 → 全站设置”修改。'],
             ['key' => 'after.whatsapp_message', 'group' => '报修按钮与 WhatsApp', 'label' => 'WhatsApp 预填消息', 'type' => 'text', 'help' => '访客打开 WhatsApp 时输入框里预先填好的文字。'],
         ]],
         ['title' => '03 资料下载', 'note' => '画册 PDF 本身在<a href="' . esc_url(admin_url('admin.php?page=bl-downloads')) . '">“网站内容 → 资料下载”</a>更换；视频条目由产品视频自动生成。', 'fields' => [
@@ -303,7 +319,7 @@ function bl_content_schema(string $page): array
             ['key' => 'journal.title', 'label' => '标题', 'type' => 'text'],
             ['key' => 'journal.link', 'label' => '链接文字', 'type' => 'text'],
         ]],
-        ['title' => '底部联系', 'note' => '联系邮箱 info@boblift.com 全站统一（页脚、联系页、询盘表单都用它），不在这里单独修改。', 'fields' => [
+        ['title' => '底部联系', 'note' => '联系邮箱由“网站内容 → 全站设置”统一管理，页脚、联系页和询盘邮件草稿共用。', 'fields' => [
             ['key' => 'contact.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'contact.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
             ['key' => 'contact.text', 'label' => '说明', 'type' => 'rich', 'help' => $rich],
@@ -357,8 +373,10 @@ function bl_content_clean_url(string $url): string
 function bl_content_clean(string $type, $value)
 {
     if (!is_scalar($value)) $value = '';
+    if ($type === 'raw' || $type === 'verbatim') return (string) $value;
     $value = str_replace("\r\n", "\n", (string) $value);
     switch ($type) {
+        case 'html': return wp_kses_post($value);
         case 'text': return sanitize_text_field($value);
         case 'textarea': return trim(sanitize_textarea_field($value));
         case 'heading': return trim(implode("\n", array_map('trim', explode("\n", sanitize_textarea_field($value)))));
@@ -373,6 +391,8 @@ function bl_content_clean(string $type, $value)
             return $tags->get_updated_html();
         case 'image': case 'url': return bl_content_clean_url($value);
         case 'digits': return preg_replace('/\D+/', '', $value);
+        // sanitize_email() keeps every character a valid address may hold (sanitize_text_field() drops %xx sequences).
+        case 'email': return sanitize_email(trim($value));
     }
     return '';
 }
@@ -435,6 +455,7 @@ function bl_content_diff(array $value, array $default): array
 add_action('admin_menu', static function (): void {
     add_menu_page('网站内容', '网站内容', 'edit_pages', 'bl-content-home', static fn() => bl_content_screen('home'), 'dashicons-edit-large', 21);
     foreach (BL_CONTENT_PAGES as $page => $info) {
+        $page = (string) $page;
         // The first entry shares the top-level slug, whose screen is already registered above.
         add_submenu_page('bl-content-home', $info['title'], $info['menu'], 'edit_pages', 'bl-content-' . $page, $page === 'home' ? '' : static fn() => bl_content_screen($page));
     }
@@ -455,9 +476,11 @@ function bl_content_screen(string $page): void
     if (!isset(BL_CONTENT_PAGES[$page]) || !current_user_can('edit_pages')) wp_die('没有编辑权限。', '', ['response' => 403]);
     $info = BL_CONTENT_PAGES[$page];
     $stored = bl_content_saved_now($page);
+    // The revision is taken before the values are read: if Support's number changes in between, the form shows the new
+    // number with an older token, and saving it is refused as stale rather than freezing a number the editor never saw.
+    $revision = bl_content_revision($stored, $page);
     $values = bl_content_resolve($page, $stored);
-    // The revision describes what is stored; "changed" marks and reset follow the migrated content the screen shows.
-    $revision = bl_content_revision($stored);
+    // "Changed" marks and reset follow the migrated content the screen shows.
     $saved = bl_content_migrate($page, $stored);
     $recovery = bl_content_recovery($page);
     if ($recovery) {
@@ -470,9 +493,11 @@ function bl_content_screen(string $page): void
     $total = array_sum(array_map($count, $sections));
     echo '<div class="wrap bl-ce"><div class="bl-page-head"><div><h1>' . esc_html($info['title']) . '</h1><p>改这个页面的文字和图片，版式由主题决定。只保存改过的内容（标“已修改”），其余内容跟随主题默认。</p></div>';
     echo '<div class="bl-page-head-actions"><a class="button" href="' . esc_url(home_url($info['path'])) . '" target="_blank" rel="noopener">查看页面<span class="screen-reader-text">（在新窗口打开）</span></a></div></div><hr class="wp-header-end">';
-    if (isset($_GET['bl_saved'])) echo '<div class="notice notice-success is-dismissible"><p>已保存。</p></div>';
-    if (isset($_GET['bl_reset'])) echo '<div class="notice notice-success is-dismissible"><p>已恢复为主题默认内容。</p></div>';
+    if (isset($_GET['bl_saved'])) echo '<p role="status"><span class="bl-chip">已保存</span></p>';
+    if (isset($_GET['bl_reset'])) echo '<p role="status"><span class="bl-chip">已恢复为主题默认内容</span></p>';
     if ($recovery) echo '<p role="alert"><span class="bl-chip bl-chip-warn">未保存</span> ' . esc_html($recovery['message']) . ' 输入已保留 24 小时；请在新标签页打开最新内容，对照后再编辑保存。<a target="_blank" rel="noopener" href="' . esc_url(admin_url('admin.php?page=bl-content-' . $page)) . '">打开最新内容</a></p>';
+    if ($page === 'privacy') echo '<p><span class="bl-chip">当前模式：' . (bl_inquiry_form_id() ? '站内提交' : '邮件草稿') . '</span> 两种模式分别编辑，前台按询盘插件的启用状态自动选择。启用统计代码后，请同步更新外部服务说明。</p>';
+    if ($page === 'about') echo '<p>公司介绍仍在原生关于页面正文中编辑。</p>';
     $open = count($sections) === 1;
     if (count($sections) >= 3) {
         echo '<nav class="bl-jump" aria-label="页面分区"><span class="bl-jump-label">跳到</span>';
@@ -519,6 +544,7 @@ function bl_content_screen(string $page): void
         submit_button('撤销最近一次恢复默认', 'secondary', 'submit', false);
         echo '</form>';
     }
+    if ($page === 'global' && function_exists('bl_tracking_screen')) bl_tracking_screen();
     echo '</div>';
 }
 
@@ -545,7 +571,7 @@ function bl_content_name(string $key): string
 function bl_content_input(string $type, string $name, string $id, string $value, string $preview = ''): string
 {
     switch ($type) {
-        case 'textarea': case 'rich':
+        case 'textarea': case 'rich': case 'html': case 'verbatim': case 'raw':
             return '<textarea class="large-text" rows="3" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '">' . esc_textarea($value) . '</textarea>';
         case 'heading':
             return '<textarea class="large-text bl-ce-heading" rows="' . max(2, substr_count($value, "\n") + 1) . '" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '">' . esc_textarea($value) . '</textarea>';
@@ -556,6 +582,8 @@ function bl_content_input(string $type, string $name, string $id, string $value,
                 . '<div class="bl-ce-image-side"><p class="bl-ce-image-file" data-default="使用主题自带的图片">' . ($value !== '' ? esc_html(wp_basename((string) parse_url($value, PHP_URL_PATH))) : '使用主题自带的图片') . '</p>'
                 . '<p class="bl-ce-image-buttons"><button type="button" class="button bl-ce-pick" id="' . esc_attr($id) . '-pick">从媒体库选择</button><button type="button" class="button-link bl-ce-clear">改回主题默认</button></p>'
                 . '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '"></div></div>';
+        case 'email':
+            return '<input class="large-text code" type="email" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '">';
         case 'url': case 'digits':
             return '<input class="large-text code" type="text" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '">';
     }
@@ -679,6 +707,7 @@ function bl_content_page_for_post(?WP_Post $post): string
 {
     if (!$post || $post->post_type !== 'page') return '';
     if ((int) get_option('page_on_front') === $post->ID) return 'home';
+    if (in_array($post->post_name, ['about', 'contact', 'privacy'], true) && !$post->post_parent) return $post->post_name;
     if ($post->post_name === 'support' && !$post->post_parent) return 'support';
     if ($post->post_name === 'applications' && !$post->post_parent) return 'applications';
     if ($post->post_name === 'thank-you' && !$post->post_parent) return 'thanks';
@@ -692,6 +721,7 @@ add_action('enqueue_block_editor_assets', static function (): void {
     $page = bl_content_page_for_post(get_post());
     if (!$page) return;
     $message = '这个页面的文字和图片在“网站内容 → ' . BL_CONTENT_PAGES[$page]['menu'] . '”里修改，编辑器正文不会显示在网站上。这里只管标题、网址和发布状态。';
+    if ($page === 'about') $message = '公司介绍继续在本页正文编辑；其他文字与图片在网站内容 → 关于我们中修改。';
     wp_add_inline_script('wp-notices', 'wp.domReady(function(){wp.data.dispatch("core/notices").createNotice("warning",' . wp_json_encode($message) . ',{isDismissible:false,actions:[{label:"去修改内容",url:' . wp_json_encode(admin_url('admin.php?page=bl-content-' . $page)) . '}]});});');
     wp_enqueue_script('wp-dom-ready');
 });

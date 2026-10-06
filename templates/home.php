@@ -108,7 +108,7 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
 
 <section class="bl-contact" id="contact" aria-labelledby="contact-title">
   <div class="bl-contact-layout bl-shell">
-    <div class="bl-contact-copy bl-reveal"><p class="bl-eyebrow"><?= bl_escape($content['contact']['eyebrow']) ?></p><h2 id="contact-title"><?= bl_heading($content['contact']['title']) ?></h2><p><?= bl_rich($content['contact']['text']) ?></p><a class="bl-contact-email" href="mailto:info@boblift.com">info@boblift.com <?= bl_icon('arrow-up-right') ?></a><span class="bl-contact-signoff"><?= bl_escape($content['contact']['signoff']) ?></span></div>
+    <div class="bl-contact-copy bl-reveal"><p class="bl-eyebrow"><?= bl_escape($content['contact']['eyebrow']) ?></p><h2 id="contact-title"><?= bl_heading($content['contact']['title']) ?></h2><p><?= bl_rich($content['contact']['text']) ?></p><a class="bl-contact-email" href="mailto:<?= bl_escape(bl_company('email')) ?>"><?= bl_escape(bl_company('email')) ?> <?= bl_icon('arrow-up-right') ?></a><span class="bl-contact-signoff"><?= bl_escape($content['contact']['signoff']) ?></span></div>
     <?php require __DIR__ . '/partials/inquiry-form.php'; ?>
   </div>
 </section>

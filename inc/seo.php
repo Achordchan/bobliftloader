@@ -5,15 +5,15 @@ function bl_structured_data(array $route): array
 {
     $base = bl_public_base();
     $organization = [
-        '@type' => 'Organization', '@id' => 'https://www.boblift.com/#organization',
-        'name' => 'Xuzhou BOB-LIFT Construction Machinery Co., Ltd.', 'alternateName' => 'BOB-LIFT',
-        'url' => 'https://www.boblift.com/', 'email' => 'info@boblift.com', 'telephone' => '+86-15852499415',
+        '@type' => 'Organization', '@id' => bl_company('website') . '#organization',
+        'name' => bl_company('name'), 'alternateName' => 'BOB-LIFT',
+        'url' => bl_company('website'), 'email' => bl_company('email'), 'telephone' => bl_company('phone_seo'),
         'sameAs' => ['https://www.bobliftcrane.com/'],
-        'logo' => bl_absolute_asset(bl_asset('images/logo.png')),
-        'address' => ['@type' => 'PostalAddress', 'streetAddress' => 'No. 79, Zone B, Jingluotuo Industrial Park, Yunlong District', 'addressLocality' => 'Xuzhou', 'addressRegion' => 'Jiangsu', 'addressCountry' => 'CN'],
+        'logo' => bl_absolute_asset(bl_brand_logo()),
+        'address' => ['@type' => 'PostalAddress', 'streetAddress' => bl_company('street'), 'addressLocality' => bl_company('city'), 'addressRegion' => bl_company('region'), 'addressCountry' => bl_company('country_code')],
     ];
     $graph = [$organization,
-        ['@type' => 'WebSite', '@id' => $base . '/#website', 'url' => $base . '/', 'name' => 'BOB-LIFT Loader', 'description' => 'The loader equipment business website of Xuzhou BOB-LIFT Construction Machinery Co., Ltd.', 'publisher' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
+        ['@type' => 'WebSite', '@id' => $base . '/#website', 'url' => $base . '/', 'name' => 'BOB-LIFT Loader', 'description' => 'The loader equipment business website of ' . bl_company('name'), 'publisher' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
         ['@type' => $route['type'] === 'about' ? 'AboutPage' : ($route['type'] === 'contact' ? 'ContactPage' : 'WebPage'), '@id' => $base . $route['path'] . '#webpage', 'url' => $base . $route['path'], 'name' => $route['title'], 'description' => $route['description'], 'isPartOf' => ['@id' => $base . '/#website'], 'about' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
     ];
     if ($route['type'] === 'product' && $route['record']['model'] !== '') {
@@ -62,7 +62,7 @@ function bl_absolute_asset(string $url): string
 function bl_share_image(array $route): string
 {
     if (!empty($route['record']['image'])) return $route['record']['image'];
-    $page = in_array($route['type'], ['home', 'support', 'applications'], true) ? $route['type'] : 'home';
+    $page = bl_seo_content_page($route);
     foreach (array_unique([$page, 'home']) as $key) {
         $custom = (string) (bl_editable($key)['seo']['image'] ?? '');
         if ($custom !== '') return $custom;
