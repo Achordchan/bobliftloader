@@ -1,8 +1,8 @@
 <?php
 /**
- * One application case: a specific job written up in full. Laid out like a news story (news.css): head with the job it
- * belongs to, lead image and text on the left; on the right the facts of the job, the machines used and a way to ask
- * about a similar one. Only what an editor filled in is shown.
+ * One application case: a specific job written up in full, in one centred reading column (news.css, .bl-story-case):
+ * head with the job it belongs to, the facts of the job in a row, lead image and text, then the machines used and a way
+ * to ask about a similar one side by side. Only what an editor filled in is shown.
  */
 $case = $route['record'];
 $hub = bl_application_hub((string) $case['hub']);
@@ -17,7 +17,7 @@ $index = array_search($case['id'] ?? null, array_column($all, 'id'), true);
 $newer = $index === false ? null : ($all[$index - 1] ?? null);
 $older = $index === false ? null : ($all[$index + 1] ?? null);
 ?>
-<article class="bl-story bl-shell" aria-labelledby="story-title">
+<article class="bl-story bl-story-case bl-shell" aria-labelledby="story-title">
   <?php bl_breadcrumbs(array_values(array_filter([['label' => 'Applications', 'url' => bl_url('/applications/')], $hub ? ['label' => $hubTitle, 'url' => $hubUrl] : null, ['label' => $case['title']]]))); ?>
   <header class="bl-story-head">
     <a class="bl-story-category" href="<?= bl_escape($hubUrl) ?>"><?= bl_escape($hubTitle ?: 'Applications') ?></a>
@@ -26,23 +26,22 @@ $older = $index === false ? null : ($all[$index + 1] ?? null);
   </header>
 
   <div class="bl-story-layout">
+    <?php if ($facts): ?>
+    <section class="bl-story-facts" aria-label="At a glance">
+      <dl>
+        <?php foreach ($factLabels as $key => $label): if (empty($facts[$key])) continue; ?><div><dt><?= bl_escape($label) ?></dt><dd><?= bl_escape((string) $facts[$key]) ?></dd></div><?php endforeach; ?>
+        <div><dt>Published</dt><dd><time datetime="<?= bl_escape($case['date']) ?>"><?= date('j F Y', strtotime($case['date'])) ?></time></dd></div>
+      </dl>
+    </section>
+    <?php endif; ?>
+
     <div class="bl-story-main">
       <figure class="bl-story-figure"><img src="<?= bl_escape($case['image']) ?>" alt="<?= bl_escape($case['title']) ?>" width="1500" height="900" fetchpriority="high"></figure>
       <?php /* The body is WordPress's own rendering of what an editor saved (blocks, embeds), echoed as the_content() does. */ ?>
       <div class="bl-story-text"><div class="bl-wp-article-content"><?= $case['content_html'] ?></div></div>
     </div>
 
-    <aside class="bl-story-aside" aria-label="About this application">
-      <?php if ($facts): ?>
-      <section class="bl-story-box">
-        <h2>At a glance</h2>
-        <dl>
-          <?php foreach ($factLabels as $key => $label): if (empty($facts[$key])) continue; ?><div><dt><?= bl_escape($label) ?></dt><dd><?= bl_escape((string) $facts[$key]) ?></dd></div><?php endforeach; ?>
-          <div><dt>Published</dt><dd><time datetime="<?= bl_escape($case['date']) ?>"><?= date('j F Y', strtotime($case['date'])) ?></time></dd></div>
-        </dl>
-      </section>
-      <?php endif; ?>
-
+    <aside class="bl-story-aside" aria-label="Machines and enquiry">
       <?php if ($machines): ?>
       <section class="bl-story-box">
         <h2>Machines used</h2>
