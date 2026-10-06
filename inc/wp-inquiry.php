@@ -142,13 +142,31 @@ HTML;
     ];
 }
 
-/** Give the form the theme made before this email existed the new subject and body, once; who receives it is kept. */
+/** The plain-text mail the theme gave its form before version 2, to tell an untouched form from one an editor changed. */
+const BL_ENQUIRY_MAIL_V1 = [
+    'subject' => 'Website enquiry — [_raw_product]',
+    'body' => "Equipment: [_raw_product]\nModel: [model]\nName: [name]\nEmail: [email]\nCountry: [country]\nCompany: [company]\n\nProject:\n[message]\n\n-- \nSent from [_site_url] on [_date] at [_time]",
+];
+
+/**
+ * Give the form the theme made before this email existed the new mail, once. Only what still is the theme's old default
+ * is replaced: a body or subject an editor changed in the Mail tab is kept (the new layout can then be pasted in by hand),
+ * and who receives the mail is never touched.
+ */
 add_action('init', static function (): void {
     if ((int) get_option('bl_inquiry_mail_version') >= BL_ENQUIRY_MAIL_VERSION || !($id = bl_wp_inquiry_form_id())) return;
     $form = WPCF7_ContactForm::get_instance($id);
     if (!$form) return;
-    $form->set_properties(['mail' => array_replace((array) $form->prop('mail'), bl_wp_inquiry_mail())]);
-    $form->save();
+    $mail = (array) $form->prop('mail');
+    $new = bl_wp_inquiry_mail();
+    $untouched = static fn(string $key): bool => trim(str_replace("\r\n", "\n", (string) ($mail[$key] ?? ''))) === BL_ENQUIRY_MAIL_V1[$key];
+    $changes = [];
+    if ($untouched('body') && empty($mail['use_html'])) $changes += ['body' => $new['body'], 'use_html' => true];
+    if ($untouched('subject')) $changes['subject'] = $new['subject'];
+    if ($changes) {
+        $form->set_properties(['mail' => array_replace($mail, $changes)]);
+        $form->save();
+    }
     update_option('bl_inquiry_mail_version', BL_ENQUIRY_MAIL_VERSION);
 });
 
@@ -175,17 +193,22 @@ function bl_wp_inquiry_product_card(string $family, string $model): string
 }
 
 /**
- * An 80 px square of the product's featured image, saved once as a JPEG beside the uploads: product photos are WebP,
- * which some desktop mail programs do not show. Falls back to the image as it is.
+ * An 80 px square of the product's photo (its featured image, else the theme's own catalogue image), saved once as a JPEG
+ * in the uploads: product photos are WebP, which some desktop mail programs do not show. Falls back to the image as it is.
  */
 function bl_wp_inquiry_thumbnail(array $product): string
 {
     $post = get_page_by_path((string) $product['slug'], OBJECT, 'bl_product');
     $attachment = $post ? (int) get_post_thumbnail_id($post) : 0;
-    $file = $attachment ? get_attached_file($attachment) : '';
+    $file = $attachment ? (string) get_attached_file($attachment) : '';
+    if (!$file && $post) {
+        $record = get_post_meta($post->ID, '_bl_record', true);
+        $stored = is_array($record) ? (string) ($record['image'] ?? '') : '';
+        if (str_starts_with($stored, 'images/') && !str_contains($stored, '..')) $file = get_template_directory() . '/assets/' . $stored;
+    }
     if (!$file || !is_file($file)) return (string) $product['image'];
     $uploads = wp_upload_dir();
-    $name = 'bl-mail/' . $attachment . '-' . substr(md5($file . filemtime($file)), 0, 8) . '-160.jpg';
+    $name = 'bl-mail/' . substr(md5($file . filemtime($file)), 0, 12) . '-160.jpg';
     $path = trailingslashit($uploads['basedir']) . $name;
     if (!is_file($path)) {
         $editor = wp_get_image_editor($file);
