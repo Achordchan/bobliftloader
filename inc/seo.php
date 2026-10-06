@@ -91,7 +91,7 @@ function bl_render_seo(array $route): void
  */
 function bl_allow_ai_crawlers(string $robots): string
 {
-    $bots = array_map('strtolower', ['GPTBot', 'ChatGPT-User', 'OAI-SearchBot', 'ClaudeBot', 'Claude-Web', 'Claude-SearchBot', 'anthropic-ai', 'Google-Extended', 'Applebot-Extended', 'PerplexityBot', 'Perplexity-User', 'meta-externalagent', 'Bytespider', 'CCBot', 'Amazonbot', 'cohere-ai', 'Diffbot', 'FacebookBot', 'ImagesiftBot', 'Omgilibot', 'YouBot']);
+    $bots = array_map('strtolower', ['GPTBot', 'ChatGPT-User', 'OAI-SearchBot', 'ClaudeBot', 'Claude-Web', 'Claude-SearchBot', 'anthropic-ai', 'Google-Extended', 'Applebot-Extended', 'PerplexityBot', 'Perplexity-User', 'meta-externalagent', 'Bytespider', 'CCBot', 'Amazonbot', 'cohere-ai', 'Diffbot', 'FacebookBot', 'ImagesiftBot', 'omgili', 'Omgilibot', 'SentiBot', 'YouBot']);
     $blocks = [];     // each: ['lines' => [...], 'agents' => n, 'kept' => n, 'rules' => bool]
     $global = [];     // Sitemap lines and the like belong to no group
     $pending = [];    // comments and blank lines after a group's rules: they lead the next group if one starts, else stay with this one
