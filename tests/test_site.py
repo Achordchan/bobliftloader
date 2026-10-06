@@ -437,6 +437,15 @@ class WebsiteTests(unittest.TestCase):
         self.assertNotIn('/products/</loc>', sitemap)
         self.assertNotIn('/thank-you/', sitemap)
 
+    def test_header_language_switch_placeholder(self):
+        _, html, _ = fetch('/about/')
+        nav = html.split('id="main-navigation"', 1)[1].split('</nav>', 1)[0]
+        self.assertLess(nav.index('bl-search-toggle'), nav.index('bl-lang-switch'))
+        self.assertLess(nav.index('bl-lang-switch'), nav.index('bl-nav-contact'))
+        self.assertIn('class="bl-lang-current" aria-current="true"><b>English</b>', nav)
+        self.assertIn('More languages are on the way.', nav)
+        self.assertIn('bl-lang-switch bl-lang-switch-single', nav)  # English alone: kept out of the phone menu
+
     def test_thank_you_page_follows_the_sent_enquiry(self):
         status, html, _ = fetch('/thank-you/')
         self.assertEqual(status, 200)

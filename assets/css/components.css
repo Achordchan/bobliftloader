@@ -176,3 +176,30 @@
 .bl-site .bl-footer-top .bl-site-panel .bl-icon{transform:none}
 .bl-site .bl-footer-top .bl-site-panel a:hover .bl-icon{transform:translate(2px,-2px)}
 @media(prefers-reduced-motion:reduce){.bl-site .bl-site-panel{animation:none}}
+/* Language switch, between search and Let's talk (templates/partials/language-switch.php). A placeholder until other
+   languages go live: English is current, the panel says more are coming. */
+.bl-site .bl-lang-switch{position:relative;margin-left:clamp(-14px,-.6vw,-8px)}
+.bl-site .bl-lang-switch>summary{display:flex;align-items:center;gap:8px;height:clamp(40px,2.2vw,52px);padding:0 10px;border:1px solid transparent;font-size:var(--fs-micro);font-weight:600;letter-spacing:1.15px;list-style:none;cursor:pointer;transition:border-color .2s,background .2s}
+.bl-site .bl-lang-switch>summary::-webkit-details-marker{display:none}
+.bl-site .bl-lang-switch>summary>svg{width:clamp(18px,.95vw,22px);height:clamp(18px,.95vw,22px)}
+.bl-site .bl-lang-switch>summary>i{width:6px;height:6px;margin-top:-3px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;opacity:.7;transform:rotate(45deg);transition:transform .2s,margin .2s}
+.bl-site .bl-lang-switch>summary:hover,.bl-site .bl-lang-switch[open]>summary{border-color:#86939c;background:#173346}
+.bl-site .bl-lang-switch[open]>summary>i{margin-top:3px;transform:rotate(-135deg)}
+.bl-site .bl-lang-panel{position:absolute;top:calc(100% + 8px);right:0;z-index:25;width:220px;padding:8px;background:#0d2536;border:1px solid #2b4456;box-shadow:0 20px 30px #081c2b40;animation:bl-site-panel .18s ease-out}
+.bl-site .bl-lang-panel>p:first-child{padding:8px 10px 6px;font-size:var(--fs-micro);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#91aabb}
+.bl-site .bl-lang-panel ul{margin:0;padding:0;list-style:none}
+.bl-site .bl-lang-panel li>*{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 10px;border-top:1px solid #2b4456;transition:background .2s}
+.bl-site .bl-lang-panel b{font-weight:600;font-size:var(--fs-small);color:#fff}
+.bl-site .bl-lang-panel small{font-size:var(--fs-micro);font-weight:700;letter-spacing:.8px;color:#91aabb}
+.bl-site .bl-lang-panel a:hover{background:#143248}
+.bl-site .bl-lang-current small{color:#8fb0ff}
+.bl-site .bl-lang-soon b{color:#91aabb}
+.bl-site .bl-lang-note{padding:10px 10px 6px;border-top:1px solid #2b4456;font-size:var(--fs-label);line-height:1.5;color:#b7c9d5}
+/* Phones: with English alone it stays out of the menu; once another language is live it is a row of the menu, its list opening in place. */
+@media(max-width:600px){
+  .bl-site .bl-nav .bl-lang-switch-single{display:none}
+  .bl-site .bl-nav .bl-lang-switch{margin:0;border-bottom:1px solid #425766}
+  .bl-site .bl-nav .bl-lang-switch>summary{height:auto;padding:16px 0;border:0;background:none;font-size:13px}
+  .bl-site .bl-nav .bl-lang-switch>summary>i{margin-left:auto}
+  .bl-site .bl-nav .bl-lang-panel{position:static;width:auto;margin-bottom:12px;box-shadow:none;animation:none}
+}
