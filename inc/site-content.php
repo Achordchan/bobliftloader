@@ -105,6 +105,8 @@ function bl_company_phone_hours(): string
 function bl_privacy_body(string $section): string
 {
     $body = bl_content_html('privacy', 'body.' . $section);
+    // An address inside a mailto: link is escaped as a URL first; everywhere else the placeholder shows the text as typed.
+    $body = preg_replace_callback('/mailto:\{company\.([a-z_]+)\}/', static fn($match) => bl_escape(bl_mailto(bl_company($match[1]))), $body);
     $body = preg_replace_callback('/\{company\.([a-z_]+)\}/', static fn($match) => bl_escape(bl_company($match[1])), $body);
     return function_exists('wp_kses_post') ? wp_kses_post($body) : $body;
 }
