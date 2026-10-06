@@ -13,7 +13,7 @@ const BL_ENQUIRY_EMAIL = 'info@boblift.com';
 // Raised when the theme's form or notification email changes, so the form the theme made earlier gets the new one once
 // (2: the HTML card; 3: no country field, the card shows the country of the sender's IP address instead; 4: the card
 // redesigned in the site's colours; 5: the country in Chinese, the same text size on phones;
-// 6: the sender is the site title again).
+// 6: the sender is the site title again; the country names come from the theme's own table).
 const BL_ENQUIRY_MAIL_VERSION = 6;
 // Marks the notification card in the form's Mail body; only that layout is sent without CF7's automatic paragraphs.
 const BL_ENQUIRY_CARD_MARKER = '<!-- bl-inquiry-card -->';
@@ -265,9 +265,10 @@ function bl_wp_ip_country(string $ip): string
         set_transient($key, $code, $code ? WEEK_IN_SECONDS : HOUR_IN_SECONDS);
     }
     if ($code === '') return '';
-    // ICU's names (PHP intl) are the mapping; without intl the two-letter code is shown.
-    $name = class_exists('Locale') ? (string) Locale::getDisplayRegion('-' . $code, 'zh_Hans_CN') : '';
-    return $name !== '' && $name !== $code ? $name : $code;
+    // The theme's own table: the server's intl may lack Chinese names and fall back to English. Unknown codes show as is.
+    static $names = null;
+    $names ??= require __DIR__ . '/country-names-zh.php';
+    return $names[$code] ?? $code;
 }
 
 // The notification's own tags. CF7 asks for them only when the mail names them, so other forms are not affected.
