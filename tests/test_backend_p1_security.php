@@ -3,6 +3,10 @@
 declare(strict_types=1);
 define('ABSPATH', dirname(__DIR__) . '/.wordpress/');
 define('WPINC', 'wp-includes');
+if (!is_dir(ABSPATH . WPINC)) {
+    echo "skip: backend P1 security requires .wordpress/wp-includes\n";
+    exit(0);
+}
 function apply_filters($hook, $value, ...$args) { return $value; }
 function wp_allowed_protocols() { return ['http', 'https', 'mailto', 'tel']; }
 function home_url($path = '') { return 'https://example.test/site' . $path; }

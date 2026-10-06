@@ -197,6 +197,7 @@ function bl_product_search_text(array $product): string
 /** Specification rows grouped for the detail table; labels outside the known groups fall under "Details". */
 function bl_spec_groups(array $specs): array
 {
+    $specs = array_slice($specs, 0, BL_CONTENT_LIMITS['specs'], true);
     $groups = [
         'Performance' => ['Rated load', 'Lifting capacity', 'Bucket capacity', 'Drum capacity', 'Travel speed', 'Max travel speed', 'Hydraulic pressure', 'Gradeability', 'Tipping', 'Tipping angle', 'Machine weight'],
         'Engine' => ['Engine options', 'Engine model', 'Engine power', 'Engine type', 'Fuel', 'Starting', 'Emission standard', 'Operating voltage'],

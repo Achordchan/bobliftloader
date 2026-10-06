@@ -8,7 +8,7 @@ defined('ABSPATH') || exit;
  */
 // The box sits with the other product boxes under the title (see inc/wp-admin.php), after 图片 and before 来源.
 add_action('add_meta_boxes_bl_product', static function (): void {
-    add_meta_box('bl-product-video', '视频', 'bl_product_videos_meta_box', 'bl_product', 'bl_main', 'default');
+    add_meta_box('bl-product-video', '视频', 'bl_product_videos_meta_box', 'bl_product', 'normal', 'default');
 });
 
 function bl_product_video_row(array $video): string
@@ -26,8 +26,8 @@ function bl_product_videos_meta_box(WP_Post $post): void
 {
     $record = get_post_meta($post->ID, '_bl_record', true);
     wp_nonce_field('bl_save_videos', 'bl_videos_nonce');
-    echo '<p class="bl-box-intro">显示在产品页大图下方，访客点缩略图后在大图位置播放。MP4 建议 960px 宽、3 MB 以内；封面图用作缩略图和播放前的画面。最多 8 个。</p>';
-    echo '<ol class="bl-rows" data-bl-rows="videos" data-bl-max="8">';
+    echo '<p class="bl-box-intro">显示在产品页概述区，使用独立视频播放器播放。MP4 建议 960px 宽、3 MB 以内；封面图用作缩略图和播放前的画面。最多 8 个。</p>';
+    echo '<ol class="bl-rows" data-bl-rows="videos" data-bl-max="' . BL_CONTENT_LIMITS['videos'] . '">';
     foreach ((array) (is_array($record) ? ($record['videos'] ?? []) : []) as $video) if (is_array($video)) echo bl_product_video_row($video);
     echo '</ol><template data-bl-template="videos">' . bl_product_video_row([]) . '</template>';
     echo '<p class="bl-rows-add"><button type="button" class="button" data-bl="add" data-bl-target="videos"><span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span> 添加视频</button></p>';
@@ -45,7 +45,7 @@ add_action('save_post_bl_product', static function (int $postId): void {
     // Rows arrive as bl_videos[src][], [poster][], [caption][]; an older form sent one "src | poster | caption" line each.
     // With the box submitted but no rows left, the list is emptied.
     $videos = [];
-    foreach (array_slice(bl_admin_posted_rows(wp_unslash($_POST['bl_videos'] ?? []), ['src', 'poster', 'caption']), 0, 8) as $row) {
+    foreach (bl_admin_posted_rows(wp_unslash($_POST['bl_videos'] ?? []), ['src', 'poster', 'caption']) as $row) {
         $src = $url($row['src']);
         if ($src) $videos[] = ['src' => $src, 'poster' => $url($row['poster']), 'caption' => sanitize_text_field($row['caption'])];
     }
@@ -72,7 +72,7 @@ function bl_downloads_screen(): void
     echo '<div class="wrap bl-downloads"><div class="bl-page-head"><div><h1>资料下载</h1><p>Support 页“资料下载”一栏里供访客下载的产品画册。栏目标题和说明文字在<a href="' . esc_url(admin_url('admin.php?page=bl-content-support')) . '">采购与售后</a>里改。</p></div>';
     echo '<div class="bl-page-head-actions"><a class="button" href="' . esc_url(home_url('/support/#downloads')) . '" target="_blank" rel="noopener">查看 Support 页</a></div></div><hr class="wp-header-end">';
     settings_errors();
-    echo '<form method="post" action="options.php">';
+    echo '<form method="post" action="options.php" class="bl-ce-form">';
     settings_fields('bl_downloads');
     $current = $url ? '<strong class="bl-dl-name">' . esc_html($name) . '</strong> <span class="bl-dl-size">' . esc_html($size ? size_format($size, 1) : '大小未知') . '</span>' : '<span class="bl-chip bl-chip-warn">使用主题自带占位画册</span>';
     echo '<details class="bl-panel" data-bl-card open><summary class="bl-panel-head">' . bl_admin_card_head(1, '产品画册 PDF', $url ? $name : '使用主题自带占位画册', 0) . '</summary><div class="bl-panel-body">';

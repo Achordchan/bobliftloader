@@ -26,7 +26,14 @@ const BL_CONTENT_PAGES = [
  * Field list per page. "group" only groups fields on the screen; "preview" is the theme's own image shown while a slot is
  * empty; a list's "summary" names the row fields shown on its folded row.
  */
+require_once __DIR__ . '/wp-content-controls.php';
+
 function bl_content_schema(string $page): array
+{
+    return bl_content_editor_schema($page, bl_content_schema_fields($page));
+}
+
+function bl_content_schema_fields(string $page): array
 {
     $extra = bl_site_content_definition($page)['sections'] ?? [];
     if ($page === 'tracking') return [['title' => '统计与跟踪代码', 'fields' => array_map(static fn($key) => ['key' => $key, 'type' => 'raw', 'label' => $key], ['head', 'body_open', 'footer'])]];
@@ -43,7 +50,7 @@ function bl_content_schema(string $page): array
         ['key' => 'seo.image', 'label' => '分享图片', 'type' => 'image', 'preview' => 'images/share-default.jpg', 'help' => $share],
     ]];
     // The block every product page of the family shares (inc/product-page.php); a product's own fields come first.
-    $productPage = static fn(string $family): array => ['title' => '产品页通用模块', 'note' => '本系列每个产品详情页都会显示的内容：' . ($family === 'loader' ? '默认展示的属具、' : '') . '工厂与出厂检查、常见问题。单个产品在“设备产品 → 编辑 → 产品页模块”里填的内容优先显示。', 'fields' => array_merge($family === 'loader' ? [
+    $productPage = static fn(string $family): array => ['title' => '产品页通用模块', 'note' => '本系列每个产品详情页都会显示的内容：' . ($family === 'loader' ? '默认展示的属具、' : '') . '工厂与出厂检查、常见问题。单个产品在“设备产品 → 编辑”的对应模块里填的内容优先显示。', 'fields' => array_merge($family === 'loader' ? [
         ['key' => 'product.attachments', 'label' => '默认展示的属具', 'type' => 'text', 'help' => '产品页“Works with”一节显示的属具名称，英文逗号分隔，名称要和上面属具列表里一致；产品自己没勾选时用这里。留空则不显示这一节。'],
     ] : [], [
         ['key' => 'product.factory.title', 'group' => '工厂与出厂检查', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
@@ -75,11 +82,11 @@ function bl_content_schema(string $page): array
                 ['key' => 'hero.text', 'label' => '右侧说明', 'type' => 'textarea'],
                 ['key' => 'hero.link', 'label' => '向下链接文字', 'type' => 'text'],
             ]],
-            ['title' => '询价前请告诉我们', 'note' => '列表页下方的“四个问题”，帮访客先准备好资料再询价。', 'fields' => [
+            ['title' => '询价前请告诉我们', 'note' => '列表页下方的“询价前的问题”，帮访客先准备好资料再询价。', 'fields' => [
                 ['key' => 'send.eyebrow', 'label' => '小标题', 'type' => 'text'],
                 ['key' => 'send.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
                 ['key' => 'send.text', 'label' => '标题下说明', 'type' => 'textarea'],
-                ['key' => 'send.items', 'label' => '四个问题', 'type' => 'list', 'add' => '添加问题', 'summary' => ['title'], 'fields' => [
+                ['key' => 'send.items', 'label' => '询价前的问题', 'type' => 'list', 'add' => '添加问题', 'summary' => ['title'], 'fields' => [
                     'title' => ['label' => '问题', 'type' => 'text'],
                     'text' => ['label' => '说明', 'type' => 'rich', 'help' => $rich],
                 ]],
@@ -309,7 +316,7 @@ function bl_content_schema(string $page): array
                 'unit' => ['label' => '单位', 'type' => 'text', 'help' => $optional],
                 'label' => ['label' => '说明', 'type' => 'text'],
             ]],
-            ['key' => 'approach.steps', 'group' => '三步', 'type' => 'list', 'add' => '添加一步', 'summary' => ['title'], 'fields' => [
+            ['key' => 'approach.steps', 'group' => '服务步骤', 'type' => 'list', 'add' => '添加一步', 'summary' => ['title'], 'fields' => [
                 'title' => ['label' => '标题', 'type' => 'text'],
                 'text' => ['label' => '说明', 'type' => 'rich', 'help' => $rich],
             ]],
@@ -377,7 +384,7 @@ function bl_content_clean(string $type, $value)
     $value = str_replace("\r\n", "\n", (string) $value);
     switch ($type) {
         case 'html': return wp_kses_post($value);
-        case 'text': return sanitize_text_field($value);
+        case 'models': case 'attachments': case 'text': return sanitize_text_field($value);
         case 'textarea': return trim(sanitize_textarea_field($value));
         case 'heading': return trim(implode("\n", array_map('trim', explode("\n", sanitize_textarea_field($value)))));
         case 'rich':
@@ -462,12 +469,13 @@ add_action('admin_menu', static function (): void {
 });
 
 add_action('admin_enqueue_scripts', static function (string $hook): void {
-    if (!str_contains($hook, 'bl-content-')) return;
+    $contentPage = str_contains($hook, 'bl-content-');
+    if (!$contentPage && !str_ends_with($hook, '_page_bl-downloads') && !str_ends_with($hook, '_page_bl-inquiry-mail')) return;
     wp_enqueue_media();
     $asset = static fn(string $file): array => [get_template_directory_uri() . '/assets/admin/' . $file, (string) filemtime(get_template_directory() . '/assets/admin/' . $file)];
     [$css, $cssVersion] = $asset('content-editor.css');
     [$js, $jsVersion] = $asset('content-editor.js');
-    wp_enqueue_style('bl-content-editor', $css, ['bl-admin'], $cssVersion);
+    if ($contentPage) wp_enqueue_style('bl-content-editor', $css, ['bl-admin'], $cssVersion);
     wp_enqueue_script('bl-content-editor', $js, ['media-editor'], $jsVersion, true);
 });
 
@@ -496,6 +504,7 @@ function bl_content_screen(string $page): void
     if ($recovery) echo '<p role="alert"><span class="bl-chip bl-chip-warn">未保存</span> ' . esc_html($recovery['message']) . ' 输入已保留 24 小时；请在新标签页打开最新内容，对照后再编辑保存。<a target="_blank" rel="noopener" href="' . esc_url(admin_url('admin.php?page=bl-content-' . $page)) . '">打开最新内容</a></p>';
     if ($page === 'global' && function_exists('bl_wp_inquiry_current_recipient') && ($recipient = bl_wp_inquiry_current_recipient()) !== '') echo '<p><span class="bl-chip">询盘通知当前发往：' . esc_html($recipient) . '</span></p>';
     if ($page === 'privacy') echo '<p><span class="bl-chip">当前模式：' . (bl_inquiry_form_id() ? '站内提交' : '邮件草稿') . '</span> 两种模式分别编辑，前台按询盘插件的启用状态自动选择。启用统计代码后，请同步更新外部服务说明。</p>';
+    if (in_array($page, ['home', 'support'], true)) echo '<p>采购数字引用采购与售后 → 采购条款。支持 {warranty_months}、{lead_time}、{minimum_order}；自定义文案中的固定数字不会自动替换，请复核。</p>';
     if ($page === 'about') echo '<p>公司介绍仍在原生关于页面正文中编辑。</p>';
     $open = count($sections) === 1;
     if (count($sections) >= 3) {
@@ -543,7 +552,7 @@ function bl_content_screen(string $page): void
         submit_button('撤销最近一次恢复默认', 'secondary', 'submit', false);
         echo '</form>';
     }
-    if ($page === 'global' && function_exists('bl_tracking_screen')) bl_tracking_screen();
+
     echo '</div>';
 }
 
@@ -570,6 +579,8 @@ function bl_content_name(string $key): string
 function bl_content_input(string $type, string $name, string $id, string $value, string $preview = ''): string
 {
     switch ($type) {
+        case 'models': case 'attachments':
+            return bl_content_selector($type, $name, $value);
         case 'textarea': case 'rich': case 'html': case 'verbatim': case 'raw':
             return '<textarea class="large-text" rows="3" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '">' . esc_textarea($value) . '</textarea>';
         case 'heading':
@@ -577,9 +588,9 @@ function bl_content_input(string $type, string $name, string $id, string $value,
         case 'image':
             $fallback = $preview !== '' ? bl_asset($preview) : '';
             $src = $value !== '' ? $value : $fallback;
-            return '<div class="bl-ce-image' . ($value === '' ? ' is-default' : '') . '" data-fallback="' . esc_url($fallback) . '"><div class="bl-ce-image-preview"><img alt="" src="' . esc_url($src) . '"' . ($src === '' ? ' hidden' : '') . '><span class="bl-chip bl-ce-image-state">主题默认</span></div>'
-                . '<div class="bl-ce-image-side"><p class="bl-ce-image-file" data-default="使用主题自带的图片">' . ($value !== '' ? esc_html(wp_basename((string) parse_url($value, PHP_URL_PATH))) : '使用主题自带的图片') . '</p>'
-                . '<p class="bl-ce-image-buttons"><button type="button" class="button bl-ce-pick" id="' . esc_attr($id) . '-pick">从媒体库选择</button><button type="button" class="button-link bl-ce-clear">改回主题默认</button></p>'
+            return '<div class="bl-ce-image' . ($value === '' ? ' is-default' : '') . '" data-fallback="' . esc_url($fallback) . '"><div class="bl-ce-image-preview"><img alt="" src="' . esc_url($src) . '"' . ($src === '' ? ' hidden' : '') . '><span class="bl-chip bl-ce-image-state">' . ($fallback !== '' ? '主题默认' : '未选择图片') . '</span></div>'
+                . '<div class="bl-ce-image-side"><p class="bl-ce-image-file" data-default="' . ($fallback !== '' ? '使用主题自带的图片' : '未选择图片') . '">' . ($value !== '' ? esc_html(wp_basename((string) parse_url($value, PHP_URL_PATH))) : ($fallback !== '' ? '使用主题自带的图片' : '未选择图片')) . '</p>'
+                . '<p class="bl-ce-image-buttons"><button type="button" class="button bl-ce-pick" id="' . esc_attr($id) . '-pick">从媒体库选择</button><button type="button" class="button-link bl-ce-clear">' . ($fallback !== '' ? '恢复默认图片' : '移除图片') . '</button></p>'
                 . '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '"></div></div>';
         case 'email':
             return '<input class="large-text code" type="email" id="' . esc_attr($id) . '" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '">';
@@ -599,7 +610,7 @@ function bl_content_field(array $field, $value, bool $changed): void
     $name = bl_content_name($field['key']);
     $id = 'bl-ce-' . str_replace('.', '-', $field['key']);
     $label = $field['label'] ?? '';
-    $labelled = !in_array($field['type'], ['list', 'loading', 'terms'], true);
+    $labelled = !in_array($field['type'], ['list', 'loading', 'terms', 'models', 'attachments'], true);
     $wide = in_array($field['type'], ['list', 'terms'], true);
     echo '<div class="bl-field bl-ce-field bl-ce-type-' . esc_attr($field['type']) . ($wide ? ' bl-ce-wide' : '') . '">';
     if ($label !== '' || $changed) {
@@ -611,7 +622,7 @@ function bl_content_field(array $field, $value, bool $changed): void
     echo '<div class="bl-field-control">';
     switch ($field['type']) {
         case 'list':
-            echo '<ol class="bl-rows bl-ce-rows" data-summary="' . esc_attr(implode(' ', $field['summary'] ?? [array_key_first($field['fields'])])) . '" data-meta="' . esc_attr($field['meta'] ?? '') . '">';
+            echo '<ol class="bl-rows bl-ce-rows" data-bl-limit="' . (int) ($field['max'] ?? 0) . '" data-bl-limit-kind="' . esc_attr($field['key']) . '" data-summary="' . esc_attr(implode(' ', $field['summary'] ?? [array_key_first($field['fields'])])) . '" data-meta="' . esc_attr($field['meta'] ?? '') . '">';
             foreach (array_values((array) $value) as $i => $row) echo bl_content_row($field, $name, $id, (string) $i, is_array($row) ? $row : [], false);
             echo '</ol><template class="bl-ce-row-template">' . bl_content_row($field, $name, $id, '__i__', [], true) . '</template>';
             echo '<p class="bl-ce-rows-add"><button type="button" class="button bl-ce-add"><span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span>' . esc_html($field['add'] ?? '添加') . '</button></p>';
@@ -655,7 +666,7 @@ function bl_content_row(array $field, string $name, string $id, string $i, array
 
 function bl_content_row_field(array $def, string $name, string $id, string $value): string
 {
-    return '<div class="bl-field bl-ce-subfield bl-ce-type-' . esc_attr($def['type']) . '"><div class="bl-field-label"><label for="' . esc_attr($id) . '">' . esc_html($def['label']) . '</label></div><div class="bl-field-control">' . bl_content_input($def['type'], $name, $id, $value) . bl_content_help($def) . '</div></div>';
+    return '<div class="bl-field bl-ce-subfield bl-ce-type-' . esc_attr($def['type']) . '"><div class="bl-field-label"><label for="' . esc_attr($id . ($def['type'] === 'image' ? '-pick' : '')) . '">' . esc_html($def['label']) . '</label></div><div class="bl-field-control">' . bl_content_input($def['type'], $name, $id, $value, $def['preview'] ?? '') . bl_content_help($def) . '</div></div>';
 }
 
 function bl_content_row_tools(): string

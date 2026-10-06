@@ -11,6 +11,8 @@
   });
   forms.forEach(function (form, index) {
   var jump = index === 0 ? document.querySelector('.bl-jump') : null;
+  // Sections scroll in below the sticky jump bar, whose height changes as it wraps or gains 未保存 chips.
+  if (jump && window.ResizeObserver) new ResizeObserver(function () { document.documentElement.style.setProperty('--bl-jump-height', jump.offsetHeight + 'px'); }).observe(jump);
   var cards = Array.prototype.slice.call(form.querySelectorAll('[data-bl-card]'));
   var toggleAll = index === 0 ? document.querySelector('[data-bl-toggle-all]') : null;
   var stateKey = 'bl-admin-open:' + (location.search.match(/[?&]page=([^&]*)/) || ['', ''])[1];
@@ -86,6 +88,7 @@
     if (button.classList.contains('bl-ce-add')) {
       var field = button.closest('.bl-ce-field');
       var list = field.querySelector('.bl-ce-rows');
+      if (+list.dataset.blLimit && list.children.length >= +list.dataset.blLimit) return;
       var holder = document.createElement('div');
       // New rows get a key no existing row uses; the server keeps rows in the order they appear on the page.
       holder.innerHTML = field.querySelector('.bl-ce-row-template').innerHTML.split('__i__').join('n' + Date.now() + '_' + (added++));

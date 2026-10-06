@@ -144,5 +144,5 @@ function bl_product_videos(array $product): array
         $resolve = static fn(string $path): string => preg_match('~^(videos|images)/~', $path) ? bl_asset($path) : $path;
         $videos[] = ['src' => $resolve($video['src']), 'poster' => !empty($video['poster']) ? $resolve($video['poster']) : '', 'caption' => (string) ($video['caption'] ?? '')];
     }
-    return $videos;
+    return array_slice($videos, 0, BL_CONTENT_LIMITS['videos']);
 }

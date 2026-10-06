@@ -3,6 +3,7 @@ declare(strict_types=1);
 defined('ABSPATH') || exit;
 
 require_once __DIR__ . '/wp-product-save.php';
+require_once __DIR__ . '/wp-effective-image.php';
 
 /**
  * Edit screens for products and news. Products use the classic screen so their data (model, specs, photos, videos)
@@ -14,13 +15,13 @@ add_filter('enter_title_here', static fn(string $text, WP_Post $post): string =>
 
 add_action('add_meta_boxes_bl_product', static function (): void {
     add_meta_box('bl-product-basics', '基本信息', 'bl_product_basics_box', 'bl_product', 'bl_main', 'high');
-    add_meta_box('bl-product-specs', '规格参数', 'bl_product_specs_box', 'bl_product', 'bl_main', 'high');
-    add_meta_box('bl-product-images', '图片', 'bl_product_images_box', 'bl_product', 'bl_main', 'high');
-    add_meta_box('bl-product-source', '来源', 'bl_product_source_box', 'bl_product', 'bl_main', 'low');
+    add_meta_box('bl-product-specs', '规格参数', 'bl_product_specs_box', 'bl_product', 'normal', 'high');
+    add_meta_box('bl-product-images', '图片', 'bl_product_images_box', 'bl_product', 'normal', 'high');
+    add_meta_box('bl-product-source', '来源', 'bl_product_source_box', 'bl_product', 'normal', 'low');
     remove_meta_box('pageparentdiv', 'bl_product', 'side');
     add_meta_box('bl-product-order', '排序', 'bl_product_order_box', 'bl_product', 'side', 'default');
     remove_meta_box('postexcerpt', 'bl_product', 'normal');
-    add_meta_box('postexcerpt', '卡片摘要', 'bl_product_excerpt_box', 'bl_product', 'normal', 'high');
+    add_meta_box('postexcerpt', '卡片摘要', 'bl_product_excerpt_box', 'bl_product', 'bl_main', 'high');
 });
 
 add_action('add_meta_boxes_bl_news', static function (): void {
@@ -115,7 +116,7 @@ function bl_admin_media(string $name, string $value, string $type = 'image', str
     $file = $value !== '' ? wp_basename((string) parse_url($value, PHP_URL_PATH)) : '';
     $thumb = $type === 'image' ? '<span class="bl-media-thumb">' . ($value !== '' ? '<img src="' . esc_url(bl_wp_image($value)) . '" alt="">' : '') . '</span>' : '';
     return '<div class="bl-media" data-bl-media="' . esc_attr($type) . '" data-empty="' . esc_attr($empty) . '">' . $thumb . '<div class="bl-media-side"><span class="bl-media-name' . ($file === '' ? ' is-empty' : '') . '">' . esc_html($file !== '' ? $file : $empty) . '</span>'
-        . '<span class="bl-media-buttons"><button type="button" class="button" data-bl="pick">' . ($type === 'video' ? '从媒体库选择视频' : '从媒体库选择图片') . '</button><button type="button" class="button-link bl-media-clear" data-bl="clear-media"' . ($file === '' ? ' hidden' : '') . '>移除</button></span></div>'
+        . '<span class="bl-media-buttons"><button type="button" class="button" data-bl="pick">' . ($type === 'video' ? '从媒体库选择视频' : '从媒体库选择图片') . '</button><button type="button" class="button-link bl-media-clear" data-bl="clear-media"' . ($file === '' ? ' hidden' : '') . '>' . ($type === 'image' ? '移除图片' : '移除视频') . '</button></span></div>'
         . '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '"></div>';
 }
 
@@ -123,7 +124,7 @@ function bl_product_basics_box(WP_Post $post): void
 {
     $record = bl_admin_record($post);
     bl_admin_field('型号', 'bl-model', bl_admin_input('bl-model', 'bl_record[model]', (string) ($record['model'] ?? ''), 'text', ' class="regular-text" placeholder="BL-T360-H"'), '产品页大标题和产品卡片上显示的型号。');
-    bl_admin_field('产品分类', 'bl-category', bl_admin_select('bl-category', 'bl_record[category]', ['skid-steer-loaders' => '滑移装载机', 'mini-dumpers' => '迷你翻斗车'], (string) ($record['category'] ?? 'skid-steer-loaders')), '决定产品出现在哪个分类页。');
+    bl_admin_field('产品栏目', 'bl-category', bl_admin_select('bl-category', 'bl_record[category]', ['skid-steer-loaders' => '滑移装载机', 'mini-dumpers' => '迷你翻斗车'], (string) ($record['category'] ?? 'skid-steer-loaders')), '决定产品出现在哪个栏目页。');
 }
 
 function bl_product_spec_row(string $key, string $value): string
@@ -134,8 +135,8 @@ function bl_product_spec_row(string $key, string $value): string
 function bl_product_specs_box(WP_Post $post): void
 {
     $record = bl_admin_record($post);
-    echo '<p class="bl-box-intro">产品页“Specifications”参数表，按这里的顺序显示。参数名和参数值都用英文。</p>';
-    echo '<div class="bl-specs"><div class="bl-specs-head" aria-hidden="true"><span>参数名</span><span>参数值</span></div><ol class="bl-rows bl-rows-compact" data-bl-rows="specs">';
+    echo '<p class="bl-box-intro">产品页“Specifications”参数表，前台按固定参数组排列，组内使用固定参数顺序，未归组参数按录入顺序显示。参数名和参数值都用英文。</p>';
+    echo '<div class="bl-specs"><div class="bl-specs-head" aria-hidden="true"><span>参数名</span><span>参数值</span></div><ol class="bl-rows bl-rows-compact" data-bl-rows="specs" data-bl-max="' . BL_CONTENT_LIMITS['specs'] . '">';
     // A new product starts with the three parameters the filters read; rows left without a value are not saved.
     foreach ((array) ($record['specs'] ?? []) ?: ['Rated load' => '', 'Bucket capacity' => '', 'Engine power' => ''] as $key => $value) echo bl_product_spec_row((string) $key, (string) $value);
     echo '</ol><template data-bl-template="specs">' . bl_product_spec_row('', '') . '</template>';
@@ -149,7 +150,7 @@ function bl_product_specs_box(WP_Post $post): void
     echo '<datalist id="bl-spec-keys">';
     foreach (array_unique($keys) as $key) echo '<option value="' . esc_attr($key) . '">';
     echo '</datalist>';
-    $filters = [['额定载重', (int) ($record['load'] ?? 0) ?: '', ' kg'], ['斗容', (string) ($record['capacity'] ?? ''), ' m³'], ['功率', (string) ($record['power'] ?? ''), ' kW']];
+    $filters = [['额定载荷', (int) ($record['load'] ?? 0) ?: '', ' kg'], ['斗容', (string) ($record['capacity'] ?? ''), ' m³'], ['功率', (string) ($record['power'] ?? ''), ' kW']];
     echo '<div class="bl-spec-filters"><p class="bl-field-help">筛选和首页范围从三项参数自动计算，参数名要一字不差：<code>Rated load</code> 填“1,000 kg”，<code>Bucket capacity</code> 填“0.5 m³”，<code>Engine power</code> 填“12.1 kW”。</p><p class="bl-spec-chips"><span class="bl-spec-chips-label">当前筛选值（保存后更新）</span>';
     foreach ($filters as [$label, $value, $unit]) echo $value !== '' ? '<span class="bl-chip bl-chip-info">' . esc_html($label . ' ' . $value . $unit) . '</span>' : '<span class="bl-chip">' . esc_html($label . ' 未识别') . '</span>';
     echo '</p></div>';
@@ -164,11 +165,13 @@ function bl_product_images_box(WP_Post $post): void
 {
     $record = bl_admin_record($post);
     $image = (string) ($record['image'] ?? '');
-    bl_admin_field('主图', '', bl_admin_media('bl_record[image]', $image), '产品页大图和产品卡片用的图片。右侧“产品主图”设置了就优先用它；没设置时用这里。');
+    echo '<details><summary>备用图片</summary>';
+    bl_admin_field('备用主图', '', bl_admin_media('bl_record[image]', $image), '未设置特色图片时生效；当前图片与来源见右侧“当前生效图片”。历史值保留。');
+    echo '</details>';
     $items = '';
     $alts = is_array($record['gallery_alt'] ?? null) ? $record['gallery_alt'] : [];
     foreach ((array) ($record['gallery'] ?? []) as $path) $items .= bl_product_gallery_item((string) $path, (string) ($alts[$path] ?? ''));
-    $control = '<ul class="bl-gallery" data-bl-gallery data-bl-base="' . esc_url(get_template_directory_uri() . '/assets/') . '">' . $items . '</ul>'
+    $control = '<ul class="bl-gallery" data-bl-gallery data-bl-max="' . BL_CONTENT_LIMITS['gallery'] . '" data-bl-base="' . esc_url(get_template_directory_uri() . '/assets/') . '">' . $items . '</ul>'
         . '<template data-bl-template="gallery">' . bl_product_gallery_item('') . '</template>'
         . '<div class="bl-gallery-add"><button type="button" class="button" data-bl="media-gallery"><span class="dashicons dashicons-images-alt2" aria-hidden="true"></span> 从媒体库添加</button></div>';
     bl_admin_field('图库', '', $control, '图库有两张及以上时，产品页大图旁显示缩略图，点击切换；通常把主图也放在第一张。最多 12 张，可用箭头调整顺序或拖动排序。每张图下方填英文替代文字，描述画面（如 BL-T1000-H loader lifting a pallet），供谷歌图片和读屏软件使用；留空时自动用产品名。');
@@ -183,13 +186,13 @@ function bl_product_source_box(WP_Post $post): void
 
 function bl_product_order_box(WP_Post $post): void
 {
-    echo '<p class="bl-side-field"><label for="menu_order">排序数字</label>' . bl_admin_input('menu_order', 'menu_order', (string) $post->menu_order, 'number', ' class="small-text" step="1"') . '</p><p class="bl-field-help">数字小的排在前面；产品列表和分类页按这个顺序显示。</p>';
+    echo '<p class="bl-side-field"><label for="menu_order">排序数字</label>' . bl_admin_input('menu_order', 'menu_order', (string) $post->menu_order, 'number', ' class="small-text" step="1"') . '</p><p class="bl-field-help">数字小的排在前面；产品列表和栏目页按这个顺序显示。</p>';
 }
 
 function bl_product_excerpt_box(WP_Post $post): void
 {
     echo '<label class="screen-reader-text" for="excerpt">卡片摘要</label><textarea rows="3" cols="40" name="excerpt" id="excerpt">' . esc_textarea($post->post_excerpt) . '</textarea>';
-    echo '<p class="bl-field-help">一两句英文，用在产品卡片、搜索结果描述和产品页首屏简介。留空则自动截取详细介绍的开头。</p>';
+    echo '<p class="bl-field-help">一两句英文，用于搜索描述回退和产品页首屏简介；产品卡片不显示此摘要。留空则自动截取详细介绍的开头。</p>';
 }
 
 function bl_news_section_box(WP_Post $post): void
@@ -198,7 +201,9 @@ function bl_news_section_box(WP_Post $post): void
     $record['line'] = bl_news_line($record, $post->post_name); // the same line the site shows, so saving keeps it
     wp_nonce_field('bl_save_record', 'bl_record_nonce');
     echo '<div class="bl-field-stack">';
-    bl_admin_field('分类', 'bl-category', bl_admin_select('bl-category', 'bl_record[category]', ['' => '不归入栏目', 'product-news' => '产品新闻 Product news', 'customer-stories' => '客户故事 Customer stories', 'industry-news' => '行业新闻 Industry news'], bl_news_category($record)), '“不归入栏目”的文章只出现在“全部”里。');
+    echo '<div data-bl-news-category>';
+    bl_admin_field('栏目', 'bl-category', bl_admin_select('bl-category', 'bl_record[category]', ['' => '不归入栏目', 'product-news' => '产品新闻 Product news', 'customer-stories' => '客户故事 Customer stories', 'industry-news' => '行业新闻 Industry news'], (string) ($record['category'] ?? '')), '“不归入栏目”的文章只出现在“全部”里。');
+    echo '</div>';
     bl_admin_field('归属', 'bl-line', bl_admin_select('bl-line', 'bl_record[line]', ['compact' => '紧凑设备（本站新闻）', 'group' => 'BOB-LIFT 集团'], $record['line']), '集团新闻（起重机等）在列表中标注 BOB-LIFT group，并且不归入任何栏目。');
     bl_admin_field('原文网址', 'bl-source', bl_admin_input('bl-source', 'bl_record[source]', (string) ($record['source'] ?? ''), 'url', ' class="code"'), '转载时填写原文地址，文章页会显示原文链接；原创留空。');
     echo '</div>';
@@ -209,7 +214,9 @@ function bl_news_image_box(WP_Post $post): void
     $record = bl_admin_record($post);
     echo '<div class="bl-field-stack">';
     bl_admin_field('图片说明', 'bl-caption', bl_admin_input('bl-caption', 'bl_record[caption]', (string) ($record['caption'] ?? '')), '英文，显示在文章顶部大图下方。');
-    bl_admin_field('备用图片', '', bl_admin_media('bl_record[image]', (string) ($record['image'] ?? '')), '只有没设置上面的“封面图片”时才用。');
+    echo '<details><summary>备用图片</summary>';
+    bl_admin_field('备用图片', '', bl_admin_media('bl_record[image]', (string) ($record['image'] ?? '')), '未设置特色图片时生效；两者都为空则使用主题默认图片。');
+    echo '</details>';
     echo '</div>';
 }
 
@@ -246,7 +253,13 @@ function bl_admin_product_checklist(WP_Post $post, string $intro): void
 function bl_case_hubs(): array
 {
     $hubs = [];
-    foreach ($GLOBALS['bl_application_base'] ?? [] as $application) $hubs[bl_application_slug($application)] = $application['title'];
+    $names = ['landscaping' => '景观绿化', 'site-preparation' => '场地准备', 'material-transport' => '物料运输', 'gardens-and-homesteads' => '园林家用', 'farms-and-orchards' => '农场果园', 'building-sites' => '工地'];
+    $content = bl_content_resolve('applications', (array) get_option('bl_content_applications', []));
+    foreach ($GLOBALS['bl_application_base'] ?? [] as $application) {
+        $slug = bl_application_slug($application);
+        $title = (string) ($content['jobs'][$slug]['title'] ?? $application['title']);
+        $hubs[$slug] = $title !== $application['title'] && $title !== '' ? $title : ($names[$slug] ?? $title);
+    }
     return $hubs;
 }
 
@@ -267,7 +280,7 @@ function bl_case_products_box(WP_Post $post): void
 function bl_case_facts_box(WP_Post $post): void
 {
     $facts = (array) (bl_admin_record($post)['facts'] ?? []);
-    echo '<p class="bl-box-intro">案例页右侧栏的“At a glance”，用英文填；留空的项不显示。正文在上面的编辑器里写，封面图用右侧“封面图片”。</p>';
+    echo '<p class="bl-box-intro">案例正文上方的“At a glance”，用英文填；留空的项不显示。正文在上面的编辑器里写，封面图用右侧“封面图片”。</p>';
     foreach (['location' => ['地点', 'Bavaria, Germany', ''], 'customer' => ['客户类型', 'Landscaping contractor', ''], 'task' => ['工作内容', 'Terrace levelling and gravel spreading', ''], 'site' => ['场地条件', 'Garden gate 900 mm wide, soft ground', '最窄通道、地面情况等。'], 'duration' => ['工期', '3 days', ''], 'result' => ['成果', 'Finished a day ahead of plan', '']] as $key => [$label, $placeholder, $help]) {
         bl_admin_field($label, 'bl-fact-' . $key, bl_admin_input('bl-fact-' . $key, 'bl_record[facts][' . $key . ']', (string) ($facts[$key] ?? ''), 'text', ' class="large-text" placeholder="' . esc_attr($placeholder) . '"'), $help);
     }
@@ -280,6 +293,7 @@ function bl_news_event_box(WP_Post $post): void
     $input = static fn(string $key, string $type = 'text', string $extra = ' class="regular-text"'): string => bl_admin_input('bl-event-' . $key, 'bl_record[event_' . $key . ']', $value($key), $type, $extra);
     $chip = $value('start') ? '<span class="bl-chip bl-chip-info">文章页显示活动信息</span>' : '<span class="bl-chip">未填写 · 不显示</span>';
     echo '<p class="bl-box-intro">' . $chip . ' 只有展会、活动类新闻才填。填了开始日期，文章页就会显示活动信息条和“还有几天开幕”；留空则整块不显示。以下内容用英文填写。</p>';
+    echo '<details data-bl-event' . ($value('start') !== '' ? ' open' : '') . '><summary>展会信息（填写开始日期后前台显示）</summary>';
     echo '<div class="bl-subgroup bl-subgroup-first"><h3 class="bl-subgroup-title">名称与日期</h3>';
     bl_admin_field('活动名称', 'bl-event-name', $input('name'), '例如 140th Canton Fair · Phase 1。');
     bl_admin_field('开始日期', 'bl-event-start', $input('start', 'date', ''));
@@ -292,7 +306,7 @@ function bl_news_event_box(WP_Post $post): void
     echo '</div><div class="bl-subgroup"><h3 class="bl-subgroup-title">日期来源</h3>';
     bl_admin_field('来源网址', 'bl-event-source', $input('source', 'url', ' class="large-text code"'), '主办方公布日期的页面或文件，文章页会显示为链接。');
     bl_admin_field('来源说明', 'bl-event-source_label', $input('source_label', 'text', ' class="large-text"'), '链接文字，例如 Dates from the Canton Fair’s 2026 Attendance Guide。');
-    echo '</div>';
+    echo '</div></details>';
 }
 
 /** Rows posted as parallel lists (specs[key][], specs[value][]) or, from older forms, as one text block. */
@@ -347,7 +361,7 @@ add_action('save_post', static function (int $postId): void {
         // Older forms without the alt fields keep the stored text for the photographs still in the gallery.
         $kept = array_key_exists('gallery_alt', $input) ? [] : (is_array($record['gallery_alt'] ?? null) ? $record['gallery_alt'] : []);
         $record['gallery_alt'] = [];
-        foreach (array_slice(is_string($gallery) ? preg_split('/\R/', $gallery) : (array) $gallery, 0, 12) as $i => $line) {
+        foreach ((is_string($gallery) ? preg_split('/\R/', $gallery) : (array) $gallery) as $i => $line) {
             $line = is_scalar($line) ? trim(sanitize_text_field((string) $line)) : '';
             $url = str_starts_with($line, 'images/') && !str_contains($line, '..') ? $line : esc_url_raw($line, ['http', 'https']);
             if (!$url) continue;
@@ -356,7 +370,7 @@ add_action('save_post', static function (int $postId): void {
             if ($alt !== '') $record['gallery_alt'][$url] = $alt;
         }
         $record['specs'] = [];
-        foreach (array_slice(bl_admin_posted_rows($input['specs'] ?? '', ['key', 'value']), 0, 40) as $row) {
+        foreach (bl_admin_posted_rows($input['specs'] ?? '', ['key', 'value']) as $row) {
             $key = sanitize_text_field($row['key']);
             $value = sanitize_text_field($row['value']);
             if ($key !== '' && $value !== '') $record['specs'][$key] = $value;
@@ -378,7 +392,7 @@ add_action('save_post', static function (int $postId): void {
         foreach (['start', 'end'] as $key) $event[$key] = bl_is_date($text('event_' . $key)) ? $text('event_' . $key) : '';
         if ($event['end'] && $event['end'] < $event['start']) $event['end'] = '';
         $event['source'] = esc_url_raw($text('event_source'), ['http', 'https']);
-        $record['event'] = $event['start'] ? $event : [];
+        $record['event'] = $event;
     }
     update_post_meta($postId, '_bl_record', $record);
 });
