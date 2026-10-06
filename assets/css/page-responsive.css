@@ -22,18 +22,23 @@
 @media(max-width:600px){
   .bl-site .bl-nav>a{font-size:34px}
   .bl-site .bl-nav .bl-nav-contact{font-size:13px}
-  .bl-site .bl-breadcrumbs{padding-block:21px;font-size:11px}
-  .bl-site .bl-breadcrumbs ol{gap:8px}
+  .bl-site .bl-breadcrumbs{padding-block:8px;font-size:13px}
+  .bl-site .bl-breadcrumbs ol{flex-wrap:nowrap;gap:0 8px;align-items:center}
+  .bl-site .bl-breadcrumbs li{display:flex;align-items:center;flex:none;min-height:44px;white-space:nowrap}
+  /* One line: the current page gives way first, cut with an ellipsis. */
+  .bl-site .bl-breadcrumbs li:last-child{flex:0 1 auto;min-width:0}
+  .bl-site .bl-breadcrumbs li:last-child>*{min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .bl-site .bl-breadcrumbs a{display:inline-flex;align-items:center;min-height:44px;padding-inline:6px;margin-inline:-6px}
   .bl-site .bl-breadcrumbs li+li::before{margin-right:8px}
   .bl-site .bl-page-heading{padding-top:24px;gap:25px}
   .bl-site .bl-page-heading h1{font-size:clamp(53px,15.3vw,85px);letter-spacing:-.8px;overflow-wrap:anywhere}
-  .bl-site .bl-page-heading .bl-eyebrow{font-size:11px;margin-bottom:22px}
-  .bl-site .bl-page-heading>p{font-size:13px;line-height:1.9}
+  .bl-site .bl-page-heading .bl-eyebrow{font-size:12px;margin-bottom:22px}
+  .bl-site .bl-page-heading>p{font-size:14px;line-height:1.85}
   .bl-site .bl-page-hero{padding-bottom:38px}
   .bl-site .bl-category-nav{gap:20px}
-  .bl-site .bl-category-nav>a{font-size:12px;padding-block:15px;white-space:nowrap}
+  .bl-site .bl-category-nav>a{font-size:13px;padding-block:15px;white-space:nowrap}
   .bl-site .bl-catalog-tools{gap:14px;padding-block:22px 26px}
-  .bl-site .bl-catalog-status{width:100%;margin-left:0;min-height:0;padding-top:14px;border-top:1px solid var(--line);font-size:12px}
+  .bl-site .bl-catalog-status{width:100%;margin-left:0;min-height:0;padding-top:14px;border-top:1px solid var(--line);font-size:13px}
   .bl-site .bl-catalog-clear{margin-left:auto}
   .bl-site .bl-catalog-filters{flex-direction:column;gap:18px}
   .bl-site .bl-product-card-content :is(h2,h3){font-size:32px}
@@ -46,8 +51,8 @@
   .bl-site .bl-prose .bl-lead{font-size:17px}
   .bl-site .bl-product-main-image>img{padding:15px}
   .bl-site .bl-product-intro h1>span{font-size:25px}
-  .bl-site .bl-product-excerpt{font-size:13px}
-  .bl-site .bl-product-section-nav{gap:25px;min-height:62px;font-size:12px}
+  .bl-site .bl-product-excerpt{font-size:14px}
+  .bl-site .bl-product-section-nav{gap:25px;min-height:62px;font-size:13px}
   .bl-site .bl-related{padding-block:50px}
   .bl-site .bl-small-section-heading{flex-direction:column;align-items:flex-start;gap:22px}
   .bl-site .bl-small-section-heading h2{font-size:45px}
@@ -63,7 +68,10 @@
   .bl-site .bl-not-found{padding-block:70px}
   .bl-site .bl-not-found>div{flex-direction:column;align-items:flex-start}
 }
-@media(min-width:601px) and (max-width:1000px){
+/* The section bar on long pages pins under the header, whatever height the header has at this width. */
+@media(max-width:800px){
+  .bl-site .bl-section-nav-live{top:var(--header-height)}
+  .bl-site:has(.bl-section-nav-live) section[id]{scroll-margin-top:calc(var(--header-height) + var(--section-nav-height))}
 }
 
 /* ---- Catalogue / detail / side bar responsive ---- */
@@ -80,12 +88,22 @@
   .bl-site .bl-gallery-thumbs button{width:72px}
   .bl-site .bl-product-intro h1{font-size:84px}
   .bl-site .bl-product-section-nav{position:static}
-  .bl-site .bl-side-contact{top:auto;bottom:0;left:0;right:0;transform:none;flex-direction:row;gap:0;background:var(--ink);border-top:1px solid #ffffff1f}
-  .bl-site .bl-side-contact a{flex:1;width:auto;height:auto;display:flex;flex-direction:column;gap:4px;padding:10px 4px;border:0;border-right:1px solid #ffffff1f;box-shadow:none;font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
-  .bl-site .bl-side-contact a:last-child{border-right:0}
-  .bl-site .bl-side-contact span{position:static;transform:none;opacity:1;background:none;padding:0;font-size:10px;pointer-events:auto}
-  .bl-site .bl-footer{padding-bottom:64px}
   .bl-site .bl-compare{padding-top:56px}
+}
+/* The contact rail becomes a bar along the foot of the screen: up to 800px, and on phones turned sideways, where the
+   rail would stand over the page. Keep this query in step with quick.js. */
+@media(max-width:800px),(max-width:1000px) and (max-height:500px){
+  .bl-site{--bl-bar-height:58px}
+  .bl-site .bl-side-contact{top:auto;bottom:0;left:0;right:0;height:calc(var(--bl-bar-height) + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);transform:none;flex-direction:row;gap:0;background:var(--ink);border-top:1px solid #ffffff1f}
+  .bl-site .bl-side-contact a{flex:1;width:auto;height:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0 4px;border:0;border-right:1px solid #ffffff1f;box-shadow:none;font-size:12px;line-height:1.2;letter-spacing:.05em;text-transform:uppercase;font-weight:700}
+  .bl-site .bl-side-contact a:last-child{border-right:0}
+  .bl-site .bl-side-contact svg{width:20px;height:20px}
+  .bl-site .bl-side-contact span,.bl-site .bl-side-contact a:is(:hover,:focus-visible) span{position:static;transform:none;opacity:1;background:none;padding:0;font-size:12px;line-height:1.2;pointer-events:auto}
+  .bl-site .bl-side-contact a:hover{transform:none}
+  /* While the quick enquiry is open, its bar button reads as the current one. */
+  .bl-quick-on .bl-site .bl-side-contact a[data-quick]{background:var(--blue);color:#fff}
+  .bl-site .bl-footer{padding-bottom:calc(var(--bl-bar-height) + env(safe-area-inset-bottom,0px))}
+  .bl-site .bl-footer-top>.bl-circle-button{display:none}
 }
 @media(max-width:600px){
   .bl-site .bl-catalog .bl-product-grid,.bl-site .bl-product-grid{grid-template-columns:1fr;gap:32px}

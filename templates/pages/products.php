@@ -21,7 +21,7 @@ $visible = count(array_filter($scope, static fn($item) => $matches($item)));
 $facetCount = static fn(string $key, string $value): int => count(array_filter($scope, static fn($item) => $matches($item, $key) && ($value === '' || $item['facets'][$key] === $value)));
 $heading = $category === 'mini-dumpers' ? 'KEEP MATERIALS<br>MOVING.' : ($category === 'skid-steer-loaders' ? 'COMPACT SIZE.<br>MORE CAPABILITY.' : 'FIND YOUR<br>NEXT MACHINE.');
 ?>
-<section class="bl-page-hero bl-shell">
+<section class="bl-page-hero bl-catalog-hero bl-shell">
   <?php bl_breadcrumbs([['label' => $category ? ($category === 'mini-dumpers' ? 'Mini dumpers' : 'Skid steer loaders') : 'Search']]); ?>
   <div class="bl-page-heading"><div><p class="bl-eyebrow">THE BOB-LIFT EQUIPMENT RANGE</p><h1><?= $heading ?></h1></div><p><?= $category === 'mini-dumpers' ? 'Published capacities. Real models. Find the mini dumper that fits your material transport requirements.' : 'Start with the work ahead. Explore our compact equipment, then get into the details.' ?></p></div>
 </section>

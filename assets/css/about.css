@@ -146,10 +146,22 @@
   .bl-site .bl-about-hero h1 .bl-outline-text{-webkit-text-stroke-width:1.5px}
   .bl-site .bl-about-hero-photo img{height:clamp(300px,92vw,460px)}
   .bl-site .bl-about-plate>div{padding:18px 18px 20px}
+  .bl-site .bl-about-plate>div:nth-child(-n+2){border-top:1px solid var(--night-line)}
+  .bl-site .bl-about-plate>div:nth-child(odd){padding-left:var(--gutter)}
+  .bl-site .bl-about-plate>div:nth-child(even),.bl-site .bl-about-plate>div:last-child{padding-right:var(--gutter)}
+  .bl-site .bl-about-hero-grid{gap:24px;padding-top:28px;padding-bottom:36px}
+  .bl-site .bl-about-hero h1{margin-top:16px}
+  .bl-site .bl-about-hero-side{padding-bottom:0}
+  /* The photograph's caption reads under the picture, on the dark band that runs into the plate. */
+  .bl-site .bl-about-hero-photo figcaption{position:relative;right:auto;top:auto;padding:12px var(--gutter);background:var(--ink);color:var(--night-muted);font-weight:500;letter-spacing:.3px;backdrop-filter:none}
   .bl-site .bl-about-plate dd{font-size:clamp(36px,11vw,48px)}
+  /* A place name sits smaller than the figures; every value keeps to the foot of its cell, so the two in a row share a baseline. */
+  .bl-site .bl-about-plate>div{display:flex;flex-direction:column;justify-content:space-between}
+  .bl-site .bl-about-plate dd.bl-about-plate-word{font-size:clamp(24px,7vw,32px);line-height:1}
   .bl-site .bl-about-group h2{font-size:clamp(44px,12.4vw,64px)}
   .bl-site .bl-tree-root-name h3{font-size:56px}
   .bl-site .bl-tree-branch{padding:24px 22px 26px}
   .bl-site .bl-tree-branch h3{font-size:clamp(40px,11vw,56px)}
   .bl-site .bl-tree-here>span{flex-wrap:wrap}
+  .bl-site .bl-tree-here-links a{min-height:44px}
 }

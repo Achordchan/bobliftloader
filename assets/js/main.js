@@ -26,10 +26,12 @@ const menuToggle = document.querySelector('.bl-menu-toggle');
 const navigation = document.querySelector('.bl-nav');
 const header = document.querySelector('.bl-header');
 
+// The root carries the menu's state too, so the stylesheet can clear the contact bar without :has().
 function closeNavigation(returnFocus = false) {
   menuToggle.setAttribute('aria-expanded', 'false');
   menuToggle.setAttribute('aria-label', 'Open navigation');
   navigation.classList.remove('bl-open');
+  document.documentElement.classList.remove('bl-menu-on');
   if (returnFocus) menuToggle.focus();
 }
 
@@ -38,6 +40,7 @@ menuToggle.addEventListener('click', () => {
   menuToggle.setAttribute('aria-expanded', String(open));
   menuToggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
   navigation.classList.toggle('bl-open', open);
+  document.documentElement.classList.toggle('bl-menu-on', open);
 });
 
 document.addEventListener('keydown', (event) => {

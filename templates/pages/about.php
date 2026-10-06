@@ -27,7 +27,7 @@ foreach (bl_editable('about')['group']['product_links'] as $item) {
     <figcaption><?= bl_content_text('about', 'hero.caption') ?></figcaption>
   </figure>
   <dl class="bl-about-plate bl-shell" aria-label="BOB-LIFT at a glance">
-    <?php foreach ($companyFacts as $fact): ?><div><dt><?= bl_escape($fact['label']) ?></dt><dd><?= bl_escape($fact['value']) ?><?php if ($fact['unit']): ?><small><?= bl_escape($fact['unit']) ?></small><?php endif; ?></dd></div><?php endforeach; ?>
+    <?php foreach ($companyFacts as $fact): ?><div><dt><?= bl_escape($fact['label']) ?></dt><dd<?= ctype_digit(substr($fact['value'], 0, 1)) ? '' : ' class="bl-about-plate-word"' ?>><?= bl_escape($fact['value']) ?><?php if ($fact['unit']): ?><small><?= bl_escape($fact['unit']) ?></small><?php endif; ?></dd></div><?php endforeach; ?>
   </dl>
   </div>
 </section>
