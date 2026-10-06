@@ -31,12 +31,19 @@ add_action('init', static function (): void {
     ]);
 });
 
-// While a drawn design is chosen, the theme's card (a Mail body still carrying the marker) is sent as that design. The
-// swap happens as the mail is written, so the form's saved Mail tab keeps the classic card; a body an editor rewrote
-// without the marker, and every other form, are sent as written.
+/** Whether the form's Mail body is still the theme's classic card exactly as shipped, not edited in the Mail tab. */
+function bl_wp_inquiry_stock_card(?WPCF7_ContactForm $form = null): bool
+{
+    $form ??= class_exists('WPCF7_ContactForm') && bl_wp_inquiry_form_id() ? WPCF7_ContactForm::get_instance(bl_wp_inquiry_form_id()) : null;
+    return $form && trim(str_replace("\r\n", "\n", (string) (((array) $form->prop('mail'))['body'] ?? ''))) === trim(bl_wp_inquiry_mail()['body']);
+}
+
+// While a drawn design is chosen, the theme's card is sent as that design. The swap happens as the mail is written, so
+// the form's saved Mail tab keeps the classic card. Only the card as shipped is swapped: a body an editor changed in any
+// way (an added field, a note), and every other form, are sent as written.
 add_filter('wpcf7_mail_html_body', static function ($body) {
     $key = bl_wp_inquiry_mail_template();
-    if ($key === 'classic' || !bl_wp_inquiry_card_mail() || !($submission = WPCF7_Submission::get_instance())) return $body;
+    if ($key === 'classic' || !bl_wp_inquiry_card_mail() || !bl_wp_inquiry_stock_card(WPCF7_ContactForm::get_current()) || !($submission = WPCF7_Submission::get_instance())) return $body;
     return BL_ENQUIRY_CARD_MARKER . "\n" . bl_wp_inquiry_render($key, bl_wp_inquiry_data([
         'name' => $submission->get_posted_string('name'),
         'email' => $submission->get_posted_string('email'),
@@ -59,7 +66,9 @@ function bl_wp_inquiry_data(array $raw): array
     $family = trim((string) ($raw['family'] ?? ''));
     $families = ['Skid steer loader' => '滑移装载机', 'Mini dumper' => '迷你翻斗车', 'Help me choose' => '帮我选型', 'Parts & service' => '配件与服务'];
     $categories = ['skid-steer-loaders' => '滑移装载机', 'mini-dumpers' => '迷你翻斗车'];
-    $type = $product ? ($categories[$product['category'] ?? ''] ?? ($families[$family] ?? $family)) : ($families[$family] ?? $family);
+    // What the sender picked comes first (a parts & service request keeps its model); the product's category fills in
+    // only when no family came through.
+    $type = $family !== '' ? ($families[$family] ?? $family) : ($product ? ($categories[$product['category'] ?? ''] ?? '') : '');
     $ip = trim((string) ($raw['ip'] ?? ''));
     $email = trim((string) ($raw['email'] ?? ''));
     $productName = $product ? (string) $product['name'] : '';
@@ -173,7 +182,9 @@ function bl_inquiry_mail_screen(): void
             . '<span class="bl-mail-template-text"><span><strong>' . esc_html($template['name']) . '</strong>' . ($key === $current ? ' <span class="bl-chip">使用中</span>' : '') . '</span><span>' . esc_html($template['note']) . '</span>'
             . '<span class="bl-mail-template-links">预览：<a href="' . $preview($key, 'product') . '" target="_blank" rel="noopener">产品页询盘</a> · <a href="' . $preview($key, 'contact') . '" target="_blank" rel="noopener">联系页询盘</a></span></span></label>';
     }
-    echo '</div><p class="bl-field-help">预览用的是虚构的询盘。表单设置里的邮件正文若被手动改过（去掉了主题标记），会一直按手改的内容发送，这里的选择不再起作用。</p></div></details>';
+    echo '</div><p class="bl-field-help">预览用的是虚构的询盘。表单设置里的邮件正文若被手动改过，会一直按手改的内容发送，这里的选择不再起作用。</p>';
+    if (class_exists('WPCF7_ContactForm') && bl_wp_inquiry_form_id() && !bl_wp_inquiry_stock_card()) echo '<p class="bl-field-help"><strong>注意：</strong>询盘表单的邮件正文已被手动改过，目前按手改的内容发送，上面的模板暂不生效。</p>';
+    echo '</div></details>';
     echo '<div class="bl-savebar">';
     submit_button('保存邮件模板', 'primary', 'submit', false);
     echo '</div></form></div>';
