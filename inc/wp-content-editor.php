@@ -219,7 +219,7 @@ function bl_content_schema(string $page): array
         ['key' => "families.$key.label", 'label' => '名称', 'type' => 'text'],
         ['key' => "families.$key.title", 'label' => '标题', 'type' => 'heading', 'help' => '换行即分行。'],
         ['key' => "families.$key.description", 'label' => '介绍', 'type' => 'textarea'],
-        ['key' => "families.$key.image", 'group' => '产品图', 'label' => '图片', 'type' => 'image', 'preview' => $preview, 'help' => '留空使用主题自带的棚拍图；建议透明或浅色背景。'],
+        ['key' => "families.$key.image", 'group' => '产品图', 'label' => '图片', 'type' => 'image', 'preview' => $preview, 'help' => '同一张图也用在顶部菜单和产品总览页。留空使用主题自带的棚拍图；建议透明或浅色背景，1374×1145 左右。'],
         ['key' => "families.$key.alt", 'group' => '产品图', 'label' => '替代文字', 'type' => 'text', 'help' => $alt],
     ]];
     return [

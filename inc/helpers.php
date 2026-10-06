@@ -475,6 +475,12 @@ function bl_family_ranges(string $family): array
     ];
 }
 
+/** A family's studio picture ('loader' or 'dumper'): the one chosen on the home page's family card, else the theme's own. */
+function bl_family_image(string $family): string
+{
+    return bl_editable('home')['families'][$family]['image'] ?: bl_asset('images/range-' . $family . '-studio.webp');
+}
+
 /** "200–500 kg", or tonnes once both ends reach a tonne ("1–5 t"); a mixed range reads "0.5–5 t". */
 function bl_load_range(array $range): string
 {
