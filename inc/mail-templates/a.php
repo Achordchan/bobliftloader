@@ -17,7 +17,7 @@ return static function (array $d): string {
         $p = $d['product'];
         $photo = $p['image'] ? '<td width="104" valign="top" style="padding-right:18px;"><img src="' . esc_url($p['image']) . '" width="104" height="104" alt="' . esc_attr($p['name']) . '" style="display:block;width:104px;height:104px;border-radius:6px;border:1px solid #e3e8ef;"></td>' : '';
         $rows .= '<tr><td colspan="2" style="padding:16px 0;border-bottom:1px solid #eef1f5;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>' . $photo
-            . '<td valign="middle" style="' . $f . '"><div style="font-size:18px;font-weight:700;line-height:26px;color:#0b1f33;white-space:nowrap;">' . $e($p['title']) . '</div>'
+            . '<td valign="middle" style="' . $f . '"><div style="font-size:18px;font-weight:700;line-height:26px;color:#0b1f33;' . ($p['full'] !== '' ? 'white-space:nowrap;' : '') . '">' . $e($p['title']) . '</div>'
             . ($p['full'] !== ''
                 ? '<div style="padding-top:4px;font-size:13px;line-height:19px;color:#6b7a8c;">' . $e($p['full']) . '</div>'
                 : '<div style="padding-top:4px;' . $mono . 'font-size:14px;color:#6b7a8c;">型号 ' . $e($d['model']) . '</div>')

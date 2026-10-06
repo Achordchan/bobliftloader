@@ -15,7 +15,7 @@ return static function (array $d): string {
         $p = $d['product'];
         $photo = $p['image'] ? '<td width="104" valign="top" style="padding-right:18px;"><img src="' . esc_url($p['image']) . '" width="104" height="104" alt="' . esc_attr($p['name']) . '" style="display:block;width:104px;height:104px;border-radius:4px;"></td>' : '';
         $details = '<tr><td colspan="2" style="padding:14px 0;border-top:1px solid #e8e3da;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>' . $photo
-            . '<td valign="middle" style="' . $f . '"><div style="font-size:16px;font-weight:700;line-height:24px;color:#0b1f33;white-space:nowrap;">' . $e($p['title']) . '</div>'
+            . '<td valign="middle" style="' . $f . '"><div style="font-size:16px;font-weight:700;line-height:24px;color:#0b1f33;' . ($p['full'] !== '' ? 'white-space:nowrap;' : '') . '">' . $e($p['title']) . '</div>'
             . ($p['full'] !== ''
                 ? '<div style="padding-top:4px;font-size:13px;line-height:19px;color:#6f6a62;">' . $e($p['full']) . '</div>'
                 : '<div style="padding-top:4px;font-size:14px;color:#6f6a62;">型号 ' . $e($d['model']) . '</div>')
