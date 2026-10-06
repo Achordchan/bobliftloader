@@ -227,7 +227,7 @@ function bl_content_schema(string $page): array
             ['key' => 'after.parts_text', 'group' => '配件', 'label' => '说明', 'type' => 'textarea'],
             ['key' => 'after.button', 'group' => '报修按钮与 WhatsApp', 'label' => '报修按钮文字', 'type' => 'text'],
             ['key' => 'after.whatsapp_label', 'group' => '报修按钮与 WhatsApp', 'label' => 'WhatsApp 链接文字', 'type' => 'text'],
-            ['key' => 'after.whatsapp_number', 'group' => '报修按钮与 WhatsApp', 'label' => 'WhatsApp 号码', 'type' => 'digits', 'help' => '含国家码，只填数字。全站设置未覆盖售后号码时使用此值；统一号码在“网站内容 → 全站设置”修改。'],
+            ['key' => 'after.whatsapp_number', 'group' => '报修按钮与 WhatsApp', 'label' => 'WhatsApp 号码', 'type' => 'digits', 'help' => '含国家码，只填数字。留空则不显示 WhatsApp 链接。售后专用；全站的销售 WhatsApp 在“网站内容 → 全站设置”。'],
             ['key' => 'after.whatsapp_message', 'group' => '报修按钮与 WhatsApp', 'label' => 'WhatsApp 预填消息', 'type' => 'text', 'help' => '访客打开 WhatsApp 时输入框里预先填好的文字。'],
         ]],
         ['title' => '03 资料下载', 'note' => '画册 PDF 本身在<a href="' . esc_url(admin_url('admin.php?page=bl-downloads')) . '">“网站内容 → 资料下载”</a>更换；视频条目由产品视频自动生成。', 'fields' => [
@@ -476,8 +476,6 @@ function bl_content_screen(string $page): void
     if (!isset(BL_CONTENT_PAGES[$page]) || !current_user_can('edit_pages')) wp_die('没有编辑权限。', '', ['response' => 403]);
     $info = BL_CONTENT_PAGES[$page];
     $stored = bl_content_saved_now($page);
-    // The revision is taken before the values are read: if Support's number changes in between, the form shows the new
-    // number with an older token, and saving it is refused as stale rather than freezing a number the editor never saw.
     $revision = bl_content_revision($stored, $page);
     $values = bl_content_resolve($page, $stored);
     // "Changed" marks and reset follow the migrated content the screen shows.
@@ -507,9 +505,6 @@ function bl_content_screen(string $page): void
     echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="bl-ce-form"><input type="hidden" name="action" value="bl_save_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
     wp_nonce_field('bl_save_content_' . $page);
     echo bl_content_revision_input($revision);
-    // The service number shown here may be inherited from Support; the form says which value it showed, so leaving it
-    // untouched keeps the inheritance even if Support changes before this form is saved.
-    if ($page === 'global' && !$recovery && bl_content_get($saved, 'company.service_whatsapp') === null) echo '<input type="hidden" name="bl_inherited[service_whatsapp]" value="' . esc_attr($values['company']['service_whatsapp']) . '">';
     foreach ($sections as $i => $section) {
         $n = $count($section);
         echo '<details class="bl-panel bl-ce-section" data-bl-card id="bl-ce-' . $i . '"' . ($open ? ' open' : '') . '><summary class="bl-panel-head">';

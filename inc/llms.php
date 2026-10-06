@@ -57,7 +57,7 @@ function bl_llms_txt(): string
             bl_llms_txt_link('Support', '/support/', 'Ordering, shipping, warranty, parts and after-delivery service'),
             bl_llms_txt_link('Contact', '/contact/', 'Enquiry form for quotations and specifications'),
             '- Email: ' . bl_company('email'),
-            '- Phone and WhatsApp: ' . bl_company('phone'),
+            ...(bl_company('phone') === bl_company('sales_whatsapp_label') ? ['- Phone and WhatsApp: ' . bl_company('phone')] : ['- Phone: ' . bl_company('phone'), '- WhatsApp: ' . bl_company('sales_whatsapp_label')]),
             '- Parent company website: https://www.boblift.com/',
         ],
     ];

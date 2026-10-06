@@ -472,10 +472,6 @@ function bl_thanks_defaults(): array
 function bl_content_defaults(string $page): array
 {
     $extra = bl_site_content_definition($page)['defaults'] ?? [];
-    if ($page === 'global') {
-        $support = bl_is_wordpress() ? get_option('bl_content_support', []) : [];
-        $extra['company']['service_whatsapp'] = bl_content_resolve('support', is_array($support) ? $support : [])['after']['whatsapp_number'];
-    }
     if ($page === 'tracking') return ['head' => '', 'body_open' => '', 'footer' => ''];
     if ($extra && !in_array($page, ['loaders', 'dumpers'], true)) return $extra;
     return array_replace_recursive(match ($page) {

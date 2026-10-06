@@ -285,7 +285,13 @@ add_filter('wpcf7_special_mail_tags', static function ($output, string $name, bo
     if (!in_array($name, ['bl_page_link', 'bl_page_url', 'bl_enquiry_kind', 'bl_logo', 'bl_site', 'bl_time', 'bl_product_card', 'bl_ip_country'], true)) return $output;
     if ($name === 'bl_site') return (string) wp_parse_url(home_url(), PHP_URL_HOST);
     if ($name === 'bl_logo') {
-        $logo = '<img src="' . esc_url(bl_brand_logo()) . '" width="112" height="45" alt="BOB-LIFT" style="display:block;width:112px;height:45px;border:0;">';
+        // Mail clients have no page to resolve a root-relative address against, so it gets the site's own origin.
+        $src = bl_brand_logo();
+        if (str_starts_with($src, '/') && !str_starts_with($src, '//')) {
+            $home = wp_parse_url(home_url());
+            $src = ($home['scheme'] ?? 'https') . '://' . ($home['host'] ?? '') . (isset($home['port']) ? ':' . $home['port'] : '') . $src;
+        }
+        $logo = '<img src="' . esc_url($src) . '" width="112" height="45" alt="BOB-LIFT" style="display:block;width:112px;height:45px;border:0;">';
         return $html ? $logo : 'BOB-LIFT';
     }
     $submission = WPCF7_Submission::get_instance();

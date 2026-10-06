@@ -49,21 +49,9 @@ $check(substr_count($html, '>WhatsApp +44123456</a>') === 1 && substr_count($htm
 $check(substr_count($html, 'https://wa.me/44123456?text=') === 2, 'product WhatsApp URLs disagree');
 $result = bl_content_prepare('global', [], ['company' => ['sales_whatsapp' => '']]);
 $check(is_wp_error($result) && str_contains($result->get_error_message(), 'WhatsApp'), 'empty sales WhatsApp was accepted');
-$before = $GLOBALS['options']['bl_content_global'] ?? [];
-$stale = bl_content_revision($before, 'global');
-$GLOBALS['options']['bl_content_support'] = ['after' => ['whatsapp_number' => '8613900000000']];
-$check(bl_content_revision($before, 'global') !== $stale, 'a Support number change did not make the global form stale');
-unset($GLOBALS['options']['bl_content_support']);
 $result = bl_content_prepare('global', [], ['company' => ['email' => 'info@boblift.com']]);
 $check(!is_wp_error($result) && $result['_bl_email_explicit'] === true, 'REST choosing the default email was not recorded');
 $result = bl_content_prepare('global', [], ['company' => ['email' => 'sales%ab@example.com']]);
 $check(!is_wp_error($result) && $result['company']['email'] === 'sales%ab@example.com', 'a valid percent address was rewritten');
-// Support changes after the settings form showed its inherited number: an untouched number keeps following Support.
-$input = bl_content_drop_untouched_inherited('global', ['company' => ['email' => 'info@boblift.com', 'service_whatsapp' => '8611111111111']], ['service_whatsapp' => '8611111111111']);
-$check(!array_key_exists('service_whatsapp', $input['company']), 'untouched inherited service number was submitted as a choice');
-$input = bl_content_drop_untouched_inherited('global', ['company' => ['service_whatsapp' => '8622222222222']], ['service_whatsapp' => '8611111111111']);
-$check(($input['company']['service_whatsapp'] ?? '') === '8622222222222', 'an edited service number was dropped');
-$prepared = bl_content_prepare('global', [], bl_content_drop_untouched_inherited('global', ['company' => ['email' => 'info@boblift.com', 'service_whatsapp' => '8611111111111']], ['service_whatsapp' => '8611111111111']), true);
-$check(!isset($prepared['company']['service_whatsapp']), 'untouched inherited service number became an override');
 if ($failures) { fwrite(STDERR, implode("\n", $failures) . "\n"); exit(1); }
 echo "backend P1 review save/render regressions ok\n";

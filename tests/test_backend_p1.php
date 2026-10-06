@@ -27,13 +27,6 @@ $check(bl_content_defaults('about')['group']['facts'][1]['value'] === '37,000', 
 $check(bl_content_defaults('contact')['mail']['body'] === "Preferred visit dates:\nNumber of visitors:\nEquipment of interest:\n", 'visit draft whitespace changed');
 $check(bl_content_defaults('global')['footer']['support_label'] === 'Buying &amp; support', 'footer entity spelling changed');
 
-// The service number inherits the existing Support option, including an intentionally empty old number.
-$GLOBALS['options']['bl_content_support'] = ['after' => ['whatsapp_number' => '44123456789']];
-$check(bl_content_resolve('global', [])['company']['service_whatsapp'] === '44123456789', 'legacy service number not inherited');
-$check(bl_content_resolve('global', ['company' => ['service_whatsapp' => '']])['company']['service_whatsapp'] === '', 'explicit service clear fell back');
-$override = bl_content_prepare('global', [], ['company' => ['service_whatsapp' => '']]);
-$check(array_key_exists('service_whatsapp', $override['company']) && $override['company']['service_whatsapp'] === '', 'service clear lost on save');
-
 // Exercise the actual REST proxy write, then render several consumers of one changed email/number.
 $request = new WP_REST_Request(['id' => 1, 'meta' => ['_bl_content' => ['company' => ['email' => 'sales@example.test', 'phone' => '+44 123 456', 'sales_whatsapp' => '44123456', 'name' => 'Example Machinery', 'domain' => 'machines.example.test'], 'brand' => ['logo' => 'https://cdn.example.test/logo.png']]]]);
 $result = run_filter('rest_pre_insert_bl_page_content', (object) [], $request);

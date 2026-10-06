@@ -86,16 +86,6 @@ function bl_content_locked(string $page, callable $compute, ?string $expected = 
     }
 }
 
-/** An inherited value the editor left as shown is not a choice: dropping it keeps following its source. */
-function bl_content_drop_untouched_inherited(string $page, array $input, array $shown): array
-{
-    if ($page === 'global' && isset($shown['service_whatsapp']) && is_string($shown['service_whatsapp']) && is_array($input['company'] ?? null)
-        && array_key_exists('service_whatsapp', $input['company']) && (string) $input['company']['service_whatsapp'] === $shown['service_whatsapp']) {
-        unset($input['company']['service_whatsapp']);
-    }
-    return $input;
-}
-
 function bl_content_revision_input(string $revision): string
 {
     return '<input type="hidden" name="bl_content_revision" value="' . esc_attr($revision) . '">';
@@ -124,7 +114,6 @@ function bl_content_handle_submission(string $operation): void
     check_admin_referer('bl_' . $operation . '_content_' . $page);
     $expected = isset($_POST['bl_content_revision']) && is_string($_POST['bl_content_revision']) ? wp_unslash($_POST['bl_content_revision']) : '';
     $input = isset($_POST['bl_content']) && is_array($_POST['bl_content']) ? wp_unslash($_POST['bl_content']) : [];
-    $input = bl_content_drop_untouched_inherited($page, $input, isset($_POST['bl_inherited']) && is_array($_POST['bl_inherited']) ? wp_unslash($_POST['bl_inherited']) : []);
     if ($operation === 'save' && ($_POST['bl_content_complete'] ?? '') !== '1') {
         wp_die('提交的内容不完整，没有保存任何修改。请返回检查服务器的 max_input_vars 限制。', '', ['response' => 400, 'back_link' => true]);
     }

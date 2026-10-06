@@ -226,11 +226,7 @@ function bl_rest_content_snapshot(string $page, bool $refresh = false): array
     return bl_rest_content_state($page, $refresh)['saved'];
 }
 
-/**
- * The revision is taken together with the snapshot and before anything is resolved from it, as on the admin screen: if
- * Support's number changes in between, the payload shows the newer number under an older token, so a client sending it
- * back is refused as stale instead of freezing a number it never saw.
- */
+/** One read per request: the payload and its revision describe the same stored content. */
 function bl_rest_content_state(string $page, bool $refresh = false): array
 {
     static $states = [];
