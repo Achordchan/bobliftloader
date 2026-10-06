@@ -72,7 +72,7 @@
 .bl-site .bl-search-body{padding-top:clamp(18px,1.4vw,32px);padding-bottom:clamp(20px,1.6vw,36px)}
 .bl-site .bl-search-note{margin-bottom:clamp(14px,1vw,22px);padding:12px 16px;background:#e3e8f3;font-size:var(--fs-small);line-height:1.6}
 .bl-site .bl-search-results{display:grid;gap:2px}
-.bl-site .bl-search-result a{display:grid;grid-template-columns:clamp(52px,3.4vw,76px) minmax(0,1fr) auto;align-items:center;gap:clamp(14px,1.2vw,28px);padding:clamp(8px,.6vw,14px) clamp(10px,.8vw,18px);border-left:3px solid transparent;transition:background .15s}
+.bl-site .bl-search-result a{display:grid;grid-template-columns:clamp(52px,3.4vw,76px) minmax(0,1fr) auto;align-items:center;gap:clamp(14px,1.2vw,28px);padding:clamp(8px,.6vw,14px) clamp(10px,.8vw,18px);transition:background .15s}
 .bl-site .bl-search-result[aria-selected=true] a{background:#fff;box-shadow:inset 0 0 0 1px #c9d1d6}
 .bl-site .bl-search-thumb{display:grid;place-items:center;aspect-ratio:1;overflow:hidden;background:#e3e6e1;font:700 var(--fs-h5)/1 var(--display);color:#8a969c}
 .bl-site .bl-search-thumb img{width:100%;height:100%;object-fit:contain;padding:4px;background:#fff}
@@ -124,12 +124,18 @@
   .bl-site .bl-nav-panel b{font:600 15px/1.3 var(--sans)}
   .bl-site .bl-nav-panel small{font-size:13px}
 }
-/* Five sections since Support joined: just above the phone menu there is no room left for Let's talk, so the bar keeps
-   the sections on one line and the enquiry stays in the fixed contact bar (its Enquire link) until the header widens. */
+/* Five sections since Support joined: up to 800px there is no room left for Let's talk, so the bar keeps the sections on
+   one line and the enquiry stays in the bottom contact bar (its Enquiry button); just above the phone menu the
+   English-only language switch steps out too, as on phones. From 801px Let's talk returns, a little tighter. */
+@media(min-width:601px) and (max-width:900px){.bl-site .bl-nav>a{white-space:nowrap}}
+@media(min-width:601px) and (max-width:800px){.bl-site .bl-nav .bl-nav-contact{display:none}}
 @media(min-width:601px) and (max-width:720px){
-  .bl-site .bl-nav{gap:16px}
-  .bl-site .bl-nav>a{white-space:nowrap}
-  .bl-site .bl-nav .bl-nav-contact{display:none}
+  .bl-site .bl-header .bl-nav{gap:12px}
+  .bl-site .bl-nav .bl-lang-switch-single{display:none}
+}
+@media(min-width:801px) and (max-width:900px){
+  .bl-site .bl-header .bl-nav{gap:10px}
+  .bl-site .bl-header .bl-nav .bl-nav-contact{padding:10px 14px;gap:12px}
 }
 
 /* Site switch: the website label beside the logo opens the three BOB-LIFT websites. The panel hangs from the

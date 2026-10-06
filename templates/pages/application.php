@@ -51,7 +51,7 @@ $machines = $named ?: array_slice($family, 0, 3);
       <figcaption>Illustration based on BOB-LIFT product photography</figcaption>
     </figure>
     <dl class="bl-app-plate bl-shell" aria-label="<?= bl_escape($familyLabel) ?> at a glance">
-      <?php foreach ($plate as $fact): ?><div><dt><?= bl_escape($fact['label']) ?></dt><dd<?= ctype_digit($fact['value'][0]) ? '' : ' class="bl-app-plate-word"' ?>><?= bl_escape($fact['value']) ?><?php if ($fact['unit']): ?><small><?= bl_escape($fact['unit']) ?></small><?php endif; ?></dd></div><?php endforeach; ?>
+      <?php foreach ($plate as $fact): ?><div><dt><?= bl_escape($fact['label']) ?></dt><dd<?= ctype_digit(substr($fact['value'], 0, 1)) ? '' : ' class="bl-app-plate-word"' ?>><?= bl_escape($fact['value']) ?><?php if ($fact['unit']): ?><small><?= bl_escape($fact['unit']) ?></small><?php endif; ?></dd></div><?php endforeach; ?>
     </dl>
   </div>
 </section>

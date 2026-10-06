@@ -3,11 +3,14 @@
  * the address shareable. Without this script the form submits and PHP filters the same way.
  */
 export function initializeCatalog() {
-  // Phones scroll the comparison sideways; its right edge fades (pages.css) until the last model is in view.
-  document.querySelectorAll('.bl-compare-scroll').forEach((box) => {
-    const edge = () => box.classList.toggle('bl-compare-end', box.scrollLeft + box.clientWidth >= box.scrollWidth - 2);
+  // Phones scroll the comparison, the filter row and a model name's key sideways; each right edge fades (pages.css) until
+  // the end is in view. Only strips marked here fade, so without the script nothing stays faded.
+  document.querySelectorAll('.bl-compare-scroll, .bl-catalog-filters, .bl-model-decode').forEach((box) => {
+    const edge = () => box.classList.toggle('bl-edge-end', box.scrollLeft + box.clientWidth >= box.scrollWidth - 2);
+    box.classList.add('bl-edge-fade');
     box.addEventListener('scroll', edge, { passive: true });
-    addEventListener('resize', edge);
+    const sizes = new ResizeObserver(edge);
+    [box, ...box.children].forEach((part) => sizes.observe(part));
     edge();
   });
   const form = document.querySelector('[data-catalog]');

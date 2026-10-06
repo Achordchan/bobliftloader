@@ -155,6 +155,9 @@
   /* The photograph's caption reads under the picture, on the dark band that runs into the plate. */
   .bl-site .bl-about-hero-photo figcaption{position:relative;right:auto;top:auto;padding:12px var(--gutter);background:var(--ink);color:var(--night-muted);font-weight:500;letter-spacing:.3px;backdrop-filter:none}
   .bl-site .bl-about-plate dd{font-size:clamp(36px,11vw,48px)}
+  /* A place name sits smaller than the figures; every value keeps to the foot of its cell, so the two in a row share a baseline. */
+  .bl-site .bl-about-plate>div{display:flex;flex-direction:column;justify-content:space-between}
+  .bl-site .bl-about-plate dd.bl-about-plate-word{font-size:clamp(24px,7vw,32px);line-height:1}
   .bl-site .bl-about-group h2{font-size:clamp(44px,12.4vw,64px)}
   .bl-site .bl-tree-root-name h3{font-size:56px}
   .bl-site .bl-tree-branch{padding:24px 22px 26px}

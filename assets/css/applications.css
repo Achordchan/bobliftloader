@@ -148,6 +148,8 @@
   .bl-site .bl-app-plate>div:nth-child(-n+2){border-top:1px solid var(--night-line)}
   .bl-site .bl-app-plate>div:nth-child(odd){padding-left:var(--gutter)}
   .bl-site .bl-app-plate>div:nth-child(even){padding-right:var(--gutter)}
+  /* Each value keeps to the foot of its cell, so a two-line label beside a one-line one leaves the figures on one baseline. */
+  .bl-site .bl-app-plate>div{display:flex;flex-direction:column;justify-content:space-between}
   .bl-site .bl-app-plate dd.bl-app-plate-word{font-size:clamp(24px,7vw,32px);line-height:1}
   /* Index panels: a smaller number on a shaded top edge; the family line in white so it holds on any colour of machine. */
   .bl-site .bl-apps-triptych a::after{background:linear-gradient(180deg,#081c2b99 0%,#081c2b00 22%,#081c2b00 30%,#081c2bb3 50%,#081c2bf2 100%)}
@@ -158,6 +160,8 @@
   .bl-site .bl-app-machines .bl-product-grid::-webkit-scrollbar{display:none}
   .bl-site .bl-app-machines .bl-product-card{scroll-snap-align:start}
   .bl-site .bl-app-machines .bl-product-card-content :is(h2,h3){font-size:26px}
+  .bl-site .bl-app-machines .bl-product-card-line{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;white-space:normal;line-height:1.45}
+  .bl-site .bl-app-machines .bl-product-card-content dl>div{display:flex;flex-direction:column;justify-content:space-between}
 }
 
 /* Application case page: the "similar job" box in the story side column. */

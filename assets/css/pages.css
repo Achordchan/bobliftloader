@@ -286,12 +286,12 @@
 .bl-site .bl-compare-table tbody tr:nth-child(odd) td{background:#f8f9f5}
 .bl-site .bl-compare-actions td{border-bottom:0}
 .bl-site .bl-compare-actions .bl-text-link{font-size:var(--fs-label);gap:10px}
-/* Phones: a narrow label column and narrower model columns, so two models sit beside the labels; the right edge fades
-   while more models wait off screen (catalog.js marks the end). */
+/* Phones: a narrow label column and narrower model columns, so two models sit beside the labels. Here and on the other
+   sideways strips the right edge fades while more waits off screen; catalog.js marks the strips it watches and their end. */
 @media(max-width:600px){
   .bl-site .bl-compare-scroll{scrollbar-width:none}
   .bl-site .bl-compare-scroll::-webkit-scrollbar{display:none}
-  .bl-site .bl-compare-scroll:not(.bl-compare-end){-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 56px),#0000);mask-image:linear-gradient(90deg,#000 calc(100% - 56px),#0000)}
+  .bl-site .bl-edge-fade:not(.bl-edge-end){-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 56px),#0000);mask-image:linear-gradient(90deg,#000 calc(100% - 56px),#0000)}
   .bl-site .bl-compare-table{width:auto;min-width:100%;font-size:13.5px}
   .bl-site .bl-compare-table th,.bl-site .bl-compare-table td{min-width:96px;width:96px;padding:12px}
   .bl-site .bl-compare-table thead span{font-size:18px;white-space:nowrap}
@@ -471,6 +471,7 @@
   .bl-site .bl-ruler-track{grid-area:track;height:30px}
   .bl-site .bl-ruler-axis{grid-template-columns:minmax(0,1fr)}
   .bl-site .bl-ruler-axis>span:not(.bl-ruler-ticks){display:none}
+  .bl-site .bl-ruler-range{height:44px;margin-top:2px}
   .bl-site .bl-range-story-options strong{font-size:44px}
 }
 
@@ -606,15 +607,25 @@
 .bl-site .bl-quick-form .bl-form-bottom p br{display:none}
 .bl-site .bl-quick-form form.bl-inquiry-form input.wpcf7-submit{width:100%;min-height:52px}
 .bl-site .bl-quick-fallback{display:grid;gap:16px;justify-items:start}
-@media(max-width:800px){
+/* Wherever the contact rail is a bottom bar (page-responsive.css, quick.js) the panel is a sheet above it. */
+@media(max-width:800px),(max-width:1000px) and (max-height:500px){
   .bl-site .bl-quick{--bl-bar-foot:calc(var(--bl-bar-height,58px) + env(safe-area-inset-bottom,0px));right:0;left:0;bottom:var(--bl-bar-foot);z-index:16;transition:none}
   .bl-site .bl-quick-toggle{display:none}
   .bl-site .bl-quick-panel{position:relative;right:auto;bottom:auto;width:100%;max-height:calc(100svh - var(--bl-bar-foot) - 56px);border-inline:0;border-bottom:0;box-shadow:0 -16px 40px #081c2b40}
-  /* The page dims behind the sheet (a tap there closes it, quick.js); the bottom bar stays clear. */
+  /* The page, header included, dims behind the sheet and stops scrolling (a tap there closes it, quick.js); the bottom bar stays clear. */
+  .bl-site .bl-quick.bl-quick-open{z-index:21}
+  .bl-quick-on .bl-site{overflow:hidden}
   .bl-site .bl-quick-open::before{content:'';position:fixed;inset:0 0 var(--bl-bar-foot);background:#03111c8f;animation:bl-quick-dim .2s}
   .bl-site .bl-quick-head{padding:20px var(--gutter) 18px}
   .bl-site .bl-quick-close{width:44px;height:44px;margin:-4px 0 0}
   .bl-site .bl-quick-form,.bl-site .bl-quick-fallback{padding:18px var(--gutter) 22px}
+}
+/* Phones turned sideways: the sheet keeps to the right half, under a slimmer header. */
+@media(min-width:801px) and (max-width:1000px) and (max-height:500px){
+  .bl-site .bl-quick{left:auto;width:min(480px,100%)}
+  .bl-site .bl-quick-panel{max-height:calc(100svh - var(--bl-bar-foot) - 16px);border-inline:1px solid #b5c2ca}
+  .bl-site .bl-quick-head{padding:14px 20px 12px}
+  .bl-site .bl-quick-form,.bl-site .bl-quick-fallback{padding:14px 20px 18px}
 }
 @keyframes bl-quick-dim{from{opacity:0}}
 @media print{.bl-site .bl-quick{display:none}}
