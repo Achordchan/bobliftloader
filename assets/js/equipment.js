@@ -59,7 +59,12 @@ export function initializeEquipment() {
   document.querySelectorAll('[data-gallery-image]').forEach((button) => {
     button.addEventListener('click', () => {
       stopVideo();
-      if (photo) photo.src = button.dataset.galleryImage;
+      if (photo) {
+        photo.src = button.dataset.galleryImage;
+        photo.alt = button.dataset.galleryAlt || photo.alt;
+      }
+      const zoom = document.querySelector('.bl-gallery-zoom');
+      if (zoom) zoom.dataset.lightboxOpen = button.dataset.galleryIndex || '0';
       press(button);
     });
   });

@@ -43,7 +43,7 @@ function bl_rest_product_slugs($value): array
  * everything else in a record (imported sections, posters, dates…) keeps its stored value whatever a client sends.
  */
 const BL_REST_FIELDS = [
-    'bl_product' => ['model', 'category', 'source', 'spec_source', 'image', 'gallery', 'specs', 'videos'],
+    'bl_product' => ['model', 'category', 'source', 'spec_source', 'image', 'gallery', 'gallery_alt', 'specs', 'videos', 'seo_description', 'highlights', 'faq', 'attachments', 'photos'],
     'bl_news' => ['category', 'line', 'caption', 'source', 'image', 'products', 'event'],
     'bl_application' => ['hub', 'products', 'facts', 'source', 'image'],
 ];
@@ -86,6 +86,47 @@ function bl_rest_field(string $type, string $key, $value)
                 if ($src) $videos[] = ['src' => $src, 'poster' => bl_rest_clean_url($video['poster'] ?? ''), 'caption' => is_scalar($video['caption'] ?? null) ? sanitize_text_field((string) $video['caption']) : ''];
             }
             return $videos;
+        case 'gallery_alt':
+            // Alternative text per gallery photograph, keyed by the photograph's stored address.
+            $alts = [];
+            foreach (array_slice(is_array($value) ? $value : [], 0, 24, true) as $path => $alt) {
+                $path = bl_rest_clean_url($path);
+                $alt = is_scalar($alt) ? mb_substr(sanitize_text_field((string) $alt), 0, 160) : '';
+                if ($path !== '' && $alt !== '') $alts[$path] = $alt;
+            }
+            return $alts;
+        case 'seo_description':
+            return mb_substr($text, 0, 200);
+        case 'highlights':
+            $items = [];
+            foreach (array_slice(array_values((array) $value), 0, 3) as $item) {
+                $title = is_array($item) && is_scalar($item['title'] ?? null) ? mb_substr(sanitize_text_field((string) $item['title']), 0, 80) : '';
+                if ($title !== '') $items[] = ['title' => $title, 'text' => is_scalar($item['text'] ?? null) ? mb_substr(sanitize_text_field((string) $item['text']), 0, 240) : ''];
+            }
+            return $items;
+        case 'faq':
+            $items = [];
+            foreach (array_slice(array_values((array) $value), 0, 6) as $item) {
+                if (!is_array($item)) continue;
+                $field = static fn(string $name): string => is_scalar($item[$name] ?? null) ? sanitize_text_field((string) $item[$name]) : '';
+                // A link goes to a page on this site (/support/…, #section) or a full address.
+                $url = $field('link_url');
+                $url = preg_match('~^[/#][\w./#?=&%-]*$~', $url) && !str_starts_with($url, '//') ? $url : esc_url_raw($url, ['http', 'https']);
+                $label = $url !== '' ? $field('link_label') : '';
+                if ($field('q') !== '' && $field('a') !== '') $items[] = ['q' => $field('q'), 'a' => $field('a'), 'link_label' => $label, 'link_url' => $label !== '' ? $url : ''];
+            }
+            return $items;
+        case 'attachments':
+            return array_slice(array_values(array_unique(array_filter(array_map(static fn($name): string => is_scalar($name) ? sanitize_text_field((string) $name) : '', (array) $value)))), 0, 12);
+        case 'photos':
+            $photos = [];
+            foreach (array_slice(array_values((array) $value), 0, 24) as $photo) {
+                $src = is_array($photo) ? bl_rest_clean_url($photo['src'] ?? '') : '';
+                $group = is_array($photo) && is_scalar($photo['group'] ?? null) ? (string) $photo['group'] : '';
+                if ($src === '' || !isset(BL_PHOTO_GROUPS[$group])) continue;
+                $photos[] = ['src' => $src, 'group' => $group, 'alt' => is_scalar($photo['alt'] ?? null) ? mb_substr(sanitize_text_field((string) $photo['alt']), 0, 160) : '', 'caption' => is_scalar($photo['caption'] ?? null) ? mb_substr(sanitize_text_field((string) $photo['caption']), 0, 200) : ''];
+            }
+            return $photos;
         case 'facts':
             $facts = [];
             foreach (['location', 'customer', 'task', 'site', 'duration', 'result'] as $fact) $facts[$fact] = isset($value[$fact]) && is_scalar($value[$fact]) ? sanitize_text_field((string) $value[$fact]) : '';

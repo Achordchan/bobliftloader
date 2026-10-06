@@ -271,6 +271,63 @@ function bl_loaders_defaults(): array
                 $tool('mixing-bucket', 'Mixing bucket', 'Mix and pour in one attachment', 'Sweep, snow & mix'),
             ],
         ],
+        'product' => bl_product_page_defaults('loader'),
+    ];
+}
+
+/**
+ * The parts every product page of a family shares (inc/product-page.php reads them): the attachments a loader page shows
+ * when its own list is empty, the factory and inspection block, and the questions asked about every model of the family.
+ * Edited in WordPress under 网站内容 → 滑移装载机 / 迷你翻斗车 → 产品页通用模块.
+ */
+function bl_product_page_defaults(string $family): array
+{
+    $support = bl_url('/support/');
+    $faq = static fn(string $q, string $a, string $label = '', string $url = ''): array => ['q' => $q, 'a' => $a, 'link_label' => $label, 'link_url' => $url];
+    $photo = static fn(string $file, string $alt, string $caption): array => ['image' => bl_asset('images/about/' . $file . '-900.webp'), 'alt' => $alt, 'caption' => $caption];
+    if ($family === 'loader') return [
+        'attachments' => '4-in-1 bucket, Pallet forks, Auger, Hydraulic breaker, Trencher, Sweeper',
+        'factory' => [
+            'title' => "MADE AND CHECKED\n*IN OUR FACTORY.*",
+            'text' => 'Every loader is welded, painted and assembled in our own workshops in Xuzhou, Jiangsu, then run and checked before it is packed for export.',
+            'link' => 'See how our loaders are made',
+            'images' => [
+                $photo('weld', 'Welder at work on a loader frame at the BOB-LIFT factory in Xuzhou', 'Frames welded on the fabrication floor'),
+                $photo('assembly', 'Technicians assembling a tracked loader frame on the BOB-LIFT assembly floor', 'Assembled one station at a time'),
+                $photo('ready', 'Finished mini skid steer loaders in customer-ordered colours at the BOB-LIFT factory', 'Painted to order and ready to ship'),
+            ],
+            'checks' => [
+                ['title' => 'Run-in test', 'text' => 'The engine, travel, steering and the lift and tilt circuits are run and checked before the loader leaves the floor.'],
+                ['title' => 'Hydraulics under pressure', 'text' => 'Cylinders, hoses and fittings are checked for leaks at working pressure, and the auxiliary lines are tested.'],
+                ['title' => 'Final inspection', 'text' => 'Welds, paint, fasteners, track tension and decals are checked against the order before packing.'],
+            ],
+        ],
+        'faq' => [
+            $faq('Which attachments suit this loader?', 'Most attachments mount on the quick-attach plate and run from the auxiliary hydraulic lines. Hydraulic flow differs from model to model, so we confirm which attachments suit this loader when we quote it.', 'See all attachments', bl_url('/products/skid-steer-loaders/#attachments')),
+            $faq('Can I choose the engine and the colour?', 'Where the specification lists more than one engine under Engine options, you choose one when you order. Loaders are painted to order, so tell us the colour you want.'),
+            $faq('How is the loader shipped?', 'By sea in a 20GP or 40HQ container, with the bucket taken off and packed alongside. We confirm the loading plan with your order.', 'Container loading for every model', $support . '#containers'),
+            $faq('What happens if something goes wrong?', 'Send us the model, the serial number and a photo or short video. Our team guides the fix remotely and ships the parts you need under the whole-machine warranty.', 'Warranty and parts', $support . '#after-delivery'),
+        ],
+    ];
+    return [
+        'attachments' => '',
+        'factory' => [
+            'title' => "CHECKED\n*BEFORE IT SHIPS.*",
+            'text' => 'Every dumper is run and checked before it is packed for export.',
+            'link' => 'About BOB-LIFT',
+            'images' => [],
+            'checks' => [
+                ['title' => 'Run-in test', 'text' => 'The engine, drive, brakes and steering are run and checked before the dumper is packed.'],
+                ['title' => 'Tipping under load', 'text' => 'The hopper is raised and lowered on its hydraulics and the cylinders and hoses are checked for leaks.'],
+                ['title' => 'Final inspection', 'text' => 'Welds, paint, fasteners, lights and tyres or tracks are checked against the order before packing.'],
+            ],
+        ],
+        'faq' => [
+            $faq('Two-wheel or four-wheel drive?', 'For loose ground and ramps, the FY20-4, FY30, FY40, FY50 and FJZ30 drive all four wheels. Tell us about your site and we confirm the drive of the model we quote.'),
+            $faq('Can I have a roof or a cab?', 'Wheeled models come open or with a roof or cab. The specification lists the dimensions with roof / cab, and that height decides how the dumper ships.'),
+            $faq('How is the dumper shipped?', 'By sea in a 20GP or 40HQ container. Taller wheeled models with a roof or cab stand above a container door, so ask us how yours will ship.', 'Container loading for every model', $support . '#containers'),
+            $faq('What happens if something goes wrong?', 'Send us the model, the serial number and a photo or short video. Our team guides the fix remotely and ships the parts you need under the whole-machine warranty.', 'Warranty and parts', $support . '#after-delivery'),
+        ],
     ];
 }
 
@@ -308,6 +365,7 @@ function bl_dumpers_defaults(): array
         'compare' => [
             'note' => 'Wheeled dumper figures from the BOB-LIFT mini dumper brochure; tracked models from the BOB-LIFT technical sheets. Confirm the final configuration with our team before ordering.',
         ],
+        'product' => bl_product_page_defaults('dumper'),
     ];
 }
 

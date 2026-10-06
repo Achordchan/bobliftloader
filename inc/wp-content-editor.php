@@ -26,6 +26,29 @@ function bl_content_schema(string $page): array
         ['key' => 'seo.description', 'label' => '页面描述', 'type' => 'textarea', 'help' => '建议 150 个字符左右。' . $extra],
         ['key' => 'seo.image', 'label' => '分享图片', 'type' => 'image', 'preview' => 'images/share-default.jpg', 'help' => $share],
     ]];
+    // The block every product page of the family shares (inc/product-page.php); a product's own fields come first.
+    $productPage = static fn(string $family): array => ['title' => '产品页通用模块', 'note' => '本系列每个产品详情页都会显示的内容：' . ($family === 'loader' ? '默认展示的属具、' : '') . '工厂与出厂检查、常见问题。单个产品在“设备产品 → 编辑 → 产品页模块”里填的内容优先显示。', 'fields' => array_merge($family === 'loader' ? [
+        ['key' => 'product.attachments', 'label' => '默认展示的属具', 'type' => 'text', 'help' => '产品页“Works with”一节显示的属具名称，英文逗号分隔，名称要和上面属具列表里一致；产品自己没勾选时用这里。留空则不显示这一节。'],
+    ] : [], [
+        ['key' => 'product.factory.title', 'group' => '工厂与出厂检查', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
+        ['key' => 'product.factory.text', 'group' => '工厂与出厂检查', 'label' => '说明', 'type' => 'textarea'],
+        ['key' => 'product.factory.link', 'group' => '工厂与出厂检查', 'label' => '链接文字', 'type' => 'text', 'help' => $family === 'loader' ? '链接到栏目页“How they are made”。留空不显示。' : '链接到关于我们。留空不显示。'],
+        ['key' => 'product.factory.images', 'group' => '工厂与出厂检查', 'label' => '照片', 'type' => 'list', 'add' => '添加照片', 'summary' => ['caption'], 'fields' => [
+            'image' => ['label' => '图片', 'type' => 'image', 'help' => '真实的工厂照片，3:2 横图。最多显示 3 张；全部删掉则只显示文字和检查项。'],
+            'alt' => ['label' => '替代文字', 'type' => 'text', 'help' => $alt],
+            'caption' => ['label' => '图下说明', 'type' => 'text'],
+        ]],
+        ['key' => 'product.factory.checks', 'group' => '工厂与出厂检查', 'label' => '出厂检查', 'type' => 'list', 'add' => '添加检查项', 'summary' => ['title'], 'fields' => [
+            'title' => ['label' => '名称', 'type' => 'text'],
+            'text' => ['label' => '说明', 'type' => 'textarea'],
+        ]],
+        ['key' => 'product.faq', 'label' => '常见问题', 'type' => 'list', 'add' => '添加问题', 'summary' => ['q'], 'fields' => [
+            'q' => ['label' => '问题', 'type' => 'text'],
+            'a' => ['label' => '回答', 'type' => 'textarea'],
+            'link_label' => ['label' => '链接文字', 'type' => 'text', 'help' => $optional],
+            'link_url' => ['label' => '链接地址', 'type' => 'url', 'help' => '可留空；文字和地址都填了才显示链接。站内页面写 /support/…。'],
+        ]],
+    ])];
     if ($page === 'applications') {
         $names = ['landscaping' => '景观绿化', 'site-preparation' => '场地准备', 'material-transport' => '物料运输', 'gardens-and-homesteads' => '园林家用', 'farms-and-orchards' => '农场果园', 'building-sites' => '工地'];
         $sections = [
@@ -87,7 +110,7 @@ function bl_content_schema(string $page): array
                 'image' => ['label' => '图片', 'type' => 'image', 'help' => '4:3 横图。留空则不显示图片。'],
             ]],
             ['key' => 'attachments.note', 'label' => '底部备注', 'type' => 'textarea', 'help' => $optional],
-        ]],
+        ]],        $productPage('loader'),
     ];
     if ($page === 'dumpers') return [
         ['title' => '栏目介绍与配置', 'note' => '翻斗车栏目页产品列表下方的介绍（#about-the-range）：标题、介绍和下面一排配置说明。中间的载荷图由产品数据自动生成。', 'fields' => [
@@ -112,7 +135,7 @@ function bl_content_schema(string $page): array
         ]],
         ['title' => '参数对比', 'fields' => [
             ['key' => 'compare.note', 'label' => '对比表说明', 'type' => 'textarea', 'help' => '对比表标题旁的说明，写参数出处。'],
-        ]],
+        ]],        $productPage('dumper'),
     ];
     if ($page === 'support') return [
         ['title' => '首屏', 'fields' => [

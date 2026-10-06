@@ -18,7 +18,9 @@ function bl_structured_data(array $route): array
     ];
     if ($route['type'] === 'product' && $route['record']['model'] !== '') {
         $p = $route['record'];
-        $graph[] = array_filter(['@type' => 'Product', 'name' => $p['name'], 'model' => $p['model'], 'image' => $p['image'] ? bl_absolute_asset($p['image']) : null, 'description' => $p['excerpt'], 'url' => $base . $route['path'], 'brand' => ['@type' => 'Brand', 'name' => 'BOB-LIFT'], 'manufacturer' => ['@id' => $organization['@id']], 'additionalProperty' => array_map(static fn($name, $value) => ['@type' => 'PropertyValue', 'name' => $name, 'value' => $value], array_keys($p['specs']), array_values($p['specs']))], static fn($value) => $value !== null); // models awaiting photography have no image
+        // Every photograph of the machine (gallery first, then the product's own photographs, drawings aside), once each.
+        $images = array_values(array_unique(array_map('bl_absolute_asset', array_filter([$p['image'], ...array_column(bl_product_gallery($p), 'src'), ...array_column(bl_product_photos($p, ['at-work', 'detail', 'delivery']), 'src')]))));
+        $graph[] = array_filter(['@type' => 'Product', 'name' => $p['name'], 'model' => $p['model'], 'sku' => $p['model'], 'mpn' => $p['model'], 'category' => $p['category'] === 'mini-dumpers' ? 'Mini dumpers' : 'Skid steer loaders', 'image' => $images ?: null, 'description' => bl_product_description($p), 'url' => $base . $route['path'], 'brand' => ['@type' => 'Brand', 'name' => 'BOB-LIFT'], 'manufacturer' => ['@id' => $organization['@id']], 'additionalProperty' => array_map(static fn($name, $value) => ['@type' => 'PropertyValue', 'name' => $name, 'value' => $value], array_keys($p['specs']), array_values($p['specs']))], static fn($value) => $value !== null); // models awaiting photography have no image
     }
     if ($route['type'] === 'application_case') {
         $c = $route['record'];

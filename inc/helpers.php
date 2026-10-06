@@ -64,7 +64,8 @@ function bl_products(): array
     foreach ($products as &$product) {
         $product['image'] = $product['image'] ? bl_asset($product['image']) : '';
         $product['excerpt'] = bl_product_excerpt($product);
-        $product['gallery'] = array_map('bl_asset', $product['gallery'] ?? []);
+        $product['gallery_paths'] = $product['gallery'] ?? [];
+        $product['gallery'] = array_map('bl_product_media', $product['gallery'] ?? []);
     }
     unset($product);
     return $products;
@@ -312,13 +313,16 @@ function bl_breadcrumbs(array $items): void
     echo '</ol></nav>';
 }
 
-function bl_product_card(array $product, string $attributes = ''): void
+/** A product card; $heading is the card title's level (h3 where the cards sit under a section's own h2). */
+function bl_product_card(array $product, string $attributes = '', string $heading = 'h2'): void
 {
+    $heading = in_array($heading, ['h2', 'h3'], true) ? $heading : 'h2';
     require __DIR__ . '/../templates/partials/product-card.php';
 }
 
-function bl_case_card(array $case): void
+function bl_case_card(array $case, string $heading = 'h2'): void
 {
+    $heading = in_array($heading, ['h2', 'h3'], true) ? $heading : 'h2';
     require __DIR__ . '/../templates/partials/case-card.php';
 }
 

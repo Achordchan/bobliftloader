@@ -153,9 +153,9 @@ function bl_product_specs_box(WP_Post $post): void
     echo '</p></div>';
 }
 
-function bl_product_gallery_item(string $path): string
+function bl_product_gallery_item(string $path, string $alt = ''): string
 {
-    return '<li class="bl-gallery-item" title="' . esc_attr($path) . '"><img src="' . esc_url(bl_wp_image($path)) . '" alt=""><input type="hidden" name="bl_record[gallery][]" value="' . esc_attr($path) . '"><span class="bl-gallery-tools">' . bl_admin_tool('up', 'arrow-left-alt2', '前移') . bl_admin_tool('down', 'arrow-right-alt2', '后移') . bl_admin_tool('remove', 'no-alt', '移除') . '</span></li>';
+    return '<li class="bl-gallery-item" title="' . esc_attr($path) . '"><img src="' . esc_url(bl_wp_image($path)) . '" alt=""><input type="hidden" name="bl_record[gallery][]" value="' . esc_attr($path) . '"><input type="text" class="bl-gallery-alt" name="bl_record[gallery_alt][]" value="' . esc_attr($alt) . '" placeholder="替代文字（英文）" aria-label="这张图的替代文字（英文）"><span class="bl-gallery-tools">' . bl_admin_tool('up', 'arrow-left-alt2', '前移') . bl_admin_tool('down', 'arrow-right-alt2', '后移') . bl_admin_tool('remove', 'no-alt', '移除') . '</span></li>';
 }
 
 function bl_product_images_box(WP_Post $post): void
@@ -164,11 +164,12 @@ function bl_product_images_box(WP_Post $post): void
     $image = (string) ($record['image'] ?? '');
     bl_admin_field('主图', '', bl_admin_media('bl_record[image]', $image), '产品页大图和产品卡片用的图片。右侧“产品主图”设置了就优先用它；没设置时用这里。');
     $items = '';
-    foreach ((array) ($record['gallery'] ?? []) as $path) $items .= bl_product_gallery_item((string) $path);
+    $alts = is_array($record['gallery_alt'] ?? null) ? $record['gallery_alt'] : [];
+    foreach ((array) ($record['gallery'] ?? []) as $path) $items .= bl_product_gallery_item((string) $path, (string) ($alts[$path] ?? ''));
     $control = '<ul class="bl-gallery" data-bl-gallery data-bl-base="' . esc_url(get_template_directory_uri() . '/assets/') . '">' . $items . '</ul>'
         . '<template data-bl-template="gallery">' . bl_product_gallery_item('') . '</template>'
         . '<div class="bl-gallery-add"><button type="button" class="button" data-bl="media-gallery"><span class="dashicons dashicons-images-alt2" aria-hidden="true"></span> 从媒体库添加</button></div>';
-    bl_admin_field('图库', '', $control, '图库有两张及以上时，产品页大图旁显示缩略图，点击切换；通常把主图也放在第一张。最多 12 张，可用箭头调整顺序或拖动排序。');
+    bl_admin_field('图库', '', $control, '图库有两张及以上时，产品页大图旁显示缩略图，点击切换；通常把主图也放在第一张。最多 12 张，可用箭头调整顺序或拖动排序。每张图下方填英文替代文字，描述画面（如 BL-T1000-H loader lifting a pallet），供谷歌图片和读屏软件使用；留空时自动用产品名。');
 }
 
 function bl_product_source_box(WP_Post $post): void
@@ -332,10 +333,17 @@ add_action('save_post', static function (int $postId): void {
         $record['category'] = in_array($text('category'), ['skid-steer-loaders', 'mini-dumpers'], true) ? $text('category') : 'skid-steer-loaders';
         $record['gallery'] = [];
         $gallery = $input['gallery'] ?? [];
-        foreach (array_slice(is_string($gallery) ? preg_split('/\R/', $gallery) : (array) $gallery, 0, 12) as $line) {
+        $alts = is_array($input['gallery_alt'] ?? null) ? array_values($input['gallery_alt']) : [];
+        // Older forms without the alt fields keep the stored text for the photographs still in the gallery.
+        $kept = array_key_exists('gallery_alt', $input) ? [] : (is_array($record['gallery_alt'] ?? null) ? $record['gallery_alt'] : []);
+        $record['gallery_alt'] = [];
+        foreach (array_slice(is_string($gallery) ? preg_split('/\R/', $gallery) : (array) $gallery, 0, 12) as $i => $line) {
             $line = is_scalar($line) ? trim(sanitize_text_field((string) $line)) : '';
             $url = str_starts_with($line, 'images/') && !str_contains($line, '..') ? $line : esc_url_raw($line, ['http', 'https']);
-            if ($url) $record['gallery'][] = $url;
+            if (!$url) continue;
+            $record['gallery'][] = $url;
+            $alt = isset($alts[$i]) && is_scalar($alts[$i]) ? mb_substr(sanitize_text_field((string) $alts[$i]), 0, 160) : (string) ($kept[$url] ?? '');
+            if ($alt !== '') $record['gallery_alt'][$url] = $alt;
         }
         $record['specs'] = [];
         foreach (array_slice(bl_admin_posted_rows($input['specs'] ?? '', ['key', 'value']), 0, 40) as $row) {

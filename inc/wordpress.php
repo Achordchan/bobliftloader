@@ -48,7 +48,9 @@ function bl_wp_product_record(WP_Post $post): array
     else $record['excerpt'] = $post->post_excerpt ?: (wp_trim_words(wp_strip_all_tags($post->post_content), 35) ?: bl_product_excerpt($record));
     $record['content_html'] = $post->post_content ? apply_filters('the_content', $post->post_content) : '';
     $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: bl_wp_image($record['image']);
-    $record['gallery'] = array_values(array_filter(array_map('bl_wp_image', (array) $record['gallery'])));
+    // The stored paths stay alongside: the gallery's written descriptions are kept by path (gallery_alt).
+    $record['gallery_paths'] = array_values(array_filter((array) $record['gallery'], static fn($path) => bl_wp_image((string) $path) !== ''));
+    $record['gallery'] = array_map(static fn($path) => bl_wp_image((string) $path), $record['gallery_paths']);
     return $record;
 }
 

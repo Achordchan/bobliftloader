@@ -28,7 +28,7 @@ function bl_resolve_route(): array
         if ($type === 'products' && $path !== '/products/') $route['category'] = explode('/', trim($path, '/'))[1];
     } elseif (preg_match('~^/product/([a-z0-9-]+)/$~', $path, $matches)) {
         $product = bl_find_record(bl_products(), $matches[1]);
-        if ($product) $route = array_replace($route, ['type' => 'product', 'title' => bl_product_page_title($product), 'description' => $product['excerpt'], 'record' => $product, 'status' => 200]);
+        if ($product) $route = array_replace($route, ['type' => 'product', 'title' => bl_product_page_title($product), 'description' => bl_product_description($product), 'record' => $product, 'status' => 200]);
     } elseif (preg_match('~^/news/([a-z0-9-]+)/$~', $path, $matches)) {
         $article = bl_find_record(bl_articles(), $matches[1]);
         if ($article) $route = array_replace($route, ['type' => 'article', 'title' => $article['title'], 'description' => $article['excerpt'], 'record' => $article, 'status' => 200]);
@@ -48,7 +48,7 @@ function bl_resolve_route(): array
     }
     // An editor's preview (draft, or unsaved changes to a published post) arrives at the site root with the post id.
     if (bl_is_wordpress() && ($preview = bl_wp_preview())) {
-        $route = array_replace($route, ['type' => $preview['type'], 'title' => $preview['title'], 'description' => $preview['record']['excerpt'], 'record' => $preview['record'], 'status' => 200, 'preview' => true, 'path' => $preview['path']]);
+        $route = array_replace($route, ['type' => $preview['type'], 'title' => $preview['title'], 'description' => $preview['type'] === 'product' ? bl_product_description($preview['record']) : $preview['record']['excerpt'], 'record' => $preview['record'], 'status' => 200, 'preview' => true, 'path' => $preview['path']]);
     }
     if (bl_is_wordpress() && !is_404() && $route['type'] === '404' && is_singular(['page', 'post'])) {
         $post = get_queried_object();
