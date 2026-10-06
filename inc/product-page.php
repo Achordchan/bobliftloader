@@ -52,7 +52,19 @@ function bl_product_gallery(array $product): array
         $alt = trim((string) ($written[$raw] ?? ''));
         $images[] = ['src' => $src, 'alt' => $alt !== '' ? $alt : $product['name'] . ($count > 1 ? ', photograph ' . ($i + 1) . ' of ' . $count : '')];
     }
+    // The main image (右侧“产品主图”, else 图片 → 主图) opens the page. When the gallery leaves it out it goes first, so it
+    // stays reachable from the thumbnails and the lightbox.
+    if ($product['image'] && bl_product_main_index($product, $images) === null) array_unshift($images, ['src' => $product['image'], 'alt' => $product['name']]);
     return $images;
+}
+
+/** Where the main image sits in the gallery, matched by file (WordPress serves sized copies such as name-1024x768.webp). */
+function bl_product_main_index(array $product, array $images): ?int
+{
+    $file = static fn(string $url): string => preg_replace('/-\d+x\d+(?=\.\w+$)/', '', basename((string) parse_url($url, PHP_URL_PATH)));
+    $main = $file((string) $product['image']);
+    foreach ($images as $i => $image) if ($file($image['src']) === $main) return $i;
+    return null;
 }
 
 /** The product's own photographs of one kind or several: [src, alt, caption, group]. */
