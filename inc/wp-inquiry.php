@@ -12,8 +12,8 @@ declare(strict_types=1);
 const BL_ENQUIRY_EMAIL = 'info@boblift.com';
 // Raised when the theme's form or notification email changes, so the form the theme made earlier gets the new one once
 // (2: the HTML card; 3: no country field, the card shows the country of the sender's IP address instead; 4: the card
-// redesigned in the site's colours).
-const BL_ENQUIRY_MAIL_VERSION = 4;
+// redesigned in the site's colours; 5: the country in Chinese, the same text size on phones, the sender named in Chinese).
+const BL_ENQUIRY_MAIL_VERSION = 5;
 // Marks the notification card in the form's Mail body; only that layout is sent without CF7's automatic paragraphs.
 const BL_ENQUIRY_CARD_MARKER = '<!-- bl-inquiry-card -->';
 
@@ -72,7 +72,7 @@ add_action('admin_init', static function (): void {
         'form' => bl_wp_inquiry_template(),
         'mail' => [
             'active' => true,
-            'sender' => '[_site_title] <wordpress@' . $host . '>',
+            'sender' => bl_wp_inquiry_sender(),
             'recipient' => BL_ENQUIRY_EMAIL,
             'additional_headers' => 'Reply-To: [name] <[email]>',
             'attachments' => '',
@@ -113,9 +113,10 @@ function bl_wp_inquiry_mail(): array
     $font = "font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei','Helvetica Neue',Arial,sans-serif;";
     // The message's heading shares its line with the message, so both go when the sender wrote none.
     $heading = static fn(string $text): string => '<tr><td style="padding:28px 36px 12px;font-size:13px;font-weight:bold;letter-spacing:1px;color:#64748b;">' . $text . '</td></tr>';
-    $row = static fn(string $name, string $tag): string => '<tr><td width="96" style="width:96px;padding:13px 0;border-bottom:1px solid #edf0f4;font-size:14px;color:#64748b;vertical-align:top;">' . $name . '</td><td style="padding:13px 0;border-bottom:1px solid #edf0f4;font-size:15px;color:#0b1f33;line-height:1.6;vertical-align:top;word-break:break-word;">' . $tag . '</td></tr>';
+    $row = static fn(string $name, string $tag): string => '<tr><td width="96" style="width:96px;padding:13px 0;border-bottom:1px solid #edf0f4;font-size:14px;color:#64748b;vertical-align:top;">' . $name . '</td><td style="padding:13px 0;border-bottom:1px solid #edf0f4;font-size:16px;color:#0b1f33;line-height:1.6;vertical-align:top;word-break:break-word;">' . $tag . '</td></tr>';
     $meta = static fn(string $name, string $tag): string => '<td width="33%" style="width:33%;padding:16px 18px;vertical-align:top;"><div style="font-size:12px;color:#64748b;padding-bottom:4px;">' . $name . '</div><div style="font-size:15px;font-weight:bold;color:#0b1f33;line-height:1.4;word-break:break-word;">' . $tag . '</div></td>';
-    // Each table row (and each cell of the strip) is one line: with "exclude blank" on, CF7 drops the line of a field
+    // Phones such as iOS Mail enlarge long blocks of text by themselves, which made the message larger than the rows;
+    // the outer table turns that off. Each table row (and each cell of the strip) is one line: with "exclude blank" on, CF7 drops the line of a field
     // the sender left empty.
     $rows = implode("\n", [
         $row('姓名', '[name]'),
@@ -124,7 +125,7 @@ function bl_wp_inquiry_mail(): array
     ]);
     $strip = implode("\n", [$meta('来源国家', '[bl_ip_country]'), $meta('IP 地址', '[_remote_ip]'), $meta('提交时间', '[bl_time]')]);
     $body = BL_ENQUIRY_CARD_MARKER . "\n" . <<<HTML
-<table width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:#eef1f5;{$font}"><tr><td align="center" style="padding:32px 0;">
+<table width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:#eef1f5;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;text-size-adjust:100%;{$font}"><tr><td align="center" style="padding:32px 0;">
 <table width="660" cellspacing="0" cellpadding="0" style="width:660px;background:#ffffff;border:1px solid #e3e8ef;border-radius:10px;border-collapse:separate;overflow:hidden;text-align:left;">
 <tr><td height="6" style="height:6px;background:#215bdb;font-size:0;line-height:0;border-radius:10px 10px 0 0;">&nbsp;</td></tr>
 <tr><td style="padding:22px 36px;border-bottom:1px solid #edf0f4;"><table width="100%" cellspacing="0" cellpadding="0"><tr><td style="vertical-align:middle;">[bl_logo]</td><td align="right" style="vertical-align:middle;font-size:13px;color:#64748b;">[bl_time]</td></tr></table></td></tr>
@@ -136,7 +137,7 @@ function bl_wp_inquiry_mail(): array
 <tr><td style="padding:0 36px;"><table width="100%" cellspacing="0" cellpadding="0" style="border-top:1px solid #edf0f4;">
 {$rows}
 </table></td></tr>
-{$heading('留言')}<tr><td style="padding:0 36px;"><div style="padding:16px 20px;background:#f5f7fa;border-radius:8px;font-size:15px;line-height:1.75;color:#0b1f33;word-break:break-word;">[message]</div></td></tr>
+{$heading('留言')}<tr><td style="padding:0 36px;"><div style="padding:16px 20px;background:#f5f7fa;border-radius:8px;font-size:16px;line-height:1.75;color:#0b1f33;word-break:break-word;">[message]</div></td></tr>
 <tr><td style="padding:24px 36px 0;"><table width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #edf0f4;border-radius:8px;border-collapse:separate;"><tr>
 {$strip}
 </tr></table></td></tr>
@@ -161,8 +162,14 @@ const BL_ENQUIRY_MAIL_V1 = [
     'body' => "Equipment: [_raw_product]\nModel: [model]\nName: [name]\nEmail: [email]\nCountry: [country]\nCompany: [company]\n\nProject:\n[message]\n\n-- \nSent from [_site_url] on [_date] at [_time]",
 ];
 
-// The HTML bodies the theme gave its form before (md5 of the trimmed body): version 2 with a country row, version 3.
-const BL_ENQUIRY_MAIL_EARLIER = ['7c345410a541a4ed5e5c6272d3971e19', '2c56857cde1a7dbe0e2e46d2db972231'];
+// The HTML bodies the theme gave its form before (md5 of the trimmed body): version 2 with a country row, 3 and 4.
+const BL_ENQUIRY_MAIL_EARLIER = ['7c345410a541a4ed5e5c6272d3971e19', '2c56857cde1a7dbe0e2e46d2db972231', '09a877efb12c5f681d0e55a193888211'];
+
+/** Who the notification comes from. The address stays on the site's own domain, so mail servers accept it. */
+function bl_wp_inquiry_sender(): string
+{
+    return 'BOB-LIFT 询盘通知 <wordpress@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>';
+}
 
 /**
  * Bring the form the theme made earlier up to date, once. Only what still is one of the theme's earlier defaults is
@@ -182,6 +189,7 @@ add_action('init', static function (): void {
         $changes += ['body' => $new['body'], 'use_html' => true];
     }
     if ($same($mail['subject'] ?? '', BL_ENQUIRY_MAIL_V1['subject'])) $changes['subject'] = $new['subject'];
+    if ($same($mail['sender'] ?? '', '[_site_title] <wordpress@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>')) $changes['sender'] = bl_wp_inquiry_sender();
     $properties = $changes ? ['mail' => array_replace($mail, $changes)] : [];
     // The country field goes only when no mail that stays (an edited body or subject, the autoresponder) still uses it.
     $kept = [$properties['mail'] ?? $mail, (array) $form->prop('mail_2')];
@@ -242,7 +250,7 @@ function bl_wp_inquiry_thumbnail(array $product): string
     return trailingslashit($uploads['baseurl']) . $name;
 }
 
-/** The country the sender's IP address points to, in English (e.g. "Canada"); empty when it cannot be told. */
+/** The country the sender's IP address points to, in Chinese (e.g. "加拿大"); empty when it cannot be told. */
 function bl_wp_ip_country(string $ip): string
 {
     if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) return '';
@@ -255,8 +263,9 @@ function bl_wp_ip_country(string $ip): string
         set_transient($key, $code, $code ? WEEK_IN_SECONDS : HOUR_IN_SECONDS);
     }
     if ($code === '') return '';
-    $name = class_exists('Locale') ? (string) Locale::getDisplayRegion('-' . $code, 'en') : '';
-    return $name !== '' && $name !== $code ? $name . ' (' . $code . ')' : $code;
+    // ICU's names (PHP intl) are the mapping; without intl the two-letter code is shown.
+    $name = class_exists('Locale') ? (string) Locale::getDisplayRegion('-' . $code, 'zh_Hans_CN') : '';
+    return $name !== '' && $name !== $code ? $name : $code;
 }
 
 // The notification's own tags. CF7 asks for them only when the mail names them, so other forms are not affected.
