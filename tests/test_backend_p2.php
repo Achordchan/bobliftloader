@@ -137,13 +137,17 @@ foreach (['bl-content-home', 'bl-content-thanks', 'bl-content-tracking', 'bl-dow
     $check(isset($GLOBALS['scripts']['bl-content-editor']), "$screen lacks shared unsaved-change handler");
     if (in_array($screen, ['bl-downloads', 'bl-inquiry-mail'], true)) $check(!isset($GLOBALS['styles']['bl-content-editor']), "$screen unexpectedly loads content layout styles");
 }
-foreach (BL_CONTENT_PAGES as $page => $_) $check(is_callable($GLOBALS['screens']['bl-content-' . $page]), "$page original URL has no callback");
+// 首页 is served by the top-level menu page; every other screen keeps its own callback.
+foreach (BL_CONTENT_PAGES as $page => $_) if ($page !== 'home') $check(is_callable($GLOBALS['screens']['bl-content-' . $page]), "$page original URL has no callback");
 $html = $capture('bl_tracking_screen');
 $check(str_contains($html, 'class="bl-ce-form"') && !str_contains($html, 'data-bl-unsaved') && str_contains($html, 'bl_content_revision') && str_contains($html, 'bl_content_complete'), 'tracking missed unified save or dirty controls');
 $_POST = ['bl_page' => 'tracking', 'bl_content_complete' => '1', 'bl_content_revision' => bl_content_revision([]), 'bl_content' => ['head' => '<script>track()</script>']];
 try { bl_content_handle_submission('save'); } catch (TestRedirect $redirect) { $check(str_contains($redirect->getMessage(), 'bl-content-tracking'), 'tracking save redirected to global'); }
 $GLOBALS['caps'] = ['unfiltered_html' => false];
 $check($capture('bl_tracking_screen') === '', 'tracking permission regressed');
+
+// WordPress runs every callback hooked to the top-level slug, so the 首页 submenu must not add a second screen.
+$check(($GLOBALS['screens']['bl-content-home'] ?? null) === '', 'home screen registered twice');
 
 if ($failures) { fwrite(STDERR, implode("\n", $failures) . "\n"); exit(1); }
 echo "backend P2 regression ok\n";

@@ -464,7 +464,7 @@ add_action('admin_menu', static function (): void {
     foreach (BL_CONTENT_PAGES as $page => $info) {
         $page = (string) $page;
         // The first entry shares the top-level slug, whose screen is already registered above.
-        add_submenu_page('bl-content-home', $info['title'], $info['menu'], 'edit_pages', 'bl-content-' . $page, static fn() => bl_content_screen($page));
+        add_submenu_page('bl-content-home', $info['title'], $info['menu'], 'edit_pages', 'bl-content-' . $page, $page === 'home' ? '' : static fn() => bl_content_screen($page));
     }
 });
 
