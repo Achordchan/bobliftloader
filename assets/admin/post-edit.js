@@ -18,7 +18,7 @@
   if (!form || !document.getElementById('bl_main-sortables')) return;
   var gallery = form.querySelector('[data-bl-gallery]');
   var base = gallery ? gallery.dataset.blBase : '';
-  var GALLERY_MAX = 12;
+  var GALLERY_MAX = gallery ? +gallery.dataset.blMax : 0;
   var dirty = false;
 
   // Theme paths (images/…, videos/…) live under the theme's assets folder; anything else is already a full address.
@@ -118,6 +118,10 @@
       }
       var row = fromTemplate(button.dataset.blTarget);
       list.appendChild(row);
+      var body = row.querySelector('[data-bl-fold-body]') || row.querySelector('.bl-row-body');
+      var fold = row.querySelector('[data-bl-fold]');
+      if (body) body.hidden = false;
+      if (fold) fold.setAttribute('aria-expanded', 'true');
       row.querySelector('input').focus();
       return;
     }
@@ -146,10 +150,15 @@
 
   form.addEventListener('input', function (event) {
     var input = event.target;
-    if (!input.closest('#bl_main-sortables')) return;
+    if (!form.contains(input)) return;
     dirty = true;
     if (input.classList.contains('bl-video-caption')) input.closest('.bl-row').querySelector('.bl-row-title').textContent = input.value.trim() || '新视频';
-    if (input.hasAttribute('data-bl-title') && input.value.trim()) input.closest('.bl-row').querySelector('.bl-row-title').textContent = input.value.trim();
+    var pageRow = input.closest('[data-bl-page-kind]');
+    if (pageRow) {
+      var kind = pageRow.dataset.blPageKind;
+      var value = function (key) { var field = pageRow.querySelector('[name="bl_page[' + kind + '][' + key + '][]"]'); return field ? field.value.trim() : ''; };
+      pageRow.querySelector('.bl-row-title').textContent = kind === 'faq' ? (value('q') || '新问题') : kind === 'highlights' ? (value('title') || '新亮点') : (value('caption') || value('alt') || '新照片');
+    }
   });
 
   if (gallery && window.jQuery && jQuery.fn.sortable) {

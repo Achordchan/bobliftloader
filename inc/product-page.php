@@ -43,12 +43,18 @@ function bl_product_description(array $product): string
  */
 function bl_product_gallery(array $product): array
 {
-    $paths = ($product['gallery'] ?? []) ?: array_filter([$product['image']]);
+    $all = array_values(($product['gallery'] ?? []) ?: array_filter([$product['image']]));
+    $limit = BL_CONTENT_LIMITS['gallery'];
+    // Past the limit the main image keeps its place in the set (it opens the page and the lightbox), taking the last slot.
+    $keep = array_slice(array_keys($all), 0, $limit);
+    $main = $product['image'] ? bl_product_main_index($product, array_map(static fn($src) => ['src' => $src], $all)) : null;
+    if ($main !== null && $main >= $limit) $keep = [...array_slice($keep, 0, $limit - 1), $main];
     $written = is_array($product['gallery_alt'] ?? null) ? $product['gallery_alt'] : [];
-    $count = count($paths);
+    $count = count($keep);
     $images = [];
-    foreach (array_values($paths) as $i => $src) {
-        $raw = (string) ($product['gallery_paths'][$i] ?? $src);
+    foreach ($keep as $i => $index) {
+        $src = $all[$index];
+        $raw = (string) ($product['gallery_paths'][$index] ?? $src);
         $alt = trim((string) ($written[$raw] ?? ''));
         $images[] = ['src' => $src, 'alt' => $alt !== '' ? $alt : $product['name'] . ($count > 1 ? ', photograph ' . ($i + 1) . ' of ' . $count : '')];
     }
@@ -71,11 +77,11 @@ function bl_product_main_index(array $product, array $images): ?int
 function bl_product_photos(array $product, array $groups): array
 {
     $photos = [];
-    foreach ((array) ($product['photos'] ?? []) as $photo) {
+    foreach (array_slice((array) ($product['photos'] ?? []), 0, BL_CONTENT_LIMITS['photos']) as $photo) {
         if (!is_array($photo) || empty($photo['src']) || !in_array($photo['group'] ?? '', $groups, true)) continue;
         $photos[] = ['src' => bl_product_media((string) $photo['src']), 'alt' => (string) ($photo['alt'] ?? '') ?: $product['model'] . ' ' . strtolower(BL_PHOTO_GROUPS[$photo['group']]), 'caption' => (string) ($photo['caption'] ?? ''), 'group' => $photo['group']];
     }
-    return $photos;
+    return array_slice($photos, 0, $groups === ['drawing'] ? BL_CONTENT_LIMITS['drawing'] : BL_CONTENT_LIMITS['photos']);
 }
 
 /** Up to three short points that set this model apart, written per product. */
@@ -85,7 +91,7 @@ function bl_product_highlights(array $product): array
     foreach ((array) ($product['highlights'] ?? []) as $item) {
         if (is_array($item) && trim((string) ($item['title'] ?? '')) !== '') $items[] = ['title' => (string) $item['title'], 'text' => (string) ($item['text'] ?? '')];
     }
-    return array_slice($items, 0, 3);
+    return array_slice($items, 0, BL_CONTENT_LIMITS['highlights']);
 }
 
 /**
@@ -101,7 +107,7 @@ function bl_product_attachments(array $product): array
     foreach (bl_attachments() as $items) foreach ($items as $item) $byName[strtolower($item['name'])] = $item;
     $chosen = [];
     foreach ($names as $name) if (isset($byName[strtolower($name)]) && !in_array($byName[strtolower($name)], $chosen, true)) $chosen[] = $byName[strtolower($name)];
-    return array_slice($chosen, 0, 8);
+    return array_slice($chosen, 0, BL_CONTENT_LIMITS['attachments']);
 }
 
 /** The dumper jobs on the family page that name this model. */
@@ -138,7 +144,7 @@ function bl_product_factory(array $product): array
 {
     $factory = bl_product_shared($product)['factory'] ?? [];
     if (!is_array($factory)) return [];
-    $factory['images'] = array_slice(array_values(array_filter((array) ($factory['images'] ?? []), static fn($image): bool => is_array($image) && ($image['image'] ?? '') !== '')), 0, 3);
+    $factory['images'] = array_slice(array_values(array_filter((array) ($factory['images'] ?? []), static fn($image): bool => is_array($image) && ($image['image'] ?? '') !== '')), 0, BL_CONTENT_LIMITS['factory']);
     $factory['checks'] = array_values(array_filter((array) ($factory['checks'] ?? []), static fn($check): bool => is_array($check) && ($check['title'] ?? '') !== ''));
     return ($factory['text'] ?? '') === '' && !$factory['checks'] ? [] : $factory;
 }
@@ -158,7 +164,7 @@ function bl_product_faq(array $product): array
             $items[] = $row;
         }
     }
-    return array_slice($items, 0, 5);
+    return array_slice($items, 0, BL_CONTENT_LIMITS['faq']);
 }
 
 /**

@@ -11,7 +11,8 @@
 .bl-jump-all { margin-left: auto; padding: 3px 4px; font-size: 12.5px; }
 
 /* Panels and fields */
-.bl-ce-section, .bl-downloads .bl-panel { scroll-margin-top: 92px; }
+/* The jump bar can wrap to two or three lines; content-editor.js keeps --bl-jump-height in step with it. */
+.bl-ce-section, .bl-downloads .bl-panel { scroll-margin-top: calc(48px + var(--bl-jump-height, 44px)); }
 .bl-ce .bl-field-label .bl-chip { margin-top: 4px; }
 .bl-ce .bl-subgroup { margin-top: 16px; padding-top: 16px; }
 .bl-ce .bl-subgroup-title { font-size: 14px; }
@@ -63,4 +64,10 @@
   .bl-ce-image { grid-template-columns: minmax(0, 1fr); }
   .bl-ce-row .bl-field { grid-template-columns: minmax(0, 1fr); }
   .bl-ce-row-meta { display: none; }
+}
+
+/* On phones the jump bar wraps to many lines; pinned, it would cover most of the screen, so it scrolls away. */
+@media (max-width: 782px) {
+  .bl-jump { position: static; }
+  .bl-ce-section, .bl-downloads .bl-panel { scroll-margin-top: 56px; }
 }

@@ -83,7 +83,7 @@ function admin_url($path) { return home_url('/wp-admin/' . $path); }
 class TestRedirect extends RuntimeException {}
 function wp_safe_redirect($url) { throw new TestRedirect($url); }
 function wp_die($message, $title = '', $args = []) { throw new RuntimeException($message); }
-function bl_wp_products() { return array_map(fn($p) => ['slug' => $p->post_name], get_posts(['post_type' => 'bl_product', 'post_status' => 'publish'])); }
+function bl_wp_products() { return array_map(fn($p) => ['slug' => $p->post_name, 'model' => (string) (get_post_meta($p->ID, '_bl_record', true)['model'] ?? $p->post_name)], get_posts(['post_type' => 'bl_product', 'post_status' => 'publish'])); }
 class MemoryWpdb {
     public string $options = 'options';
     function prepare($sql, ...$args) { return [$sql, $args]; }
@@ -108,7 +108,7 @@ function register_post_meta($type, $key, $args) { $GLOBALS['post_meta_schema'][$
 function register_post_type($type, $args) { $GLOBALS['post_types'][$type] = $args; }
 function wp_kses_post($value) { return $value; }
 
-function wp_nonce_field($action) { echo '<input type="hidden" name="_wpnonce" value="' . esc_attr($action) . '">'; }
+function wp_nonce_field($action, $name = '_wpnonce') { echo '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($action) . '">'; }
 function submit_button($text, ...$args) { echo '<button type="submit">' . esc_html($text) . '</button>'; }
 function wp_strip_all_tags($value) { return strip_tags($value); }
 function wp_html_excerpt($value, $count, $more = '') { return mb_substr($value, 0, $count) . (mb_strlen($value) > $count ? $more : ''); }

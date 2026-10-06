@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/content-limits.php';
+require_once __DIR__ . '/content-business.php';
 
 /**
  * The words and pictures of the home and Support pages. The defaults below are the site as written; in WordPress the
@@ -82,7 +84,7 @@ function bl_home_defaults(): array
             'steps' => [
                 ['title' => 'Start with the right fit.', 'text' => 'Your site, your materials, your priorities. Tell us what you need to do and we’ll discuss the equipment options with you.'],
                 ['title' => 'Know what you’re choosing.', 'text' => 'Ask for model specifications, configuration options and product documentation before you decide, and confirm the details that matter to your work.'],
-                ['title' => 'Keep the conversation going.', 'text' => 'Contact the same team for equipment questions, <a href="' . bl_escape(bl_url('/support/') . '#after-delivery') . '">parts and service</a>, with a 12-month warranty on the whole machine. Have a machine already? Include its model and serial number.'],
+                ['title' => 'Keep the conversation going.', 'text' => 'Contact the same team for equipment questions, <a href="' . bl_escape(bl_url('/support/') . '#after-delivery') . '">parts and service</a>, with a {warranty_months}-month warranty on the whole machine. Have a machine already? Include its model and serial number.'],
             ],
         ],
         'journal' => [
@@ -104,7 +106,7 @@ function bl_support_defaults(): array
     return [
         'seo' => [
             'title' => 'Buying, Warranty & Support',
-            'description' => 'How buying from BOB-LIFT works: one-unit orders, T/T payment, 8–30 working days to ship, a 12-month whole-machine warranty, spare parts, downloads and answers to common questions.',
+            'description' => 'How buying from BOB-LIFT works: {minimum_order_words}-unit orders, T/T payment, {lead_time} working days to ship, a {warranty_months}-month whole-machine warranty, spare parts, downloads and answers to common questions.',
             'image' => '',
         ],
         'hero' => [
@@ -130,8 +132,8 @@ function bl_support_defaults(): array
             'steps' => [
                 ['title' => 'Tell us the job', 'text' => 'The narrowest opening on your site, the heaviest load and the ground you will work on. A few photos of the route help.', 'link_label' => 'What to send us', 'link_url' => bl_url('/applications/') . '#before-you-enquire'],
                 ['title' => 'Quote & configuration', 'text' => 'We suggest a model and confirm its engine, running gear, colour and attachments, then quote on the trade terms you need.', 'link_label' => '', 'link_url' => ''],
-                ['title' => 'Place the order', 'text' => 'One machine is enough to order. Payment is by T/T bank transfer.', 'link_label' => '', 'link_url' => ''],
-                ['title' => 'Built to order', 'text' => 'Your machine is built at our Xuzhou factory, typically in 8 to 30 working days. Quantity and configuration decide the date, which we confirm with your order.', 'link_label' => '', 'link_url' => ''],
+                ['title' => 'Place the order', 'text' => '{minimum_order_sentence} {minimum_order_noun} {minimum_order_verb} enough to order. Payment is by T/T bank transfer.', 'link_label' => '', 'link_url' => ''],
+                ['title' => 'Built to order', 'text' => 'Your machine is built at our Xuzhou factory, typically in {lead_time_words} working days. Quantity and configuration decide the date, which we confirm with your order.', 'link_label' => '', 'link_url' => ''],
                 ['title' => 'Shipping', 'text' => 'We quote EXW, FOB, CFR, CIF and the other common Incoterms, and ship by container.', 'link_label' => 'Machines per container', 'link_url' => '#containers'],
             ],
         ],
@@ -153,11 +155,11 @@ function bl_support_defaults(): array
         ],
         'after' => [
             'eyebrow' => '02 / AFTER DELIVERY',
-            'title' => "COVERED FOR\n*TWELVE MONTHS.*",
+            'title' => "COVERED FOR\n*{warranty_months_upper} MONTHS.*",
             'intro' => 'The team that built your machine stays on the other end of the line, for questions, faults and parts.',
             'warranty_eyebrow' => 'WARRANTY',
             'warranty_title' => 'The whole machine.',
-            'warranty_text' => 'Every BOB-LIFT loader and dumper carries a 12-month warranty that covers the whole machine.',
+            'warranty_text' => 'Every BOB-LIFT loader and dumper carries a {warranty_months}-month warranty that covers the whole machine.',
             'service_eyebrow' => 'IF SOMETHING GOES WRONG',
             'service_steps' => [
                 ['title' => 'Send us the details', 'text' => 'The model, the serial number and a photo or short video of the problem.'],
@@ -503,7 +505,7 @@ function bl_editable(string $page): array
     static $cache = [];
     if (isset($cache[$page])) return $cache[$page];
     $saved = bl_is_wordpress() ? get_option('bl_content_' . $page) : [];
-    return $cache[$page] = bl_content_resolve($page, is_array($saved) ? $saved : []);
+    return $cache[$page] = bl_business_render($page, bl_content_resolve($page, is_array($saved) ? $saved : []));
 }
 
 /** Saved values replace defaults of the same kind; only declared maps accept dynamic keys. */

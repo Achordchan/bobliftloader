@@ -97,3 +97,13 @@
 .bl-page-fields textarea { max-width: 560px; }
 .bl-checks { display: flex; flex-wrap: wrap; gap: 6px 18px; max-width: 760px; }
 .bl-check { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Phones: 产品页模块 rows drop to one column too (this rule follows the base one above so it wins). */
+@media (max-width: 782px) {
+  .bl-page-fields { padding: 4px 8px 10px; }
+  .bl-page-fields .bl-mini-field { grid-template-columns: 1fr; }
+}
+@media (max-width: 782px) {
+  /* The image strip stays within the screen (fields themselves stack via admin.css). */
+  .bl-gallery { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); max-width: 100%; }
+}

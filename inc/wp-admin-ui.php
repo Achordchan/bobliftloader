@@ -11,6 +11,7 @@ add_action('admin_enqueue_scripts', static function (string $hook): void {
     $uri = get_template_directory_uri();
     wp_enqueue_style('bl-admin', $uri . '/assets/admin/admin.css', [], (string) filemtime($dir . '/assets/admin/admin.css'));
     wp_enqueue_style('bl-admin-ui', $uri . '/assets/admin/admin-ui.css', ['bl-admin'], (string) filemtime($dir . '/assets/admin/admin-ui.css'));
+    wp_enqueue_script('bl-admin-interactions', $uri . '/assets/admin/interactions.js', [], (string) filemtime($dir . '/assets/admin/interactions.js'), true);
     if (!str_ends_with($hook, '_page_bl-downloads')) return;
     wp_enqueue_media();
     wp_enqueue_script('bl-admin-ui', $uri . '/assets/admin/admin-ui.js', ['jquery', 'media-editor'], (string) filemtime($dir . '/assets/admin/admin-ui.js'), true);
@@ -63,7 +64,7 @@ add_filter('disable_months_dropdown', static fn(bool $disable, string $postType)
 const BL_LIST_PRODUCT_CATEGORIES = ['skid-steer-loaders' => '滑移装载机', 'mini-dumpers' => '迷你翻斗车'];
 const BL_LIST_NEWS_CATEGORIES = ['product-news' => '产品新闻', 'customer-stories' => '客户故事', 'industry-news' => '行业新闻'];
 
-add_filter('manage_bl_product_posts_columns', static fn(array $columns): array => ['cb' => $columns['cb'], 'bl_thumb' => '<span class="screen-reader-text">图片</span>', 'title' => '产品名称', 'bl_model' => '型号', 'bl_category' => '分类', 'bl_load' => '额定载荷', 'menu_order' => '排序']);
+add_filter('manage_bl_product_posts_columns', static fn(array $columns): array => ['cb' => $columns['cb'], 'bl_thumb' => '<span class="screen-reader-text">图片</span>', 'title' => '产品名称', 'bl_model' => '型号', 'bl_category' => '栏目', 'bl_load' => '额定载荷', 'menu_order' => '排序']);
 add_filter('manage_edit-bl_product_sortable_columns', static fn(array $columns): array => $columns + ['menu_order' => 'menu_order']);
 
 add_action('manage_bl_product_posts_custom_column', static function (string $column, int $postId): void {
@@ -86,7 +87,7 @@ add_action('manage_bl_product_posts_custom_column', static function (string $col
 add_action('restrict_manage_posts', static function (string $postType): void {
     if ($postType !== 'bl_product') return;
     $current = sanitize_key(wp_unslash($_GET['bl_product_category'] ?? ''));
-    echo '<label class="screen-reader-text" for="bl-product-category">按分类筛选</label><select name="bl_product_category" id="bl-product-category"><option value="">全部分类</option>';
+    echo '<label class="screen-reader-text" for="bl-product-category">按栏目筛选</label><select name="bl_product_category" id="bl-product-category"><option value="">全部栏目</option>';
     foreach (BL_LIST_PRODUCT_CATEGORIES as $value => $label) echo '<option value="' . esc_attr($value) . '"' . selected($current, $value, false) . '>' . esc_html($label) . '</option>';
     echo '</select>';
 });
@@ -193,11 +194,12 @@ function bl_dashboard_widget(): void
             ['首页内容', 'admin.php?page=bl-content-home', 'edit_pages', '首屏、产品、应用和联系区的文字与图片'],
             ['采购与售后', 'admin.php?page=bl-content-support', 'edit_pages', '采购流程、质保、配件和常见问题'],
             ['应用场景', 'admin.php?page=bl-content-applications', 'edit_pages', '应用列表页和 ' . count($GLOBALS['bl_application_base'] ?? []) . ' 个应用详情页'],
-            ['全站设置', 'admin.php?page=bl-content-global', 'edit_pages', '公司与联系方式、页眉页脚、品牌图片；管理员可管理统计代码'],
+            ['全站设置', 'admin.php?page=bl-content-global', 'edit_pages', '公司与联系方式、页眉页脚、品牌图片'],
             ['滑移装载机', 'admin.php?page=bl-content-loaders', 'edit_pages', '栏目与产品公共模块、搜索信息'],
             ['迷你翻斗车', 'admin.php?page=bl-content-dumpers', 'edit_pages', '栏目与产品公共模块、搜索信息'],
             ['关于我们', 'admin.php?page=bl-content-about', 'edit_pages', '首屏、公司概况和工厂；公司介绍仍编辑原生页面正文'],
             ['联系我们', 'admin.php?page=bl-content-contact', 'edit_pages', '联系页文字、照片与预约邮件'],
+            ['询盘成功页', 'admin.php?page=bl-content-thanks', 'edit_pages', '询盘提交成功后的提示文字与链接'],
             ['隐私说明', 'admin.php?page=bl-content-privacy', 'edit_pages', '邮件草稿与站内提交两种模式正文'],
             ['新闻列表', 'admin.php?page=bl-content-news', 'edit_pages', '搜索标题、描述与分享图片'],
             ['未找到页面', 'admin.php?page=bl-content-404', 'edit_pages', '404 文案与链接'],
@@ -215,6 +217,8 @@ function bl_dashboard_widget(): void
             ['其他页面', 'edit.php?post_type=page', 'edit_pages', '原生页面的标题、网址与发布状态；关于、联系、隐私的展示内容见上方快捷入口'],
         ],
     ];
+    usort($groups['页面内容'], static fn($a, $b) => array_search(str_replace('admin.php?page=', '', $a[1]), BL_CONTENT_MENU_ORDER, true) <=> array_search(str_replace('admin.php?page=', '', $b[1]), BL_CONTENT_MENU_ORDER, true));
+    if (bl_can_manage_tracking()) $groups['页面内容'][] = ['统计代码', 'admin.php?page=bl-content-tracking', 'manage_options', '全站统计与跟踪代码'];
     echo '<div class="bl-dash">';
     foreach ($groups as $title => $links) {
         $items = '';
