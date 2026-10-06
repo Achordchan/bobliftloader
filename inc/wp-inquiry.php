@@ -12,6 +12,8 @@ declare(strict_types=1);
 const BL_ENQUIRY_EMAIL = 'info@boblift.com';
 // Raised when the theme's notification email changes, so the form the theme made earlier gets the new one once.
 const BL_ENQUIRY_MAIL_VERSION = 2;
+// Marks the notification card in the form's Mail body; only that layout is sent without CF7's automatic paragraphs.
+const BL_ENQUIRY_CARD_MARKER = '<!-- bl-inquiry-card -->';
 
 /**
  * The form CF7 renders for the theme, or 0 when CF7 or Flamingo is not active (or the form has been deleted). Flamingo is
@@ -84,10 +86,12 @@ add_action('admin_init', static function (): void {
     }
 });
 
-// The theme lays out its own form and its notification email, so CF7 must not wrap their markup in paragraphs; other
-// forms keep their setting.
+// The theme lays out its own form and its notification card, so CF7 must not wrap their markup in paragraphs. Other
+// forms, an edited mail and the autoresponder keep CF7's setting.
 add_filter('wpcf7_autop_or_not', static function (bool $autop, $options = []): bool {
-    if (!in_array($options['for'] ?? 'form', ['form', 'mail'], true)) return $autop;
+    $for = $options['for'] ?? 'form';
+    if ($for === 'mail') return bl_wp_inquiry_card_mail() ? false : $autop;
+    if ($for !== 'form') return $autop;
     $form = WPCF7_ContactForm::get_current();
     return $form && $form->id() === bl_wp_inquiry_form_id() ? false : $autop;
 }, 10, 2);
@@ -116,7 +120,7 @@ function bl_wp_inquiry_mail(): array
         $row('IP:', '[_remote_ip]'),
         $row('来源国家:', '[bl_ip_country]'),
     ]);
-    $body = <<<HTML
+    $body = BL_ENQUIRY_CARD_MARKER . "\n" . <<<HTML
 <table width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:#ffffff;"><tr><td style="padding:16px 0;">
 <table align="center" width="660" cellspacing="0" cellpadding="0" style="width:660px;border:1px solid #d8dde6;border-collapse:separate;background:#ffffff;border-radius:3px;font-family:Arial,'Microsoft YaHei',sans-serif;color:#333333;">
 <tr><td height="8" style="background:#1995f6;height:8px;font-size:0;line-height:0;border-radius:3px 3px 0 0;">&nbsp;</td></tr>
@@ -170,11 +174,12 @@ add_action('init', static function (): void {
     update_option('bl_inquiry_mail_version', BL_ENQUIRY_MAIL_VERSION);
 });
 
-/** Whether CF7 is composing mail for the theme's own form. */
-function bl_wp_inquiry_mail_current(): bool
+/** Whether CF7 is composing the theme's notification card: the form's main mail, whose body still carries the marker. */
+function bl_wp_inquiry_card_mail(): bool
 {
     $form = class_exists('WPCF7_ContactForm') ? WPCF7_ContactForm::get_current() : null;
-    return $form && $form->id() === bl_wp_inquiry_form_id();
+    if (!$form || $form->id() !== bl_wp_inquiry_form_id() || WPCF7_Mail::get_current_template_name() !== 'mail') return false;
+    return str_contains((string) (((array) $form->prop('mail'))['body'] ?? ''), BL_ENQUIRY_CARD_MARKER);
 }
 
 /** The product the sender chose: the model's photo, name and link when they wrote from a product page, else the family. */
@@ -256,5 +261,5 @@ add_filter('wpcf7_special_mail_tags', static function ($output, string $name, bo
 
 // Keep the line breaks of the sender's message in the HTML email.
 add_filter('wpcf7_mail_tag_replaced_textarea', static function ($replaced, $submitted, bool $html) {
-    return $html && is_string($replaced) && bl_wp_inquiry_mail_current() ? str_replace(["\r", "\n"], '', nl2br($replaced, false)) : $replaced;
+    return $html && is_string($replaced) && bl_wp_inquiry_card_mail() ? str_replace(["\r", "\n"], '', nl2br($replaced, false)) : $replaced;
 }, 10, 3);
