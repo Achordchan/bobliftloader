@@ -266,6 +266,24 @@ function bl_articles(): array
     return $articles;
 }
 
+/**
+ * A news picture's width over height, from its WordPress attachment or, for pictures shipped with the theme, from the
+ * file; null when it cannot be read (the list then shows the picture whole, never cropped through its lettering).
+ */
+function bl_news_image_ratio(array $article): ?float
+{
+    $size = null;
+    $id = (int) ($article['image_id'] ?? 0);
+    if (!$id && function_exists('attachment_url_to_postid') && str_contains((string) $article['image'], '/wp-content/uploads/')) $id = (int) attachment_url_to_postid($article['image']);
+    if ($id && function_exists('wp_get_attachment_metadata')) {
+        $meta = wp_get_attachment_metadata($id);
+        if (!empty($meta['width']) && !empty($meta['height'])) $size = [(int) $meta['width'], (int) $meta['height']];
+    }
+    $file = $size ? false : strstr((string) parse_url((string) $article['image'], PHP_URL_PATH), '/assets/');
+    if ($file && ($info = @getimagesize(dirname(__DIR__) . $file))) $size = $info;
+    return $size && !empty($size[0]) && !empty($size[1]) ? $size[0] / $size[1] : null;
+}
+
 /** "15–19 October 2026", or "30 October – 2 November 2026" across months. */
 function bl_event_dates(array $event): string
 {

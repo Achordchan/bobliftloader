@@ -48,6 +48,7 @@ function bl_wp_product_record(WP_Post $post): array
     else $record['excerpt'] = $post->post_excerpt ?: (wp_trim_words(wp_strip_all_tags($post->post_content), 35) ?: bl_product_excerpt($record));
     $record['content_html'] = $post->post_content ? apply_filters('the_content', $post->post_content) : '';
     $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: bl_wp_image($record['image']);
+    $record['image_id'] = $record['image'] && $record['image'] === get_the_post_thumbnail_url($post, 'large') ? (int) get_post_thumbnail_id($post) : 0;
     // The stored paths stay alongside: the gallery's written descriptions are kept by path (gallery_alt).
     $record['gallery_paths'] = array_values(array_filter((array) $record['gallery'], static fn($path) => bl_wp_image((string) $path) !== ''));
     $record['gallery'] = array_map(static fn($path) => bl_wp_image((string) $path), $record['gallery_paths']);
@@ -78,6 +79,7 @@ function bl_wp_article_record(WP_Post $post): array
     if ($author) $record['author'] = ['name' => get_the_author_meta('display_name', $author), 'title' => (string) get_user_meta($author, 'bl_title', true), 'avatar' => (string) get_avatar_url($author, ['size' => 128])];
     if (get_the_modified_date('Y-m-d', $post) > $record['date']) $record['updated'] = get_the_modified_date('Y-m-d', $post);
     $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: bl_wp_image($record['image']);
+    $record['image_id'] = $record['image'] && $record['image'] === get_the_post_thumbnail_url($post, 'large') ? (int) get_post_thumbnail_id($post) : 0;
     if (!$record['image']) $record['image'] = bl_asset('images/company/boblift-workshop-aerial-mobile.webp');
     return $record;
 }

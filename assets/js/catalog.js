@@ -13,20 +13,29 @@ export function initializeCatalog() {
     [box, ...box.children].forEach((part) => sizes.observe(part));
     edge();
   });
-  // Phones show the comparison's first eight rows (pages.css); the button under it opens the rest.
+  // Phones show the comparison's first eight rows (pages.css); the button under it opens the rest and closes them again,
+  // bringing the top of the table back into view when the rows it was reading go.
   document.querySelectorAll('.bl-compare-more').forEach((button) => {
     const section = button.closest('.bl-compare');
-    const rows = section.querySelectorAll('tbody tr:not(.bl-compare-actions)');
-    if (rows.length <= 8) return;
+    const table = section.querySelector('.bl-compare-scroll');
+    const label = button.querySelector('span');
+    if (section.querySelectorAll('tbody tr:not(.bl-compare-actions)').length <= 8) return;
     section.classList.add('bl-compare-short');
     button.hidden = false;
     button.addEventListener('click', () => {
-      section.classList.remove('bl-compare-short');
-      button.setAttribute('aria-expanded', 'true');
-      button.hidden = true;
-      const next = rows[8].querySelector('th');
-      next.tabIndex = -1;
-      next.focus({ preventScroll: true });
+      const open = section.classList.toggle('bl-compare-short') === false;
+      button.setAttribute('aria-expanded', String(open));
+      label.textContent = open ? 'Show fewer specs' : 'Show all specs';
+      if (open) return;
+      // The table's top comes back just under the header and section bar; where the eight rows and the button do not
+      // both fit above the contact bar, the button (which keeps focus) stays in sight instead.
+      const pinned = [...document.querySelectorAll('.bl-header,.bl-section-nav,.bl-product-section-nav,.bl-side-contact')].filter((bar) => ['fixed', 'sticky'].includes(getComputedStyle(bar).position)).map((bar) => bar.getBoundingClientRect());
+      const ceiling = Math.max(0, ...pinned.filter((box) => box.top < innerHeight / 2).map((box) => box.bottom)) + 12;
+      const floor = Math.min(innerHeight, ...pinned.filter((box) => box.top >= innerHeight / 2).map((box) => box.top)) - 12;
+      const top = table.getBoundingClientRect().top;
+      if (top >= ceiling) return;
+      const shift = Math.max(top - ceiling, button.getBoundingClientRect().bottom - floor);
+      window.scrollTo({ top: window.scrollY + shift, behavior: 'instant' });
     });
   });
   const form = document.querySelector('[data-catalog]');

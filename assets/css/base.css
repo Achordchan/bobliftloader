@@ -29,6 +29,7 @@
 .bl-site img{display:block;max-width:100%;height:auto}
 .bl-site ul{margin:0;padding:0;list-style:none}
 .bl-site :focus-visible{outline:3px solid #efaa49;outline-offset:5px}
+.bl-site [data-swipe-row]:focus-visible{outline-offset:2px}
 .bl-site section[id]{scroll-margin-top:clamp(67px,calc(51.6px + 2.25vw),109px)}
 .bl-site .bl-shell{padding-left:var(--gutter);padding-right:var(--gutter);max-width:var(--frame-width);margin-inline:auto}
 .bl-site .bl-icon{display:inline-block;width:clamp(20px,1vw,26px);height:clamp(20px,1vw,26px);flex-shrink:0;vertical-align:middle}

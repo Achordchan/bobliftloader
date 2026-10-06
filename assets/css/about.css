@@ -164,9 +164,9 @@
   /* A place name sits smaller than the figures; every value keeps to the foot of its cell, so the two in a row share a baseline. */
   .bl-site .bl-about-plate>div{display:flex;flex-direction:column;justify-content:space-between}
   .bl-site .bl-about-plate dd.bl-about-plate-word{font-size:clamp(24px,7vw,32px);line-height:1}
-  .bl-site .bl-tree-root-name h3{font-size:56px}
+  .bl-site .bl-tree-root-name h3{font-size:calc(var(--m-h3,28px) + 6px)}
   .bl-site .bl-tree-branch{padding:24px 22px 26px}
-  .bl-site .bl-tree-branch h3{font-size:clamp(40px,11vw,56px)}
+  .bl-site .bl-tree-branch h3{font-size:var(--m-h3,28px)}
   .bl-site .bl-tree-here>span{flex-wrap:wrap}
   .bl-site .bl-tree-here-links a{min-height:44px}
 }

@@ -194,6 +194,7 @@
   .bl-site .bl-sup-photo img{height:clamp(300px,80vw,440px)}
   .bl-site .bl-sup-plate>div{padding:18px 18px 20px}
   .bl-site .bl-sup-plate dd{font-size:clamp(30px,9vw,44px);white-space:normal}
+  .bl-site .bl-attachments{padding-bottom:var(--m-sec,56px)}
   .bl-site :is(.bl-attachments-head,.bl-sup-head,.bl-sup-faq-aside) h2{font-size:var(--m-h2,clamp(38px,11vw,46px))}
   .bl-site .bl-sup-head{gap:20px;margin-bottom:32px}
   .bl-site .bl-sup-containers{margin-top:var(--m-sec-tight,40px);padding:28px var(--gutter);margin-inline:calc(-1 * var(--gutter))}

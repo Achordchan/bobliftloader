@@ -21,7 +21,7 @@ $makingSteps = [
       <p>Photographed at our factory in Xuzhou, Jiangsu: the steps every loader goes through before it leaves.</p>
       <ol class="bl-making-steps"><?php foreach ($makingSteps as $i => $step): ?><li><a href="#making-<?= $i + 1 ?>" data-making-step<?= $i === 0 ? ' aria-current="step"' : '' ?>><span>0<?= $i + 1 ?></span><?= bl_escape($step['title']) ?></a></li><?php endforeach; ?></ol>
     </div>
-    <div class="bl-making-figures">
+    <div class="bl-making-figures" role="region" aria-labelledby="making-title" data-swipe-row>
       <?php foreach ($makingSteps as $i => $step): $base = 'images/about/' . $step['image']; ?>
       <figure class="bl-making-figure bl-reveal" id="making-<?= $i + 1 ?>">
         <img srcset="<?= bl_escape(bl_asset($base . '-900.webp')) ?> 900w, <?= bl_escape(bl_asset($base . '-1600.webp')) ?> 1600w" sizes="(max-width: 1000px) 100vw, 58vw" src="<?= bl_escape(bl_asset($base . '-1600.webp')) ?>" alt="<?= bl_escape($step['alt']) ?>" width="1600" height="1067" loading="lazy">
