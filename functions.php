@@ -7,6 +7,8 @@ require_once __DIR__ . '/inc/editable.php';
 require_once __DIR__ . '/inc/support.php';
 require_once __DIR__ . '/inc/product-page.php';
 require_once __DIR__ . '/inc/seo.php';
+require_once __DIR__ . '/inc/routes.php';
+require_once __DIR__ . '/inc/llms.php';
 require_once __DIR__ . '/inc/wordpress.php';
 require_once __DIR__ . '/inc/wp-admin.php';
 require_once __DIR__ . '/inc/wp-import.php';
@@ -30,6 +32,11 @@ add_filter('get_site_icon_url', static fn($url, $size = 512) => bl_asset((int) $
 // Search and AI crawlers are welcome: drop the per-bot blocks the platform adds to robots.txt.
 add_filter('robots_txt', 'bl_allow_ai_crawlers', 99999);
 add_action('init', 'bl_register_content_types');
+// /llms.txt for AI assistants (inc/llms.php); its opening text is a setting editable over REST.
+add_action('init', static function (): void {
+    register_setting('bl_llms', BL_LLMS_TXT_INTRO_OPTION, ['type' => 'string', 'description' => 'llms.txt 开头的介绍（Markdown），留空用主题默认文字。', 'sanitize_callback' => 'sanitize_textarea_field', 'default' => '', 'show_in_rest' => true]);
+});
+add_action('parse_request', static fn(WP $wp) => bl_serve_llms_txt('/' . $wp->request), 1);
 // New URL rules (application cases) need one flush on sites that already run the theme; bump the number when the rules change.
 add_action('init', static function (): void {
     if (get_option('bl_rewrite_version') === '2') return;

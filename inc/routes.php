@@ -84,6 +84,7 @@ function bl_sitemap_paths(): array
 function bl_serve_discovery(): void
 {
     $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+    bl_serve_llms_txt((string) $path);
     if ($path === '/robots.txt') {
         header('Content-Type: text/plain; charset=utf-8');
         echo "User-agent: *\n" . (bl_indexable() ? "Allow: /\nSitemap: " . bl_public_base() . "/sitemap.xml\n" : "Disallow: /\n");
