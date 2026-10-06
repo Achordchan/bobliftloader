@@ -134,10 +134,10 @@ function bl_content_handle_submission(string $operation): void
             // If temporary storage is unavailable, keep an escaped copy in the response instead of losing the submission.
             wp_die(esc_html($result->get_error_message()) . '<p>临时保存失败，请复制以下输入后返回：</p><textarea readonly rows="25" cols="100">' . esc_textarea(wp_json_encode($input, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . '</textarea>', '', ['response' => 409, 'back_link' => true]);
         }
-        wp_safe_redirect(admin_url('admin.php?page=bl-content-' . ($page === 'tracking' ? 'global' : $page) . '&bl_recovery=' . $id));
+        wp_safe_redirect(admin_url('admin.php?page=bl-content-' . $page . '&bl_recovery=' . $id));
         exit;
     }
-    wp_safe_redirect(admin_url('admin.php?page=bl-content-' . ($page === 'tracking' ? 'global' : $page) . ($operation === 'reset' ? '&bl_reset=1' : '&bl_saved=1')));
+    wp_safe_redirect(admin_url('admin.php?page=bl-content-' . $page . ($operation === 'reset' ? '&bl_reset=1' : '&bl_saved=1')));
     exit;
 }
 

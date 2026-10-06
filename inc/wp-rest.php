@@ -79,10 +79,10 @@ function bl_rest_field(string $type, string $key, $value)
         case 'products':
             return bl_rest_product_slugs($value);
         case 'gallery':
-            return array_values(array_filter(array_map('bl_rest_clean_url', array_slice(array_values((array) $value), 0, 12))));
+            return array_values(array_filter(array_map('bl_rest_clean_url', array_values((array) $value))));
         case 'specs':
             $specs = [];
-            foreach (array_slice(is_array($value) ? $value : [], 0, 40, true) as $label => $item) {
+            foreach ((is_array($value) ? $value : []) as $label => $item) {
                 $label = sanitize_text_field((string) $label);
                 $item = is_scalar($item) ? sanitize_text_field((string) $item) : '';
                 if ($label !== '' && $item !== '') $specs[$label] = $item;
@@ -90,7 +90,7 @@ function bl_rest_field(string $type, string $key, $value)
             return $specs;
         case 'videos':
             $videos = [];
-            foreach (array_slice(array_values((array) $value), 0, 8) as $video) {
+            foreach (array_values((array) $value) as $video) {
                 $src = is_array($video) ? bl_rest_clean_url($video['src'] ?? '') : '';
                 if ($src) $videos[] = ['src' => $src, 'poster' => bl_rest_clean_url($video['poster'] ?? ''), 'caption' => is_scalar($video['caption'] ?? null) ? sanitize_text_field((string) $video['caption']) : ''];
             }
@@ -98,7 +98,7 @@ function bl_rest_field(string $type, string $key, $value)
         case 'gallery_alt':
             // Alternative text per gallery photograph, keyed by the photograph's stored address.
             $alts = [];
-            foreach (array_slice(is_array($value) ? $value : [], 0, 24, true) as $path => $alt) {
+            foreach ((is_array($value) ? $value : []) as $path => $alt) {
                 $path = bl_rest_clean_url($path);
                 $alt = is_scalar($alt) ? mb_substr(sanitize_text_field((string) $alt), 0, 160) : '';
                 if ($path !== '' && $alt !== '') $alts[$path] = $alt;
@@ -108,14 +108,14 @@ function bl_rest_field(string $type, string $key, $value)
             return mb_substr($text, 0, 200);
         case 'highlights':
             $items = [];
-            foreach (array_slice(array_values((array) $value), 0, 3) as $item) {
+            foreach (array_values((array) $value) as $item) {
                 $title = is_array($item) && is_scalar($item['title'] ?? null) ? mb_substr(sanitize_text_field((string) $item['title']), 0, 80) : '';
                 if ($title !== '') $items[] = ['title' => $title, 'text' => is_scalar($item['text'] ?? null) ? mb_substr(sanitize_text_field((string) $item['text']), 0, 240) : ''];
             }
             return $items;
         case 'faq':
             $items = [];
-            foreach (array_slice(array_values((array) $value), 0, 6) as $item) {
+            foreach (array_values((array) $value) as $item) {
                 if (!is_array($item)) continue;
                 $field = static fn(string $name): string => is_scalar($item[$name] ?? null) ? sanitize_text_field((string) $item[$name]) : '';
                 // A link goes to a page on this site (/support/…, #section) or a full address.
@@ -126,10 +126,10 @@ function bl_rest_field(string $type, string $key, $value)
             }
             return $items;
         case 'attachments':
-            return array_slice(array_values(array_unique(array_filter(array_map(static fn($name): string => is_scalar($name) ? sanitize_text_field((string) $name) : '', (array) $value)))), 0, 12);
+            return array_values(array_unique(array_filter(array_map(static fn($name): string => is_scalar($name) ? sanitize_text_field((string) $name) : '', (array) $value))));
         case 'photos':
             $photos = [];
-            foreach (array_slice(array_values((array) $value), 0, 24) as $photo) {
+            foreach (array_values((array) $value) as $photo) {
                 $src = is_array($photo) ? bl_rest_clean_url($photo['src'] ?? '') : '';
                 $group = is_array($photo) && is_scalar($photo['group'] ?? null) ? (string) $photo['group'] : '';
                 if ($src === '' || !isset(BL_PHOTO_GROUPS[$group])) continue;
@@ -147,7 +147,7 @@ function bl_rest_field(string $type, string $key, $value)
             foreach (['start', 'end'] as $field) $event[$field] = isset($input[$field]) && is_string($input[$field]) && bl_is_date($input[$field]) ? $input[$field] : '';
             if ($event['end'] && $event['end'] < $event['start']) $event['end'] = '';
             $event['source'] = esc_url_raw(is_scalar($input['source'] ?? null) ? (string) $input['source'] : '', ['http', 'https']);
-            return $event['start'] ? $event : [];
+            return $event;
     }
     return null;
 }

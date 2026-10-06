@@ -15,9 +15,10 @@
     frame.off('select').on('select', function () {
       var file = frame.state().get('selection').first().toJSON();
       input.val(file.url);
+      input[0].dispatchEvent(new Event('change', { bubbles: true }));
       show(file.filename, file.filesizeHumanReadable);
     });
     frame.open();
   });
-  clear.on('click', function () { input.val(''); show('', ''); });
+  clear.on('click', function () { input.val(''); input[0].dispatchEvent(new Event('change', { bubbles: true })); show('', ''); });
 })(jQuery);

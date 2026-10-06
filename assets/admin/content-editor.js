@@ -86,6 +86,7 @@
     if (button.classList.contains('bl-ce-add')) {
       var field = button.closest('.bl-ce-field');
       var list = field.querySelector('.bl-ce-rows');
+      if (+list.dataset.blLimit && list.children.length >= +list.dataset.blLimit) return;
       var holder = document.createElement('div');
       // New rows get a key no existing row uses; the server keeps rows in the order they appear on the page.
       holder.innerHTML = field.querySelector('.bl-ce-row-template').innerHTML.split('__i__').join('n' + Date.now() + '_' + (added++));

@@ -58,7 +58,7 @@ return [
                 ['key' => 'company.email', 'label' => '销售邮箱', 'type' => 'email', 'help' => '必填。网站上显示的联系邮箱。改成新地址并保存后，询盘通知也改发到这里；没改过时，询盘通知沿用询盘表单里原有的收件人（本页顶部显示当前发往哪里）。'],
                 ['key' => 'company.business_email', 'label' => '商务合作邮箱', 'type' => 'email', 'help' => ''],
                 ['key' => 'company.phone', 'label' => '电话（含国家码）', 'type' => 'text', 'help' => ''],
-                ['key' => 'company.sales_whatsapp', 'label' => '销售 WhatsApp 号码', 'type' => 'digits', 'help' => '必填。带国家区号，只写数字，例如 8615852499415；全站 WhatsApp 按钮都用它。'],
+                ['key' => 'company.sales_whatsapp', 'label' => '销售 WhatsApp 号码', 'type' => 'digits', 'help' => '必填。带国家区号，只写数字，例如 8615852499415；全站销售 WhatsApp 按钮使用此号码；售后号码在“采购与售后”单独设置。'],
                 ['key' => 'company.name', 'label' => '公司名称', 'type' => 'text', 'help' => ''],
                 ['key' => 'company.domain', 'label' => '本站域名', 'type' => 'text', 'help' => ''],
                 ['key' => 'company.website', 'label' => '公司官网', 'type' => 'url', 'help' => ''],

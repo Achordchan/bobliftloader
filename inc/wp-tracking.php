@@ -20,7 +20,7 @@ function bl_tracking_screen(): void
         $revision = $recovery['revision'];
         echo '<p role="alert"><span class="bl-chip">未保存</span> ' . esc_html($recovery['message']) . '</p>';
     }
-    echo '<details class="bl-panel" id="bl-tracking"' . ($recovery ? ' open' : '') . '><summary class="bl-panel-head">统计与跟踪代码</summary><div class="bl-panel-body"><p>仅同时拥有网站设置权限和未过滤 HTML 权限的用户可见、可保存。代码按原文输出，请粘贴完整代码。</p><p>GTM 的 script 放入 head，noscript 放入 body 开头；GA4 只需 head 那段。本区使用下方按钮独立保存。</p>';
+    echo '<details class="bl-panel" id="bl-tracking"' . ' open' . '><summary class="bl-panel-head">统计与跟踪代码</summary><div class="bl-panel-body"><p>仅同时拥有网站设置权限和未过滤 HTML 权限的用户可见、可保存。代码按原文输出，请粘贴完整代码。</p><p>GTM 的 script 放入 head，noscript 放入 body 开头；GA4 只需 head 那段。本区使用下方按钮独立保存。</p>';
     // The privacy page promises no tracking; once a code is in, point the editor at the sentence to change.
     $privacy = (string) (bl_editable('privacy')['body']['ending'] ?? '');
     if (trim(implode('', array_map('strval', $values))) !== '' && stripos($privacy, 'does not use advertising or analytics tracking') !== false) {

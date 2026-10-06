@@ -102,7 +102,9 @@ foreach (['global', 'about', 'contact', 'privacy', 'news', '404'] as $page) {
     $screen = $capture(static fn() => bl_content_screen($page));
     $check(str_contains($screen, 'bl_content_complete'), "$page form lacks completeness marker");
     if ($page === 'global') {
-        $check(str_contains($screen, '统计与跟踪代码') && str_contains($screen, 'name="bl_content[body_open]"'), 'global screen missing tracking sub-form');
+        $check(!str_contains($screen, 'name="bl_content[body_open]"'), 'global screen still embeds tracking form');
+        $screen = $capture('bl_tracking_screen');
+        $check(str_contains($screen, 'name="bl_content[body_open]"'), 'independent tracking screen missing form');
         $check(!str_contains($screen, $snippets['head']) && str_contains($screen, esc_textarea($snippets['head'])), 'raw scripts executed instead of escaped in editor');
     }
 }

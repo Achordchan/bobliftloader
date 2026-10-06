@@ -19,6 +19,7 @@ function bl_content_migrate(string $page, array $saved): array
             }
         }
     }
+    $saved = bl_business_migrate($page, $saved);
     $saved['_bl_schema_version'] = 1;
     return $saved;
 }
