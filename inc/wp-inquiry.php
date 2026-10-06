@@ -208,13 +208,13 @@ function bl_wp_inquiry_product_card(string $family, string $model): string
     $product = null;
     if ($model !== '') foreach (bl_products() as $record) if (strcasecmp((string) $record['model'], $model) === 0) { $product = $record; break; }
     $pill = static fn(string $label, string $text): string => '<span style="display:inline-block;margin:0 6px 6px 0;padding:4px 10px;border-radius:6px;background:#f1f4f9;font-size:13px;color:#334155;white-space:nowrap;"><span style="color:#64748b;">' . $label . '</span> ' . esc_html($text) . '</span>';
-    $pills = ($model !== '' ? $pill('型号', $model) : '') . $pill('类型', $family !== '' ? $family : '—') . $pill('品牌', 'BOB-LIFT');
+    $pills = ($model !== '' ? $pill('型号', $model) : '') . $pill('类型', $family !== '' ? $family : '—');
     $box = static fn(string $inner): string => '<table width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #e3e8ef;border-radius:8px;border-collapse:separate;"><tr>' . $inner . '</tr></table>';
     if (!$product) return $box('<td style="padding:16px 18px 10px;">' . $pills . '</td>');
     $url = esc_url($product['url']);
     $image = bl_wp_inquiry_thumbnail($product);
     $photo = $image ? '<td width="104" style="width:104px;padding:16px 0 16px 16px;vertical-align:top;"><a href="' . $url . '" target="_blank"><img src="' . esc_url($image) . '" width="104" height="104" alt="' . esc_attr($product['name']) . '" style="display:block;width:104px;height:104px;border-radius:6px;border:1px solid #edf0f4;object-fit:cover;"></a></td>' : '';
-    return $box($photo . '<td style="padding:16px 18px 10px;vertical-align:top;"><a href="' . $url . '" target="_blank" style="display:block;padding-bottom:10px;font-size:17px;line-height:1.45;font-weight:bold;color:#0b1f33;text-decoration:none;">' . esc_html($product['name']) . '</a>' . $pills . '<div style="padding-top:4px;font-size:13px;"><a href="' . $url . '" target="_blank" style="color:#215bdb;text-decoration:none;">查看产品页 →</a></div></td>');
+    return $box($photo . '<td style="padding:16px 18px 10px;vertical-align:top;"><a href="' . $url . '" target="_blank" style="display:block;padding-bottom:10px;font-size:17px;line-height:1.45;font-weight:bold;color:#0b1f33;text-decoration:none;">' . esc_html($product['name']) . '</a>' . $pills . '</td>');
 }
 
 /**
