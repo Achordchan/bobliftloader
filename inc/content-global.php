@@ -23,7 +23,6 @@ return [
         'footer' => [
             'tagline1' => 'One BOB-LIFT.',
             'tagline2' => 'A world of possibilities.',
-            'top_url' => '#top',
             'equipment_title' => 'EQUIPMENT',
             'loaders_label' => 'Skid steer loaders',
             'dumpers_label' => 'Mini dumpers',
@@ -50,7 +49,7 @@ return [
             'copyright' => ' BOB-LIFT. All rights reserved.',
         ],
         'cta' => ['eyebrow' => 'YOUR NEXT MOVE', 'title' => 'LET’S FIND YOUR FIT.', 'url' => '/contact/', 'button' => 'Talk to our team '],
-        'side' => ['whatsapp' => 'WhatsApp', 'email' => 'Email', 'enquiry' => 'Enquiry', 'top' => 'Top', 'top_url' => '#top', 'enquiry_url' => '/contact/#enquiry'],
+        'side' => ['whatsapp' => 'WhatsApp', 'email' => 'Email', 'enquiry' => 'Enquiry', 'top' => 'Top', 'enquiry_url' => '/contact/#enquiry'],
     ],
     'sections' => [
         [
@@ -85,7 +84,6 @@ return [
             'fields' => [
                 ['key' => 'footer.tagline1', 'label' => '口号第一行', 'type' => 'text'],
                 ['key' => 'footer.tagline2', 'label' => '口号第二行', 'type' => 'text'],
-                ['key' => 'footer.top_url', 'label' => '回顶部地址', 'type' => 'url'],
                 ['key' => 'footer.equipment_title', 'label' => '产品分组标题', 'type' => 'text'],
                 ['key' => 'footer.loaders_label', 'label' => '装载机链接文字', 'type' => 'text'],
                 ['key' => 'footer.dumpers_label', 'label' => '翻斗车链接文字', 'type' => 'text'],
@@ -128,7 +126,6 @@ return [
                 ['key' => 'side.email', 'label' => '邮箱名称', 'type' => 'text'],
                 ['key' => 'side.enquiry', 'label' => '询盘名称', 'type' => 'text'],
                 ['key' => 'side.top', 'label' => '回顶部名称', 'type' => 'text'],
-                ['key' => 'side.top_url', 'label' => '回顶部地址', 'type' => 'url'],
                 ['key' => 'side.enquiry_url', 'label' => '询盘链接', 'type' => 'url'],
             ],
         ],
