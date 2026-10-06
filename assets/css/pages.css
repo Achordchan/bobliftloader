@@ -41,6 +41,20 @@
   .bl-site .bl-family-switch>a{grid-template-columns:88px minmax(0,1fr) auto;gap:14px;padding:10px 14px 10px 10px}
   .bl-site .bl-family-switch b{font-size:24px}
 }
+/* Phones: the range page opens on a shorter heading and slimmer family rows, so the first models show in the first screen. */
+@media(max-width:600px){
+  .bl-site .bl-catalog-hero.bl-page-hero{padding-bottom:24px}
+  .bl-site .bl-catalog-hero .bl-page-heading{gap:14px;padding-top:8px}
+  .bl-site .bl-catalog-hero .bl-page-heading .bl-eyebrow{margin-bottom:14px}
+  .bl-site .bl-catalog-hero .bl-page-heading h1{font-size:clamp(40px,11vw,52px);letter-spacing:-.4px}
+  .bl-site .bl-catalog-hero .bl-page-heading>p{line-height:1.7;padding-bottom:0}
+  .bl-site .bl-family-switch{gap:8px}
+  .bl-site .bl-family-switch>a{grid-template-columns:56px minmax(0,1fr);gap:12px;padding:8px 12px 8px 8px}
+  .bl-site .bl-family-switch small{letter-spacing:1px}
+  .bl-site .bl-family-switch b{margin:2px 0 3px;font-size:21px}
+  .bl-site .bl-family-switch a>span>span{font-size:13px;line-height:1.45}
+  .bl-site .bl-family-switch .bl-icon{position:absolute;top:12px;right:12px;width:18px;height:18px}
+}
 .bl-site .bl-card-note{font-size:var(--fs-label);color:var(--muted);border-top:1px solid var(--line);padding-top:15px}
 .bl-site .bl-empty{padding:85px 0;text-align:center}
 .bl-site .bl-empty h2{font:600 var(--fs-h3)/1 var(--display)}
@@ -114,6 +128,10 @@
 .bl-site .bl-contact-prepare li>span{font:700 var(--fs-label)/1.9 var(--sans);letter-spacing:1px;color:var(--blue)}
 .bl-site .bl-contact-prepare h2{font:600 var(--fs-h5)/1.1 var(--display);margin-bottom:6px}
 .bl-site .bl-contact-prepare p:not(.bl-eyebrow){font-size:var(--fs-small);line-height:1.75;color:var(--muted)}
+@media(max-width:800px){
+  .bl-site .bl-contact-prepare li{grid-template-columns:28px minmax(0,1fr)}
+  .bl-site .bl-contact-prepare li>span{font-variant-numeric:tabular-nums}
+}
 .bl-site .bl-contact-form-panel{grid-area:form;background:var(--white);border:1px solid #b5c2ca;padding:clamp(28px,2.6vw,64px)}
 .bl-site .bl-contact-form-panel>h2{font:600 var(--fs-h3)/.97 var(--display);margin:18px 0 clamp(24px,2vw,44px)}
 .bl-site .bl-selected-model{font-size:var(--fs-small);margin-bottom:18px}
@@ -213,9 +231,17 @@
 @keyframes bl-card-enter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 /* Phones: each filter group is one swipeable row, so the filters stay short above the results. */
 @media(max-width:600px){
-  .bl-site .bl-chips{flex-wrap:nowrap;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding-inline:var(--gutter);scrollbar-width:none}
+  .bl-site .bl-chips{flex-wrap:nowrap;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:4px var(--gutter) 6px;scrollbar-width:none}
   .bl-site .bl-chips::-webkit-scrollbar{display:none}
-  .bl-site .bl-chip span{min-height:38px}
+  .bl-site .bl-chip span{min-height:44px}
+  /* All the groups share one swipeable strip, each named above its chips, so the models start higher on the page. */
+  .bl-site .bl-catalog .bl-catalog-tools{gap:0;padding-block:16px 10px}
+  .bl-site .bl-catalog .bl-catalog-status{padding-top:10px}
+  .bl-site .bl-catalog-tools .bl-catalog-filters{flex-direction:row;flex-wrap:nowrap;gap:28px;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:4px var(--gutter) 6px;scrollbar-width:none}
+  .bl-site .bl-catalog-filters::-webkit-scrollbar{display:none}
+  .bl-site .bl-filter{flex:none;max-width:none}
+  .bl-site .bl-filter legend{margin-bottom:8px}
+  .bl-site .bl-filter .bl-chips{overflow:visible;margin-inline:0;padding-inline:0}
 }
 .bl-site .bl-product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(36px,2.6vw,64px) clamp(20px,1.4vw,36px)}
 .bl-site .bl-catalog .bl-product-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -234,6 +260,13 @@
 .bl-site .bl-product-card-content dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0;padding-top:clamp(12px,.9vw,20px);border-top:1px solid var(--line)}
 .bl-site .bl-product-card-content dt{font-size:var(--fs-micro);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .bl-site .bl-product-card-content dd{font-size:var(--fs-small);margin:6px 0 0;font-weight:600;overflow-wrap:anywhere}
+@media(max-width:600px){
+  .bl-site .bl-product-card-image{aspect-ratio:16/11}
+  .bl-site .bl-product-card-image>img{padding:8px}
+  .bl-site .bl-product-card-content{padding-top:14px}
+  .bl-site .bl-product-card-line{margin-top:4px;padding-bottom:12px}
+  .bl-site .bl-product-card-content dl{padding-top:12px}
+}
 
 /* ---------- Comparison table ---------- */
 .bl-site .bl-compare{padding-top:var(--sp-section);padding-bottom:var(--sp-block);border-top:1px solid var(--line)}
@@ -253,6 +286,21 @@
 .bl-site .bl-compare-table tbody tr:nth-child(odd) td{background:#f8f9f5}
 .bl-site .bl-compare-actions td{border-bottom:0}
 .bl-site .bl-compare-actions .bl-text-link{font-size:var(--fs-label);gap:10px}
+/* Phones: a narrow label column and narrower model columns, so two models sit beside the labels; the right edge fades
+   while more models wait off screen (catalog.js marks the end). */
+@media(max-width:600px){
+  .bl-site .bl-compare-scroll{scrollbar-width:none}
+  .bl-site .bl-compare-scroll::-webkit-scrollbar{display:none}
+  .bl-site .bl-compare-scroll:not(.bl-compare-end){-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 56px),#0000);mask-image:linear-gradient(90deg,#000 calc(100% - 56px),#0000)}
+  .bl-site .bl-compare-table{width:auto;min-width:100%;font-size:13.5px}
+  .bl-site .bl-compare-table th,.bl-site .bl-compare-table td{min-width:96px;width:96px;padding:12px}
+  .bl-site .bl-compare-table thead span{font-size:18px;white-space:nowrap}
+  .bl-site .bl-compare-table thead th:not(:first-child){vertical-align:top}
+  .bl-site .bl-compare-table td{white-space:normal;line-height:1.4}
+  .bl-site .bl-compare-table thead th:first-child,.bl-site .bl-compare-table tbody th{min-width:100px;width:100px;max-width:100px;padding-inline:12px 8px;font-size:13px;line-height:1.4;box-shadow:inset -1px 0 var(--line)}
+  .bl-site .bl-compare-table thead img,.bl-site .bl-compare-noimage{max-width:84px}
+  .bl-site .bl-compare-table thead small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;line-height:1.35}
+}
 .bl-site .bl-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* ---------- Product detail: 60/40 hero, vertical thumbs, direct contact ---------- */
@@ -492,15 +540,11 @@
 .bl-site:has(.bl-section-nav-live) section[id]{scroll-margin-top:calc(var(--header-height) + var(--section-nav-height))}
 .bl-site:has(.bl-section-nav-live) .bl-making-aside{top:calc(var(--header-height) + var(--section-nav-height) + clamp(20px,1.6vw,40px))}
 @media(max-width:800px){
-  .bl-site .bl-section-nav-live{top:73px}
-  .bl-site:has(.bl-section-nav-live) section[id]{scroll-margin-top:calc(73px + var(--section-nav-height))}
   .bl-site .bl-section-nav-title{display:none}
   .bl-site .bl-catalog-group-head{flex-direction:column;align-items:flex-start;gap:10px}
 }
 @media(max-width:600px){
   .bl-site{--section-nav-height:48px}
-  .bl-site .bl-section-nav-live{top:68px}
-  .bl-site:has(.bl-section-nav-live) section[id]{scroll-margin-top:calc(68px + var(--section-nav-height))}
   .bl-site .bl-section-nav-cta,.bl-site .bl-section-nav [data-section-link] span{display:none}
   .bl-site .bl-section-nav ol{gap:22px;margin-inline:calc(-1 * var(--gutter));padding-inline:var(--gutter)}
   .bl-site .bl-section-nav [data-section-link]{font-size:13px}
@@ -563,8 +607,14 @@
 .bl-site .bl-quick-form form.bl-inquiry-form input.wpcf7-submit{width:100%;min-height:52px}
 .bl-site .bl-quick-fallback{display:grid;gap:16px;justify-items:start}
 @media(max-width:800px){
-  .bl-site .bl-quick{right:0;left:0;bottom:var(--bl-bar-height,62px);z-index:16;transition:none}
+  .bl-site .bl-quick{--bl-bar-foot:calc(var(--bl-bar-height,58px) + env(safe-area-inset-bottom,0px));right:0;left:0;bottom:var(--bl-bar-foot);z-index:16;transition:none}
   .bl-site .bl-quick-toggle{display:none}
-  .bl-site .bl-quick-panel{position:static;width:100%;max-height:calc(100svh - var(--bl-bar-height,62px) - 56px);border-inline:0;border-bottom:0;box-shadow:0 -16px 40px #081c2b40}
+  .bl-site .bl-quick-panel{position:relative;right:auto;bottom:auto;width:100%;max-height:calc(100svh - var(--bl-bar-foot) - 56px);border-inline:0;border-bottom:0;box-shadow:0 -16px 40px #081c2b40}
+  /* The page dims behind the sheet (a tap there closes it, quick.js); the bottom bar stays clear. */
+  .bl-site .bl-quick-open::before{content:'';position:fixed;inset:0 0 var(--bl-bar-foot);background:#03111c8f;animation:bl-quick-dim .2s}
+  .bl-site .bl-quick-head{padding:20px var(--gutter) 18px}
+  .bl-site .bl-quick-close{width:44px;height:44px;margin:-4px 0 0}
+  .bl-site .bl-quick-form,.bl-site .bl-quick-fallback{padding:18px var(--gutter) 22px}
 }
+@keyframes bl-quick-dim{from{opacity:0}}
 @media print{.bl-site .bl-quick{display:none}}

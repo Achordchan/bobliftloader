@@ -52,6 +52,7 @@
 /* Application detail: single-line title, full-bleed scene with the family's published ranges on a plate. */
 .bl-site .bl-app-hero h1{font-size:clamp(60px,6vw,168px)}
 .bl-site .bl-app-hero h1>span{display:inline}
+.bl-site .bl-app-hero-actions>.bl-button{display:none}
 .bl-site .bl-app-subtitle{margin-top:clamp(14px,1vw,24px);font:600 var(--fs-h4)/1.1 var(--display);color:var(--muted)}
 .bl-site .bl-app-stage{position:relative}
 .bl-site .bl-app-photo{position:relative;margin:0;overflow:hidden;background:var(--ink)}
@@ -131,6 +132,32 @@
   .bl-site .bl-app-photo img{height:clamp(300px,80vw,440px)}
   .bl-site .bl-app-plate>div{padding:18px 18px 20px}
   .bl-site .bl-app-plate dd{font-size:clamp(30px,9vw,44px);white-space:normal}
+  /* Hero: tighter rhythm so the enquiry button and the start of the photograph share the first screen. */
+  .bl-site .bl-apps-hero-grid{gap:24px;padding-top:28px;padding-bottom:36px}
+  .bl-site .bl-apps-hero h1{margin-top:16px}
+  .bl-site .bl-apps-hero-side{padding-bottom:0}
+  .bl-site .bl-apps-hero-side p{line-height:1.7}
+  .bl-site .bl-app-subtitle{margin-top:10px}
+  .bl-site .bl-app-eyebrow-family{display:block;padding-left:20px;color:var(--muted)}
+  .bl-site .bl-app-eyebrow-family>span{display:none}
+  .bl-site .bl-app-hero-actions{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:22px}
+  .bl-site .bl-app-hero-actions>.bl-button{display:inline-flex;align-self:stretch}
+  .bl-site .bl-app-hero-actions .bl-text-link{min-height:44px;margin-top:0;padding-top:12px}
+  /* The photograph's credit reads under the picture, on the dark band that runs into the plate. */
+  .bl-site .bl-app-photo figcaption{position:relative;right:auto;top:auto;padding:12px var(--gutter);background:var(--ink);color:var(--night-muted);font-weight:500;letter-spacing:.3px;backdrop-filter:none}
+  .bl-site .bl-app-plate>div:nth-child(-n+2){border-top:1px solid var(--night-line)}
+  .bl-site .bl-app-plate>div:nth-child(odd){padding-left:var(--gutter)}
+  .bl-site .bl-app-plate>div:nth-child(even){padding-right:var(--gutter)}
+  .bl-site .bl-app-plate dd.bl-app-plate-word{font-size:clamp(24px,7vw,32px);line-height:1}
+  /* Index panels: a smaller number on a shaded top edge; the family line in white so it holds on any colour of machine. */
+  .bl-site .bl-apps-triptych a::after{background:linear-gradient(180deg,#081c2b99 0%,#081c2b00 22%,#081c2b00 30%,#081c2bb3 50%,#081c2bf2 100%)}
+  .bl-site .bl-apps-panel-index{top:18px;font-size:36px;-webkit-text-stroke-width:1px}
+  .bl-site .bl-apps-panel-family{color:#fff;text-shadow:0 1px 8px #081c2b99}
+  /* Machines for this job: a sideways strip of compact cards instead of three full-width ones. */
+  .bl-site .bl-app-machines .bl-product-grid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:76%;gap:14px;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 4px;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gutter);scrollbar-width:none}
+  .bl-site .bl-app-machines .bl-product-grid::-webkit-scrollbar{display:none}
+  .bl-site .bl-app-machines .bl-product-card{scroll-snap-align:start}
+  .bl-site .bl-app-machines .bl-product-card-content :is(h2,h3){font-size:26px}
 }
 
 /* Application case page: the "similar job" box in the story side column. */

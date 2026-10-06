@@ -201,6 +201,43 @@
   .bl-site .bl-gallery-zoom span{display:none}
   .bl-site .bl-product-enquiry-form{padding:20px 16px}
   .bl-site .bl-lightbox-step,.bl-site .bl-lightbox-step:hover{top:auto;bottom:16px;transform:none}
+  /* Hero: photograph, name, the three figures and the quote button share the first screen. */
+  .bl-site .bl-product-hero{gap:14px;padding-top:4px}
+  .bl-site .bl-product-gallery{gap:8px}
+  .bl-site .bl-product-main-image{aspect-ratio:4/3}
+  .bl-site .bl-product-main-image>img{padding:12px}
+  .bl-site .bl-gallery-zoom{justify-content:center;min-width:44px;min-height:44px;padding:0 12px}
+  .bl-site .bl-gallery-thumbs{gap:8px;padding-bottom:0;scroll-padding-inline:var(--gutter)}
+  .bl-site .bl-gallery-thumbs button{flex:0 0 56px;width:56px;padding:4px}
+  .bl-site .bl-product-intro h1{font-size:clamp(46px,13.4vw,56px);margin:10px 0 16px}
+  .bl-site .bl-product-intro h1>span{margin-top:8px;font-size:20px;line-height:1.2}
+  /* The name's key (chips and link) follows the quote button here, so the button stays in the first screen. */
+  .bl-site .bl-product-intro{display:flex;flex-direction:column}
+  .bl-site .bl-product-intro>.bl-model-decode{order:1}
+  .bl-site .bl-product-intro>:is(.bl-product-direct,.bl-product-terms,.bl-source-note){order:2}
+  .bl-site .bl-model-decode{gap:6px 8px;margin:24px 0 0}
+  .bl-site .bl-model-decode span{padding:3px 10px 3px 3px}
+  .bl-site .bl-model-decode b{height:22px}
+  .bl-site .bl-model-decode a,.bl-site .bl-product-compare thead a{position:relative}
+  .bl-site .bl-model-decode a::after,.bl-site .bl-product-compare thead a::after{content:'';position:absolute;inset:-13px -6px}
+  /* The three figures: labels may run to two lines, the figures still share one line along the foot. */
+  .bl-site .bl-product-key-specs{gap:12px;padding:12px 0;margin:0}
+  .bl-site .bl-product-key-specs>div{display:flex;flex-direction:column;justify-content:space-between;min-width:0}
+  .bl-site .bl-product-key-specs dt{line-height:1.35;letter-spacing:.04em}
+  .bl-site .bl-product-key-specs dd{margin-top:8px}
+  .bl-site .bl-product-actions{margin-top:14px}
+  .bl-site .bl-product-section-nav ol a{display:flex;align-items:center;min-height:44px;padding:0 10px;margin-inline:-10px}
+  /* Factory checks: one number column, so every heading starts on the same line. */
+  .bl-site .bl-product-checks li{grid-template-columns:2em minmax(0,1fr);column-gap:12px;padding-bottom:20px}
+  .bl-site .bl-product-checks span{font-variant-numeric:tabular-nums}
+  /* The model and its neighbours fit the width, the current one in the middle and marked, so nothing hides off screen. */
+  .bl-site .bl-product-compare{overflow:visible}
+  .bl-site .bl-product-compare table{min-width:0;font-size:13.5px}
+  .bl-site .bl-product-compare th,.bl-site .bl-product-compare td{padding:11px 8px;vertical-align:top}
+  .bl-site .bl-product-compare tbody th{width:27%;padding-left:0;font-size:13px}
+  .bl-site .bl-product-compare thead th{vertical-align:bottom;font-size:clamp(15px,4.2vw,18px);line-height:1.05;white-space:nowrap}
+  .bl-site .bl-product-compare thead th small{margin-top:5px;font-size:11px;letter-spacing:.04em;white-space:normal}
+  .bl-site .bl-product-compare thead th[aria-current]{box-shadow:inset 0 3px var(--blue)}
 }
 @media(prefers-reduced-motion:reduce){
   .bl-site .bl-product-photo-grid img,.bl-site .bl-product-apps .bl-icon{transition:none}

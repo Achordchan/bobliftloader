@@ -19,6 +19,8 @@ export function initializeQuick() {
   };
   toggle.addEventListener('click', () => setOpen(panel.hidden));
   quick.querySelector('.bl-quick-close').addEventListener('click', () => setOpen(false));
+  // On phones the page behind the sheet is dimmed (the panel's ::before); a tap there closes it.
+  quick.addEventListener('click', (event) => { if (event.target === quick) setOpen(false); });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !panel.hidden) setOpen(false);
   });

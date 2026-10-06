@@ -195,7 +195,22 @@
   .bl-site .bl-sup-plate dd{font-size:clamp(30px,9vw,44px);white-space:normal}
   .bl-site .bl-attachments-head h2{font-size:clamp(52px,15vw,72px)}
   .bl-site .bl-sup-head h2,.bl-site .bl-sup-faq-aside h2{font-size:clamp(40px,11vw,56px)}
-  .bl-site .bl-sup-containers{padding:24px 18px;margin-inline:calc(-1 * var(--gutter))}
+  .bl-site .bl-sup-containers{padding:28px var(--gutter);margin-inline:calc(-1 * var(--gutter))}
+  .bl-site .bl-sup-table td,.bl-site .bl-sup-table thead th+th{width:3.4em}
+  .bl-site .bl-sup-table tbody th{padding-right:12px}
+  .bl-site .bl-sup-table tbody th small{white-space:nowrap}
+  .bl-site .bl-sup-table tbody th a{position:relative}
+  .bl-site .bl-sup-table tbody th a::before{content:'';position:absolute;inset:-13px -8px}
+  .bl-site .bl-sup-steps li{grid-template-columns:48px minmax(0,1fr);column-gap:12px}
+  .bl-site .bl-sup-step-index{font-variant-numeric:tabular-nums}
+  .bl-site .bl-sup-hero-grid{gap:24px;padding-top:28px;padding-bottom:36px}
+  .bl-site .bl-sup-hero h1{margin-top:16px}
+  .bl-site .bl-sup-hero-side{padding-bottom:0}
+  /* The photograph's caption reads under the picture, on the dark band that runs into the plate. */
+  .bl-site .bl-sup-photo figcaption{position:relative;right:auto;top:auto;padding:12px var(--gutter);background:var(--ink);color:var(--night-muted);font-weight:500;letter-spacing:.3px;backdrop-filter:none}
+  .bl-site .bl-sup-plate>div:nth-child(-n+2){border-top:1px solid var(--night-line)}
+  .bl-site .bl-sup-plate>div:nth-child(odd){padding-left:var(--gutter)}
+  .bl-site .bl-sup-plate>div:nth-child(even){padding-right:var(--gutter)}
   .bl-site .bl-sup-after-grid{grid-template-columns:1fr}
   .bl-site .bl-sup-after-grid>*+*{padding-left:0;border-left:0;border-top:1px solid var(--night-line);margin-top:28px}
   .bl-site .bl-sup-parts{grid-template-columns:1fr}

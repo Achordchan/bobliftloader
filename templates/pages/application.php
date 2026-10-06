@@ -35,13 +35,13 @@ $machines = $named ?: array_slice($family, 0, 3);
     <?php bl_breadcrumbs([['label' => 'Applications', 'url' => bl_url('/applications/')], ['label' => $application['title']]]); ?>
     <div class="bl-apps-hero-grid">
       <div>
-        <p class="bl-eyebrow"><span class="bl-status-dot"></span> APPLICATION 0<?= $position + 1 ?> / 0<?= count($applications) ?> · <?= bl_escape(strtoupper($familyLabel)) ?></p>
+        <p class="bl-eyebrow bl-app-eyebrow"><span class="bl-status-dot"></span> APPLICATION 0<?= $position + 1 ?> / 0<?= count($applications) ?><span class="bl-app-eyebrow-family"><span aria-hidden="true"> · </span><?= bl_escape(strtoupper($familyLabel)) ?></span></p>
         <h1 id="application-title"><?= bl_escape(strtoupper($application['title'])) ?><span class="bl-blue-text">.</span></h1>
         <p class="bl-app-subtitle"><?= bl_escape($application['subtitle']) ?></p>
       </div>
       <div class="bl-apps-hero-side">
         <p><?= bl_escape($application['description']) ?></p>
-        <a class="bl-text-link" href="#machines">The machines for this job <?= bl_icon('arrow-down') ?></a>
+        <div class="bl-app-hero-actions"><a class="bl-button bl-button-blue" href="<?= bl_escape(bl_contact_url(null, $application['title'])) ?>">Discuss this application <?= bl_icon('arrow-up-right') ?></a><a class="bl-text-link" href="#machines">The machines for this job <?= bl_icon('arrow-down') ?></a></div>
       </div>
     </div>
   </div>
@@ -51,7 +51,7 @@ $machines = $named ?: array_slice($family, 0, 3);
       <figcaption>Illustration based on BOB-LIFT product photography</figcaption>
     </figure>
     <dl class="bl-app-plate bl-shell" aria-label="<?= bl_escape($familyLabel) ?> at a glance">
-      <?php foreach ($plate as $fact): ?><div><dt><?= bl_escape($fact['label']) ?></dt><dd><?= bl_escape($fact['value']) ?><?php if ($fact['unit']): ?><small><?= bl_escape($fact['unit']) ?></small><?php endif; ?></dd></div><?php endforeach; ?>
+      <?php foreach ($plate as $fact): ?><div><dt><?= bl_escape($fact['label']) ?></dt><dd<?= ctype_digit($fact['value'][0]) ? '' : ' class="bl-app-plate-word"' ?>><?= bl_escape($fact['value']) ?><?php if ($fact['unit']): ?><small><?= bl_escape($fact['unit']) ?></small><?php endif; ?></dd></div><?php endforeach; ?>
     </dl>
   </div>
 </section>

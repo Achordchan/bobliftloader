@@ -3,6 +3,13 @@
  * the address shareable. Without this script the form submits and PHP filters the same way.
  */
 export function initializeCatalog() {
+  // Phones scroll the comparison sideways; its right edge fades (pages.css) until the last model is in view.
+  document.querySelectorAll('.bl-compare-scroll').forEach((box) => {
+    const edge = () => box.classList.toggle('bl-compare-end', box.scrollLeft + box.clientWidth >= box.scrollWidth - 2);
+    box.addEventListener('scroll', edge, { passive: true });
+    addEventListener('resize', edge);
+    edge();
+  });
   const form = document.querySelector('[data-catalog]');
   if (!form) return;
   const cards = [...document.querySelectorAll('[data-catalog-card]')];
