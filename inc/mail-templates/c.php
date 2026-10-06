@@ -10,8 +10,10 @@ return static function (array $d): string {
         $p = $d['product'];
         $photo = $p['image'] ? '<td width="104" valign="top" style="padding:18px 0 18px 18px;"><img src="' . esc_url($p['image']) . '" width="104" height="104" alt="' . esc_attr($p['name']) . '" style="display:block;width:104px;height:104px;border-radius:8px;background:#ffffff;"></td>' : '';
         $plate = $photo . '<td valign="middle" style="padding:18px 20px;' . $f . '"><div style="font-size:12px;letter-spacing:2px;color:#7f93a8;">询问的产品</div>'
-            . '<div style="padding-top:6px;font-size:19px;font-weight:700;line-height:27px;color:#ffffff;">' . $e($p['name']) . '</div>'
-            . '<div style="padding-top:8px;' . $mono . 'font-size:14px;line-height:20px;color:#c5d2df;white-space:nowrap;">MODEL&nbsp;' . $e($d['model']) . '</div>'
+            . '<div style="padding-top:6px;font-size:19px;font-weight:700;line-height:27px;color:#ffffff;white-space:nowrap;">' . $e($p['title']) . '</div>'
+            . ($p['full'] !== ''
+                ? '<div style="padding-top:4px;font-size:13px;line-height:19px;color:#c5d2df;">' . $e($p['full']) . '</div>'
+                : '<div style="padding-top:8px;' . $mono . 'font-size:14px;line-height:20px;color:#c5d2df;white-space:nowrap;">MODEL&nbsp;' . $e($d['model']) . '</div>')
             . '<div style="padding-top:10px;">' . $chip . '</div></td>';
     } else {
         $model = $d['model'] !== '' ? '<div style="padding-top:8px;' . $mono . 'font-size:14px;line-height:20px;color:#c5d2df;white-space:nowrap;">MODEL&nbsp;' . $e($d['model']) . '</div>' : '';

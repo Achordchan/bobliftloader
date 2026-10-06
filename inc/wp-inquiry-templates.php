@@ -79,7 +79,7 @@ function bl_wp_inquiry_data(array $raw): array
         'message' => trim(str_replace("\r\n", "\n", (string) ($raw['message'] ?? ''))),
         'model' => $model,
         'type' => $type !== '' ? $type : '未选择',
-        'product' => $product ? ['name' => $productName, 'url' => (string) $product['url'], 'image' => $raw['image'] ?? bl_wp_inquiry_thumbnail($product)] : null,
+        'product' => $product ? ['name' => $productName, 'url' => (string) $product['url'], 'image' => $raw['image'] ?? bl_wp_inquiry_thumbnail($product)] + bl_wp_inquiry_title($productName, $model) : null,
         'kind' => $model !== '' ? '产品询盘' : '询盘表单',
         'url' => (string) ($raw['url'] ?? ''),
         'ip' => $ip,
@@ -89,6 +89,16 @@ function bl_wp_inquiry_data(array $raw): array
         'site' => (string) wp_parse_url(home_url(), PHP_URL_HOST),
         'reply' => 'mailto:' . $email . '?subject=' . rawurlencode($productName !== '' ? 'Re: Your inquiry about ' . $productName : 'Re: Your inquiry to BOB-LIFT'),
     ];
+}
+
+/**
+ * How a design heads the product: a name too long for one line on a phone is headed by its model instead, with the full
+ * name under it in small type ("full"); a short name is the heading itself and "full" stays empty.
+ */
+function bl_wp_inquiry_title(string $name, string $model): array
+{
+    $long = $model !== '' && mb_strlen($name) > 24;
+    return ['title' => $long ? $model : $name, 'full' => $long ? $name : ''];
 }
 
 /** A design drawn with the given data. Each design is a file in inc/mail-templates/ returning a function of the data. */

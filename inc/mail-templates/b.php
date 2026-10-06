@@ -14,8 +14,11 @@ return static function (array $d): string {
         $p = $d['product'];
         $photo = $p['image'] ? '<td width="104" valign="top" style="padding-right:20px;"><img src="' . esc_url($p['image']) . '" width="104" height="104" alt="' . esc_attr($p['name']) . '" style="display:block;width:104px;height:104px;border-radius:12px;"></td>' : '';
         $product = '<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>' . $photo . '<td valign="middle" style="' . $f . '">'
-            . '<div style="font-size:17px;font-weight:700;line-height:25px;color:#0b1f33;">' . $e($p['name']) . '</div>'
-            . '<div style="padding-top:4px;font-size:14px;line-height:22px;color:#5d6b7c;"><span style="white-space:nowrap;">型号 ' . $e($d['model']) . '</span> · <span style="white-space:nowrap;">' . $e($d['type']) . '</span></div></td></tr></table>';
+            . '<div style="font-size:17px;font-weight:700;line-height:25px;color:#0b1f33;white-space:nowrap;">' . $e($p['title']) . '</div>'
+            . ($p['full'] !== ''
+                ? '<div style="padding-top:4px;font-size:13px;line-height:19px;color:#5d6b7c;">' . $e($p['full']) . '</div><div style="padding-top:4px;font-size:14px;line-height:22px;color:#5d6b7c;">' . $e($d['type']) . '</div>'
+                : '<div style="padding-top:4px;font-size:14px;line-height:22px;color:#5d6b7c;"><span style="white-space:nowrap;">型号 ' . $e($d['model']) . '</span> · <span style="white-space:nowrap;">' . $e($d['type']) . '</span></div>')
+            . '</td></tr></table>';
     } else {
         $product = '<div style="' . $f . 'font-size:16px;line-height:26px;color:#0b1f33;">询盘类型：<b>' . $e($d['type']) . '</b>' . ($d['model'] !== '' ? '&nbsp;&nbsp;·&nbsp;&nbsp;型号 ' . $e($d['model']) : '') . '</div>';
     }
