@@ -6,8 +6,8 @@ const BL_CONTENT_MENU_ORDER = ['bl-content-global', 'bl-content-home', 'bl-conte
 
 add_action('admin_menu', static function (): void {
     if (bl_can_manage_tracking()) add_submenu_page('bl-content-home', '统计代码', '统计代码', 'manage_options', 'bl-content-tracking', static function (): void {
-        echo '<div class="wrap"><h1>统计代码</h1>';
-        if (isset($_GET['bl_saved'])) echo '<p role="status">已保存</p>';
+        echo '<div class="wrap bl-ce"><div class="bl-page-head"><div><h1>统计代码</h1><p>Google Tag Manager、GA4 或广告像素要求“粘贴到网页里”的代码放在这里，保存后全站生效，不用改主题文件。</p></div></div><hr class="wp-header-end">';
+        if (isset($_GET['bl_saved'])) echo '<div class="notice notice-success is-dismissible"><p>已保存。</p></div>';
         bl_tracking_screen();
         echo '</div>';
     });
@@ -77,12 +77,14 @@ function bl_content_selector(string $kind, string $name, string|array $value): s
         }
         foreach (bl_products() as $product) if ($product['model'] !== '' && ($category === '' || ($product['category'] ?? '') === $category)) $options[$product['model']] = $product['model'];
     } else foreach (bl_attachments() as $items) foreach ($items as $item) $options[$item['name']] = $item['name'];
-    $html = '<div data-bl-selector data-bl-format="' . ($array ? 'array' : 'csv') . '" data-bl-name="' . esc_attr($name) . '" data-bl-choice-limit="' . ($kind === 'attachments' ? BL_CONTENT_LIMITS['attachments'] : 0) . '">';
+    $html = '<div class="bl-picker" data-bl-selector data-bl-format="' . ($array ? 'array' : 'csv') . '" data-bl-name="' . esc_attr($name) . '" data-bl-choice-limit="' . ($kind === 'attachments' ? BL_CONTENT_LIMITS['attachments'] : 0) . '">';
     if (!$array) $html .= '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '">';
-    $html .= '<ul>';
+    $html .= '<p class="bl-picker-hint">勾选的项目排在前面，用箭头调整前台的显示顺序。</p><ul class="bl-picker-list">';
     foreach (array_unique([...$chosen, ...array_keys($options)]) as $choice) {
         $selected = in_array($choice, $chosen, true);
-        $html .= '<li><label><input type="checkbox" value="' . esc_attr($choice) . '"' . ($array ? ' name="' . esc_attr($name) . '[]"' : '') . ($selected ? ' checked' : '') . ' data-bl-choice-valid="' . (isset($options[$choice]) ? '1' : '0') . '"> ' . esc_html($options[$choice] ?? '未找到：' . $choice) . '</label> <button type="button" class="button-link" data-bl-choice="up">上移</button> <button type="button" class="button-link" data-bl-choice="down">下移</button></li>';
+        $label = $options[$choice] ?? '未找到：' . $choice;
+        $move = static fn(string $way, string $icon, string $text): string => '<button type="button" class="button-link bl-tool" data-bl-choice="' . $way . '" aria-label="' . esc_attr($text . '：' . $label) . '" title="' . esc_attr($text) . '"><span class="dashicons dashicons-' . $icon . '" aria-hidden="true"></span></button>';
+        $html .= '<li class="bl-picker-item' . (isset($options[$choice]) ? '' : ' is-missing') . '"><label><input type="checkbox" value="' . esc_attr($choice) . '"' . ($array ? ' name="' . esc_attr($name) . '[]"' : '') . ($selected ? ' checked' : '') . ' data-bl-choice-valid="' . (isset($options[$choice]) ? '1' : '0') . '"> <span>' . esc_html($label) . '</span></label><span class="bl-picker-move">' . $move('up', 'arrow-up-alt2', '上移') . $move('down', 'arrow-down-alt2', '下移') . '</span></li>';
     }
     return $html . '</ul></div>';
 }

@@ -89,3 +89,39 @@ details.bl-panel[open] .bl-card-meta { visibility: hidden; }
   .bl-card-meta { display: none; }
   details.bl-panel > summary.bl-panel-head { padding: 12px 14px; }
 }
+
+/* Pickers (machines, attachments): ticked items lead, in page order, with arrows; the rest are a compact grid. */
+.bl-picker-hint { margin: 0 0 8px; color: var(--bl-muted); font-size: 12px; }
+.bl-picker-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(190px, calc(50% - 3px)), 1fr)); gap: 6px; max-width: 880px; margin: 0; }
+.bl-picker-item { display: flex; align-items: center; gap: 4px; min-height: 34px; margin: 0; padding: 0 4px 0 10px; background: var(--bl-surface); border: 1px solid var(--bl-border); border-radius: 4px; }
+.bl-picker-item label { display: flex; flex: 1; align-items: center; gap: 8px; min-width: 0; padding: 6px 0; }
+.bl-picker-item label span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bl-picker-item input[type="checkbox"] { margin: 0; }
+.bl-picker-item:has(input:checked) { background: #f0f6fc; border-color: #72aee6; }
+.bl-picker-item.is-missing { border-style: dashed; color: #b32d2e; }
+.bl-picker-move { display: none; }
+.bl-picker-item:has(input:checked) .bl-picker-move { display: inline-flex; }
+.wp-core-ui .bl-picker .bl-tool { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; color: var(--bl-muted); border-radius: 3px; }
+.wp-core-ui .bl-picker .bl-tool:hover, .wp-core-ui .bl-picker .bl-tool:focus { color: var(--bl-accent); background: #fff; }
+.bl-picker [data-bl-overflow] { color: #b32d2e; font-size: 12px; white-space: nowrap; }
+.bl-picker [data-bl-limit-note] { display: block; margin-top: 6px; color: var(--bl-muted); font-size: 12px; }
+
+/* "备用图片" and other quiet disclosures inside edit boxes. */
+.bl-box details > summary, .postbox .inside details > summary { display: inline-flex; align-items: center; gap: 4px; margin: 4px 0 8px; color: var(--bl-accent); cursor: pointer; list-style: none; }
+.postbox .inside details > summary::-webkit-details-marker { display: none; }
+.postbox .inside details > summary::before { content: "\f345"; font: normal 16px/1 dashicons; transition: transform .15s; }
+.postbox .inside details[open] > summary::before { transform: rotate(90deg); }
+
+/* Long section names and the status chips wrap instead of pushing the save bar or headings off screen. */
+.bl-panel-head { flex-wrap: wrap; row-gap: 4px; }
+.bl-panel-head .bl-chip { white-space: nowrap; }
+@media (max-width: 782px) {
+  .bl-savebar { flex-wrap: wrap; gap: 8px; }
+  .bl-savebar-status { flex-basis: 100%; order: 3; }
+}
+@media (max-width: 782px) {
+  /* Fields stack on phones and their controls may shrink, so pickers and tables never widen the page. */
+  .bl-field { grid-template-columns: 1fr; }
+  .bl-field-control { min-width: 0; }
+  .bl-ce-table { display: block; max-width: 100%; overflow-x: auto; }
+}

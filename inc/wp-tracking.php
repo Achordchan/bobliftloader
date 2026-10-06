@@ -20,22 +20,27 @@ function bl_tracking_screen(): void
         $revision = $recovery['revision'];
         echo '<p role="alert"><span class="bl-chip">未保存</span> ' . esc_html($recovery['message']) . '</p>';
     }
-    echo '<details class="bl-panel" id="bl-tracking"' . ' open' . '><summary class="bl-panel-head">统计与跟踪代码</summary><div class="bl-panel-body"><p>仅同时拥有网站设置权限和未过滤 HTML 权限的用户可见、可保存。代码按原文输出，请粘贴完整代码。</p><p>GTM 的 script 放入 head，noscript 放入 body 开头；GA4 只需 head 那段。本区使用下方按钮独立保存。</p>';
     // The privacy page promises no tracking; once a code is in, point the editor at the sentence to change.
     $privacy = (string) (bl_editable('privacy')['body']['ending'] ?? '');
     if (trim(implode('', array_map('strval', $values))) !== '' && stripos($privacy, 'does not use advertising or analytics tracking') !== false) {
-        echo '<p role="status"><span class="bl-chip bl-chip-warn">请同步隐私说明</span> 已填写统计或跟踪代码，但隐私说明仍写着本站不使用广告或分析跟踪。<a href="' . esc_url(admin_url('admin.php?page=bl-content-privacy')) . '">去修改隐私说明</a></p>';
+        echo '<div class="notice notice-warning"><p><span class="bl-chip bl-chip-warn">请同步隐私说明</span> 已填写统计或跟踪代码，但隐私说明仍写着本站不使用广告或分析跟踪。<a href="' . esc_url(admin_url('admin.php?page=bl-content-privacy')) . '">去修改隐私说明</a></p></div>';
     }
     echo '<form class="bl-ce-form" method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="bl_save_content"><input type="hidden" name="bl_page" value="tracking">';
     wp_nonce_field('bl_save_content_tracking');
     echo bl_content_revision_input($revision);
-    foreach (['head' => '插入 head 内', 'body_open' => '紧跟 body 开头', 'footer' => 'body 结尾'] as $key => $label) {
-        echo '<p><label for="bl-tracking-' . $key . '">' . esc_html($label) . '</label></p><textarea class="large-text code" rows="8" id="bl-tracking-' . $key . '" name="bl_content[' . $key . ']">' . esc_textarea($values[$key]) . '</textarea>';
+    echo '<div class="bl-panel" id="bl-tracking"><div class="bl-panel-body">';
+    $slots = [
+        'head' => ['放进 &lt;head&gt;', 'GA4 的整段代码，或 GTM 的第一段（&lt;script&gt; 开头的那段）。大多数统计工具只需要这一格。'],
+        'body_open' => ['紧跟 &lt;body&gt; 开头', 'GTM 的第二段（&lt;noscript&gt; 开头的那段）。'],
+        'footer' => ['放在页面最底部', '只有工具明确要求“放在 &lt;/body&gt; 之前”时才用。'],
+    ];
+    foreach ($slots as $key => [$label, $help]) {
+        echo '<div class="bl-field bl-ce-wide"><div class="bl-field-label"><label for="bl-tracking-' . $key . '">' . $label . '</label></div><div class="bl-field-control"><textarea class="large-text code" rows="6" spellcheck="false" id="bl-tracking-' . $key . '" name="bl_content[' . $key . ']">' . esc_textarea($values[$key]) . '</textarea><p class="bl-field-help">' . $help . '</p></div></div>';
     }
-    echo '<input type="hidden" name="bl_content_complete" value="1">';
-    echo '<p class="bl-savebar-status" role="status">尚未修改</p>';
-    submit_button('保存统计与跟踪代码');
-    echo '</form></div></details>';
+    echo '<p class="bl-field-help">代码按原样输出到每个页面，请粘贴工具给出的完整代码。只有管理员能看到和保存这一页。留空的格子不会输出任何东西。</p>';
+    echo '</div></div><input type="hidden" name="bl_content_complete" value="1"><div class="bl-savebar">';
+    submit_button('保存', 'primary', 'submit', false);
+    echo '<span class="bl-savebar-status" role="status">没有未保存的修改</span></div></form>';
 }
 
 function bl_render_tracking(string $position): void

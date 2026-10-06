@@ -17,8 +17,11 @@
     var button = event.target.closest('[data-bl-choice]');
     if (button) {
       var row = button.closest('li');
-      if (button.dataset.blChoice === 'up' && row.previousElementSibling) row.parentNode.insertBefore(row, row.previousElementSibling);
-      if (button.dataset.blChoice === 'down' && row.nextElementSibling) row.parentNode.insertBefore(row.nextElementSibling, row);
+      var prev = row.previousElementSibling;
+      var next = row.nextElementSibling;
+      // Only ticked items have an order on the page, so the arrows move among them.
+      if (button.dataset.blChoice === 'up' && prev) row.parentNode.insertBefore(row, prev);
+      if (button.dataset.blChoice === 'down' && next && next.querySelector('input:checked')) row.parentNode.insertBefore(next, row);
       syncSelector(button.closest('[data-bl-selector]'));
       button.focus();
       limits();
@@ -32,7 +35,14 @@
   });
   document.addEventListener('change', function (event) {
     var box = event.target.closest('[data-bl-selector]');
-    if (box && event.target.matches('input[type="checkbox"]')) syncSelector(box);
+    if (box && event.target.matches('input[type="checkbox"]')) {
+      // A newly ticked item joins the end of the ticked ones; an unticked one goes back among the choices.
+      var item = event.target.closest('li');
+      var ticked = Array.from(item.parentNode.children).filter(function (li) { return li !== item && li.querySelector('input:checked'); });
+      var anchor = ticked.length ? ticked[ticked.length - 1].nextElementSibling : item.parentNode.firstElementChild;
+      if (anchor !== item) item.parentNode.insertBefore(item, anchor);
+      syncSelector(box);
+    }
     conditions();
     limits();
     effectiveImage();

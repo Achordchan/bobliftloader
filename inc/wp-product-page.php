@@ -57,7 +57,7 @@ function bl_product_page_meta_box(WP_Post $post, string $kind = 'overview'): voi
     }
     if ($kind === 'attachments') {
         echo bl_content_selector('attachments', 'bl_page[attachments]', (array) ($record['attachments'] ?? []));
-        echo '<p>仅滑移装载机显示；未选择时使用栏目默认属具，前台最多显示 ' . BL_CONTENT_LIMITS['attachments'] . ' 条。未找到的历史值保留。</p>';
+        echo '<p class="bl-field-help">只在滑移装载机的产品页显示；一个都不勾时，使用“网站内容 → 滑移装载机”里的默认属具。</p>';
     }
     if ($kind === 'faq') {
         bl_admin_field('常见问题', '', bl_product_page_rows('faq', (array) ($record['faq'] ?? []), BL_CONTENT_LIMITS['faq'], '添加问题'), '这台机器专有的问题排在前面，再接系列通用问题，页面最多显示 5 条。链接地址可写站内路径，如 /support/#containers。');
