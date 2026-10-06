@@ -16,6 +16,7 @@
     <?php endif; ?>
     <?php endforeach; ?>
     <button class="bl-search-toggle" type="button" data-open-search aria-haspopup="dialog" aria-controls="site-search" aria-label="Search the site" title="Search (/)" hidden><?= bl_icon('magnifying-glass') ?></button>
+    <?php require __DIR__ . '/partials/language-switch.php'; ?>
     <a class="bl-nav-contact" href="<?= bl_escape(bl_url('/contact/')) ?>" <?= $activeType === 'contact' ? 'aria-current="page"' : '' ?>>Let’s talk <?= bl_icon('arrow-up-right') ?></a>
   </nav>
   <?php /* Phones keep search in the bar itself, beside the menu button; both search buttons appear once the script runs. */ ?>

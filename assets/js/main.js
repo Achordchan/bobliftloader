@@ -49,9 +49,9 @@ document.addEventListener('focusin', (event) => {
 });
 window.matchMedia('(min-width: 601px)').addEventListener('change', () => closeNavigation());
 
-// Site switch (header, and the footer's copy that opens upward): a <details>, so it opens without the script; this closes it
+// Site switch (header, and the footer's copy that opens upward) and the language switch: each a <details>, so it opens without the script; this closes it
 // on Escape, an outside click or focus leaving it, and keeps the header one and the phone menu from being open together.
-document.querySelectorAll('.bl-site-switch').forEach((siteSwitch) => {
+document.querySelectorAll('.bl-site-switch, .bl-lang-switch').forEach((siteSwitch) => {
   const summary = siteSwitch.querySelector('summary');
   const inHeader = header.contains(siteSwitch);
   const closeSwitch = (event) => { if (siteSwitch.open && !siteSwitch.contains(event.target)) siteSwitch.open = false; };
