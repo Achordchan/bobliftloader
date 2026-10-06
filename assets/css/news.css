@@ -80,6 +80,16 @@
 .bl-site .bl-story-text::after{content:'';display:block;clear:both}
 .bl-site .bl-story-text .bl-story-visit{clear:both}
 
+/* Application case: one centred reading column; the facts run across the top, machines and the enquiry sit side by side below the text. */
+.bl-site .bl-story-case .bl-story-head,.bl-site .bl-story-case .bl-story-layout{max-width:58rem;margin-inline:auto}
+.bl-site .bl-story-case .bl-story-layout{display:block}
+.bl-site .bl-story-facts{margin-bottom:clamp(28px,2.2vw,48px)}
+.bl-site .bl-story-facts dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:0 clamp(20px,2vw,32px);margin:0}
+.bl-site .bl-story-facts dl>div{padding:12px 0;border-bottom:1px solid var(--line)}
+.bl-site .bl-story-facts dt{font-size:var(--fs-micro);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.bl-site .bl-story-facts dd{margin:4px 0 0;font-size:var(--fs-small);font-weight:600;line-height:1.5}
+.bl-site .bl-story-case .bl-story-aside{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));align-items:start;margin-top:clamp(36px,3vw,64px)}
+
 /* Written by: the person, then the dates. */
 .bl-site .bl-story-author-name{display:flex;align-items:center;gap:14px;padding-bottom:14px}
 .bl-site .bl-story-author-name img,.bl-site .bl-story-avatar{flex:0 0 auto;width:48px;height:48px;border-radius:50%;object-fit:cover}
