@@ -6,8 +6,9 @@ import unittest
 from urllib.error import HTTPError
 from urllib.request import build_opener, ProxyHandler
 
-BASE = sys.argv[1].rstrip('/') if len(sys.argv) > 1 else 'http://127.0.0.1:4173'
-sys.argv = [sys.argv[0]]
+BASE = sys.argv[1].rstrip('/') if __name__ == '__main__' and len(sys.argv) > 1 else 'http://127.0.0.1:4173'
+if __name__ == '__main__':
+    sys.argv = [sys.argv[0]]
 OPENER = build_opener(ProxyHandler({}))
 
 

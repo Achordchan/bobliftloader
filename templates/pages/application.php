@@ -63,7 +63,7 @@ $machines = $named ?: array_slice($family, 0, 3);
   </div>
   <ol class="bl-app-checks-list">
     <?php foreach ($application['checks'] as $i => $check): ?>
-    <li class="bl-reveal"><span class="bl-app-check-index">0<?= $i + 1 ?></span><h3><?= bl_escape($check['title']) ?></h3><p><?= bl_escape($check['text']) ?></p><p class="bl-app-check-measure"><span>You’ll need</span><?= bl_escape($check['measure']) ?></p><?php if (!empty($check['link'])): ?><a class="bl-text-link" href="<?= bl_escape(bl_url($check['link'][0])) ?>"><?= bl_escape($check['link'][1]) ?> <?= bl_icon('arrow-up-right') ?></a><?php endif; ?></li>
+    <li class="bl-reveal"><span class="bl-app-check-index">0<?= $i + 1 ?></span><h3><?= bl_escape($check['title']) ?></h3><p><?= bl_escape($check['text']) ?></p><p class="bl-app-check-measure"><span>You’ll need</span><?= bl_escape($check['measure']) ?></p><?php if (!empty($check['link'])): ?><a class="bl-text-link" href="<?= bl_escape(bl_application_link($check['link'][0])) ?>"><?= bl_escape($check['link'][1]) ?> <?= bl_icon('arrow-up-right') ?></a><?php endif; ?></li>
     <?php endforeach; ?>
   </ol>
 </section>

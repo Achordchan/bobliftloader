@@ -66,6 +66,7 @@ function bl_product_page_meta_box(WP_Post $post): void
 }
 
 add_action('save_post_bl_product', static function (int $postId): void {
+    if (!bl_product_submission_complete()) return;
     if (wp_is_post_revision($postId) || wp_is_post_autosave($postId) || !current_user_can('edit_post', $postId)) return;
     if (!isset($_POST['bl_page_nonce']) || !is_string($_POST['bl_page_nonce'])) return;
     if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['bl_page_nonce'])), 'bl_save_product_page')) return;

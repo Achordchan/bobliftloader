@@ -429,9 +429,14 @@ function bl_content_screen(string $page): void
 {
     if (!isset(BL_CONTENT_PAGES[$page]) || !current_user_can('edit_pages')) wp_die('没有编辑权限。', '', ['response' => 403]);
     $info = BL_CONTENT_PAGES[$page];
-    $values = bl_editable($page);
-    $saved = get_option('bl_content_' . $page);
-    $saved = is_array($saved) ? $saved : [];
+    $saved = bl_content_saved_now($page);
+    $values = bl_content_resolve($page, $saved);
+    $revision = bl_content_revision($saved);
+    $recovery = bl_content_recovery($page);
+    if ($recovery) {
+        $values = bl_content_clean_all($page, $recovery['input']);
+        $revision = $recovery['revision'];
+    }
     $sections = bl_content_schema($page);
     $changed = static fn(array $field): bool => bl_content_get($saved, $field['key']) !== null;
     $count = static fn(array $section): int => count(array_filter($section['fields'], $changed));
@@ -440,6 +445,7 @@ function bl_content_screen(string $page): void
     echo '<div class="bl-page-head-actions"><a class="button" href="' . esc_url(home_url($info['path'])) . '" target="_blank" rel="noopener">查看页面<span class="screen-reader-text">（在新窗口打开）</span></a></div></div><hr class="wp-header-end">';
     if (isset($_GET['bl_saved'])) echo '<div class="notice notice-success is-dismissible"><p>已保存。</p></div>';
     if (isset($_GET['bl_reset'])) echo '<div class="notice notice-success is-dismissible"><p>已恢复为主题默认内容。</p></div>';
+    if ($recovery) echo '<p role="alert"><span class="bl-chip bl-chip-warn">未保存</span> ' . esc_html($recovery['message']) . ' 输入已保留 24 小时；请在新标签页打开最新内容，对照后再编辑保存。<a target="_blank" rel="noopener" href="' . esc_url(admin_url('admin.php?page=bl-content-' . $page)) . '">打开最新内容</a></p>';
     $open = count($sections) === 1;
     if (count($sections) >= 3) {
         echo '<nav class="bl-jump" aria-label="页面分区"><span class="bl-jump-label">跳到</span>';
@@ -448,6 +454,7 @@ function bl_content_screen(string $page): void
     }
     echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" class="bl-ce-form"><input type="hidden" name="action" value="bl_save_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
     wp_nonce_field('bl_save_content_' . $page);
+    echo bl_content_revision_input($revision);
     foreach ($sections as $i => $section) {
         $n = $count($section);
         echo '<details class="bl-panel bl-ce-section" data-bl-card id="bl-ce-' . $i . '"' . ($open ? ' open' : '') . '><summary class="bl-panel-head">';
@@ -469,12 +476,20 @@ function bl_content_screen(string $page): void
     }
     echo '<input type="hidden" name="bl_content_complete" value="1"><div class="bl-savebar">';
     submit_button('保存修改', 'primary', 'submit', false);
-    echo '<span class="bl-savebar-status" role="status">没有未保存的修改</span>';
-    if ($saved) echo '<button type="submit" form="bl-ce-reset" class="button bl-danger-button" title="本页有 ' . $total . ' 项内容改过；恢复后改回主题自带的文字和图片，无法撤销。">整页恢复默认</button>';
+    echo '<span class="bl-savebar-status" role="status">' . ($recovery ? '有未保存的修改（版本已过期）' : '没有未保存的修改') . '</span>';
+    if ($total > 0) echo '<button type="submit" form="bl-ce-reset" class="button bl-danger-button" title="本页有 ' . $total . ' 项内容改过；恢复前保存快照，保留最近 5 份。">整页恢复默认</button>';
     echo '</div></form>';
-    if ($saved) {
-        echo '<form method="post" id="bl-ce-reset" action="' . esc_url(admin_url('admin-post.php')) . '" onsubmit="return confirm(\'确定把整页恢复为主题默认内容吗？已修改的内容会丢失，无法撤销。\')"><input type="hidden" name="action" value="bl_reset_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
+    if ($total > 0) {
+        echo '<form method="post" id="bl-ce-reset" action="' . esc_url(admin_url('admin-post.php')) . '" onsubmit="return confirm(\'确定把整页恢复为主题默认内容吗？恢复前将保存当前内容快照，可撤销。\')"><input type="hidden" name="action" value="bl_reset_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
         wp_nonce_field('bl_reset_content_' . $page);
+        echo bl_content_revision_input($revision);
+        echo '</form>';
+    }
+    if (get_option('bl_content_snapshots_' . $page, [])) {
+        echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="bl_restore_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
+        wp_nonce_field('bl_restore_content_' . $page);
+        echo bl_content_revision_input($revision);
+        submit_button('撤销最近一次恢复默认', 'secondary', 'submit', false);
         echo '</form>';
     }
     echo '</div>';
@@ -628,73 +643,7 @@ function bl_lock_release(string $name, string $token): void
     $GLOBALS['wpdb']->delete($GLOBALS['wpdb']->options, ['option_name' => 'bl_lock_' . $name, 'option_value' => $token]);
 }
 
-/**
- * Saves one page's content under that page's lock, so two saves (screen or REST) never start from the same content and
- * overwrite each other. $compute gets what is saved right now and returns what to save ([] clears it); the result is
- * written only while this request still owns the lock. Returns false, saving nothing, when the lock was not had.
- */
-function bl_content_locked(string $page, callable $compute): bool
-{
-    $token = bl_lock_acquire('content_' . $page);
-    if ($token === '') return false;
-    try {
-        $diff = $compute(bl_content_saved_now($page));
-        if (!bl_lock_owned('content_' . $page, $token)) return false;
-        if ($diff) update_option('bl_content_' . $page, $diff);
-        else delete_option('bl_content_' . $page);
-    } finally {
-        bl_lock_release('content_' . $page, $token);
-    }
-    return true;
-}
-
-/** What is saved for a page now, read past the options cache (another request may have saved since this one started). */
-function bl_content_saved_now(string $page): array
-{
-    global $wpdb;
-    // update_option() compares with the cached value, so the cache is brought up to date as well.
-    foreach (['alloptions', 'notoptions', 'bl_content_' . $page] as $key) wp_cache_delete($key, 'options');
-    $saved = maybe_unserialize((string) $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'bl_content_' . $page)));
-    return is_array($saved) ? $saved : [];
-}
-
-function bl_content_request_page(): string
-{
-    $page = isset($_POST['bl_page']) && is_string($_POST['bl_page']) ? sanitize_key(wp_unslash($_POST['bl_page'])) : '';
-    if (!isset(BL_CONTENT_PAGES[$page])) wp_die('未知页面。', '', ['response' => 400]);
-    if (!current_user_can('edit_pages')) wp_die('没有编辑权限。', '', ['response' => 403]);
-    return $page;
-}
-
-add_action('admin_post_bl_save_content', static function (): void {
-    $page = bl_content_request_page();
-    check_admin_referer('bl_save_content_' . $page);
-    // PHP drops fields beyond max_input_vars without an error. The form's last field is a marker: if it did not arrive,
-    // the submission is incomplete and saving it would silently lose content, so nothing is saved.
-    if (!isset($_POST['bl_content_complete'])) wp_die('提交的内容不完整（可能超出了服务器的 max_input_vars 限制），没有保存任何修改。请返回后减少列表条目，或调高服务器的 max_input_vars。', '', ['response' => 400, 'back_link' => true]);
-    $input = isset($_POST['bl_content']) && is_array($_POST['bl_content']) ? wp_unslash($_POST['bl_content']) : [];
-    $saved = bl_content_locked($page, static function (array $previous) use ($page, $input): array {
-        $diff = bl_content_diff(bl_content_clean_all($page, $input), bl_content_clean_all($page, bl_content_defaults($page)));
-        // The loading table lists published products only; figures saved for a model not on the form (unpublished for now)
-        // are carried over rather than dropped.
-        if (is_array($previous['containers']['loading'] ?? null)) {
-            $posted = is_array($input['containers']['loading'] ?? null) ? array_map('sanitize_title', array_keys($input['containers']['loading'])) : [];
-            foreach ($previous['containers']['loading'] as $slug => $fit) if (!in_array((string) $slug, $posted, true)) $diff['containers']['loading'][$slug] = $fit;
-        }
-        return $diff;
-    });
-    if (!$saved) wp_die('另一个保存正在进行，这次没有保存任何修改。请稍后返回重新保存。', '', ['response' => 409, 'back_link' => true]);
-    wp_safe_redirect(admin_url('admin.php?page=bl-content-' . $page . '&bl_saved=1'));
-    exit;
-});
-
-add_action('admin_post_bl_reset_content', static function (): void {
-    $page = bl_content_request_page();
-    check_admin_referer('bl_reset_content_' . $page);
-    delete_option('bl_content_' . $page);
-    wp_safe_redirect(admin_url('admin.php?page=bl-content-' . $page . '&bl_reset=1'));
-    exit;
-});
+require_once __DIR__ . '/wp-content-state.php';
 
 /* ---------- Pointers from the page editor ---------- */
 
