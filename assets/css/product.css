@@ -91,14 +91,23 @@
 .bl-site .bl-product-checks p{font-size:var(--fs-small);line-height:1.7;color:#a9bac6}
 
 /* Shipping, warranty and documents: three columns under one head. */
-.bl-site .bl-product-buying-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
-.bl-site .bl-product-buying-grid article{display:flex;flex-direction:column;align-items:flex-start;gap:clamp(14px,1vw,22px);padding:clamp(22px,1.8vw,40px);background:var(--paper);min-width:0}
+/* The three cards share one set of rows (label, figure, text, link), so the big figures, the text and the links line
+   up across the cards whatever each one holds. */
+.bl-site .bl-product-buying-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(4,auto);gap:1px;background:var(--line);border:1px solid var(--line)}
+.bl-site .bl-product-buying-grid article{display:grid;grid-row:span 4;grid-template-rows:subgrid;justify-items:start;align-content:start;row-gap:clamp(14px,1vw,22px);padding:clamp(22px,1.8vw,40px);background:var(--paper);min-width:0}
+.bl-site .bl-product-buying-grid article>h3{grid-row:1}
+.bl-site .bl-product-buying-grid article>.bl-product-figure{grid-row:2}
+.bl-site .bl-product-buying-grid article>p:not(.bl-product-figure){grid-row:3}
+.bl-site .bl-product-buying-grid article>.bl-product-docs{grid-row:2/4;align-self:start}
+.bl-site .bl-product-buying-grid article>.bl-text-link{grid-row:4;align-self:end}
 .bl-site .bl-product-buying-grid h3{font-size:var(--fs-label);font-weight:700;letter-spacing:.12em;text-transform:uppercase}
 .bl-site .bl-product-buying-grid p{font-size:var(--fs-small);line-height:1.7;color:var(--muted)}
-.bl-site .bl-product-buying-grid .bl-text-link{margin-top:auto;color:var(--ink);font-size:var(--fs-label)}
+.bl-site .bl-product-buying-grid .bl-text-link{color:var(--ink);font-size:var(--fs-label)}
 .bl-site .bl-product-loading{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(14px,1.2vw,28px);width:100%;margin:0}
+/* The container counts read like the warranty figure: number first, container under it. */
+.bl-site .bl-product-loading>div{display:flex;flex-direction:column-reverse;justify-content:flex-end;gap:8px}
 .bl-site .bl-product-loading dt{font-size:var(--fs-micro);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.bl-site .bl-product-loading dd,.bl-site p.bl-product-big{margin:6px 0 0;font:600 clamp(40px,3vw,72px)/1 var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
+.bl-site .bl-product-loading dd,.bl-site p.bl-product-big{margin:0;font:600 clamp(40px,3vw,72px)/1 var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
 .bl-site .bl-product-loading small,.bl-site p.bl-product-big small{font:600 var(--fs-h5)/1 var(--display);color:var(--muted)}
 .bl-site .bl-product-docs{display:grid;gap:10px;width:100%}
 .bl-site .bl-product-docs a,.bl-site .bl-product-docs button{display:flex;align-items:center;gap:14px;width:100%;padding:12px 14px;background:#fff;border:1px solid var(--line);text-align:left;font-size:var(--fs-small);font-weight:700;transition:border-color .2s}
@@ -107,7 +116,11 @@
 .bl-site .bl-product-docs .bl-icon{width:18px;height:18px}
 
 /* Questions. */
-.bl-site .bl-product-faq-list{border-top:1px solid var(--ink)}
+/* Questions: the heading holds the left column (it stays in view while the answers are read), the questions the right,
+   on the same line as the text column of the sections above. */
+.bl-site .bl-product-faq{display:grid;grid-template-columns:1fr 1.1fr;column-gap:9%;align-items:start}
+.bl-site .bl-product-faq .bl-product-section-head{grid-template-columns:1fr;gap:clamp(20px,1.6vw,32px);align-items:start;margin-bottom:0;position:sticky;top:calc(var(--header-height) + clamp(72px,3.6vw,92px) + clamp(20px,1.6vw,40px))}
+.bl-site .bl-product-faq-list{border-top:1px solid var(--ink);min-width:0}
 .bl-site .bl-product-faq-list details{border-bottom:1px solid var(--line)}
 .bl-site .bl-product-faq-list summary{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:clamp(16px,1.2vw,26px) 0;list-style:none;cursor:pointer}
 .bl-site .bl-product-faq-list summary::-webkit-details-marker{display:none}
@@ -162,11 +175,14 @@
 
 @media(max-width:1100px){
   .bl-site .bl-product-jobs,.bl-site .bl-product-checks,.bl-site .bl-product-cases{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .bl-site .bl-product-buying-grid{grid-template-columns:1fr}
+  .bl-site .bl-product-buying-grid{grid-template-columns:1fr;grid-template-rows:none}
+  .bl-site .bl-product-buying-grid article>.bl-text-link{margin-top:6px}
   .bl-site .bl-spec-body-drawing{grid-template-columns:1fr}
 }
 @media(max-width:800px){
   .bl-site .bl-product-section-head,.bl-site .bl-product-enquiry-inner{grid-template-columns:1fr;gap:20px}
+  .bl-site .bl-product-faq{grid-template-columns:1fr;row-gap:clamp(32px,6vw,48px)}
+  .bl-site .bl-product-faq .bl-product-section-head{position:static}
   .bl-site .bl-product-built-photos{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:78%;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 6px;scroll-snap-type:x mandatory;scrollbar-width:none}
   .bl-site .bl-product-built-photos li{scroll-snap-align:start}
   /* Phones: the thumbnails become one swipeable row under the main photograph. */
