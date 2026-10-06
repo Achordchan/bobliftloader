@@ -35,8 +35,9 @@
 /* Gallery: thumbnails in order, each with move and remove buttons; drag works too. */
 .bl-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; max-width: 760px; margin: 0; }
 .bl-gallery:empty { display: none; }
-.bl-gallery-item { position: relative; margin: 0; aspect-ratio: 1; background: var(--bl-surface); border: 1px solid var(--bl-border); border-radius: var(--bl-radius); overflow: hidden; cursor: move; }
-.bl-gallery-item img { display: block; width: 100%; height: calc(100% - 28px); object-fit: contain; }
+.bl-gallery-item { position: relative; margin: 0; padding-bottom: 28px; background: var(--bl-surface); border: 1px solid var(--bl-border); border-radius: var(--bl-radius); overflow: hidden; cursor: move; }
+.bl-gallery-item img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; }
+.bl-gallery-alt { display: block; width: calc(100% - 8px); margin: 4px; font-size: 12px; }
 .bl-gallery-tools { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; background: var(--bl-sunken); border-top: 1px solid var(--bl-border-soft); }
 .bl-gallery-tools .bl-tool { height: 27px; }
 .bl-gallery-placeholder { aspect-ratio: 1; border: 1px dashed var(--bl-border); border-radius: var(--bl-radius); }
@@ -89,3 +90,10 @@
   .bl-video-poster { max-width: 160px; }
   .bl-mini-field { grid-template-columns: 1fr; }
   }
+
+/* 产品页模块 (inc/wp-product-page.php) */
+.bl-page-fields { display: grid; gap: 8px; padding: 4px 12px 12px 42px; }
+.bl-page-fields .bl-mini-field { grid-template-columns: 64px minmax(0, 1fr); }
+.bl-page-fields textarea { max-width: 560px; }
+.bl-checks { display: flex; flex-wrap: wrap; gap: 6px 18px; max-width: 760px; }
+.bl-check { display: inline-flex; align-items: center; gap: 6px; }

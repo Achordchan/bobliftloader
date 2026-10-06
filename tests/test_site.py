@@ -120,6 +120,36 @@ class WebsiteTests(unittest.TestCase):
             self.assertNotIn('offers', schema)
             self.assertNotIn('aggregateRating', schema)
 
+    def test_product_pages_guide_the_buyer(self):
+        for product in self.products:
+            _, html, _ = fetch('/product/' + product['slug'] + '/')
+            main = html.split('<main id="main">', 1)[1].split('</main>', 1)[0]
+            self.assertEqual(main.count('<h1'), 1)
+            # Section headings name the model; the large slogans under them are not headings.
+            for heading in re.findall(r'<h2 class="bl-eyebrow"[^>]*>(.*?)</h2>', main):
+                self.assertTrue(heading.strip(), product['slug'])
+            self.assertNotRegex(main, r'<h2[^>]*>[A-Z’ .,]+<br>')
+            # The section bar links only to sections that are on the page.
+            nav = re.search(r'<nav class="bl-product-section-nav"[^>]*>(.*?)</nav>', main, re.S).group(1)
+            for anchor in re.findall(r'href="#([\w-]+)"', nav):
+                self.assertIn('id="' + anchor + '"', main, product['slug'] + ' #' + anchor)
+            # Every photograph is described, and every lightbox button opens a photograph that exists.
+            for alt in re.findall(r'<img id="product-photo"[^>]*alt="([^"]*)"', main) + re.findall(r'data-gallery-alt="([^"]*)"', main):
+                self.assertTrue(alt.strip(), product['slug'])
+            items = [int(i) for i in re.findall(r'data-lightbox-item="(\d+)"', main)]
+            self.assertEqual(items, list(range(len(items))))
+            for opened in re.findall(r'data-lightbox-open="(\d+)"', main):
+                self.assertLess(int(opened), len(items))
+            # The quote form sits on the page with this model chosen, and at most five questions are answered.
+            self.assertIn('<input type="hidden" name="model" value="' + product['model'] + '"', main)
+            self.assertLessEqual(main.split('class="bl-product-faq-list"', 1)[-1].split('</section>', 1)[0].count('<details'), 5)
+            loader = product['category'] == 'skid-steer-loaders'
+            self.assertEqual('class="bl-product-tools"' in main, loader)
+            self.assertIn('aria-current="true"', main.split('class="bl-product-compare"', 1)[1])
+            schema = next(item for item in Page(html).structured[0]['@graph'] if item['@type'] == 'Product')
+            self.assertEqual((schema['sku'], schema['mpn']), (product['model'], product['model']))
+            if product['image']: self.assertIsInstance(schema['image'], list)
+
     def test_search_filters_and_empty_state(self):
         _, html, _ = fetch('/products/?q=BL-T1000-H')
         self.assertEqual(len(visible_cards(html)), 1)

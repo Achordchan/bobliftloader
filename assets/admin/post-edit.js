@@ -149,10 +149,11 @@
     if (!input.closest('#bl_main-sortables')) return;
     dirty = true;
     if (input.classList.contains('bl-video-caption')) input.closest('.bl-row').querySelector('.bl-row-title').textContent = input.value.trim() || '新视频';
+    if (input.hasAttribute('data-bl-title') && input.value.trim()) input.closest('.bl-row').querySelector('.bl-row-title').textContent = input.value.trim();
   });
 
   if (gallery && window.jQuery && jQuery.fn.sortable) {
-    jQuery(gallery).sortable({ items: '> li', placeholder: 'bl-gallery-placeholder', tolerance: 'pointer', cancel: 'button', update: function () { dirty = true; } });
+    jQuery(gallery).sortable({ items: '> li', placeholder: 'bl-gallery-placeholder', tolerance: 'pointer', cancel: 'button, input', update: function () { dirty = true; } });
   }
 
   // WordPress only warns about unsaved title and text; the product boxes need the same care.

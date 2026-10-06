@@ -34,6 +34,22 @@ try {
     bl_test_assert($saved['specs'] === $original['specs'] && $saved['gallery'] === $original['gallery'] && $saved['load'] === $original['load'], 'Spec rows or gallery did not round-trip');
     bl_test_assert($saved['videos'] === [['src' => 'videos/bucket.mp4', 'poster' => 'videos/bucket.webp', 'caption' => 'QA clip']], 'Video rows were not saved');
     unset($_POST['bl_videos_nonce'], $_POST['bl_videos']);
+    // 产品页模块 and the gallery's alternative text save with the product (inc/wp-product-page.php, inc/wp-admin.php).
+    $firstImage = $original['gallery'][0] ?? '';
+    $_POST['bl_record']['gallery_alt'] = array_replace(array_fill(0, count($original['gallery']), ''), [0 => 'QA loader lifting a pallet']);
+    $_POST['bl_page_nonce'] = wp_create_nonce('bl_save_product_page');
+    $_POST['bl_page'] = ['seo_description' => '<b>QA description</b>', 'highlights' => ['title' => ['QA highlight', ''], 'text' => ['Fits a gate', 'dropped']],
+        'faq' => ['q' => ['QA question?', 'No answer?'], 'a' => ['QA answer.', ''], 'link_label' => ['Support', ''], 'link_url' => ['/support/#containers', '']],
+        'attachments' => ['Auger', 'Auger', 'Pallet forks'], 'photos' => ['src' => ['images/a.webp', 'javascript:alert(1)', 'images/b.webp'], 'group' => ['at-work', 'at-work', 'nonsense'], 'alt' => ['QA at work', '', ''], 'caption' => ['On site', '', '']]];
+    wp_update_post(['ID' => $post->ID, 'post_title' => $post->post_title]);
+    $saved = get_post_meta($post->ID, '_bl_record', true);
+    bl_test_assert(!$firstImage || $saved['gallery_alt'] === [$firstImage => 'QA loader lifting a pallet'], 'Gallery alternative text was not saved by path');
+    bl_test_assert($saved['seo_description'] === 'QA description' && $saved['highlights'] === [['title' => 'QA highlight', 'text' => 'Fits a gate']], 'Search description or highlights were not saved');
+    bl_test_assert($saved['faq'] === [['q' => 'QA question?', 'a' => 'QA answer.', 'link_label' => 'Support', 'link_url' => '/support/#containers']] && $saved['attachments'] === ['Auger', 'Pallet forks'], 'Questions or attachments were not saved');
+    bl_test_assert($saved['photos'] === [['src' => 'images/a.webp', 'group' => 'at-work', 'alt' => 'QA at work', 'caption' => 'On site']], 'Photographs were not cleaned');
+    unset($_POST['bl_page_nonce'], $_POST['bl_page'], $_POST['bl_record']['gallery_alt']);
+    wp_update_post(['ID' => $post->ID, 'post_title' => $post->post_title]);
+    bl_test_assert(get_post_meta($post->ID, '_bl_record', true)['gallery_alt'] === $saved['gallery_alt'], 'A form without the alt fields cleared them');
     bl_test_assert(bl_find_record(bl_wp_products(), $post->post_name)['model'] === 'QA-PERSISTENCE', 'Frontend did not read saved data');
     $_POST['bl_record_nonce'] = 'invalid';
     $_POST['bl_record']['model'] = 'QA-NONCE-REJECT';
@@ -70,12 +86,18 @@ try {
     $record['specs']['Rated load'] = '1,234 kg';
     $record['specs']['Hydraulic flow'] = '40 L/min & 20 MPa';
     $record['gallery'] = ['javascript:alert(1)', $original['gallery'][0] ?? 'images/a.webp'];
+    $record['seo_description'] = str_repeat('Long ', 60);
+    $record['faq'] = [['q' => 'Q?', 'a' => 'A.', 'link_label' => 'Bad', 'link_url' => 'javascript:alert(1)'], 'not-a-row'];
+    $record['photos'] = [['src' => 'images/c.webp', 'group' => 'drawing', 'alt' => '', 'caption' => '']];
+    $record['gallery_alt'] = ['javascript:alert(1)' => 'x', ($original['gallery'][0] ?? 'images/a.webp') => '<i>QA</i> alt'];
     $write = new WP_REST_Request('POST', '/wp/v2/bl_product/' . $product->ID);
     $write->set_body_params(['meta' => ['_bl_record' => $record]]);
     bl_test_assert(rest_do_request($write)->get_status() === 200, 'REST write was refused');
     $saved = get_post_meta($product->ID, '_bl_record', true);
     bl_test_assert($saved['model'] === 'QA-REST' && $saved['load'] === 1234 && $saved['specs']['Rated load'] === '1,234 kg', 'REST write was not cleaned or derived');
     bl_test_assert($saved['specs']['Hydraulic flow'] === '40 L/min & 20 MPa' && !in_array('javascript:alert(1)', $saved['gallery'], true), 'REST write mangled text or kept a script link');
+    bl_test_assert(mb_strlen($saved['seo_description']) === 200 && $saved['faq'] === [['q' => 'Q?', 'a' => 'A.', 'link_label' => '', 'link_url' => '']], 'REST product page fields were not cleaned');
+    bl_test_assert($saved['photos'][0]['group'] === 'drawing' && $saved['gallery_alt'] === [($original['gallery'][0] ?? 'images/a.webp') => 'QA alt'], 'REST photographs or alternative text were not cleaned');
     $partial = new WP_REST_Request('POST', '/wp/v2/bl_product/' . $product->ID);
     $partial->set_body_params(['meta' => ['_bl_record' => ['specs' => ['Rated load' => '900 kg'], 'spec_source' => '<i>QA brochure</i>']]]);
     bl_test_assert(rest_do_request($partial)->get_status() === 200, 'REST partial write was refused');
