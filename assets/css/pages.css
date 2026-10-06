@@ -548,8 +548,8 @@
 .bl-site .bl-quick-close:hover{background:#173346}
 .bl-site .bl-quick-form,.bl-site .bl-quick-fallback{padding:18px 22px 22px}
 .bl-site .bl-quick-form .bl-selected-model{margin-bottom:12px}
-/* The same form, shortened: no step headings, no company line, a smaller message box, the button across the panel. */
-.bl-site .bl-quick-form .bl-inquiry-form legend,.bl-site .bl-quick-form .bl-form-grid label:has([name="company"]){display:none}
+/* The same form, shortened: no step headings, no company line (unless the saved form makes it required), a smaller message box, the button across the panel. */
+.bl-site .bl-quick-form .bl-inquiry-form legend,.bl-site .bl-quick-form .bl-form-grid label:has([name="company"]):not(:has([aria-required="true"])){display:none}
 .bl-site .bl-quick-form .bl-inquiry-form fieldset{margin:0 0 14px}
 .bl-site .bl-quick-form .wpcf7-radio{gap:6px}
 .bl-site .bl-quick-form .wpcf7-list-item-label{padding:8px 10px;font-size:var(--fs-micro)}

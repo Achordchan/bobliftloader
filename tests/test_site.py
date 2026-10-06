@@ -447,6 +447,9 @@ class WebsiteTests(unittest.TestCase):
         for path in ('/contact/', '/thank-you/'):
             _, html, _ = fetch(path)
             self.assertNotIn('class="bl-quick"', html)
+        # The company line is only hidden while it is optional, so a form saved with [text* company] stays submittable.
+        _, css, _ = fetch('/assets/css/pages.css')
+        self.assertIn('label:has([name="company"]):not(:has([aria-required="true"])){display:none}', css)
 
     def test_header_language_switch_placeholder(self):
         _, html, _ = fetch('/about/')
