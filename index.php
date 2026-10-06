@@ -25,13 +25,13 @@ if (bl_is_wordpress()) status_header($route['status']); else http_response_code(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#081c2b">
   <?php bl_render_seo($route); ?>
-  <link rel="icon" href="<?= bl_escape(bl_asset('images/icons/favicon.ico')) ?>" sizes="48x48">
-  <link rel="icon" href="<?= bl_escape(bl_asset('images/icons/icon-32.png')) ?>" type="image/png" sizes="32x32">
-  <link rel="icon" href="<?= bl_escape(bl_asset('images/icons/icon-192.png')) ?>" type="image/png" sizes="192x192">
-  <link rel="apple-touch-icon" href="<?= bl_escape(bl_asset('images/icons/apple-touch-icon.png')) ?>">
+  <link rel="icon" href="<?= bl_escape(bl_brand_icon('images/icons/favicon.ico', 48)) ?>" sizes="48x48">
+  <link rel="icon" href="<?= bl_escape(bl_brand_icon('images/icons/icon-32.png', 32)) ?>" type="image/png" sizes="32x32">
+  <link rel="icon" href="<?= bl_escape(bl_brand_icon('images/icons/icon-192.png', 192)) ?>" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="<?= bl_escape(bl_brand_icon('images/icons/apple-touch-icon.png', 180)) ?>">
   <link rel="preload" href="<?= bl_escape(bl_asset('fonts/barlow-condensed-700.ttf')) ?>" as="font" type="font/ttf" crossorigin>
   <?php if ($route['type'] === 'home'): $heroImages = bl_home_hero_images(); ?><link rel="preload" href="<?= bl_escape($heroImages['wide']) ?>" as="image" media="(min-width: 801px)" fetchpriority="high"><link rel="preload" href="<?= bl_escape($heroImages['narrow']) ?>" as="image" media="(max-width: 800px)" fetchpriority="high"><?php endif; ?>
-  <?php if ($route['type'] === 'about'): ?><link rel="preload" as="image" imagesrcset="<?= bl_escape(bl_asset('images/about/hall-1200.webp')) ?> 1200w, <?= bl_escape(bl_asset('images/about/hall-2560.webp')) ?> 2560w" imagesizes="100vw" fetchpriority="high"><?php endif; ?>
+  <?php if ($route['type'] === 'about'): ?><link rel="preload" as="image" imagesrcset="<?= bl_escape(bl_content_asset('about', 'hero.image_small', 'images/about/hall-1200.webp')) ?> 1200w, <?= bl_escape(bl_content_asset('about', 'hero.image', 'images/about/hall-2560.webp')) ?> 2560w" imagesizes="100vw" fetchpriority="high"><?php endif; ?>
   <?php foreach (['base', 'home', 'components', 'responsive', 'pages', 'page-responsive', ...($route['type'] === 'about' ? ['about'] : []), ...(in_array($route['type'], ['applications', 'application', 'application_case'], true) ? ['applications'] : []), ...(in_array($route['type'], ['news', 'article', 'application_case'], true) ? ['news'] : []), ...($route['type'] === 'product' ? ['product'] : [])] as $stylesheet): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset_versioned('css/' . $stylesheet . '.css')) ?>"><?php endforeach; ?>
   <script type="importmap"><?= bl_script_import_map() ?></script>
   <script type="module" src="<?= bl_escape(bl_asset_versioned('js/main.js')) ?>"></script>

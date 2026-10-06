@@ -20,6 +20,7 @@ require_once __DIR__ . '/inc/wp-admin-ui.php';
 require_once __DIR__ . '/inc/wp-inquiry.php';
 require_once __DIR__ . '/inc/wp-inquiry-templates.php';
 require_once __DIR__ . '/inc/wp-rest.php';
+require_once __DIR__ . '/inc/wp-tracking.php';
 
 add_action('after_setup_theme', static function (): void {
     add_theme_support('post-thumbnails');
@@ -28,9 +29,9 @@ add_action('after_setup_theme', static function (): void {
 // Our shared document renders one canonical, title and robots block for every route.
 remove_action('wp_head', 'rel_canonical');
 remove_action('wp_head', 'wp_robots');
-// The icons are the theme's own (index.php): drop the platform's default site icon so only ours is advertised, and point /favicon.ico at ours.
+// index.php renders one icon set; honor an administrator's site icon before theme defaults.
 remove_action('wp_head', 'wp_site_icon', 99);
-add_filter('get_site_icon_url', static fn($url, $size = 512) => bl_asset((int) $size >= 180 ? 'images/icons/icon-192.png' : 'images/icons/icon-32.png'), 99, 2);
+add_filter('get_site_icon_url', static fn($url, $size = 512) => get_option('site_icon') ? $url : bl_content_asset('global', 'brand.icon', (int) $size >= 180 ? 'images/icons/icon-192.png' : 'images/icons/icon-32.png'), 99, 2);
 // The theme lists its own related products, articles and cases, so the platform's "Related" block (Jetpack) stays out of
 // the content it filters; otherwise it shows a second, Chinese-labelled list inside product overviews.
 add_filter('jetpack_relatedposts_filter_enabled_for_request', '__return_false');

@@ -191,8 +191,16 @@ function bl_dashboard_widget(): void
     $groups = [
         '页面内容' => [
             ['首页内容', 'admin.php?page=bl-content-home', 'edit_pages', '首屏、产品、应用和联系区的文字与图片'],
-            ['采购与售后（Support）', 'admin.php?page=bl-content-support', 'edit_pages', '采购流程、质保、配件和常见问题'],
-            ['应用场景（Applications）', 'admin.php?page=bl-content-applications', 'edit_pages', '应用列表页和 ' . count($GLOBALS['bl_application_base'] ?? []) . ' 个应用详情页'],
+            ['采购与售后', 'admin.php?page=bl-content-support', 'edit_pages', '采购流程、质保、配件和常见问题'],
+            ['应用场景', 'admin.php?page=bl-content-applications', 'edit_pages', '应用列表页和 ' . count($GLOBALS['bl_application_base'] ?? []) . ' 个应用详情页'],
+            ['全站设置', 'admin.php?page=bl-content-global', 'edit_pages', '公司与联系方式、页眉页脚、品牌图片；管理员可管理统计代码'],
+            ['滑移装载机', 'admin.php?page=bl-content-loaders', 'edit_pages', '栏目与产品公共模块、搜索信息'],
+            ['迷你翻斗车', 'admin.php?page=bl-content-dumpers', 'edit_pages', '栏目与产品公共模块、搜索信息'],
+            ['关于我们', 'admin.php?page=bl-content-about', 'edit_pages', '首屏、公司概况和工厂；公司介绍仍编辑原生页面正文'],
+            ['联系我们', 'admin.php?page=bl-content-contact', 'edit_pages', '联系页文字、照片与预约邮件'],
+            ['隐私说明', 'admin.php?page=bl-content-privacy', 'edit_pages', '邮件草稿与站内提交两种模式正文'],
+            ['新闻列表', 'admin.php?page=bl-content-news', 'edit_pages', '搜索标题、描述与分享图片'],
+            ['未找到页面', 'admin.php?page=bl-content-404', 'edit_pages', '404 文案与链接'],
             ['换产品画册', 'admin.php?page=bl-downloads', 'edit_pages', 'Support 页可下载的 PDF'],
             ['询盘邮件样式', 'admin.php?page=bl-inquiry-mail', 'edit_pages', '通知邮件的模板，可随时切换'],
         ],
@@ -204,7 +212,7 @@ function bl_dashboard_widget(): void
         ],
         '图片与网站' => [
             ['媒体库', 'upload.php', 'upload_files', '上传图片、视频和 PDF'],
-            ['其他页面', 'edit.php?post_type=page', 'edit_pages', '关于、联系、隐私等页面的正文'],
+            ['其他页面', 'edit.php?post_type=page', 'edit_pages', '原生页面的标题、网址与发布状态；关于、联系、隐私的展示内容见上方快捷入口'],
         ],
     ];
     echo '<div class="bl-dash">';

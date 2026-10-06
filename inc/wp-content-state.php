@@ -3,13 +3,31 @@ declare(strict_types=1);
 defined('ABSPATH') || exit;
 
 /** Both form and REST writes migrate first, merge declared maps, clean fields and store only differences. */
-function bl_content_prepare(string $page, array $previous, array $input, bool $form = false): array
+function bl_content_prepare(string $page, array $previous, array $input, bool $form = false): array|WP_Error
 {
+    if ($page === 'tracking' && !bl_can_manage_tracking()) throw new RuntimeException('没有保存统计代码的权限。');
     $previous = bl_content_migrate($page, $previous);
     if ($page === 'home') $input = bl_migrate_home_facts($input);
     // Empty HTML lists have no successful controls; a complete form explicitly clears these lists.
     if ($form) foreach (bl_content_schema($page) as $section) foreach ($section['fields'] as $field) {
         if ($field['type'] === 'list' && bl_content_get($input, $field['key']) === null) bl_content_set($input, $field['key'], []);
+    }
+    // The WhatsApp links on every page are built from the sales number, so it cannot be cleared.
+    if ($page === 'global' && is_array($input['company'] ?? null) && array_key_exists('sales_whatsapp', $input['company']) && preg_replace('/\D/', '', (string) $input['company']['sales_whatsapp']) === '') {
+        return new WP_Error('bl_content_whatsapp_invalid', '销售 WhatsApp 号码为必填项，请填写带国家区号的号码。本次修改未保存。', ['status' => 400]);
+    }
+    // Validate the submitted address before sanitization can turn invalid input into a different address.
+    $emailSubmitted = $page === 'global' && is_array($input['company'] ?? null) && array_key_exists('email', $input['company']);
+    if ($page === 'global' && ($emailSubmitted || $form)) {
+        $email = $input['company']['email'] ?? null;
+        if (!is_string($email) || !is_email(trim($email))) {
+            return new WP_Error('bl_content_email_invalid', '销售邮箱为必填项，请填写有效的邮箱地址。本次修改未保存。', ['status' => 400]);
+        }
+        $input['company']['email'] = trim($email);
+        // Choosing an address (the default included) survives difference-based persistence; saving other fields with the
+        // address untouched leaves an older form recipient alone.
+        // A REST client that sends an address has chosen it, even when it equals the default.
+        if (!$form || $input['company']['email'] !== bl_content_resolve($page, $previous)['company']['email']) $previous['_bl_email_explicit'] = true;
     }
     $current = bl_content_resolve($page, $previous);
     $merged = bl_merge_content($current, $input, bl_content_dynamic_paths($page));
@@ -44,7 +62,7 @@ function bl_content_locked(string $page, callable $compute, ?string $expected = 
     if ($token === '') return new WP_Error('bl_content_busy', '另一个保存正在进行，本次未保存。请稍后重试。', ['status' => 409]);
     try {
         $previous = bl_content_saved_now($page);
-        if ($expected !== null && !hash_equals(bl_content_revision($previous), $expected)) {
+        if ($expected !== null && !hash_equals(bl_content_revision($previous, $page), $expected)) {
             return new WP_Error('bl_content_conflict', '内容已被其他编辑者或接口修改，本表单版本已过期，本次未保存。', ['status' => 409]);
         }
         $diff = $compute($previous);
@@ -76,7 +94,8 @@ function bl_content_revision_input(string $revision): string
 function bl_content_request_page(): string
 {
     $page = isset($_POST['bl_page']) && is_string($_POST['bl_page']) ? sanitize_key(wp_unslash($_POST['bl_page'])) : '';
-    if (!isset(BL_CONTENT_PAGES[$page])) wp_die('未知页面。', '', ['response' => 400]);
+    if ($page === 'tracking' && !bl_can_manage_tracking()) wp_die('没有保存统计代码的权限。', '', ['response' => 403]);
+    if ($page !== 'tracking' && !isset(BL_CONTENT_PAGES[$page])) wp_die('未知页面。', '', ['response' => 400]);
     if (!current_user_can('edit_pages')) wp_die('没有编辑权限。', '', ['response' => 403]);
     return $page;
 }
@@ -115,10 +134,10 @@ function bl_content_handle_submission(string $operation): void
             // If temporary storage is unavailable, keep an escaped copy in the response instead of losing the submission.
             wp_die(esc_html($result->get_error_message()) . '<p>临时保存失败，请复制以下输入后返回：</p><textarea readonly rows="25" cols="100">' . esc_textarea(wp_json_encode($input, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . '</textarea>', '', ['response' => 409, 'back_link' => true]);
         }
-        wp_safe_redirect(admin_url('admin.php?page=bl-content-' . $page . '&bl_recovery=' . $id));
+        wp_safe_redirect(admin_url('admin.php?page=bl-content-' . ($page === 'tracking' ? 'global' : $page) . '&bl_recovery=' . $id));
         exit;
     }
-    wp_safe_redirect(admin_url('admin.php?page=bl-content-' . $page . ($operation === 'reset' ? '&bl_reset=1' : '&bl_saved=1')));
+    wp_safe_redirect(admin_url('admin.php?page=bl-content-' . ($page === 'tracking' ? 'global' : $page) . ($operation === 'reset' ? '&bl_reset=1' : '&bl_saved=1')));
     exit;
 }
 

@@ -1,0 +1,17 @@
+<?php
+/** Defaults retain the original frontend strings; sections feed the shared content editor. */
+return [
+    'defaults' => [
+        'seo' => ['title' => 'BOB-LIFT News & Company Updates', 'description' => 'Read company and exhibition updates from BOB-LIFT, with links to original announcements on the main BOB-LIFT website.', 'image' => ''],
+    ],
+    'sections' => [
+        [
+            'title' => '搜索结果显示',
+            'fields' => [
+                ['key' => 'seo.title', 'label' => '搜索标题', 'type' => 'text'],
+                ['key' => 'seo.description', 'label' => '搜索描述', 'type' => 'textarea'],
+                ['key' => 'seo.image', 'label' => '分享图片', 'type' => 'image', 'preview' => 'images/share-default.jpg'],
+            ],
+        ],
+    ],
+];

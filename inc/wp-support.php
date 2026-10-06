@@ -90,9 +90,7 @@ function bl_downloads_screen(): void
 
 // Editors who can change the other 网站内容 screens can change the catalogue too (options.php asks manage_options otherwise).
 add_filter('option_page_capability_bl_downloads', static fn(): string => 'edit_pages');
-add_action('admin_init', static function (): void {
-    register_setting('bl_downloads', 'bl_catalogue_url', ['type' => 'string', 'sanitize_callback' => static fn($value): string => esc_url_raw((string) $value, ['http', 'https'])]);
-});
+require_once __DIR__ . '/wp-catalogue-rest.php';
 
 // Keep the file size beside the address, so the Downloads list can show it without fetching the file on every visit.
 $bl_catalogue_size = static function ($old, $value): void {

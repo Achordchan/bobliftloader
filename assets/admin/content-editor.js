@@ -1,11 +1,18 @@
 /* 网站内容 screens: folding cards (remembered per screen), image picking, list rows (fold, add, remove, reorder) and unsaved-change warnings. */
 (function () {
   'use strict';
-  var form = document.querySelector('.bl-ce-form');
-  if (!form) return;
-  var jump = document.querySelector('.bl-jump');
+  var forms = Array.prototype.slice.call(document.querySelectorAll('.bl-ce-form'));
+  if (!forms.length) return;
+  var submitting = false;
+  window.addEventListener('beforeunload', function (event) {
+    if (submitting || !forms.some(function (form) { return form.classList.contains('is-dirty'); })) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
+  forms.forEach(function (form, index) {
+  var jump = index === 0 ? document.querySelector('.bl-jump') : null;
   var cards = Array.prototype.slice.call(form.querySelectorAll('[data-bl-card]'));
-  var toggleAll = document.querySelector('[data-bl-toggle-all]');
+  var toggleAll = index === 0 ? document.querySelector('[data-bl-toggle-all]') : null;
   var stateKey = 'bl-admin-open:' + (location.search.match(/[?&]page=([^&]*)/) || ['', ''])[1];
   var status = form.querySelector('.bl-savebar-status');
   var added = 0;
@@ -19,7 +26,7 @@
     if (dirty) return;
     dirty = true;
     form.classList.add('is-dirty');
-    status.textContent = '有未保存的修改';
+    if (status) status.textContent = '有未保存的修改';
   }
 
   function preview(box, url) {
@@ -119,12 +126,15 @@
     if (row) summarize(row);
   });
 
-  // Leaving with unsaved edits asks first.
-  form.addEventListener('submit', function () { dirty = false; });
-  window.addEventListener('beforeunload', function (event) {
-    if (!dirty) return;
-    event.preventDefault();
-    event.returnValue = '';
+  form.addEventListener('change', function (event) { markDirty(event.target); });
+  // A successful submission saves only this form; require consent before discarding another form's edits.
+  form.addEventListener('submit', function (event) {
+    var otherDirty = forms.some(function (other) { return other !== form && other.classList.contains('is-dirty'); });
+    if (otherDirty && !window.confirm('另一个表单有未保存的修改，继续保存将丢失这些修改。是否继续？')) {
+      event.preventDefault();
+      return;
+    }
+    submitting = !event.defaultPrevented;
   });
 
   // Cards: saving redirects back to this screen, so the open ones are remembered for the session; a #hash opens its card.
@@ -175,5 +185,6 @@
     event.preventDefault();
     card.scrollIntoView({ behavior: 'auto', block: 'start' });
     history.replaceState(null, '', link.getAttribute('href'));
+  });
   });
 })();

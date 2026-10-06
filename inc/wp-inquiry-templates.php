@@ -182,7 +182,7 @@ function bl_inquiry_mail_screen(): void
 {
     $current = bl_wp_inquiry_mail_template();
     $preview = static fn(string $key, string $sample): string => esc_url(admin_url('admin-post.php?action=bl_inquiry_mail_preview&template=' . $key . '&sample=' . $sample));
-    echo '<div class="wrap bl-inquiry-mail"><div class="bl-page-head"><div><h1>询盘邮件</h1><p>网站询盘表单发到 ' . esc_html(BL_ENQUIRY_EMAIL) . ' 的通知邮件用哪种样式。保存后，下一封询盘起生效；内容和字段都一样，只是排版不同。</p></div></div><hr class="wp-header-end">';
+    echo '<div class="wrap bl-inquiry-mail"><div class="bl-page-head"><div><h1>询盘邮件</h1><p>网站询盘表单发到 ' . esc_html(bl_company('email')) . ' 的通知邮件用哪种样式。保存后，下一封询盘起生效；内容和字段都一样，只是排版不同。</p></div></div><hr class="wp-header-end">';
     settings_errors();
     echo '<form method="post" action="options.php">';
     settings_fields('bl_inquiry_mail');

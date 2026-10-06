@@ -52,7 +52,7 @@ $send = $content['send'];
     <p><?= bl_escape($send['text']) ?></p>
     <div class="bl-apps-send-actions">
       <a class="bl-button bl-button-blue" href="<?= bl_escape(bl_url('/contact/') . '#enquiry') ?>">Start an enquiry <?= bl_icon('arrow-up-right') ?></a>
-      <a class="bl-text-link" href="https://wa.me/8615852499415" target="_blank" rel="noopener">Send photos on WhatsApp <?= bl_icon('arrow-up-right') ?></a>
+      <a class="bl-text-link" href="<?= bl_escape(bl_company('sales_whatsapp_url')) ?>" target="_blank" rel="noopener">Send photos on WhatsApp <?= bl_icon('arrow-up-right') ?></a>
     </div>
   </div>
   <ol class="bl-apps-send-list">

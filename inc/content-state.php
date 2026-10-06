@@ -29,7 +29,7 @@ function bl_content_resolve(string $page, array $saved): array
 }
 
 /** A hash includes the stored revision, detecting edits even when a reset returns to identical content. */
-function bl_content_revision(array $saved): string
+function bl_content_revision(array $saved, string $page = ''): string
 {
     return hash('sha256', serialize($saved));
 }
