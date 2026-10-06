@@ -103,11 +103,12 @@
   .bl-site .bl-footer-links>div{font-size:14px;gap:0}
   .bl-site .bl-footer-links>div>a{display:inline-flex;align-items:center;min-height:44px;max-width:100%;overflow-wrap:anywhere}
   .bl-site .bl-footer-links .bl-eyebrow{font-size:12px;margin-bottom:0}
-  .bl-site .bl-footer-links>.bl-footer-domain{grid-area:domain;display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:16px;padding-top:14px;border-top:1px solid #425360}
-  .bl-site .bl-footer-domain>.bl-eyebrow,.bl-site .bl-footer-domain>p{grid-column:1/-1}
-  .bl-site .bl-footer-domain>a{white-space:nowrap}
+  .bl-site .bl-footer-links>.bl-footer-domain{grid-area:domain;min-width:0;display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;column-gap:16px;padding-top:14px;border-top:1px solid #425360}
+  .bl-site .bl-footer-domain>.bl-eyebrow,.bl-site .bl-footer-domain>p{flex-basis:100%}
+  .bl-site .bl-footer-domain>a{min-width:0;overflow-wrap:anywhere}
+  .bl-site .bl-footer-domain>a .bl-icon{flex-shrink:0}
   .bl-site .bl-footer-links>.bl-footer-domain>p{max-width:none;margin:6px 0 0;font-size:13px;line-height:1.5}
-  .bl-site .bl-footer-domain>span:last-child{font-size:13px;text-align:right}
+  .bl-site .bl-footer-domain>span:last-child{min-width:0;margin-left:auto;font-size:13px;text-align:right;overflow-wrap:anywhere}
   .bl-site .bl-footer-bottom{font-size:12px;min-height:56px;padding-block:6px}
   .bl-site .bl-footer-bottom>a{display:inline-flex;align-items:center;min-height:44px;padding-left:8px;margin-left:-8px}
   .bl-site .bl-dialog{max-width:calc(100% - 24px);max-height:calc(100svh - 24px)}

@@ -212,8 +212,8 @@
   .bl-site .bl-product-hero:not(:has(.bl-model-decode)) .bl-product-main-image{max-height:max(150px,calc(100svh - 432px - env(safe-area-inset-bottom,0px)))}
   .bl-site .bl-product-main-image>img{padding:8px 12px 22px}
   .bl-site .bl-gallery-zoom{justify-content:center;min-width:44px;min-height:44px;padding:0 12px}
-  .bl-site .bl-gallery-thumbs{position:absolute;grid-area:1/1;left:4px;right:64px;bottom:-6px;z-index:1;display:flex;gap:0;margin:0;padding:0;overflow:visible}
-  .bl-site .bl-gallery-thumbs button{flex:0 1 44px;width:auto;min-width:0;height:44px;aspect-ratio:auto;padding:0;background:none;border:0}
+  .bl-site .bl-gallery-thumbs{position:absolute;grid-area:1/1;left:4px;right:64px;bottom:-6px;z-index:1;display:flex;gap:0;margin:0;padding:0;overflow-x:auto;scroll-snap-type:none}
+  .bl-site .bl-gallery-thumbs button{flex:0 0 32px;width:auto;min-width:32px;height:44px;aspect-ratio:auto;padding:0;background:none;border:0}
   .bl-site .bl-gallery-thumbs button::before{content:'';display:block;width:8px;height:8px;margin:auto;border-radius:4px;background:#b9c4c9;transition:width .2s,background .2s}
   .bl-site .bl-gallery-thumbs button[aria-pressed=true]::before{width:18px;background:var(--blue)}
   .bl-site .bl-gallery-thumbs button:focus-visible{outline-offset:-6px}
