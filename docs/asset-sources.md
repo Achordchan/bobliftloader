@@ -73,3 +73,7 @@ codex-image（gpt-image-2.5-sunburst）改图，参考图两张：FY30 实拍 `a
 ## 产品目录 PDF（`assets/downloads/boblift-compact-equipment-catalogue.pdf`）
 
 2026-10-06 重做，替换原先 ImageMagick 拼成的无品牌供应商画册（纯图片、无文本层、含本站不卖的型号）。新版 27 页 A4：文本层可检索，带文档属性、书签、Tagged PDF 与图片替代文字，每款产品页有二维码和链接指向线上产品页。参数取自线上 18 款 `_bl_record`；图片全部为实拍（主题产品图、`assets/images/about/` 工厂照片、Mac `工作/滑移装载机(1)/照片/红色 360-460 站/` 原图、翻斗车画册 FY30 厂区图）。BL-T390-C / BL-T490-C 暂无实拍，页内放轮式 S390-C / S490-C 并注明。生成脚本与预览在项目共享文件夹 `bobliftloader/catalog-pdf/`。
+
+## 翻斗车系列卡补 BOB-LIFT 字样（2026-10-06）
+
+`assets/images/range-dumper-studio.webp`（1374 × 1145，首页翻斗车系列卡、产品总览、顶部菜单共用）原版按旧提示词去掉了车斗上的 BOB-LIFT 字样，与实拍不符。codex-image（gpt-image-2.5-sunburst）以原图和 FY30 实拍 `assets/images/products/3-ton-mini-dumper.webp` 为参考改图，只在车斗朝向镜头的侧面加上 BOB-LIFT，字体、颜色、位置照实拍，其余不变；放大检查字母无变形。新规则：参考原图有自家 logo 时保留，不再要求去掉。
