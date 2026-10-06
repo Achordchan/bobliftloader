@@ -43,12 +43,18 @@ function bl_product_description(array $product): string
  */
 function bl_product_gallery(array $product): array
 {
-    $paths = array_slice(($product['gallery'] ?? []) ?: array_filter([$product['image']]), 0, BL_CONTENT_LIMITS['gallery']);
+    $all = array_values(($product['gallery'] ?? []) ?: array_filter([$product['image']]));
+    $limit = BL_CONTENT_LIMITS['gallery'];
+    // Past the limit the main image keeps its place in the set (it opens the page and the lightbox), taking the last slot.
+    $keep = array_slice(array_keys($all), 0, $limit);
+    $main = $product['image'] ? bl_product_main_index($product, array_map(static fn($src) => ['src' => $src], $all)) : null;
+    if ($main !== null && $main >= $limit) $keep = [...array_slice($keep, 0, $limit - 1), $main];
     $written = is_array($product['gallery_alt'] ?? null) ? $product['gallery_alt'] : [];
-    $count = count($paths);
+    $count = count($keep);
     $images = [];
-    foreach (array_values($paths) as $i => $src) {
-        $raw = (string) ($product['gallery_paths'][$i] ?? $src);
+    foreach ($keep as $i => $index) {
+        $src = $all[$index];
+        $raw = (string) ($product['gallery_paths'][$index] ?? $src);
         $alt = trim((string) ($written[$raw] ?? ''));
         $images[] = ['src' => $src, 'alt' => $alt !== '' ? $alt : $product['name'] . ($count > 1 ? ', photograph ' . ($i + 1) . ' of ' . $count : '')];
     }
