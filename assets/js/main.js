@@ -63,7 +63,8 @@ document.querySelectorAll('.bl-site-switch, .bl-lang-switch').forEach((siteSwitc
   document.addEventListener('click', closeSwitch);
   document.addEventListener('focusin', closeSwitch);
   if (!inHeader) return;
-  siteSwitch.addEventListener('toggle', () => { if (siteSwitch.open) closeNavigation(); });
+  // The language switch sits inside the menu on phones, so opening it must leave the menu open.
+  if (!navigation.contains(siteSwitch)) siteSwitch.addEventListener('toggle', () => { if (siteSwitch.open) closeNavigation(); });
   menuToggle.addEventListener('click', () => { siteSwitch.open = false; });
 });
 

@@ -177,7 +177,7 @@
 .bl-site .bl-footer-top .bl-site-panel a:hover .bl-icon{transform:translate(2px,-2px)}
 @media(prefers-reduced-motion:reduce){.bl-site .bl-site-panel{animation:none}}
 /* Language switch, between search and Let's talk (templates/partials/language-switch.php). A placeholder until other
-   languages go live: English is current, the panel says more are coming. Phones leave it out of the menu for now. */
+   languages go live: English is current, the panel says more are coming. */
 .bl-site .bl-lang-switch{position:relative;margin-left:clamp(-14px,-.6vw,-8px)}
 .bl-site .bl-lang-switch>summary{display:flex;align-items:center;gap:8px;height:clamp(40px,2.2vw,52px);padding:0 10px;border:1px solid transparent;font-size:var(--fs-micro);font-weight:600;letter-spacing:1.15px;list-style:none;cursor:pointer;transition:border-color .2s,background .2s}
 .bl-site .bl-lang-switch>summary::-webkit-details-marker{display:none}
@@ -195,4 +195,11 @@
 .bl-site .bl-lang-current small{color:#8fb0ff}
 .bl-site .bl-lang-soon b{color:#91aabb}
 .bl-site .bl-lang-note{padding:10px 10px 6px;border-top:1px solid #2b4456;font-size:var(--fs-label);line-height:1.5;color:#b7c9d5}
-@media(max-width:600px){.bl-site .bl-nav .bl-lang-switch{display:none}}
+/* Phones: with English alone it stays out of the menu; once another language is live it is a row of the menu, its list opening in place. */
+@media(max-width:600px){
+  .bl-site .bl-nav .bl-lang-switch-single{display:none}
+  .bl-site .bl-nav .bl-lang-switch{margin:0;border-bottom:1px solid #425766}
+  .bl-site .bl-nav .bl-lang-switch>summary{height:auto;padding:16px 0;border:0;background:none;font-size:13px}
+  .bl-site .bl-nav .bl-lang-switch>summary>i{margin-left:auto}
+  .bl-site .bl-nav .bl-lang-panel{position:static;width:auto;margin-bottom:12px;box-shadow:none;animation:none}
+}

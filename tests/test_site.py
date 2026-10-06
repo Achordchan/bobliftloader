@@ -444,6 +444,7 @@ class WebsiteTests(unittest.TestCase):
         self.assertLess(nav.index('bl-lang-switch'), nav.index('bl-nav-contact'))
         self.assertIn('class="bl-lang-current" aria-current="true"><b>English</b>', nav)
         self.assertIn('More languages are on the way.', nav)
+        self.assertIn('bl-lang-switch bl-lang-switch-single', nav)  # English alone: kept out of the phone menu
 
     def test_thank_you_page_follows_the_sent_enquiry(self):
         status, html, _ = fetch('/thank-you/')
