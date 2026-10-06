@@ -44,10 +44,27 @@ function bl_business_migrate(string $page, array $saved): array
     $walk = static function (array $value, array $defaults) use (&$walk, $variables): array {
         foreach ($value as $key => $item) {
             $default = $defaults[$key] ?? null;
-            if (is_array($item) && is_array($default)) $value[$key] = $walk($item, $default);
+            // A reordered list is matched row by row against every stock row, field by field, not by position.
+            if (is_array($item) && is_array($default) && array_is_list($item) && array_is_list($default)) $value[$key] = bl_business_migrate_list($item, $default, $variables);
+            elseif (is_array($item) && is_array($default)) $value[$key] = $walk($item, $default);
             elseif (is_string($item) && is_string($default) && $item === strtr($default, $variables)) $value[$key] = $default;
         }
         return $value;
     };
     return $walk($saved, $defaults);
+}
+
+/** Rows of a saved list whose fields still read as a stock row's former wording take that row's variable form. */
+function bl_business_migrate_list(array $rows, array $defaults, array $variables): array
+{
+    $stock = [];
+    foreach ($defaults as $row) {
+        if (is_string($row)) $stock[''][strtr($row, $variables)] = $row;
+        elseif (is_array($row)) foreach ($row as $field => $text) if (is_string($text)) $stock[$field][strtr($text, $variables)] = $text;
+    }
+    foreach ($rows as $i => $row) {
+        if (is_string($row) && isset($stock[''][$row])) $rows[$i] = $stock[''][$row];
+        elseif (is_array($row)) foreach ($row as $field => $text) if (is_string($text) && isset($stock[$field][$text])) $rows[$i][$field] = $stock[$field][$text];
+    }
+    return $rows;
 }
