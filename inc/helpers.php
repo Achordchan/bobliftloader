@@ -275,9 +275,9 @@ function bl_news_image_ratio(array $article): ?float
     $size = null;
     $id = (int) ($article['image_id'] ?? 0);
     if (!$id && function_exists('attachment_url_to_postid') && str_contains((string) $article['image'], '/wp-content/uploads/')) $id = (int) attachment_url_to_postid($article['image']);
-    if ($id && function_exists('wp_get_attachment_metadata')) {
-        $meta = wp_get_attachment_metadata($id);
-        if (!empty($meta['width']) && !empty($meta['height'])) $size = [(int) $meta['width'], (int) $meta['height']];
+    // The rendition the list shows ('large', which a site may hard-crop), not the original upload.
+    if ($id && function_exists('wp_get_attachment_image_src') && ($src = wp_get_attachment_image_src($id, 'large'))) {
+        if (!empty($src[1]) && !empty($src[2])) $size = [(int) $src[1], (int) $src[2]];
     }
     $file = $size ? false : strstr((string) parse_url((string) $article['image'], PHP_URL_PATH), '/assets/');
     if ($file && ($info = @getimagesize(dirname(__DIR__) . $file))) $size = $info;
