@@ -155,11 +155,11 @@ function bl_content_schema(string $page): array
                 'text' => ['label' => '说明', 'type' => 'textarea'],
             ]],
         ]],
-        ['title' => '等待期间', 'note' => '标题下方的三个链接：WhatsApp、下载画册（读“资料下载”里设置的画册）、产品总览。文字留空则不显示该链接。', 'fields' => [
+        ['title' => '等待期间', 'note' => '标题下方的链接：WhatsApp、下载画册（读“资料下载”里设置的画册）、滑移装载机和迷你翻斗车两个栏目。文字留空则不显示该链接。', 'fields' => [
             ['key' => 'more.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'more.whatsapp', 'label' => 'WhatsApp 链接文字', 'type' => 'text'],
             ['key' => 'more.catalogue', 'label' => '画册链接文字', 'type' => 'text'],
-            ['key' => 'more.range', 'label' => '产品总览链接文字', 'type' => 'text'],
+            ['key' => 'more.range', 'label' => '产品栏目链接文字', 'type' => 'text', 'help' => '两个栏目链接共用这句。'],
         ]],
     ];
     if ($page === 'support') return [

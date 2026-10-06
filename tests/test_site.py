@@ -442,7 +442,10 @@ class WebsiteTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertIn('class="bl-thanks-next"', html)
         self.assertIn('https://wa.me/8615852499415', html)
-        self.assertIn('href="/products/"', html.split('class="bl-thanks', 1)[1])
+        page = html.split('class="bl-thanks', 1)[1].split('</section>', 1)[0]
+        self.assertIn('href="/products/skid-steer-loaders/"', page)
+        self.assertIn('href="/products/mini-dumpers/"', page)
+        self.assertNotIn('href="/products/"', page)
         with open('inc/seo.php') as source: self.assertIn("$route['type'] !== 'thanks'", source.read())
         with open('assets/js/inquiry.js') as source: script = source.read()
         self.assertIn("'wpcf7mailsent'", script)

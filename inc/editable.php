@@ -463,7 +463,7 @@ function bl_thanks_defaults(): array
             'eyebrow' => 'WHILE YOU WAIT',
             'whatsapp' => 'Send photos of the route and work area on WhatsApp',
             'catalogue' => 'Download the equipment catalogue',
-            'range' => 'Browse the full range',
+            'range' => 'Browse the range',
         ],
     ];
 }

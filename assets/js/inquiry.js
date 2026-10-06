@@ -30,9 +30,10 @@ function initializeSentInquiry(wrap) {
   wrap.addEventListener('wpcf7reset', () => setTimeout(sync));
   sync();
   // Once the mail has gone, the visitor goes on to the thank-you page, which reports the enquiry (see reportSentInquiry).
-  wrap.addEventListener('wpcf7mailsent', () => {
-    const product = wrap.querySelector('input[name="product"]:checked')?.value || '';
-    try { sessionStorage.setItem(SENT_KEY, JSON.stringify({ product, model: model?.value || '' })); } catch { /* storage blocked: the page still loads */ }
+  // The values come from the submission itself, not the form, which the visitor may have changed while it was sending.
+  wrap.addEventListener('wpcf7mailsent', (event) => {
+    const sent = Object.fromEntries((event.detail?.inputs || []).map(({ name, value }) => [name, value]));
+    try { sessionStorage.setItem(SENT_KEY, JSON.stringify({ product: sent.product || '', model: sent.model || '' })); } catch { /* storage blocked: the page still loads */ }
     if (wrap.dataset.thanks) window.location.assign(wrap.dataset.thanks);
   });
 }
