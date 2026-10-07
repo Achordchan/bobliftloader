@@ -1,0 +1,76 @@
+<?php
+declare(strict_types=1);
+
+/** Request-local index of loaded records. Exact slugs reserve their keys before historical slugs are added. */
+function bl_record_slug_index(array $records): array
+{
+    static $indexes = [];
+    $key = hash('sha256', serialize($records));
+    if (isset($indexes[$key])) return $indexes[$key];
+    $index = [];
+    foreach ($records as $record) $index[$record['slug']] ??= $record;
+    foreach ($records as $record) foreach ((array) ($record['_wp_old_slug'] ?? []) as $slug) {
+        if (is_string($slug) && $slug !== '') $index[$slug] ??= $record;
+    }
+    return $indexes[$key] = $index;
+}
+
+/** Current names always win; case folding matches the existing model and attachment readers. */
+function bl_named_record_index(array $records, string $field, string $aliases): array
+{
+    $index = [];
+    foreach ($records as $record) $index[strtolower((string) $record[$field])] = $record;
+    foreach ($records as $record) foreach ((array) ($record[$aliases] ?? []) as $name) {
+        if (is_string($name) && $name !== '') $index[strtolower($name)] ??= $record;
+    }
+    return $index;
+}
+
+/** Retain history in the same product record; submitted alias fields are never trusted. */
+function bl_product_model_aliases(array $record, array $previous): array
+{
+    $old = (string) ($previous['model'] ?? '');
+    if ($old !== '' && $old !== (string) ($record['model'] ?? '')) {
+        $record['model_aliases'] = array_values(array_unique([...(array) ($previous['model_aliases'] ?? []), $old]));
+    }
+    return $record;
+}
+
+/** Resolve loading keys in memory; explicit current keys (including empty values) take precedence. */
+function bl_loading_aliases(array $loading, array $products): array
+{
+    $index = bl_record_slug_index($products);
+    foreach ($loading as $slug => $fit) {
+        $current = $index[$slug]['slug'] ?? $slug;
+        if ($current !== $slug && !array_key_exists($current, $loading)) $loading[$current] = $fit;
+    }
+    return $loading;
+}
+
+/** Preserve history across reordering; infer a rename only at the same position with unique, unchanged row evidence. */
+function bl_attachment_row_aliases(array $rows, array $previous): array
+{
+    $names = array_count_values(array_column($previous, 'name'));
+    $images = array_count_values(array_column($previous, 'image'));
+    $newImages = array_count_values(array_column($rows, 'image'));
+    $newNames = array_count_values(array_column($rows, 'name'));
+    foreach ($rows as $i => &$row) {
+        $old = null;
+        foreach ($previous as $candidate) {
+            if ($candidate['name'] === $row['name'] && ($names[$row['name']] ?? 0) === 1 && ($newNames[$row['name']] ?? 0) === 1) { $old = $candidate; break; }
+        }
+        if ($old === null && count($rows) === count($previous) && isset($previous[$i])) {
+            $candidate = $previous[$i];
+            $image = (string) ($row['image'] ?? '');
+            if ($image !== '' && ($images[$image] ?? 0) === 1 && ($newImages[$image] ?? 0) === 1
+                && !isset($newNames[$candidate['name']]) && !isset($names[$row['name']])
+                && $image === ($candidate['image'] ?? '') && ($row['group'] ?? '') === ($candidate['group'] ?? '') && ($row['use'] ?? '') === ($candidate['use'] ?? '')) $old = $candidate;
+        }
+        if ($old === null) continue;
+        $aliases = (array) ($old['aliases'] ?? []);
+        if ($old['name'] !== '' && $old['name'] !== $row['name']) $aliases[] = $old['name'];
+        if ($aliases) $row['aliases'] = array_values(array_unique($aliases));
+    }
+    unset($row);
+    return $rows;
+}

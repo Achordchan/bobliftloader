@@ -77,6 +77,11 @@ function bl_content_selector(string $kind, string $name, string|array $value): s
         }
         foreach (bl_products() as $product) if ($product['model'] !== '' && ($category === '' || ($product['category'] ?? '') === $category)) $options[$product['model']] = $product['model'];
     } else foreach (bl_attachments() as $items) foreach ($items as $item) $options[$item['name']] = $item['name'];
+    $records = $kind === 'models' ? bl_products() : array_merge([], ...array_values(bl_attachments()));
+    $field = $kind === 'models' ? 'model' : 'name';
+    $index = bl_named_record_index($records, $field, $kind === 'models' ? 'model_aliases' : 'aliases');
+    $chosen = array_values(array_unique(array_map(static fn($choice) => isset($index[strtolower($choice)]) && isset($options[$index[strtolower($choice)][$field]]) ? $index[strtolower($choice)][$field] : $choice, $chosen)));
+    if (!$array) $value = implode(', ', $chosen);
     $html = '<div class="bl-picker" data-bl-selector data-bl-format="' . ($array ? 'array' : 'csv') . '" data-bl-name="' . esc_attr($name) . '" data-bl-choice-limit="' . ($kind === 'attachments' ? BL_CONTENT_LIMITS['attachments'] : 0) . '">';
     if (!$array) $html .= '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '">';
     $html .= '<p class="bl-picker-hint">勾选的项目排在前面，用箭头调整前台的显示顺序。</p><ul class="bl-picker-list">';

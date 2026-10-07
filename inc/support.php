@@ -36,7 +36,7 @@ function bl_service_steps(): array
  */
 function bl_container_loading(): array
 {
-    return array_filter(bl_editable('support')['containers']['loading'], static fn($fit): bool => is_array($fit) && count($fit) === 2);
+    return array_filter(bl_loading_aliases(bl_editable('support')['containers']['loading'], bl_products()), static fn($fit): bool => is_array($fit) && count($fit) === 2);
 }
 
 /** The catalogue on the Downloads list. WordPress can point it at an uploaded file (网站内容 → 资料下载). */
@@ -82,7 +82,9 @@ function bl_attachments(): array
 {
     $groups = [];
     foreach (bl_editable('loaders')['attachments']['items'] as $item) {
-        $groups[$item['group']][] = ['name' => $item['name'], 'use' => $item['use'], 'image' => $item['image']];
+        $row = ['name' => $item['name'], 'use' => $item['use'], 'image' => $item['image']];
+        if (!empty($item['aliases'])) $row['aliases'] = $item['aliases'];
+        $groups[$item['group']][] = $row;
     }
     return $groups;
 }
@@ -132,7 +134,7 @@ function bl_dumper_model_index(array $products): array
         if (isset($index[strtolower($name)])) $aliases[strtolower($model)] ??= $index[strtolower($name)];
         if (isset($index[strtolower($model)])) $aliases[strtolower($name)] ??= $index[strtolower($model)];
     }
-    return $index + $aliases;
+    return bl_named_record_index(array_values(array_filter($products, static fn($p) => $p['category'] === 'mini-dumpers')), 'model', 'model_aliases') + $aliases;
 }
 
 /** A product's videos: each has a source, a poster and a caption. Theme paths (videos/…) resolve to the theme's assets. */

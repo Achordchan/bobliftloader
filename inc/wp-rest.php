@@ -176,10 +176,11 @@ foreach (array_keys(BL_REST_FIELDS) as $bl_rest_type) {
         $id = (int) $request->get_param('id');
         $record = $id ? get_post_meta($id, '_bl_record', true) : [];
         if (!is_array($record)) $record = [];
+        $previous = $record;
         $previousPoster = (array) ($record['poster'] ?? []);
         foreach (BL_REST_FIELDS[$type] as $key) if (array_key_exists($key, $sent)) $record[$key] = $key === 'products' ? bl_rest_product_slugs($sent[$key], (array) ($record['products'] ?? [])) : bl_rest_field($type, $key, $sent[$key]);
         if ($type === 'bl_news' && array_key_exists('poster', $sent)) $record['poster'] = array_replace($previousPoster, $record['poster']);
-        if ($type === 'bl_product') $record = bl_product_derived($record);
+        if ($type === 'bl_product') $record = bl_product_model_aliases(bl_product_derived($record), $previous);
         $meta['_bl_record'] = $record;
         $request->set_param('meta', $meta);
         return $prepared;

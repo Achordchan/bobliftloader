@@ -74,6 +74,24 @@ try {
     wp_set_current_user(0);
 }
 bl_test_assert(count(bl_wp_products()) === $productCount, 'Product restore failed');
+// Real WordPress slug history must preserve a news association without rewriting the news record.
+$aliasProduct = wp_insert_post(['post_type' => 'bl_product', 'post_status' => 'publish', 'post_title' => 'Alias smoke product', 'post_name' => 'qa-alias-before']);
+$aliasNews = wp_insert_post(['post_type' => 'bl_news', 'post_status' => 'publish', 'post_title' => 'Alias smoke news']);
+try {
+    bl_test_assert($aliasProduct > 0 && $aliasNews > 0, 'Alias smoke fixtures could not be created');
+    $oldSlug = get_post($aliasProduct)->post_name;
+    update_post_meta($aliasProduct, '_bl_record', ['model' => 'QA-ALIAS']);
+    update_post_meta($aliasNews, '_bl_record', ['products' => [$oldSlug]]);
+    wp_update_post(['ID' => $aliasProduct, 'post_name' => 'qa-alias-after']);
+    bl_test_assert(in_array($oldSlug, get_post_meta($aliasProduct, '_wp_old_slug', false), true), 'WordPress did not record old slug');
+    $article = bl_wp_article_record(get_post($aliasNews));
+    $linked = bl_find_record(bl_wp_products(), $article['products'][0]);
+    bl_test_assert($linked && $linked['slug'] === get_post($aliasProduct)->post_name, 'News association broke after real slug rename');
+    bl_test_assert(get_post_meta($aliasNews, '_bl_record', true)['products'] === [$oldSlug], 'Slug rename rewrote news references');
+} finally {
+    if ($aliasNews) wp_delete_post($aliasNews, true);
+    if ($aliasProduct) wp_delete_post($aliasProduct, true);
+}
 // The record is open to the REST API (the WordPress.com connector writes through it): editors read and write it, a
 // REST write is cleaned and the derived load follows the specs, and anonymous visitors can neither read nor write it.
 // rest_do_request() points the global $post at whatever it last returned, so the product is kept apart.

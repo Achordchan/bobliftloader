@@ -123,7 +123,7 @@ function bl_admin_media(string $name, string $value, string $type = 'image', str
 function bl_product_basics_box(WP_Post $post): void
 {
     $record = bl_admin_record($post);
-    bl_admin_field('型号', 'bl-model', bl_admin_input('bl-model', 'bl_record[model]', (string) ($record['model'] ?? ''), 'text', ' class="regular-text" placeholder="BL-T360-H"'), '产品页大标题和产品卡片上显示的型号。');
+    bl_admin_field('型号', 'bl-model', bl_admin_input('bl-model', 'bl_record[model]', (string) ($record['model'] ?? ''), 'text', ' class="regular-text" placeholder="BL-T360-H"'), '产品页大标题和产品卡片上显示的型号。已发布产品修改 slug（网址别名）后，旧引用仍可解析；草稿改 slug 不会记录旧 slug，请同步检查引用。');
     bl_admin_field('产品栏目', 'bl-category', bl_admin_select('bl-category', 'bl_record[category]', ['skid-steer-loaders' => '滑移装载机', 'mini-dumpers' => '迷你翻斗车'], (string) ($record['category'] ?? 'skid-steer-loaders')), '决定产品出现在哪个栏目页。');
 }
 
@@ -232,6 +232,8 @@ function bl_news_products_box(WP_Post $post): void
 function bl_admin_product_checklist(WP_Post $post, string $intro): void
 {
     $chosen = (array) (bl_admin_record($post)['products'] ?? []);
+    $index = bl_record_slug_index(bl_products());
+    $chosen = array_map(static fn($slug) => $index[$slug]['slug'] ?? $slug, $chosen);
     echo '<p class="bl-field-help bl-box-intro">' . esc_html($intro) . '</p>';
     $groups = ['skid-steer-loaders' => ['滑移装载机', ''], 'mini-dumpers' => ['迷你翻斗车', '']];
     $products = get_posts(['post_type' => 'bl_product', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'menu_order title', 'order' => 'ASC']);
@@ -353,7 +355,9 @@ add_action('save_post', static function (int $postId): void {
         $image = $text('image');
         $record['image'] = str_starts_with($image, 'images/') && !str_contains($image, '..') ? $image : esc_url_raw($image, ['http', 'https']);
         if (get_post_type($postId) === 'bl_product') {
+            $previous = $record;
             $record['model'] = $text('model');
+            $record = bl_product_model_aliases($record, $previous);
             // Older forms without the field keep the stored value instead of clearing it.
             if (array_key_exists('spec_source', $input)) $record['spec_source'] = $text('spec_source');
             $record['category'] = in_array($text('category'), ['skid-steer-loaders', 'mini-dumpers'], true) ? $text('category') : 'skid-steer-loaders';

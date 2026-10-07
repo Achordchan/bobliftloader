@@ -31,7 +31,16 @@ function bl_content_prepare(string $page, array $previous, array $input, bool $f
     }
     $current = bl_content_resolve($page, $previous);
     $merged = bl_merge_content($current, $input, bl_content_dynamic_paths($page));
-    $diff = bl_content_diff(bl_content_clean_all($page, $merged), bl_content_clean_all($page, bl_content_defaults($page)));
+    $clean = bl_content_clean_all($page, $merged);
+    if ($page === 'loaders') {
+        $previousRows = $current['attachments']['items'];
+        foreach ($previousRows as &$row) {
+            foreach (['name', 'group', 'use', 'image'] as $key) $row[$key] = bl_content_clean($key === 'image' ? 'image' : 'text', $row[$key] ?? '');
+        }
+        unset($row);
+        $clean['attachments']['items'] = bl_attachment_row_aliases($clean['attachments']['items'], $previousRows);
+    }
+    $diff = bl_content_diff($clean, bl_content_clean_all($page, bl_content_defaults($page)));
     // Keep historical fields outside the current editor schema without exposing them as new editable fields.
     foreach (bl_content_schema($page) as $section) foreach ($section['fields'] as $field) {
         $parts = explode('.', $field['key']);

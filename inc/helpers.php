@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/record-aliases.php';
 
 function bl_is_wordpress(): bool
 {
@@ -355,12 +356,7 @@ function bl_news_label(array $article): string
 
 function bl_find_record(array $records, string $slug): ?array
 {
-    foreach ($records as $record) {
-        if ($record['slug'] === $slug) {
-            return $record;
-        }
-    }
-    return null;
+    return bl_record_slug_index($records)[$slug] ?? null;
 }
 
 function bl_product_url(array $product): string
@@ -520,8 +516,11 @@ function bl_load_range(array $range): string
 /** The machines an application names in 'models', in that order, matched by current or former model name; none named, none returned. */
 function bl_application_models(array $application): array
 {
-    $index = bl_dumper_model_index(bl_products());
-    foreach (bl_products() as $product) $index[strtolower($product['model'])] ??= $product;
+    $all = bl_products();
+    $index = bl_dumper_model_index($all);
+    foreach ($all as $product) $index[strtolower($product['model'])] ??= $product;
+    // Preserve the legacy catalogue resolution unless a saved rename history exists.
+    if (array_filter($all, static fn($product) => !empty($product['model_aliases']))) $index = bl_named_record_index($all, 'model', 'model_aliases') + $index;
     $products = [];
     foreach ((array) ($application['models'] ?? []) as $model) {
         $product = $index[strtolower(trim((string) $model))] ?? null;
