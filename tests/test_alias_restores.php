@@ -77,4 +77,10 @@ $check($restoredMoved[0]['aliases'] === ['Older tool', 'B tool'], 'a moved, rena
 // Resetting the loaders page keeps the renamed default row's history too.
 $resetRows = bl_content_restore_values('loaders', [], ['attachments' => ['items' => $renamed]])['attachments']['items'];
 $check(($resetRows[0]['aliases'] ?? null) === ['Renamed default'], 'reset to defaults dropped alias history');
+// Renamed away from a shipped address, figures edited there, renamed back: the saved figures win over the shipped ones.
+$back = bl_loading_aliases(['a' => [6, 14], 'b' => [9, 18]], [['slug' => 'a', '_wp_old_slug' => ['b']]], ['b' => [9, 18]]);
+$check($back['a'] === [9, 18], 'renaming back showed the shipped figures instead of the saved ones');
+// Renamed away with no edits: the shipped figures follow the product.
+$away = bl_loading_aliases(['a' => [6, 14]], [['slug' => 'b', '_wp_old_slug' => ['a']]], []);
+$check($away['b'] === [6, 14], 'shipped figures did not follow a renamed product');
 echo "PASS: $checks alias restore checks\n";

@@ -641,7 +641,7 @@ function bl_content_field(array $field, $value, bool $changed): void
             echo '</tbody></table></div>';
             break;
         case 'loading':
-            $value = bl_loading_aliases((array) $value, bl_products());
+            $value = bl_loading_aliases((array) $value, bl_products(), bl_loading_saved());
             echo '<div class="bl-ce-table-wrap"><table class="widefat striped bl-ce-table bl-ce-loading"><thead><tr><th>型号</th><th>20GP</th><th>40HQ</th></tr></thead><tbody>';
             foreach (bl_products() as $product) {
                 $fit = (array) ($value[$product['slug']] ?? []);

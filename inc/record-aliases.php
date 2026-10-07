@@ -64,15 +64,21 @@ function bl_attachment_restore_aliases(array $rows, array $previous): array
  * Resolve loading keys in memory. An explicit current key (even empty) wins; otherwise the most recent old address that
  * has figures does (WordPress keeps old slugs oldest first), so a further rename never falls back to older figures.
  */
-function bl_loading_aliases(array $loading, array $products): array
+function bl_loading_aliases(array $loading, array $products, ?array $saved = null): array
 {
+    // $saved: the keys an editor actually stored. Only those count as "explicit"; a key filled in from the theme defaults
+    // must not hide newer figures saved under a later address (e.g. a product renamed away and back).
+    $explicit = $saved ?? $loading;
     $index = bl_record_slug_index($products);
     foreach ($products as $product) {
         $current = (string) ($product['slug'] ?? '');
-        if ($current === '' || array_key_exists($current, $loading)) continue;
-        foreach (array_reverse((array) ($product['_wp_old_slug'] ?? [])) as $old) {
-            if (is_string($old) && array_key_exists($old, $loading) && ($index[$old]['slug'] ?? '') === $current) { $loading[$current] = $loading[$old]; break; }
-        }
+        if ($current === '' || array_key_exists($current, $explicit)) continue;
+        // Newest saved figures under an old address first, then figures the theme ships under an old address.
+        $olds = array_values(array_filter(array_reverse((array) ($product['_wp_old_slug'] ?? [])), static fn($old) => is_string($old) && array_key_exists($old, $loading) && ($index[$old]['slug'] ?? '') === $current));
+        // A product renamed back to an address the theme ships figures for still prefers figures saved under a later one;
+        // shipped figures under an old address only fill in when the current address has none at all.
+        $pick = current(array_filter($olds, static fn($old) => array_key_exists($old, $explicit))) ?: (array_key_exists($current, $loading) ? null : ($olds[0] ?? null));
+        if ($pick !== null) $loading[$current] = $loading[$pick];
     }
     return $loading;
 }

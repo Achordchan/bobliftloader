@@ -34,9 +34,16 @@ function bl_service_steps(): array
  * Approximate machines per container [20GP, 40HQ], open-seat versions with loader buckets taken off and packed alongside.
  * Estimated from each model's published dimensions; the loading plan is confirmed per order. A model without figures is left out.
  */
+/** The loading figures an editor saved (not the theme defaults filled in around them). */
+function bl_loading_saved(): array
+{
+    $saved = bl_is_wordpress() ? get_option('bl_content_support', []) : [];
+    return is_array($saved['containers']['loading'] ?? null) ? $saved['containers']['loading'] : [];
+}
+
 function bl_container_loading(): array
 {
-    return array_filter(bl_loading_aliases(bl_editable('support')['containers']['loading'], bl_products()), static fn($fit): bool => is_array($fit) && count($fit) === 2);
+    return array_filter(bl_loading_aliases(bl_editable('support')['containers']['loading'], bl_products(), bl_loading_saved()), static fn($fit): bool => is_array($fit) && count($fit) === 2);
 }
 
 /** The catalogue on the Downloads list. WordPress can point it at an uploaded file (网站内容 → 资料下载). */
