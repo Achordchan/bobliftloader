@@ -53,7 +53,7 @@ $prepared = run_filter('rest_pre_insert_bl_news', (object) ['post_content' => ''
 $data = run_filter('wp_insert_post_data', ['post_type' => 'bl_news', 'post_content' => ''], (array) $prepared);
 $check($data['post_content_filtered'] === 'bl-body-managed' && $request->get_param('meta') === null, 'body ownership required a metadata write');
 bl_lock_release('record_2', $token);
-for ($i = 0; $i < 13; $i++) bl_record_locked(2, static fn($old) => array_replace($old, ['caption' => "Version $i"]));
+for ($i = 0; $i < 13; $i++) { unset($GLOBALS['bl_record_history_entry']); bl_record_locked(2, static fn($old) => array_replace($old, ['caption' => "Version $i"])); } // one request per save
 $history = get_post_meta(2, '_bl_record_history', true);
 $check(count($history) === 10 && $history[0]['record']['caption'] === 'Version 11' && $history[9]['record']['caption'] === 'Version 2', 'record history cap/order incorrect');
 $before = $GLOBALS['meta'];

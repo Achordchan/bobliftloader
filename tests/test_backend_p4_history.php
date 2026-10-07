@@ -102,6 +102,7 @@ $check(!str_contains($renderArticle(true), 'Imported body') && str_contains($ren
 
 // Structured edits retain their own before-images, without creating WordPress revisions.
 foreach ([1, 2, 3] as $id) {
+    unset($GLOBALS['bl_record_history_entry']); // each save below is its own request
     $original = (array) get_post_meta($id, '_bl_record', true);
     $next = array_replace($original, ['source' => 'https://example.test/history']);
     $check(bl_record_locked($id, static fn() => $next) === true, 'record save failed');
@@ -111,4 +112,15 @@ foreach ([1, 2, 3] as $id) {
     $check(get_post_meta($id, '_bl_record', true) === $original, 'record restore changed editorial values');
     $check(get_post_meta($id, '_bl_record_history', true)[0]['record'] === $next, 'restore did not back up current record');
 }
+// One product form saves through several boxes in one request: one history entry, holding the record before the first.
+unset($GLOBALS['bl_record_history_entry']);
+$_POST['bl_product_complete'] = '1';
+$before = (array) get_post_meta(1, '_bl_record', true);
+$count = count((array) get_post_meta(1, '_bl_record_history', true));
+bl_record_locked(1, static fn(array $r) => array_replace($r, ['source' => 'https://example.test/one']));
+bl_record_locked(1, static fn(array $r) => array_replace($r, ['spec_source' => 'Box two']));
+bl_record_locked(1, static fn(array $r) => array_replace($r, ['caption' => 'Box three']));
+$history = get_post_meta(1, '_bl_record_history', true);
+$check(count($history) === min(10, $count + 1) && $history[0]['record'] === $before && $history[0]['changes'] >= 2, 'one submission took several history entries or lost its before-image');
+unset($GLOBALS['bl_record_history_entry'], $_POST['bl_product_complete']);
 echo "backend P4 history ok ($checks checks)\n";

@@ -3,11 +3,23 @@ declare(strict_types=1);
 defined('ABSPATH') || exit;
 
 /** Save the before-image under the record's lock, before writing the new record. */
-function bl_record_history_save(int $postId, array $previous, array $next): bool|WP_Error
+function bl_record_history_save(int $postId, array $previous, array $next, bool $separate = false): bool|WP_Error
 {
     $history = get_post_meta($postId, '_bl_record_history', true);
     $history = is_array($history) ? $history : [];
-    array_unshift($history, ['id' => wp_generate_uuid4(), 'saved_at' => gmdate('c'), 'user_id' => get_current_user_id(), 'record' => $previous, 'changes' => bl_content_change_count($previous, $next)]);
+    // One product form saves through several boxes in one request; they share one entry holding the record as it was
+    // before the first of them, and its change count follows the request's latest result.
+    $form = !$separate && ($_POST['bl_product_complete'] ?? '') === '1';
+    $entry = $form ? ($GLOBALS['bl_record_history_entry'][$postId] ?? '') : '';
+    // A restore always gets its own entry, so it can itself be undone.
+    if ($entry !== '' && ($history[0]['id'] ?? '') === $entry) {
+        $history[0]['changes'] = bl_content_change_count((array) $history[0]['record'], $next);
+        update_post_meta($postId, '_bl_record_history', wp_slash($history));
+        return true;
+    }
+    $id = wp_generate_uuid4();
+    $GLOBALS['bl_record_history_entry'][$postId] = $form ? $id : '';
+    array_unshift($history, ['id' => $id, 'saved_at' => gmdate('c'), 'user_id' => get_current_user_id(), 'record' => $previous, 'changes' => bl_content_change_count($previous, $next)]);
     $history = array_slice($history, 0, 10);
     if (!update_post_meta($postId, '_bl_record_history', wp_slash($history))) {
         return new WP_Error('bl_record_backup_failed', '修改历史保存失败，本次未保存。', ['status' => 500]);

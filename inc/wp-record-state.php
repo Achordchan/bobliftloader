@@ -17,7 +17,7 @@ function bl_record_locked(int $postId, callable $compute, bool $forceHistory = f
         $next = $compute($previous);
         if (is_wp_error($next)) return $next;
         if ($next === $previous && !$forceHistory) return true;
-        $backup = bl_record_history_save($postId, $previous, $next);
+        $backup = bl_record_history_save($postId, $previous, $next, $forceHistory);
         if (is_wp_error($backup)) return $backup;
         if ($next === $previous) return true;
         if (!bl_lock_owned('record_' . $postId, $token)) return new WP_Error('bl_record_busy', '记录保存锁已失效。', ['status' => 409]);
