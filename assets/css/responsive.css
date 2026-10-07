@@ -228,7 +228,10 @@
   .bl-site .bl-hero-scroll{display:none}
   /* The enquiry form goes to one column, as on phones held upright. */
   .bl-site .bl-form-grid{grid-template-columns:1fr;gap:20px}
-  /* Footer: the business column gets the room to keep "Visit our main website" and its arrow on one line. */
+}
+/* Landscape phones wider than 600px: the four-column footer gives the business column the room to keep "Visit our main
+   website" and its arrow on one line. At 600px and below the compact two-column footer stays as it is. */
+@media (min-width:601px) and (max-width:1000px) and (max-height:500px){
   .bl-site .bl-footer-links{grid-template-columns:1fr 1fr 1.2fr 1.5fr}
   .bl-site .bl-footer-domain{padding-left:24px}
   .bl-site .bl-footer-domain>a{white-space:nowrap}
