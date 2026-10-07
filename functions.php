@@ -43,6 +43,7 @@ add_action('wp', static function (): void {
 // Search and AI crawlers are welcome: drop the per-bot blocks the platform adds to robots.txt.
 add_filter('robots_txt', 'bl_allow_ai_crawlers', 99999);
 add_action('init', 'bl_register_content_types');
+add_action('template_redirect', 'bl_wp_application_route', 0);
 // /llms.txt for AI assistants (inc/llms.php); its opening text is a setting editable over REST.
 add_action('init', static function (): void {
     register_setting('bl_llms', BL_LLMS_TXT_INTRO_OPTION, ['type' => 'string', 'description' => 'llms.txt 开头的介绍（Markdown），留空用主题默认文字。', 'sanitize_callback' => 'sanitize_textarea_field', 'default' => '', 'show_in_rest' => true]);

@@ -1,0 +1,13 @@
+'use strict';
+const { readFileSync } = require('node:fs');
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+const control = () => ({ value: '', listeners: {}, addEventListener(name, callback) { this.listeners[name] = callback; } });
+const title = control(); const slug = control();
+const panel = { querySelector: selector => selector.includes('[title]') ? title : slug };
+vm.runInNewContext(readFileSync('assets/admin/application-content.js', 'utf8'), { document: { querySelector: () => panel } });
+title.value = 'Road & Site Maintenance'; title.listeners.input(); assert.equal(slug.value, 'road-site-maintenance');
+slug.value = 'road-work'; slug.listeners.input(); title.value = 'New Name'; title.listeners.input(); assert.equal(slug.value, 'road-work');
+slug.value = ''; slug.listeners.input(); title.listeners.input(); assert.equal(slug.value, 'new-name');
+vm.runInNewContext(readFileSync('assets/admin/application-content.js', 'utf8'), { document: { querySelector: () => null } });
+console.log('application slug interactions ok');

@@ -1,0 +1,48 @@
+<?php
+declare(strict_types=1);
+require __DIR__ . '/fixtures/wp-memory.php';
+require __DIR__ . '/../inc/bootstrap.php';
+require __DIR__ . '/../inc/wp-admin.php';
+require __DIR__ . '/../inc/wp-content-editor.php';
+require __DIR__ . '/../inc/wp-rest.php';
+$failures = [];
+$check = static function (bool $ok, string $message) use (&$failures): void { if (!$ok) $failures[] = $message; };
+$base = $GLOBALS['bl_application_base'];
+$defaults = bl_content_resolve('applications', []);
+$check(count(bl_apply_application_content($base, $defaults)) === 6, 'default scenarios duplicated');
+$next = bl_content_prepare('applications', [], ['new_jobs' => [['title' => 'Road Maintenance', 'product' => 'dumper', 'focus' => 'payload', 'image' => '/assets/images/app-dumper-sites.webp', 'models' => 'FY20-2', 'order' => '0', 'checks' => [['title' => 'Access', 'text' => 'Measure', 'measure' => 'mm']]]]]);
+$check(!is_wp_error($next), 'new scenario rejected');
+$resolved = bl_content_resolve('applications', $next);
+$check(isset($resolved['jobs']['road-maintenance']), 'generated slug missing');
+$visible = bl_apply_application_content($base, $resolved);
+$check(count($visible) === 7 && $visible[0]['slug'] === 'road-maintenance' && $visible[0]['product'] === 'dumper', 'new scenario order/family wrong');
+$next['jobs']['road-maintenance']['historical'] = 'keep';
+$hidden = bl_content_prepare('applications', $next, ['jobs' => ['road-maintenance' => ['hidden' => '1'], 'landscaping' => ['hidden' => '1']]]);
+$check($hidden['jobs']['road-maintenance']['historical'] === 'keep', 'unknown historical field lost');
+$check(count(bl_apply_application_content($base, bl_content_resolve('applications', $hidden))) === 5, 'hidden scenarios visible');
+$boolShown = bl_content_prepare('applications', $hidden, ['jobs' => ['road-maintenance' => ['hidden' => false]]]);
+$check(bl_content_resolve('applications', $boolShown)['jobs']['road-maintenance']['hidden'] === '0', 'REST boolean false rejected');
+$shown = bl_content_prepare('applications', $hidden, ['jobs' => ['road-maintenance' => ['hidden' => '0', 'title' => 'Renamed']]]);
+$check(bl_content_resolve('applications', $shown)['jobs']['road-maintenance']['checks'][0]['title'] === 'Access', 'partial save lost checklist');
+$check(count(bl_apply_application_content($base, bl_content_resolve('applications', $shown))) === 6, 'reshow failed');
+foreach ([['jobs' => ['road-maintenance' => ['slug' => 'changed']]], ['new_jobs' => [['title' => 'Duplicate', 'slug' => 'landscaping']]], ['jobs' => ['bad.slug' => ['title' => 'Bad']]], ['jobs' => ['landscaping' => ['product' => 'bad']]], ['jobs' => ['landscaping' => ['focus' => 'bad']]], ['jobs' => ['landscaping' => ['order' => '-1']]], ['jobs' => ['landscaping' => ['hidden' => 'false']]], ['new_jobs' => 'invalid'], ['new_jobs' => [['title' => []]]]] as $bad) $check(is_wp_error(bl_content_prepare('applications', $next, $bad)), 'invalid update accepted');
+$form = bl_content_resolve('applications', $shown); unset($form['jobs']['road-maintenance']['checks']);
+$cleared = bl_content_prepare('applications', $shown, $form, true);
+$check(bl_content_resolve('applications', $cleared)['jobs']['road-maintenance']['checks'] === [], 'new scenario checklist cannot clear');
+$unrelated = bl_content_prepare('applications', $shown, ['hero' => ['line1' => 'NEW']]);
+$check(bl_content_resolve('applications', $unrelated)['jobs'] === bl_content_resolve('applications', $shown)['jobs'], 'unrelated save changed jobs');
+$GLOBALS['options']['bl_content_applications'] = $next;
+$GLOBALS['options']['unrelated'] = ['untouched'];
+$meta = $GLOBALS['meta'];
+$check(bl_content_locked('applications', fn($previous) => bl_content_prepare('applications', $previous, ['jobs' => ['road-maintenance' => ['hidden' => '1']]]), bl_content_revision($next)) === true, 'locked save failed');
+$check($GLOBALS['options']['bl_content_snapshots_applications'][0]['content'] === $next, 'history snapshot lost new scenario');
+$check($GLOBALS['meta'] === $meta && $GLOBALS['options']['unrelated'] === ['untouched'], 'cross-record mutation');
+$check(bl_content_resolve('applications', bl_content_restore_values('applications', $next, $hidden))['jobs'] === bl_content_resolve('applications', $next)['jobs'], 'restore content differs');
+// Missing jobs in a partial update never delete records; reset/restore retains existing whole-page semantics.
+$check(isset(bl_content_resolve('applications', bl_content_prepare('applications', $next, ['jobs' => []]))['jobs']['road-maintenance']), 'empty update deleted scenario');
+$GLOBALS['posts'] = [1 => new WP_Post(1, 'bl_page_content', 'applications')];
+$request = new WP_REST_Request(['id' => 1, 'meta' => ['_bl_content' => ['jobs' => ['road-maintenance' => ['hidden' => '0']]]]]);
+$check(!is_wp_error(run_filter('rest_pre_insert_bl_page_content', (object) [], $request)), 'REST save failed');
+$check(isset(bl_case_hubs()['road-maintenance']), 'new scenario unavailable to native cases');
+if ($failures) { fwrite(STDERR, implode("\n", $failures) . "\n"); exit(1); }
+echo "application scenarios regression ok\n";
