@@ -50,7 +50,7 @@ function bl_content_schema_fields(string $page): array
         ['key' => 'seo.image', 'label' => '分享图片', 'type' => 'image', 'preview' => 'images/share-default.jpg', 'help' => $share],
     ]];
     // The block every product page of the family shares (inc/product-page.php); a product's own fields come first.
-    $productPage = static fn(string $family): array => ['title' => '产品页通用模块', 'note' => '本系列每个产品详情页都会显示的内容：' . ($family === 'loader' ? '默认展示的属具、' : '') . '工厂与出厂检查、常见问题。单个产品在“设备产品 → 编辑”的对应模块里填的内容优先显示。', 'fields' => array_merge($family === 'loader' ? [
+    $productPage = static fn(string $family): array => ['title' => '产品页通用模块', 'note' => '本系列产品详情页的外层文案与公共内容：' . ($family === 'loader' ? '默认展示的属具、' : '') . '工厂与出厂检查、常见问题。单个产品在“设备产品 → 编辑”的对应模块里填的内容优先显示。外层文案可用 {model}（型号）、{name}（产品名称）、{warranty_months}（质保月数）、{lead_time}（交期）；采购数字在“采购与售后”统一维护。', 'fields' => array_merge(bl_family_content_definition($family === 'loader')['product_fields'], $family === 'loader' ? [
         ['key' => 'product.attachments', 'label' => '默认展示的属具', 'type' => 'text', 'help' => '产品页“Works with”一节显示的属具名称，英文逗号分隔，名称要和上面属具列表里一致；产品自己没勾选时用这里。留空则不显示这一节。'],
     ] : [], [
         ['key' => 'product.factory.title', 'group' => '工厂与出厂检查', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
@@ -113,6 +113,13 @@ function bl_content_schema_fields(string $page): array
         $sections[] = $seo('');
         return $sections;
     }
+    $makingSection = [];
+    if ($page === 'loaders') {
+        foreach ($extra as $index => $section) if (($section['fields'][0]['key'] ?? '') === 'making.eyebrow') {
+            $makingSection[] = $section;
+            unset($extra[$index]);
+        }
+    }
     if ($page === 'loaders') return [...$extra,
         ['title' => '适用场景', 'note' => '滑移装载机栏目页属具上方的“用在哪里”，常见问题“什么是滑移装载机”链接到这里（#loader-jobs）。全部删掉则不显示这一块。', 'fields' => [
             ['key' => 'jobs.eyebrow', 'label' => '小标题', 'type' => 'text'],
@@ -133,7 +140,7 @@ function bl_content_schema_fields(string $page): array
                 'image' => ['label' => '图片', 'type' => 'image', 'help' => '4:3 横图。留空则不显示图片。'],
             ]],
             ['key' => 'attachments.note', 'label' => '底部备注', 'type' => 'textarea', 'help' => $optional],
-        ]],        $productPage('loader'),
+        ]], ...$makingSection, $productPage('loader'),
     ];
     if ($page === 'dumpers') return [...$extra,
         ['title' => '栏目介绍与配置', 'note' => '翻斗车栏目页产品列表下方的介绍（#about-the-range）：标题、介绍和下面一排配置说明。中间的载荷图由产品数据自动生成。', 'fields' => [

@@ -9,9 +9,10 @@ $inWords = static fn(int $n): string => ['no', 'one', 'two', 'three', 'four', 'f
 $rows = [];
 
 if ($storyCategory === 'skid-steer-loaders') {
+    $rangeCopy = bl_editable('loaders')['range_story'];
     foreach ($storyProducts as $p) {
         $body = (int) $number($p['specs']['Machine width'] ?? '');
-        $bucket = (int) $number($p['specs']['Bucket width'] ?? '');
+        $bucket = (int) $number($p['specs'][$rangeCopy['legend_bucket']] ?? '');
         if ($body) $rows[] = ['model' => $p['model'], 'url' => bl_product_url($p), 'value' => $body, 'sub' => $bucket, 'label' => number_format($body) . ' mm', 'note' => $bucket ? 'Bucket ' . number_format($bucket) . ' mm' : '', 'hit' => $body < 1000];
     }
     usort($rows, static fn($a, $b) => [$a['value'], $a['model']] <=> [$b['value'], $b['model']]);
@@ -26,19 +27,23 @@ if ($storyCategory === 'skid-steer-loaders') {
     }
     $brands = array_keys($brands);
     $story = [
-        'eyebrow' => 'ABOUT THE LOADERS',
-        'title' => 'MADE FOR THE<br>TIGHT SPOTS.',
-        'intro' => 'A skid steer turns by running its left and right tracks or wheels at different speeds, so it spins on the spot. We build ours in Xuzhou for yards, gardens, greenhouses and building sites where a full-size loader won’t fit.',
-        'chartEyebrow' => 'MACHINE WIDTH',
-        'chartTitle' => 'NARROW BY DESIGN.',
-        'chartText' => ($under === count($rows) ? 'Every one of our ' . $inWords(count($rows)) . ' loaders is' : ucfirst($inWords($under)) . ' of our ' . $inWords(count($rows)) . ' loaders ' . ($under === 1 ? 'is' : 'are')) . ' under one metre wide across the body' . ($widest >= 1000 ? ', and the widest is ' . number_format($widest) . ' mm' : '') . '.' . ($narrowest && $narrowest['sub'] && $narrowest['sub'] < 1000 ? ' The narrowest, ' . $narrowest['model'] . ', stays under a metre with its bucket fitted too.' : ''),
-        'chartNote' => 'Widths from each model’s published specifications. Where a bucket is wider than your opening, its line turns orange.',
-        'legend' => ['bar' => 'Body width', 'sub' => 'Bucket width', 'marker' => 'Your opening'],
-        'control' => ['name' => 'opening', 'label' => 'Your narrowest opening', 'hint' => 'Gate, path or doorway', 'step' => 10, 'default' => 1000, 'unit' => 'mm'],
+        'eyebrow' => bl_content_text('loaders', 'range_story.eyebrow'),
+        'title' => bl_content_html('loaders', 'range_story.title'),
+        'intro' => $rangeCopy['intro'],
+        'chartEyebrow' => bl_content_text('loaders', 'range_story.chartEyebrow'),
+        'chartTitle' => bl_content_text('loaders', 'range_story.chartTitle'),
+        'chartText' => strtr($rangeCopy[$under === count($rows) ? 'chart_all' : 'chart_some'], [
+            '{under_count}' => ucfirst($inWords($under)), '{model_count}' => $inWords(count($rows)), '{verb}' => $under === 1 ? 'is' : 'are',
+            '{widest_note}' => $widest >= 1000 ? strtr($rangeCopy['chart_widest'], ['{widest_width}' => number_format($widest)]) : '',
+            '{narrowest_note}' => $narrowest && $narrowest['sub'] && $narrowest['sub'] < 1000 ? ' ' . strtr($rangeCopy['chart_narrowest'], ['{narrowest_model}' => $narrowest['model']]) : '',
+        ]),
+        'chartNote' => $rangeCopy['chartNote'],
+        'legend' => ['bar' => $rangeCopy['legend_body'], 'sub' => $rangeCopy['legend_bucket'], 'marker' => $rangeCopy['legend_opening']],
+        'control' => ['name' => 'opening', 'label' => $rangeCopy['control_label'], 'hint' => $rangeCopy['control_hint'], 'step' => 10, 'default' => 1000, 'unit' => 'mm'],
         'options' => [
-            ['big' => 'TRACKS <i>/</i> TIRES', 'title' => 'Running gear.', 'text' => 'Rubber tracks for soft ground and slopes, rubber tires for concrete and asphalt.'],
-            ['big' => 'STAND-ON <i>/</i> SEATED', 'title' => 'Operator position.', 'text' => 'Step on the platform for quick on-and-off work, or take the seat for longer shifts. The model name tells you which.', 'link' => ['#model-names', 'How our model names work']],
-            ['big' => count($brands) . ' <i>BRANDS</i>', 'title' => 'Engine.', 'text' => (count($brands) > 1 ? implode(', ', array_slice($brands, 0, -1)) . ' or ' . end($brands) : implode('', $brands)) . ($electric ? ', with electric versions of selected models' : '') . '.'],
+            ['big' => bl_content_html('loaders', 'range_story.gear_big'), 'title' => $rangeCopy['gear_title'], 'text' => $rangeCopy['gear_text']],
+            ['big' => bl_content_html('loaders', 'range_story.operator_big'), 'title' => $rangeCopy['operator_title'], 'text' => $rangeCopy['operator_text'], 'link' => ['#model-names', $rangeCopy['operator_link']]],
+            ['big' => strtr(bl_content_html('loaders', 'range_story.engine_big'), ['{brand_count}' => (string) count($brands)]), 'title' => $rangeCopy['engine_title'], 'text' => strtr($rangeCopy['engine_text'], ['{engine_brands}' => (count($brands) > 1 ? implode(', ', array_slice($brands, 0, -1)) . ' or ' . end($brands) : implode('', $brands)), '{electric_note}' => $electric ? $rangeCopy['electric_note'] : ''])],
         ],
         'colour' => true,
     ];
@@ -138,8 +143,8 @@ $at = static fn(int $v): string => rtrim(rtrim(number_format(($v - $scale['from'
     <?php endforeach; ?>
     <?php if ($story['colour']): ?>
     <li class="bl-range-story-colour bl-reveal">
-      <img src="<?= bl_escape(bl_asset('images/about/ready-900.webp')) ?>" alt="Finished loaders in red, yellow, blue and green at the BOB-LIFT factory in Xuzhou, each painted to its customer’s order" width="900" height="600" loading="lazy">
-      <div><span class="bl-range-story-swatches" aria-hidden="true"><i style="--c:#d63a22"></i><i style="--c:#f0b21b"></i><i style="--c:#1f5cc8"></i><i style="--c:#56693f"></i><i style="--c:#ea6a1f"></i><i style="--c:#23272a"></i></span><h3>Painted to order.</h3><p>Tell us the colour you want. The loaders on our Xuzhou factory floor are painted for other customers’ orders.</p></div>
+      <?php if ($rangeCopy['colour_image'] !== ''): ?><img src="<?= bl_escape(bl_product_media($rangeCopy['colour_image'])) ?>" alt="<?= bl_escape($rangeCopy['colour_alt']) ?>" width="900" height="600" loading="lazy"><?php endif; echo "\n"; ?>
+      <div><span class="bl-range-story-swatches" aria-hidden="true"><i style="--c:#d63a22"></i><i style="--c:#f0b21b"></i><i style="--c:#1f5cc8"></i><i style="--c:#56693f"></i><i style="--c:#ea6a1f"></i><i style="--c:#23272a"></i></span><h3><?= bl_escape($rangeCopy['colour_title']) ?></h3><p><?= bl_escape($rangeCopy['colour_text']) ?></p></div>
     </li>
     <?php endif; ?>
   </ul>

@@ -16,6 +16,17 @@
 
   var form = document.getElementById('post');
   if (!form || !document.getElementById('bl_main-sortables')) return;
+  // The select owns known keys; custom text is disclosed only when that choice is selected.
+  function specChoice(select) {
+    var custom = select.parentElement.querySelector('input');
+    if (!custom) return;
+    custom.hidden = select.value !== '';
+  }
+  form.querySelectorAll('select[name="bl_record[specs][choice][]"]').forEach(specChoice);
+  form.addEventListener('change', function (event) {
+    if (event.target.matches('select[name="bl_record[specs][choice][]"]')) { specChoice(event.target); dirty = true; }
+  });
+
   var gallery = form.querySelector('[data-bl-gallery]');
   var base = gallery ? gallery.dataset.blBase : '';
   var GALLERY_MAX = gallery ? +gallery.dataset.blMax : 0;

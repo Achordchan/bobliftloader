@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/content-family.php';
 
 /** Additional screens share the same P0 resolver and difference-based persistence. */
 function bl_site_content_definition(string $page): array
@@ -8,6 +9,11 @@ function bl_site_content_definition(string $page): array
     if (!in_array($page, ['global', 'about', 'contact', 'privacy', 'news', '404', 'loaders', 'dumpers'], true)) return [];
     if (!isset($definitions[$page])) {
         $definitions[$page] = require __DIR__ . '/content-' . $page . '.php';
+        if (in_array($page, ['loaders', 'dumpers'], true)) {
+            $family = bl_family_content_definition($page === 'loaders');
+            $definitions[$page]['defaults'] = array_replace_recursive($definitions[$page]['defaults'], $family['defaults']);
+            $definitions[$page]['sections'] = [...$family['sections'], ...$definitions[$page]['sections']];
+        }
         if ($page === 'global') {
             $nav = require __DIR__ . '/content-navigation.php';
             $definitions[$page]['defaults'] = array_merge($definitions[$page]['defaults'], $nav['defaults']);

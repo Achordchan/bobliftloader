@@ -160,16 +160,7 @@ function bl_model_parts(string $model): ?array
  */
 function bl_catalog_filters(string $category): array
 {
-    $gear = ['label' => 'Running gear', 'options' => ['tracked' => 'Tracked', 'wheeled' => 'Wheeled']];
-    if ($category === 'skid-steer-loaders') return [
-        'gear' => $gear,
-        'operator' => ['label' => 'Operator', 'options' => ['stand-on' => 'Stand-on', 'seated' => 'Seated']],
-        'load' => ['label' => 'Rated load', 'options' => ['light' => 'Up to 250 kg', 'mid' => '251–400 kg', 'heavy' => 'Over 400 kg']],
-    ];
-    return [
-        'load' => ['label' => 'Rated load', 'options' => ['light' => 'Up to 1 t', 'mid' => '1–2 t', 'heavy' => 'Over 2 t']],
-        'gear' => $gear,
-    ];
+    return bl_editable($category === 'skid-steer-loaders' ? 'loaders' : 'dumpers')['catalog_filters'];
 }
 
 /** A product's value for each catalogue filter. Load bands follow the page: kilograms for loaders, tonnes elsewhere. */
