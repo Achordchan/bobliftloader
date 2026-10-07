@@ -156,6 +156,20 @@
 .bl-site .bl-contact-form-panel .bl-form-bottom{margin-top:clamp(20px,1.6vw,36px)}
 /* Phones: the form sits on the page between the same margins as the rest, its fields underlined like the site's other forms. */
 @media(max-width:600px){
+  .bl-site .bl-contact-grid>.bl-contact-form-panel{margin-inline:0;padding:28px 0 0;background:none;border:0;border-top:1px solid var(--ink)}
+  .bl-site .bl-contact-grid>.bl-contact-form-panel>h2{margin:16px 0 28px;font-size:var(--m-h2,clamp(38px,11vw,46px))}
+  .bl-site .bl-contact-form-panel .bl-inquiry-form input:not([type=radio]),.bl-site .bl-contact-form-panel .bl-inquiry-form textarea{margin-top:2px;padding:12px 0;border:0;border-bottom:1px solid #a0afbc;background:transparent;font-size:16px}
+  .bl-site .bl-contact-form-panel .bl-inquiry-form input:not([type=radio]):focus,.bl-site .bl-contact-form-panel .bl-inquiry-form textarea:focus{border-color:var(--blue);background:transparent;box-shadow:0 1px var(--blue)}
+  .bl-site .bl-contact-form-panel .bl-inquiry-form textarea{min-height:96px;height:96px}
+  .bl-site .bl-contact-prepare li{grid-template-columns:auto minmax(0,1fr);column-gap:14px;align-items:baseline}
+  .bl-site .bl-contact-prepare li>span{font:600 36px/1 var(--display);letter-spacing:0;font-variant-numeric:tabular-nums}
+  .bl-site .bl-contact-prepare h2{font-size:22px}
+}
+/* Phones held upright (round 5): a tighter contact page, its form heading at card-title size, the four points
+   swiping. Phones on their side keep the layout above, as before. */
+@media(max-width:600px) and (orientation:portrait){
+  /* The message box: three lines (page-responsive.css), not the 96px above. */
+  .bl-site .bl-contact-form-panel .bl-inquiry-form textarea{min-height:calc(4.5em + 20px)}
   /* The page title already sits above, so the form's own heading takes the card-title size and less room around it. */
   .bl-site .bl-contact-grid>*{min-width:0}
   .bl-site .bl-contact-grid>.bl-contact-form-panel{margin-inline:0;padding:20px 0 0;background:none;border:0;border-top:1px solid var(--ink)}
@@ -174,7 +188,6 @@
   .bl-site .bl-contact-prepare ol::-webkit-scrollbar{display:none}
   .bl-site .bl-contact-prepare li{grid-template-columns:auto minmax(0,1fr);column-gap:12px;align-items:baseline;padding:16px;border:1px solid var(--line);background:var(--white);scroll-snap-align:start}
   .bl-site .bl-contact-prepare li>span{font:600 32px/1 var(--display);letter-spacing:0;font-variant-numeric:tabular-nums}
-  .bl-site .bl-contact-prepare h2{font-size:22px}
   .bl-site .bl-contact-prepare p:not(.bl-eyebrow){line-height:1.6}
   /* The intro: a shorter lede gap and slimmer contact rows; every row keeps a 44px or taller target. */
   .bl-site .bl-contact-lede{margin-top:14px;line-height:1.7}
@@ -576,8 +589,9 @@
 
 /* ---------- Family pages on phones: the long sections under the models fold into thumb-sized pieces ----------
    Portrait phones only. catalog.js builds the accordion buttons, the attachment tabs and the two-model comparison while
-   this query matches (the classes below exist only then); without the script every section reads in full, as before. */
-@media(max-width:600px){
+   this query matches (the classes below exist only then); without the script every section reads in full, as before.
+   Phones on their side keep the full sections, as before. */
+@media(max-width:600px) and (orientation:portrait){
   /* The range's options (running gear, operator position, engines, colour) are one sideways row of cards, each as tall as
      its own text, the link straight after it. */
   .bl-site .bl-range-story-options,.bl-site .bl-range-story-options:not(.bl-range-story-with-colour),.bl-site .bl-range-story-with-colour{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:75%;align-items:start;gap:12px;overflow-x:auto;margin:40px calc(-1 * var(--gutter)) 0;padding:0 var(--gutter) 4px;border-top:0;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gutter);overscroll-behavior-x:contain;scrollbar-width:none}
