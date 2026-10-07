@@ -83,4 +83,4 @@ add_action('admin_footer', static function (): void {
         echo '</form>';
     }
     unset($GLOBALS['bl_record_history_forms']);
-});
+}, 100); // after WordPress prints the block editor's boxes (admin_footer, default priority), which fill this list
