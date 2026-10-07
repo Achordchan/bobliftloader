@@ -135,7 +135,8 @@ foreach (['bl-content-home', 'bl-content-thanks', 'bl-content-tracking', 'bl-dow
     $GLOBALS['scripts'] = $GLOBALS['styles'] = [];
     run_hook('admin_enqueue_scripts', 'website_page_' . $screen);
     $check(isset($GLOBALS['scripts']['bl-content-editor']), "$screen lacks shared unsaved-change handler");
-    if (in_array($screen, ['bl-downloads', 'bl-inquiry-mail'], true)) $check(!isset($GLOBALS['styles']['bl-content-editor']), "$screen unexpectedly loads content layout styles");
+    if ($screen === 'bl-downloads') $check(isset($GLOBALS['styles']['bl-content-editor']), 'downloads lacks shared list layout styles');
+    if ($screen === 'bl-inquiry-mail') $check(!isset($GLOBALS['styles']['bl-content-editor']), "$screen unexpectedly loads content layout styles");
 }
 // 首页 is served by the top-level menu page; every other screen keeps its own callback.
 foreach (BL_CONTENT_PAGES as $page => $_) if ($page !== 'home') $check(is_callable($GLOBALS['screens']['bl-content-' . $page]), "$page original URL has no callback");

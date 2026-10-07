@@ -23,6 +23,7 @@ $downloads = [
     ['kind' => 'PDF' . ($catalogue['size'] ? ' · ' . $catalogue['size'] : ''), 'title' => $files['catalogue_title'], 'text' => $files['catalogue_text'], 'url' => $catalogue['url'], 'download' => true],
     ['kind' => count(bl_products()) . ' models', 'title' => $files['sheets_title'], 'text' => $files['sheets_text'], 'url' => bl_url('/products/skid-steer-loaders/')],
 ];
+if (bl_downloads_extended()) $downloads = [...bl_downloads_for(), ...array_slice($downloads, 1)];
 if ($filmed) $downloads[] = ['kind' => 'Video', 'title' => $files['videos_title'], 'text' => 'Watch the ' . $filmedModels . ' at work, in ' . (count($filmed) > 1 ? 'their product galleries.' : 'its product gallery.'), 'url' => bl_product_url($filmed[0])];
 $hero = $content['hero'];
 $heroImage = bl_content_image($hero['image'], ['src' => bl_asset('images/about/people-1600.webp'), 'srcset' => bl_asset('images/about/people-900.webp') . ' 900w, ' . bl_asset('images/about/people-1600.webp') . ' 1600w, ' . bl_asset('images/about/people-2560.webp') . ' 2560w', 'width' => 2560, 'height' => 1707]);

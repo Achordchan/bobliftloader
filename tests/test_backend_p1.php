@@ -75,7 +75,7 @@ $check(is_wp_error(bl_content_locked('tracking', static fn($previous) => [], $ex
 // Registrations are exercised without a database; the proxy-creation hook at priority 20 is intentionally excluded.
 foreach ($GLOBALS['hooks']['init'][10] ?? [] as $callback) $callback();
 run_hook('rest_api_init');
-$check($GLOBALS['settings']['bl_catalogue_url']['show_in_rest'] === true, 'catalogue setting missing on REST requests');
+$check(!isset($GLOBALS['settings']['bl_catalogue_url']), 'legacy setting bypasses unified content saving');
 $endpoint = $GLOBALS['rest_routes']['boblift/v1/catalogue'];
 $GLOBALS['caps']['edit_pages'] = false;
 $check(!$endpoint[0]['permission_callback']() && !$endpoint[1]['permission_callback'](), 'catalogue permits non-editor');
@@ -83,7 +83,7 @@ $GLOBALS['caps'] = ['manage_options' => false, 'edit_pages' => true];
 $check($endpoint[0]['permission_callback']() && $endpoint[1]['permission_callback'](), 'catalogue unnecessarily requires administrator');
 $GLOBALS['options']['bl_catalogue_size'] = 4096;
 $updated = bl_catalogue_rest_save(new WP_REST_Request(['bl_catalogue_url' => 'https://example.test/catalogue.pdf']));
-$check($updated['bl_catalogue_url'] === 'https://example.test/catalogue.pdf' && $updated['bl_catalogue_size'] === 4096, 'catalogue read/write contract mismatch');
+$check($updated['bl_catalogue_url'] === 'https://example.test/catalogue.pdf' && $updated['bl_catalogue_size'] === 0, 'catalogue read/write contract mismatch');
 $check(is_wp_error(bl_catalogue_rest_save(new WP_REST_Request(['bl_catalogue_size' => 9]))), 'catalogue size accepted writes');
 $check($endpoint['schema']()['properties']['bl_catalogue_size']['readonly'] === true, 'catalogue size schema is writable');
 $meta = $GLOBALS['registered_meta']['user']['bl_title'];

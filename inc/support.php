@@ -49,14 +49,8 @@ function bl_container_loading(): array
 /** The catalogue on the Downloads list. WordPress can point it at an uploaded file (网站内容 → 资料下载). */
 function bl_catalogue(): array
 {
-    $local = 'downloads/boblift-compact-equipment-catalogue.pdf';
-    $url = bl_asset($local);
-    $size = is_file(dirname(__DIR__) . '/assets/' . $local) ? (int) filesize(dirname(__DIR__) . '/assets/' . $local) : 0;
-    if (bl_is_wordpress() && ($custom = (string) get_option('bl_catalogue_url'))) {
-        $url = $custom;
-        $size = (int) get_option('bl_catalogue_size');
-    }
-    return ['url' => $url, 'size' => $size ? number_format($size / 1048576, 1) . ' MB' : ''];
+    $file = bl_download_file(bl_downloads_catalogue_row()['url']);
+    return ['url' => $file['url'], 'size' => bl_download_size($file['size'])];
 }
 
 /**
