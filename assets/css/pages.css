@@ -622,7 +622,7 @@
 
   /* Attachments: one row of group tabs over the chosen group's sideways strip (catalog.js). */
   .bl-site .bl-attachments-tabbed{border-top:0;padding-top:0}
-  .bl-site .bl-attachments-tabs{display:flex;gap:8px;overflow-x:auto;margin:0 calc(-1 * var(--gutter)) 16px;padding:0 var(--gutter);scroll-padding-inline:var(--gutter);scrollbar-width:none}
+  .bl-site .bl-attachments-tabs{display:flex;gap:8px;overflow-x:auto;margin:0 calc(-1 * var(--gutter)) 16px;padding:0 var(--gutter);scroll-padding-inline:var(--gutter);scrollbar-width:none;scroll-margin-top:calc(var(--header-height) + 12px)}
   .bl-site .bl-attachments-tabs::-webkit-scrollbar{display:none}
   .bl-site .bl-attachments-tabs [role=tab]{display:inline-flex;flex:none;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid #b9c4c9;background:none;color:var(--ink);font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
   .bl-site .bl-attachments-tabs small{font-size:12px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}

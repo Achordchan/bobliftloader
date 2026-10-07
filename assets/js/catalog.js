@@ -233,7 +233,7 @@ function initializePhoneSections() {
   });
 
   // Attachment groups: tabs named and counted as the group headings are; the chosen group's strip shows below.
-  document.querySelectorAll('.bl-attachments-groups').forEach((wrap) => { let chosen = 0; phoneOnly(() => {
+  document.querySelectorAll('.bl-attachments-groups').forEach((wrap) => { let chosen = 0; let landed = false; phoneOnly(() => {
     const groups = [...wrap.querySelectorAll(':scope > .bl-attachments-group')];
     if (groups.length < 2) return null;
     const tabs = document.createElement('div');
@@ -281,11 +281,37 @@ function initializePhoneSections() {
       event.preventDefault();
       select((next + buttons.length) % buttons.length, true);
     });
+    // A link to a group heading (#attachments-group-2) opens that group's tab and brings the tabs into view, on arrival
+    // (the first time only, so turning the phone keeps the tab picked since), on a link in the page, and on back/forward.
+    const groupOf = (hash) => {
+      let target = null;
+      try { target = hash.length > 1 ? document.getElementById(decodeURIComponent(hash.slice(1))) : null; } catch { return -1; }
+      return target ? groups.findIndex((group) => group.contains(target)) : -1;
+    };
+    const arrive = (hash) => {
+      const index = groupOf(hash);
+      if (index < 0) return;
+      select(index, false);
+      requestAnimationFrame(() => tabs.scrollIntoView({ block: 'start' }));
+    };
+    const follow = (event) => {
+      const link = event.target.closest?.('a[href]');
+      if (link && link.hash && link.pathname === location.pathname) setTimeout(() => arrive(link.hash));
+    };
+    const moved = () => arrive(location.hash);
+    document.addEventListener('click', follow, true);
+    window.addEventListener('hashchange', moved);
     wrap.prepend(tabs);
     wrap.classList.add('bl-attachments-tabbed');
+    const linked = landed ? -1 : groupOf(location.hash);
+    landed = true;
+    if (linked >= 0) chosen = linked;
     if (chosen >= groups.length) chosen = 0;
     buttons.forEach((tab, i) => { tab.setAttribute('aria-selected', String(i === chosen)); tab.tabIndex = i === chosen ? 0 : -1; groups[i].hidden = i !== chosen; });
+    if (linked >= 0) requestAnimationFrame(() => tabs.scrollIntoView({ block: 'start' }));
     return () => {
+      document.removeEventListener('click', follow, true);
+      window.removeEventListener('hashchange', moved);
       tabs.remove();
       wrap.classList.remove('bl-attachments-tabbed');
       groups.forEach((group) => {
