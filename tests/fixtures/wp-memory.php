@@ -25,6 +25,8 @@ function wp_cache_set(...$args) {}
 function wp_cache_delete(...$args) {}
 function is_email($value) { return filter_var($value, FILTER_VALIDATE_EMAIL); }
 function sanitize_email($value) { $value = trim((string) $value); return filter_var($value, FILTER_VALIDATE_EMAIL) ? $value : ''; }
+function post_password_required($post = null) { return $post instanceof WP_Post && ($post->post_password ?? '') !== '' && empty($GLOBALS['password_given'][$post->ID]); }
+function get_the_password_form($post = null) { return '<form class="post-password-form"></form>'; }
 function wp_date($format, $time = null) { return gmdate($format, $time ?? time()); }
 function sanitize_text_field($value) { return trim(strip_tags($value)); }
 function sanitize_textarea_field($value) { return trim(strip_tags($value)); }
@@ -61,6 +63,8 @@ class WP_Post {
     public string $post_content = '';
     public string $post_content_filtered = '';
     public string $post_excerpt = '';
+    public string $post_password = '';
+    public int $post_parent = 0;
     function __construct(public int $ID, public string $post_type, public string $post_name, public string $post_title = '', public string $post_status = 'publish') {}
 }
 function get_post($id) { return $GLOBALS['posts'][$id] ?? null; }

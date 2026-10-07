@@ -302,6 +302,36 @@ try {
     foreach ($savedOptions as $page => $value) is_array($value) ? update_option('bl_content_' . $page, $value) : delete_option('bl_content_' . $page);
     wp_set_current_user(0);
 }
+// Native structured-page editing must preserve an existing body when only publishing fields are submitted.
+$nativeSupport = get_page_by_path('support', OBJECT, 'page');
+$nativePrivacy = get_page_by_path('privacy', OBJECT, 'page');
+$nativeAbout = get_page_by_path('about', OBJECT, 'page');
+bl_test_assert($nativeSupport && $nativePrivacy && $nativeAbout, 'Native editing fixture pages missing');
+$nativeBody = $nativeSupport->post_content;
+$nativeGet = $_GET;
+$nativePost = $_POST;
+$nativeEditorSupport = get_all_post_type_supports('page')['editor'] ?? null;
+try {
+    wp_set_current_user(1);
+    bl_test_assert(!use_block_editor_for_post($nativeSupport), 'Structured page still opens the block editor');
+    bl_test_assert(!use_block_editor_for_post($nativePrivacy), 'Privacy should open its native classic body editor');
+    bl_test_assert(!bl_page_body_is_structured($nativeAbout), 'About body was locked');
+    wp_update_post(['ID' => $nativeSupport->ID, 'post_content' => '<p>Native body must survive</p>']);
+    $_GET = ['post' => $nativeSupport->ID];
+    do_action('load-post.php');
+    bl_test_assert(!post_type_supports('page', 'editor'), 'Structured editor support was not removed');
+    require_once ABSPATH . 'wp-admin/includes/post.php';
+    $_POST = ['post_ID' => $nativeSupport->ID, 'post_type' => 'page', 'post_title' => $nativeSupport->post_title, 'post_status' => $nativeSupport->post_status];
+    $nativeResult = edit_post($_POST);
+    bl_test_assert(!is_wp_error($nativeResult), 'Native title/status update failed');
+    bl_test_assert(get_post($nativeSupport->ID)->post_content === '<p>Native body must survive</p>', 'Native title/status update erased the hidden body');
+} finally {
+    $_GET = $nativeGet;
+    $_POST = $nativePost;
+    if ($nativeEditorSupport !== null) add_post_type_support('page', 'editor', $nativeEditorSupport);
+    wp_update_post(['ID' => $nativeSupport->ID, 'post_content' => $nativeBody]);
+    wp_set_current_user(0);
+}
 $report = ['wordpress' => get_bloginfo('version'), 'php' => PHP_VERSION, 'theme' => get_stylesheet(), 'import' => $firstImport, 'idempotent_import' => true, 'admin_save_and_frontend_read' => true, 'news_editor_read' => true, 'product_summary_follows_specs' => true, 'nonce_rejection' => true, 'anonymous_rejection' => true, 'draft_visibility' => true, 'rest_record' => true, 'rest_page_content' => true, 'restored' => true, 'published_products' => $productCount, 'published_news' => $newsCount];
 file_put_contents('/wordpress/wp-content/bl-verification.json', wp_json_encode($report));
 echo wp_json_encode($report);

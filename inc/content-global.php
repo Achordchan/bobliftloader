@@ -76,7 +76,6 @@ return [
             'title' => '品牌图片',
             'fields' => [
                 ['key' => 'brand.logo', 'label' => '品牌标志', 'type' => 'image', 'preview' => 'images/logo.png', 'help' => '页眉、页脚与公司结构化信息共用。留空使用主题标志。'],
-                ['key' => 'brand.icon', 'label' => '站点图标', 'type' => 'image', 'preview' => 'images/icons/icon-192.png', 'help' => '站点图标优先使用 WordPress 后台已设置的站点图标，否则使用此图；留空使用主题图片。'],
             ],
         ],
         [

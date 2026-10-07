@@ -11,6 +11,7 @@ function apply_filters($hook, $value, ...$args) { return $value; }
 function wp_allowed_protocols() { return ['http', 'https', 'mailto', 'tel']; }
 function home_url($path = '') { return 'https://example.test/site' . $path; }
 function bl_page_editor_content() { return ''; }
+if (!function_exists('get_queried_object')) { function get_queried_object() { return null; } }
 function bl_wp_products() { return []; }
 function get_template_directory_uri() { return 'https://example.test/site/theme'; }
 function get_option($key, $default = false) { return $GLOBALS['options'][$key] ?? $default; }

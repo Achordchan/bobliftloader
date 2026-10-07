@@ -200,7 +200,7 @@ function bl_dashboard_widget(): void
             ['关于我们', 'admin.php?page=bl-content-about', 'edit_pages', '首屏、公司概况和工厂；公司介绍仍编辑原生页面正文'],
             ['联系我们', 'admin.php?page=bl-content-contact', 'edit_pages', '联系页文字、照片与预约邮件'],
             ['询盘成功页', 'admin.php?page=bl-content-thanks', 'edit_pages', '询盘提交成功后的提示文字与链接'],
-            ['隐私说明', 'admin.php?page=bl-content-privacy', 'edit_pages', '邮件草稿与站内提交两种模式正文'],
+            ['隐私说明', 'admin.php?page=bl-content-privacy', 'edit_pages', '询盘模式、首屏与搜索设置；正文在原生页面中编辑'],
             ['新闻列表', 'admin.php?page=bl-content-news', 'edit_pages', '搜索标题、描述与分享图片'],
             ['未找到页面', 'admin.php?page=bl-content-404', 'edit_pages', '404 文案与链接'],
             ['换产品画册', 'admin.php?page=bl-downloads', 'edit_pages', 'Support 页可下载的 PDF'],
@@ -214,7 +214,7 @@ function bl_dashboard_widget(): void
         ],
         '图片与网站' => [
             ['媒体库', 'upload.php', 'upload_files', '上传图片、视频和 PDF'],
-            ['其他页面', 'edit.php?post_type=page', 'edit_pages', '原生页面的标题、网址与发布状态；关于、联系、隐私的展示内容见上方快捷入口'],
+            ['其他页面', 'edit.php?post_type=page', 'edit_pages', '原生页面的标题、网址与发布状态；关于我们、隐私说明的正文在页面中编辑'],
         ],
     ];
     usort($groups['页面内容'], static fn($a, $b) => array_search(str_replace('admin.php?page=', '', $a[1]), BL_CONTENT_MENU_ORDER, true) <=> array_search(str_replace('admin.php?page=', '', $b[1]), BL_CONTENT_MENU_ORDER, true));
