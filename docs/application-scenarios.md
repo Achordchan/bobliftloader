@@ -10,7 +10,7 @@
 - `product` 使用 `loader` / `dumper`。`focus` 仍为 `width`（窄机型优先）、`load`（大载重优先）、`payload`（小载重优先）；参数值继续从推荐机型或设备系列的真实规格计算。
 - 保存和 REST 更新均经过 `bl_content_prepare`、`bl_content_locked`，沿用版本冲突检测和最近 10 份快照。没有添加跨记录锁、事务或同步写入；既有历史和锁的基础设施保持不变。
 - 新增、隐藏和排序在读取集合时统一解析，供首页、应用列表/详情、搜索、产品关联场景、sitemap、llms.txt 和联系页预填使用。
-- 当前仓库的默认联系表单没有应用下拉，只有 `?application=` 预填。默认表单结构不变；若站点现有 CF7 询盘表单包含名为 `application` 的 select，读取适配会在场景内容发生编辑后，按可见场景更新选项。未新增表单控件或改写 CF7 记录。
+- 询盘表单没有应用场景下拉，只有 `?application=` 预填；主题不改写 CF7 表单。
 - `/applications/{slug}/` 由场景选项控制：隐藏返回 404，显示的新场景无需原生 page 即可访问。已存在同路径 page 不改标题、状态、正文或 meta；该路径的展示以场景配置为准。
 - `bl_application` 是独立的案例，网址为 `/application/{slug}/`，不是场景详情。案例的 `hub` 在读取时解析；场景隐藏时不输出指向它的关联，案例本身仍保留、独立发布。后台仍标识隐藏场景，避免改写或丢失已保存关联。
 - 既有预置页面导入逻辑保持原样，不向它加入新增场景。
@@ -25,7 +25,7 @@ php tests/test_application_readers.php
 node tests/test_application_content_js.cjs
 ```
 
-覆盖增量保存、旧默认数据、slug 生成与锁定、校验失败、部分 REST 更新、表单清空检查项、隐藏/恢复、排序、历史版本、无跨记录写入、原生页面不能绕过隐藏 404、虚拟详情、各读取入口和现有 CF7 下拉适配。
+覆盖增量保存、旧默认数据、slug 生成与锁定、校验失败、部分 REST 更新、表单清空检查项、隐藏/恢复、排序、历史版本、无跨记录写入、原生页面不能绕过隐藏 404、虚拟详情、各读取入口。
 
 全量无数据库检查：执行所有 `tests/*.php`（排除 `wp-smoke.php`）、所有 `tests/*.cjs`，并对全部 PHP 文件执行 `php -l`。`test_backend_p1_security.php` 需要本地 WordPress 核心文件，本环境缺失，脚本自行跳过。真实 WordPress/CF7 集成、数据库 smoke 和浏览器布局未执行；后台复用现有样式类，前台 CSS、JS 和视觉结构未改。
 

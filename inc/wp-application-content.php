@@ -75,17 +75,3 @@ add_action('admin_enqueue_scripts', static function (string $hook): void {
     wp_enqueue_script('bl-application-content', get_template_directory_uri() . '/assets/admin/application-content.js', ['bl-content-editor'], (string) filemtime(__DIR__ . '/../assets/admin/application-content.js'), true);
 });
 
-/** Populate an existing application selector on the site's enquiry form without rewriting its saved template. */
-function bl_application_form_tag($tag)
-{
-    if (($tag['basetype'] ?? '') !== 'select' || ($tag['name'] ?? '') !== 'application') return $tag;
-    $form = WPCF7_ContactForm::get_current();
-    if (!$form || $form->id() !== bl_wp_inquiry_form_id()) return $tag;
-    $content = bl_editable('applications');
-    if ($content['jobs'] === bl_applications_defaults()['jobs']) return $tag;
-    $values = array_column(bl_apply_application_content($GLOBALS['bl_application_base'], $content), 'title');
-    $tag['raw_values'] = $tag['values'] = $tag['labels'] = $values;
-    $tag['pipes'] = new WPCF7_Pipes([]);
-    return $tag;
-}
-add_filter('wpcf7_form_tag', 'bl_application_form_tag');

@@ -52,11 +52,5 @@ ob_start(); require __DIR__ . '/../templates/pages/application.php'; $html = ob_
 $check(str_contains($html, 'Road work description') && !str_contains($html, '/applications/landscaping/'), 'new detail rendering');
 ob_start(); bl_content_screen('applications'); $admin = ob_get_clean();
 $check(str_contains($admin, 'jobs][road-work][title]') && str_contains($admin, 'jobs][landscaping][hidden]') && str_contains($admin, 'new_jobs][0][slug]'), 'admin cannot manage hidden/new scenarios');
-class WPCF7_ContactForm { static function get_current() { return new self; } function id() { return 8; } }
-class WPCF7_Pipes { function __construct($values) {} }
-$GLOBALS['inquiry_form_id'] = 8;
-$tag = bl_application_form_tag(['basetype' => 'select', 'name' => 'application', 'values' => ['Landscaping']]);
-$check($tag['values'][0] === 'Renamed Site' && in_array('Road Work', $tag['values'], true) && !in_array('Landscaping', $tag['values'], true), 'CF7 dropdown visibility/order');
-$check(bl_application_form_tag(['basetype' => 'select', 'name' => 'country']) === ['basetype' => 'select', 'name' => 'country'], 'unrelated form field changed');
 if ($failures) { fwrite(STDERR, implode("\n", $failures) . "\n"); exit(1); }
 echo "application readers regression ok\n";
