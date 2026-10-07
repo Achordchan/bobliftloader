@@ -32,9 +32,16 @@ export function initializeSectionNav() {
     if (link && link.pathname === window.location.pathname && link.hash.length > 1 && document.getElementById(link.hash.slice(1))) jump();
   }, true);
   window.addEventListener('hashchange', jump);
-  // An open site or language switch, or a keyboard on a header control, holds the header in view: sliding it away
-  // would leave the panel over the page with the control that opened it gone.
-  const held = () => !!header.querySelector('details[open], :focus-visible');
+  // An open site or language switch, the Equipment panel showing under the header (on hover or focus), or a keyboard
+  // on a header control holds the header in view: sliding it away would leave the panel over the page with the control
+  // that opened it gone. (In the phone menu the panel is a plain list, always visible, so only a floating one counts.)
+  const panel = header.querySelector('.bl-nav-panel');
+  const floating = () => {
+    if (!panel) return false;
+    const style = getComputedStyle(panel);
+    return style.position === 'absolute' && style.visibility === 'visible';
+  };
+  const held = () => !!header.querySelector('details[open], :focus-visible') || floating();
   const direction = () => {
     const y = window.scrollY;
     if (held()) { root.classList.add('bl-header-back'); lastY = turnY = y; return; }
