@@ -80,7 +80,7 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
 
 <section class="bl-applications" id="applications" aria-labelledby="application-title">
   <div class="bl-section-top bl-shell bl-reveal"><div><p class="bl-eyebrow"><?= bl_escape($content['applications']['eyebrow']) ?></p><h2 class="bl-display" id="application-title"><?= bl_heading($content['applications']['title'], 'bl-outline-text') ?></h2></div><p class="bl-section-description"><?= bl_rich($content['applications']['description']) ?></p></div>
-  <div class="bl-application-strip bl-shell">
+  <div class="bl-application-strip bl-shell" role="region" aria-labelledby="application-title" data-swipe-row>
     <?php foreach ($applications as $index => $app): ?>
     <a class="bl-application-tile" href="<?= bl_escape(bl_url('/applications/' . bl_application_slug($app) . '/')) ?>"><span class="bl-photo-label">APPLICATION / 0<?= $index + 1 ?></span><img src="<?= bl_escape($app['image']) ?>" alt="<?= bl_escape($app['alt']) ?>" loading="lazy" width="1586" height="992"><div class="bl-application-tile-body"><div><span class="bl-eyebrow"><?= bl_escape($app['title']) ?></span><h3><?= $app['subtitle'] ?></h3><p><?= bl_escape($app['description']) ?></p></div><span class="bl-circle-button"><?= bl_icon('arrow-up-right') ?></span></div></a>
     <?php endforeach; ?>

@@ -23,7 +23,7 @@ $posterFigure = static fn(array $poster): string => '<figure class="bl-story-pos
   <?php bl_breadcrumbs([['label' => 'News', 'url' => bl_url('/news/')], ['label' => $article['title']]]); ?>
   <header class="bl-story-head">
     <?php if ($category): ?><a class="bl-story-category" href="<?= bl_escape(bl_url('/news/') . '?category=' . $category) ?>"><?= bl_escape(BL_NEWS_CATEGORIES[$category]) ?></a><?php else: ?><span class="bl-story-category bl-story-category-group"><?= bl_escape(bl_news_label($article)) ?></span><?php endif; ?>
-    <h1 id="story-title"><?= bl_escape($article['title']) ?></h1>
+    <h1 id="story-title"><?= bl_title_text($article['title']) ?></h1>
     <p class="bl-story-lede"><?= bl_escape($article['excerpt']) ?></p>
   </header>
 
@@ -82,7 +82,7 @@ $posterFigure = static fn(array $poster): string => '<figure class="bl-story-pos
 </article>
 
 <nav class="bl-story-pager bl-shell" aria-label="More stories">
-  <?php if ($newer): ?><a href="<?= bl_escape(bl_article_url($newer)) ?>"><span><?= bl_icon('arrow-left') ?> Newer</span><b><?= bl_escape($newer['title']) ?></b></a><?php else: ?><a href="<?= bl_escape(bl_url('/news/')) ?>"><span><?= bl_icon('arrow-left') ?> All news</span><b>Back to the list</b></a><?php endif; ?>
-  <?php if ($older): ?><a class="bl-story-pager-older" href="<?= bl_escape(bl_article_url($older)) ?>"><span>Older <?= bl_icon('arrow-up-right') ?></span><b><?= bl_escape($older['title']) ?></b></a><?php endif; ?>
+  <?php if ($newer): ?><a href="<?= bl_escape(bl_article_url($newer)) ?>"><span><?= bl_icon('arrow-left') ?> Newer</span><b><?= bl_title_text($newer['title']) ?></b></a><?php else: ?><a href="<?= bl_escape(bl_url('/news/')) ?>"><span><?= bl_icon('arrow-left') ?> All news</span><b>Back to the list</b></a><?php endif; ?>
+  <?php if ($older): ?><a class="bl-story-pager-older" href="<?= bl_escape(bl_article_url($older)) ?>"><span>Older <?= bl_icon('arrow-up-right') ?></span><b><?= bl_title_text($older['title']) ?></b></a><?php endif; ?>
 </nav>
 <?php require __DIR__ . '/../partials/page-cta.php'; ?>

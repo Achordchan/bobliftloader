@@ -13,7 +13,8 @@ $plate = [
 ];
 $focusKey = $application['focus'] === 'width' ? 'width' : 'load';
 $plate = ['models' => ['label' => $familyLabel, 'value' => (string) $ranges['count'], 'unit' => 'models']] + array_diff_key($plate, [$focusKey => 1]) + [$focusKey => $plate[$focusKey]];
-if ($application['focus'] === 'width') $plate['width'] = ['label' => $application['product'] === 'dumper' ? 'Narrowest model' : 'Narrowest, bucket fitted', 'value' => number_format($ranges['width'][0]), 'unit' => 'mm'];
+// The lit figure is the job's own, read the same way as its card on /applications/ (across the machines it names, if any).
+$plate[$focusKey] = array_intersect_key(bl_application_focus($application), ['label' => 1, 'value' => 1, 'unit' => 1]);
 $others = array_values(array_filter($applications, static fn($a) => bl_application_slug($a) !== $slug));
 // The machines for this job, ordered by the figure that decides it; the family page's range chart takes it from there.
 $dimensions = array_column(bl_model_dimensions(), null, 'slug');

@@ -10,6 +10,8 @@
 .bl-site .bl-apps-hero-side{padding-bottom:.4em}
 .bl-site .bl-apps-hero-side p{font-size:var(--fs-body);line-height:1.85;color:var(--muted);text-wrap:pretty}
 .bl-site .bl-apps-hero-side .bl-text-link{margin-top:clamp(22px,1.6vw,36px)}
+/* The index's enquiry button joins the hero on phones only (below), as the detail pages' does. */
+.bl-site .bl-apps-hero-cta{display:none}
 
 /* Three jobs side by side, full bleed; the one under the pointer opens wider. */
 .bl-site .bl-apps-triptych{display:flex;gap:2px;height:clamp(460px,40vw,1040px);margin:0;padding:0;list-style:none;background:var(--ink)}
@@ -60,7 +62,8 @@
 .bl-site .bl-app-photo img{width:100%;height:clamp(420px,42vw,1080px);object-fit:cover;object-position:center 58%}
 .bl-site .bl-app-photo figcaption{position:absolute;right:var(--gutter);top:clamp(18px,1.4vw,32px);padding:8px 12px;background:#081c2bb3;color:#dbe4ea;font-size:var(--fs-micro);font-weight:600;letter-spacing:.6px;backdrop-filter:blur(6px)}
 .bl-site .bl-app-plate{position:absolute;z-index:1;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0 auto;padding-top:0;padding-bottom:0}
-.bl-site .bl-app-plate>div{background:var(--ink);color:var(--paper);padding:clamp(20px,1.6vw,40px) clamp(20px,1.6vw,40px) clamp(22px,1.8vw,44px)}
+/* Each value keeps to the foot of its cell, so a two-line label beside a one-line one leaves the figures on one baseline. */
+.bl-site .bl-app-plate>div{display:flex;flex-direction:column;justify-content:space-between;background:var(--ink);color:var(--paper);padding:clamp(20px,1.6vw,40px) clamp(20px,1.6vw,40px) clamp(22px,1.8vw,44px)}
 .bl-site .bl-app-plate>div+div{border-left:1px solid var(--night-line)}
 .bl-site .bl-app-plate>div:last-child{background:var(--blue)}
 .bl-site .bl-app-plate dt{font-size:var(--fs-micro);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--night-muted)}
@@ -149,13 +152,13 @@
   .bl-site .bl-app-hero-actions{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:22px}
   .bl-site .bl-app-hero-actions>.bl-button{display:inline-flex;align-self:stretch}
   .bl-site .bl-app-hero-actions .bl-text-link{min-height:44px;margin-top:0;padding-top:12px}
+  .bl-site .bl-apps-hero-side>.bl-apps-hero-cta{display:flex;margin-top:22px}
+  .bl-site .bl-apps-hero-cta+.bl-text-link{min-height:44px;margin-top:6px;padding-top:12px}
   /* The photograph's credit reads under the picture, on the dark band that runs into the plate. */
   .bl-site .bl-app-photo figcaption{position:relative;right:auto;top:auto;padding:12px var(--gutter);background:var(--ink);color:var(--night-muted);font-weight:500;letter-spacing:.3px;backdrop-filter:none}
   .bl-site .bl-app-plate>div:nth-child(-n+2){border-top:1px solid var(--night-line)}
   .bl-site .bl-app-plate>div:nth-child(odd){padding-left:var(--gutter)}
   .bl-site .bl-app-plate>div:nth-child(even){padding-right:var(--gutter)}
-  /* Each value keeps to the foot of its cell, so a two-line label beside a one-line one leaves the figures on one baseline. */
-  .bl-site .bl-app-plate>div{display:flex;flex-direction:column;justify-content:space-between}
   .bl-site .bl-app-plate dd.bl-app-plate-word{font-size:clamp(24px,7vw,32px);line-height:1}
   /* Index panels: the number joins the family line, which is white so it holds on any colour of machine. */
   .bl-site .bl-apps-triptych a::after{background:linear-gradient(180deg,#081c2b00 0%,#081c2b00 32%,#081c2bb3 54%,#081c2bf2 100%)}
@@ -163,6 +166,8 @@
   .bl-site .bl-apps-panel-no{display:inline}
   .bl-site .bl-apps-panel-family{color:#fff;text-shadow:0 1px 8px #081c2b99}
   .bl-site .bl-apps-panel-title{font-size:var(--m-h3,28px)}
+  /* Short notes under a figure break evenly rather than leaving one word on the last line. */
+  .bl-site :is(.bl-apps-panel-focus>span,.bl-app-more-focus){text-wrap:balance}
   /* Machines for this job: a sideways strip of compact cards instead of three full-width ones. */
   .bl-site .bl-app-machines .bl-product-grid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:76%;gap:14px;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 4px;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gutter);scrollbar-width:none}
   .bl-site .bl-app-machines .bl-product-grid::-webkit-scrollbar{display:none}
@@ -189,6 +194,33 @@
   .bl-site .bl-app-more-title{font-size:var(--m-h3,26px);line-height:1}
   .bl-site .bl-app-more-list .bl-circle-button{align-self:end;width:44px;height:44px;margin:0 16px 16px 0}
   .bl-site .bl-app-more-list .bl-circle-button .bl-icon{width:20px;height:20px}
+}
+
+/* Phones on their side: the phone layout's actions and type floor, with cards and photographs that fit the short screen. */
+@media (max-width:1000px) and (max-height:500px){
+  .bl-site:is(.bl-page-applications,.bl-page-application) #main{--fs-micro:12px;--fs-small:14px}
+  /* Title and note side by side again, so the actions reach the first screen sooner. */
+  .bl-site .bl-apps-hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;padding-top:20px;padding-bottom:32px}
+  .bl-site .bl-apps-hero h1{margin-top:14px}
+  .bl-site .bl-apps-hero-side{padding-bottom:0}
+  .bl-site .bl-apps-hero-side p{line-height:1.7}
+  .bl-site .bl-app-hero-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:22px}
+  .bl-site .bl-app-hero-actions>.bl-button{display:inline-flex}
+  .bl-site .bl-app-hero-actions .bl-text-link{margin-top:0}
+  .bl-site .bl-apps-hero-side>.bl-apps-hero-cta{display:inline-flex;margin:22px 28px 0 0;vertical-align:middle}
+  .bl-site .bl-apps-hero-cta+.bl-text-link{vertical-align:middle}
+  .bl-site :is(.bl-apps-triptych,.bl-apps-triptych-rows)>li{height:min(340px,calc(100svh - var(--header-height) - var(--bl-bar-height,58px) + 40px))}
+  .bl-site .bl-apps-panel-index{display:none}
+  .bl-site .bl-apps-panel-no{display:inline}
+  .bl-site .bl-apps-panel-body{padding-inline:var(--gutter)}
+  .bl-site :is(.bl-apps-panel-focus>span,.bl-app-more-focus){text-wrap:balance}
+  .bl-site .bl-app-photo img{height:300px}
+  .bl-site .bl-app-plate>div:nth-child(odd){padding-left:var(--gutter)}
+  .bl-site .bl-app-plate>div:nth-child(even){padding-right:var(--gutter)}
+  .bl-site .bl-app-photo figcaption{right:var(--gutter)}
+  /* Text links keep their look; an invisible layer gives them a 44px tall target, as on narrow phones. */
+  .bl-site:is(.bl-page-applications,.bl-page-application) #main .bl-text-link{position:relative}
+  .bl-site:is(.bl-page-applications,.bl-page-application) #main .bl-text-link::before{content:'';position:absolute;left:0;right:0;top:50%;height:max(100%,44px);transform:translateY(-50%)}
 }
 
 /* Application case page: the "similar job" box in the story side column. */

@@ -56,6 +56,16 @@ function bl_escape(string $text): string
     return htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+/**
+ * A title as element text: escaped, and a one-letter word (A, a, I) held to the word after it with a no-break space,
+ * so a line never ends on it ("A closer look. A / stronger connection."). Display only: the stored title is unchanged,
+ * and attributes (alt, title) and structured data keep using bl_escape() or their own encoding.
+ */
+function bl_title_text(string $text): string
+{
+    return (string) preg_replace('/(?<![\p{L}\p{N}\p{M}\'’&#-])([AaI]) (?=\S)/u', '$1&nbsp;', bl_escape($text));
+}
+
 function bl_icon(string $name, string $class = ''): string
 {
     return '<img class="bl-icon ' . bl_escape($class) . '" src="' . bl_escape(bl_asset('icons/' . $name . '.svg')) . '" alt="" width="24" height="24" aria-hidden="true">';

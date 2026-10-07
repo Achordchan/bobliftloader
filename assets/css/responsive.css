@@ -96,13 +96,14 @@
   .bl-site .bl-footer-top{padding-block:22px;flex-wrap:wrap;gap:16px}
   .bl-site .bl-footer-top .bl-brand img{width:104px}
   .bl-site .bl-footer-top>p{display:none}
-  .bl-site .bl-footer-links{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"equip explore" "contact explore" "domain domain";padding-block:20px 22px;gap:14px 20px}
+  .bl-site .bl-footer-links{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"equip explore" "contact explore" "domain domain";padding-block:20px 22px;gap:0 20px}
   .bl-site .bl-footer-links>div:nth-child(1){grid-area:equip}
   .bl-site .bl-footer-links>div:nth-child(2){grid-area:explore}
   .bl-site .bl-footer-links>div:nth-child(3){grid-area:contact}
   .bl-site .bl-footer-links>div{font-size:14px;gap:0}
   .bl-site .bl-footer-links>div>a{display:inline-flex;align-items:center;min-height:44px;max-width:100%;overflow-wrap:anywhere}
-  .bl-site .bl-footer-links .bl-eyebrow{font-size:12px;margin-bottom:0}
+  /* Labels take a 44px row like the links, the text at its foot, so both columns step down on the same lines. */
+  .bl-site .bl-footer-links .bl-eyebrow{display:flex;align-items:flex-end;min-height:44px;padding-bottom:6px;font-size:12px;margin-bottom:0}
   .bl-site .bl-footer-links>.bl-footer-domain{grid-area:domain;min-width:0;display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;column-gap:16px;padding-top:14px;border-top:1px solid #425360}
   .bl-site .bl-footer-domain>.bl-eyebrow,.bl-site .bl-footer-domain>p{flex-basis:100%}
   .bl-site .bl-footer-domain>a{min-width:0;overflow-wrap:anywhere}
@@ -162,7 +163,15 @@
   .bl-site .bl-range-facts{grid-template-columns:1fr;gap:0;padding-top:0}
   .bl-site .bl-range-facts>div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-block:12px;border-bottom:1px solid var(--line)}
   .bl-site .bl-range-facts dd{margin:0;font-size:20px}
-  .bl-site .bl-application-tile{aspect-ratio:4/5}
+  /* Six jobs side by side in one row that swipes, like the other card rows: about one card and a sixth of the next. */
+  .bl-site .bl-application-strip{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:84%;gap:12px;overflow-x:auto;padding:0 var(--gutter) 4px;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gutter);overscroll-behavior-x:contain;scrollbar-width:none}
+  .bl-site .bl-application-strip::-webkit-scrollbar{display:none}
+  .bl-site .bl-application-tile{aspect-ratio:3/4;scroll-snap-align:start}
+  /* The narrower card keeps every line of its text: no cut-off line at the foot. */
+  .bl-site .bl-application-tile-body p{max-height:none;line-height:1.6}
+  /* The text takes the card's full width; the round arrow stands just above it at the right. */
+  .bl-site .bl-application-tile-body{grid-template-columns:minmax(0,1fr)}
+  .bl-site .bl-application-tile-body .bl-circle-button{position:absolute;right:22px;top:-44px;width:44px;height:44px}
   .bl-site .bl-application-tile::after{background:linear-gradient(0deg,#03111cf5 0%,#03111cd9 34%,#03111c73 60%,#03111c00 80%)}
   .bl-site .bl-application-tile-body .bl-eyebrow{color:#e3ebf7;font-size:12px;text-shadow:0 1px 12px #03111c}
   .bl-site .bl-photo-label{font-size:12px}
@@ -189,9 +198,58 @@
   .bl-site .bl-approach-photo{aspect-ratio:4/3}
   .bl-site .bl-approach-steps h3{font-size:var(--m-h3,28px)}
   /* The two figures stand side by side, figure over label, so neither row trails a half-empty line. */
-  .bl-site .bl-approach-facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px;margin-top:32px}
+  .bl-site .bl-approach-facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 20px;margin-top:32px}
   .bl-site .bl-approach-facts li{flex-direction:column;justify-content:flex-start;align-items:flex-start;gap:10px;padding-block:16px 0}
   .bl-site .bl-approach-facts strong{font-size:clamp(36px,10vw,42px)}
   .bl-site .bl-approach-facts span{max-width:none;text-align:left}
+  /* An odd figure out (the third of three) takes the whole row: figure left, label right, a full-width rule above. */
+  .bl-site .bl-approach-facts li:last-child:nth-child(odd){grid-column:1/-1;flex-direction:row;align-items:baseline;justify-content:space-between;gap:16px}
+  .bl-site .bl-approach-facts li:last-child:nth-child(odd) span{max-width:12em;text-align:right}
   .bl-site .bl-approach-steps{margin-top:40px}
+  /* The caption leaves the photograph and sits under it, as on the other pages. */
+  .bl-site .bl-approach-photo{aspect-ratio:auto;background:none}
+  .bl-site .bl-approach-photo img{aspect-ratio:4/3;height:auto}
+  /* Ground-coloured, above the picture, so the photograph's slow drift never shows through beneath it. */
+  .bl-site .bl-approach-photo figcaption{position:relative;z-index:1;left:auto;bottom:auto;padding:10px 0 0;background:var(--paper);color:var(--muted);backdrop-filter:none;-webkit-backdrop-filter:none}
+}
+
+/* Phones turned sideways (the same query as the bottom contact bar): the first screen is short, so the hero fits the
+   space between header and bar, eyebrow, three-line title and button all inside it; the picture is unchanged. */
+@media (max-width:1000px) and (max-height:500px){
+  .bl-site .bl-hero{height:auto;min-height:calc(100svh - var(--header-height) - var(--bl-bar-height,58px));max-height:none}
+  .bl-site .bl-hero-switch-row{padding-top:8px}
+  .bl-site .bl-hero-content{min-height:0;padding-top:50px;padding-bottom:12px;justify-content:flex-end}
+  .bl-site .bl-hero-slide{align-self:end}
+  .bl-site .bl-hero-eyebrow{margin-bottom:8px}
+  /* The title takes what is left of the screen's height once the other parts are placed, in three lines. */
+  .bl-site .bl-hero .bl-hero-title{font-size:clamp(30px,calc((100svh - var(--header-height) - var(--bl-bar-height,58px) - 146px) / 2.58),52px);max-width:60%}
+  .bl-site .bl-hero-action{margin-top:12px}
+  .bl-site .bl-hero-action .bl-button{min-height:44px;padding-block:8px}
+  .bl-site .bl-hero-scroll{display:none}
+  /* The enquiry form goes to one column, as on phones held upright. */
+  .bl-site .bl-form-grid{grid-template-columns:1fr;gap:20px}
+}
+/* Landscape phones wider than 600px: the four-column footer gives the business column the room to keep "Visit our main
+   website" and its arrow on one line. At 600px and below the compact two-column footer stays as it is. */
+@media (min-width:601px) and (max-width:1000px) and (max-height:500px){
+  .bl-site .bl-footer-links{grid-template-columns:1fr 1fr 1.2fr 1.5fr}
+  .bl-site .bl-footer-domain{padding-left:24px}
+  .bl-site .bl-footer-domain>a{white-space:nowrap}
+}
+/* Touch screens from tablet width down: the application tiles keep the phone treatment (white label, deeper shade), and
+   in the three narrow columns (801-1000px) the titles step down so they hold two lines or so. */
+@media (min-width:601px) and (max-width:1000px) and (hover:none){
+  .bl-site .bl-application-tile::after{background:linear-gradient(0deg,#03111cf5 0%,#03111cd9 34%,#03111c73 60%,#03111c00 80%)}
+  .bl-site .bl-application-tile-body .bl-eyebrow{color:#e3ebf7;font-size:12px;letter-spacing:.08em;text-shadow:0 1px 12px #03111c}
+}
+@media (min-width:801px) and (max-width:1000px) and (hover:none){
+  .bl-site .bl-application-tile-body h3{font-size:clamp(24px,3.4vw,30px)}
+  /* The label and title get the column's full width; the round arrow stands just above them, as on phones. */
+  .bl-site .bl-application-tile-body{grid-template-columns:minmax(0,1fr)}
+  .bl-site .bl-application-tile-body .bl-circle-button{position:absolute;right:22px;top:-44px;width:44px;height:44px}
+}
+/* Header site switch, 601-1150px: only the caret shows; an invisible layer makes it a 44px target without moving anything. */
+@media (min-width:601px) and (max-width:1150px){
+  .bl-site .bl-header .bl-site-switch>summary{position:relative}
+  .bl-site .bl-header .bl-site-switch>summary::before{content:'';position:absolute;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}
 }

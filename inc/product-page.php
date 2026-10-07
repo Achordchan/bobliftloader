@@ -187,9 +187,48 @@ function bl_product_compare_rows(array $product, array $models): array
     $keys = ['Rated load', 'Bucket capacity', 'Drum capacity', 'Engine power', 'Machine weight', 'Machine width', 'Standard dimensions', 'Working height', 'Max travel speed', 'Travel speed', 'Drive', 'Running gear', 'Operator station'];
     $rows = [];
     foreach ($keys as $key) {
-        if (empty($product['specs'][$key])) continue;
-        $rows[$key] = array_map(static fn(array $m): string => (string) ($m['specs'][$key] ?? '—'), $models);
+        // A figure published under another name (bl_spec_synonyms) is the same row: it carries the name this model uses,
+        // and each neighbour's value under whichever name that model uses.
+        $names = bl_spec_synonyms($key, $models);
+        if (array_intersect_key($rows, array_flip($names))) continue;
+        $label = null;
+        foreach ($names as $name) if (!empty($product['specs'][$name])) { $label = $name; break; }
+        if ($label === null) continue;
+        $rows[$label] = array_map(static fn(array $m): string => bl_spec_value($m, $label, $models) ?? '—', $models);
         if (count($rows) === 6) break;
     }
     return $rows;
 }
+
+/**
+ * Figures published under two names in different models' sheets (a tracked dumper's travel speed is a wheeled one's max
+ * travel speed; its hopper is the others' bucket). The comparisons show each group as one row, under a name the data
+ * already uses; the data itself keeps its own names.
+ */
+const BL_SPEC_SYNONYMS = [['Max travel speed', 'Travel speed'], ['Bucket capacity', 'Hopper capacity']];
+
+/**
+ * The names that mean the same figure as $key among $models (the models one comparison sets side by side), $key first.
+ * Where any of those models publishes two of the names with different figures, they are not one figure there: the
+ * names stay apart, each its own row, and only $key is returned.
+ */
+function bl_spec_synonyms(string $key, array $models): array
+{
+    foreach (BL_SPEC_SYNONYMS as $group) {
+        if (!in_array($key, $group, true)) continue;
+        foreach ($models as $model) {
+            $values = array_unique(array_filter(array_map(static fn(string $name): string => trim((string) ($model['specs'][$name] ?? '')), $group), static fn(string $value): bool => $value !== ''));
+            if (count($values) > 1) return [$key];
+        }
+        return array_values(array_unique([$key, ...$group]));
+    }
+    return [$key];
+}
+
+/** A model's figure for $key, under whichever of its names (bl_spec_synonyms among $models) the model publishes it. */
+function bl_spec_value(array $product, string $key, array $models): ?string
+{
+    foreach (bl_spec_synonyms($key, $models) as $name) if (($product['specs'][$name] ?? '') !== '') return (string) $product['specs'][$name];
+    return null;
+}
+

@@ -32,14 +32,14 @@
 .bl-site .bl-news-item-excerpt{font-size:var(--fs-small);line-height:1.75;color:var(--muted);text-wrap:pretty}
 .bl-site .bl-news-item-event{display:flex;flex-wrap:wrap;align-items:center;margin-top:clamp(12px,1vw,20px);font-size:var(--fs-label);font-weight:600}
 .bl-site .bl-news-item-event>*+*::before{content:'';display:inline-block;width:1px;height:.9em;margin:0 12px;background:var(--line);vertical-align:-1px}
-.bl-site .bl-news-item:hover .bl-news-item-title{color:var(--blue)}
-.bl-site .bl-news-item:hover img{transform:scale(1.03)}
+@media(hover:hover){.bl-site .bl-news-item:hover .bl-news-item-title{color:var(--blue)}}
+@media(hover:hover){.bl-site .bl-news-item:hover img{transform:scale(1.03)}}
 
 /* Story: text column and a side column of details. */
 .bl-site .bl-story{padding-bottom:clamp(40px,3vw,72px)}
 .bl-site .bl-story-head{max-width:60em;padding:clamp(28px,2.4vw,60px) 0 clamp(24px,2vw,44px)}
 .bl-site .bl-story-category{display:inline-block;padding-bottom:3px;border-bottom:2px solid currentColor;font-size:var(--fs-label);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--blue)}
-.bl-site a.bl-story-category:hover{color:var(--ink)}
+@media(hover:hover){.bl-site a.bl-story-category:hover{color:var(--ink)}}
 .bl-site .bl-story-category-group{color:var(--ink)}
 .bl-site .bl-story-head h1{margin:clamp(18px,1.4vw,30px) 0 clamp(14px,1.1vw,24px);font:700 clamp(40px,3.2vw,84px)/1 var(--display);letter-spacing:-.01em;text-wrap:balance}
 .bl-site .bl-story-lede{max-width:42em;font-size:var(--fs-lead);line-height:1.7;color:var(--muted);text-wrap:pretty}
@@ -58,7 +58,7 @@
 .bl-site .bl-story-text h2:first-child{margin-top:0}
 .bl-site .bl-story-text p{font-size:var(--fs-body);line-height:1.85;color:#3f4c57;text-wrap:pretty}
 .bl-site .bl-story-text a{color:var(--blue);border-bottom:1px solid #215bdb66}
-.bl-site .bl-story-text a:hover{border-bottom-color:var(--blue)}
+@media(hover:hover){.bl-site .bl-story-text a:hover{border-bottom-color:var(--blue)}}
 .bl-site .bl-story-text .bl-story-visit{margin-top:clamp(28px,2.2vw,48px);padding-top:clamp(16px,1.2vw,24px);border-top:1px solid var(--line)}
 
 .bl-site .bl-story-aside{display:flex;flex-direction:column;gap:clamp(20px,1.6vw,32px)}
@@ -73,7 +73,7 @@
 .bl-site .bl-story-box dd strong{font:700 var(--fs-h5)/1 var(--display);color:var(--blue)}
 .bl-site .bl-story-box dd .bl-news-when{display:block;margin-top:2px;font-size:var(--fs-micro);letter-spacing:.5px;text-transform:uppercase}
 .bl-site .bl-story-box-link{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding-bottom:3px;border-bottom:1px solid var(--line);font-size:var(--fs-label);font-weight:600;line-height:1.5;color:var(--ink)}
-.bl-site .bl-story-box-link:hover{border-bottom-color:var(--ink)}
+@media(hover:hover){.bl-site .bl-story-box-link:hover{border-bottom-color:var(--ink)}}
 .bl-site .bl-story-box-link .bl-icon{width:15px;height:15px;flex:0 0 auto}
 .bl-site .bl-story-poster{float:right;width:min(42%,340px);margin:6px 0 20px clamp(24px,2vw,44px)}
 .bl-site .bl-story-poster img{width:100%;border:1px solid var(--line);background:#fff}
@@ -104,7 +104,7 @@
 .bl-site .bl-story-product-image img{width:100%;height:100%;object-fit:contain;padding:3px}
 .bl-site .bl-story-product-list b{display:block;font:700 var(--fs-h5)/1 var(--display);transition:color .2s}
 .bl-site .bl-story-product-list small{display:block;margin-top:3px;font-size:var(--fs-micro);line-height:1.4;color:var(--muted)}
-.bl-site .bl-story-product-list a:hover b{color:var(--blue)}
+@media(hover:hover){.bl-site .bl-story-product-list a:hover b{color:var(--blue)}}
 
 /* The pager's rule sits inside the page gutters, like the content it divides. */
 .bl-site .bl-story-pager{background:linear-gradient(var(--line),var(--line)) top center/calc(100% - 2 * var(--gutter)) 1px no-repeat}
@@ -114,7 +114,7 @@
 .bl-site .bl-story-pager span{display:inline-flex;align-items:center;gap:8px;font-size:var(--fs-micro);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
 .bl-site .bl-story-pager .bl-icon{width:15px;height:15px}
 .bl-site .bl-story-pager b{max-width:22em;font:600 var(--fs-h5)/1.15 var(--display);transition:color .2s}
-.bl-site .bl-story-pager a:hover b{color:var(--blue)}
+@media(hover:hover){.bl-site .bl-story-pager a:hover b{color:var(--blue)}}
 .bl-site .bl-story-pager-older{grid-column:2;align-items:flex-end;text-align:right}
 
 @media(max-width:1000px){
@@ -126,7 +126,9 @@
   .bl-site .bl-news-item{grid-template-columns:1fr;gap:16px}
   .bl-site .bl-story-pager{grid-template-columns:1fr}
   .bl-site .bl-story-pager-older{grid-column:auto;align-items:flex-start;text-align:left}
-  .bl-site .bl-story-poster{float:none;width:auto;max-width:340px;margin:24px auto}
+  /* A tall poster is shown whole within one screen, centred, at its own width. */
+  .bl-site .bl-story-poster{float:none;width:fit-content;max-width:100%;margin:24px auto}
+  .bl-site .bl-story-poster img{width:auto;max-width:100%;max-height:calc(100svh - var(--header-height) - var(--bl-bar-height,0px) - 64px);margin-inline:auto}
   /* One column: each picture near 3:2 in a frame of its own shape (news.php); posters sit whole on a light mat in a 3:2 frame, so lettering is never cropped. */
   .bl-site .bl-news-item-image{aspect-ratio:var(--bl-news-ratio,3/2)}
   .bl-site .bl-news-item-image-whole{background:#e9edf0}
@@ -137,6 +139,7 @@
   .bl-site .bl-news-head h1{font-size:var(--m-h1,clamp(48px,14vw,60px));line-height:.9;letter-spacing:-.015em;text-transform:uppercase}
   .bl-site .bl-news-head-row{gap:16px;padding-top:28px}
   .bl-site .bl-news-list-section{padding-bottom:var(--m-sec,56px)}
+  .bl-site .bl-news-tabs small{font-size:12px}
   .bl-site .bl-news-item-event>.bl-news-when{flex-basis:100%;margin-top:4px}
   .bl-site .bl-news-item-event>.bl-news-when::before{display:none}
   .bl-site .bl-news-tabs>a::before{content:'';position:absolute;inset:0 -10px}
@@ -147,4 +150,7 @@
   .bl-site .bl-story-pager span{min-height:24px}
   .bl-site .bl-story-product-image{background:#fff}
   .bl-site .bl-story-product-image img{padding:0}
+}
+@media(hover:none){
+  .bl-site .bl-news-item:active .bl-news-item-title,.bl-site .bl-story-product-list a:active b,.bl-site .bl-story-pager a:active b{color:var(--blue)}
 }
