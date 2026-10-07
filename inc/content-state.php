@@ -47,8 +47,13 @@ function bl_application_link(string $url): string
 function bl_content_restore_values(string $page, array $snapshot, array $previous = []): array
 {
     $restored = bl_content_migrate($page, $snapshot);
-    if ($page === 'loaders' && isset($restored['attachments']['items'])) {
-        $restored['attachments']['items'] = bl_attachment_restore_aliases($restored['attachments']['items'], (array) ($previous['attachments']['items'] ?? []));
+    if ($page === 'loaders') {
+        // Snapshots hold overrides only: compare the rows as they will show (defaults filled in) on both sides, and keep
+        // the merged rows even when the snapshot had none of its own, so their alias history is not lost.
+        $rows = bl_content_resolve($page, $snapshot)['attachments']['items'] ?? [];
+        $before = bl_content_resolve($page, $previous)['attachments']['items'] ?? [];
+        $merged = bl_attachment_restore_aliases($rows, $before);
+        if ($merged !== $rows || isset($restored['attachments']['items'])) $restored['attachments']['items'] = $merged;
     }
     return $restored;
 }

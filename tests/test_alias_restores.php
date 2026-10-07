@@ -59,4 +59,15 @@ $check(bl_product_attachments(['category' => 'skid-steer-loaders', 'attachments'
 $check($GLOBALS['meta'] === $beforeMeta && get_option('bl_content_snapshots_loaders')[0]['content'] === $current, 'attachment restore rewrote product or omitted backup');
 $other = array_replace($row, ['name' => 'Unrelated', 'image' => 'images/qa-other.webp', 'group' => 'Other']);
 $check(bl_attachment_restore_aliases([$snapshotRows[0]], [$other]) === [$snapshotRows[0]], 'a different row transferred aliases');
+// Loading figures: the newest old address with figures wins after a further rename; a current key always wins.
+$fits = bl_loading_aliases(['a' => [6, 14], 'b' => [8, 16]], [['slug' => 'c', '_wp_old_slug' => ['a', 'b']]]);
+$check($fits['c'] === [8, 16], 'a further rename fell back to older loading figures');
+$check(bl_loading_aliases(['a' => [6, 14], 'c' => []], [['slug' => 'c', '_wp_old_slug' => ['a']]])['c'] === [], 'an explicit current key lost to an old one');
+// A snapshot taken before any attachment edit has no rows of its own; restoring it still keeps the renamed row's history.
+$defaults = bl_content_defaults('loaders')['attachments']['items'];
+$renamed = $defaults; $renamed[0]['name'] = 'Renamed default'; $renamed[0]['aliases'] = [$defaults[0]['name']];
+$restoredDefaults = bl_content_restore_values('loaders', [], ['attachments' => ['items' => $renamed]]);
+$check(($restoredDefaults['attachments']['items'][0]['aliases'] ?? null) === ['Renamed default'] && $restoredDefaults['attachments']['items'][0]['name'] === $defaults[0]['name'], 'restoring a snapshot without rows dropped alias history');
+// Two quick renames over REST: the second save merges the history it finds under the lock.
+$check(bl_product_model_aliases(['model' => 'C', 'model_aliases' => ['A']], ['model' => 'B', 'model_aliases' => ['A']])['model_aliases'] === ['A', 'B'], 'a second rename lost the first new name');
 echo "PASS: $checks alias restore checks\n";

@@ -45,13 +45,19 @@ function bl_attachment_restore_aliases(array $rows, array $previous): array
     return bl_attachment_row_aliases($rows, $previous);
 }
 
-/** Resolve loading keys in memory; explicit current keys (including empty values) take precedence. */
+/**
+ * Resolve loading keys in memory. An explicit current key (even empty) wins; otherwise the most recent old address that
+ * has figures does (WordPress keeps old slugs oldest first), so a further rename never falls back to older figures.
+ */
 function bl_loading_aliases(array $loading, array $products): array
 {
     $index = bl_record_slug_index($products);
-    foreach ($loading as $slug => $fit) {
-        $current = $index[$slug]['slug'] ?? $slug;
-        if ($current !== $slug && !array_key_exists($current, $loading)) $loading[$current] = $fit;
+    foreach ($products as $product) {
+        $current = (string) ($product['slug'] ?? '');
+        if ($current === '' || array_key_exists($current, $loading)) continue;
+        foreach (array_reverse((array) ($product['_wp_old_slug'] ?? [])) as $old) {
+            if (is_string($old) && array_key_exists($old, $loading) && ($index[$old]['slug'] ?? '') === $current) { $loading[$current] = $loading[$old]; break; }
+        }
     }
     return $loading;
 }
