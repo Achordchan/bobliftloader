@@ -161,3 +161,7 @@
   .bl-site .bl-inquiry-form textarea{field-sizing:content;min-height:calc(4.5em + 27px);max-height:240px}
   .bl-site .bl-contact-form-panel .bl-inquiry-form textarea{height:auto}
 }
+
+/* With the WordPress toolbar showing: on phones WordPress lets the toolbar scroll away with the page (absolute there,
+   not fixed), so the header pins to the very top instead of hanging 46px below an empty strip (pages.css sets 46px). */
+@media(max-width:600px){.bl-site.bl-wp-admin-bar .bl-header{top:0}}
