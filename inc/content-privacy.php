@@ -23,12 +23,10 @@ return [
             ],
         ],
         [
-            'title' => '隐私正文',
+            'title' => '询盘模式说明',
             'fields' => [
-                ['key' => 'body.intro', 'label' => '公司与网站', 'type' => 'html', 'help' => '可使用 {company.name}、{company.domain}、{company.email} 引用全站信息。'],
                 ['key' => 'body.submitted', 'label' => '站内提交模式正文', 'type' => 'html', 'help' => '可使用 {company.name}、{company.domain}、{company.email} 引用全站信息。'],
                 ['key' => 'body.draft', 'label' => '邮件草稿模式正文', 'type' => 'html', 'help' => '可使用 {company.name}、{company.domain}、{company.email} 引用全站信息。'],
-                ['key' => 'body.ending', 'label' => '外部服务与联系', 'type' => 'html', 'help' => '可使用 {company.name}、{company.domain}、{company.email} 引用全站信息。'],
             ],
         ],
         [

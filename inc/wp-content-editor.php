@@ -525,6 +525,7 @@ function bl_content_screen(string $page): void
     if ($page === 'global' && function_exists('bl_wp_inquiry_current_recipient') && ($recipient = bl_wp_inquiry_current_recipient()) !== '') echo '<p><span class="bl-chip">询盘通知当前发往：' . esc_html($recipient) . '</span></p>';
     if ($page === 'privacy') echo '<p><span class="bl-chip">当前模式：' . (bl_inquiry_form_id() ? '站内提交' : '邮件草稿') . '</span> 两种模式分别编辑，前台按询盘插件的启用状态自动选择。启用统计代码后，请同步更新外部服务说明。</p>';
     if (in_array($page, ['home', 'support'], true)) echo '<p>采购数字引用采购与售后 → 采购条款。支持 {warranty_months}、{lead_time}、{minimum_order}；自定义文案中的固定数字不会自动替换，请复核。</p>';
+    if ($page === 'privacy') bl_privacy_migration_card();
     if ($page === 'about') echo '<p>公司介绍仍在原生关于页面正文中编辑。</p>';
     $open = count($sections) === 1;
     if (count($sections) >= 3) {
@@ -550,6 +551,7 @@ function bl_content_screen(string $page): void
                 $group = $next;
             }
             bl_content_field($field, bl_content_get($values, $field['key']), $changed($field));
+            if ($page === 'global' && $field['key'] === 'brand.logo') bl_native_site_icon_note();
         }
         if ($group !== '') echo '</div></div>';
         echo '</div></details>';
@@ -734,7 +736,7 @@ require_once __DIR__ . '/wp-content-state.php';
 function bl_content_page_for_post(?WP_Post $post): string
 {
     if (!$post || $post->post_type !== 'page') return '';
-    if ((int) get_option('page_on_front') === $post->ID) return 'home';
+    if (get_option('show_on_front') === 'page' && (int) get_option('page_on_front') === $post->ID) return 'home';
     if (in_array($post->post_name, ['about', 'contact', 'privacy'], true) && !$post->post_parent) return $post->post_name;
     if ($post->post_name === 'support' && !$post->post_parent) return 'support';
     if ($post->post_name === 'applications' && !$post->post_parent) return 'applications';
@@ -744,19 +746,11 @@ function bl_content_page_for_post(?WP_Post $post): string
     return $parent && $parent->post_name === 'applications' && !$parent->post_parent ? 'applications' : '';
 }
 
-// Their layout comes from the theme and the editor body is not shown, so the page editor points to the right screen.
-add_action('enqueue_block_editor_assets', static function (): void {
-    $page = bl_content_page_for_post(get_post());
-    if (!$page) return;
-    $message = '这个页面的文字和图片在“网站内容 → ' . BL_CONTENT_PAGES[$page]['menu'] . '”里修改，编辑器正文不会显示在网站上。这里只管标题、网址和发布状态。';
-    if ($page === 'about') $message = '公司介绍继续在本页正文编辑；其他文字与图片在网站内容 → 关于我们中修改。';
-    wp_add_inline_script('wp-notices', 'wp.domReady(function(){wp.data.dispatch("core/notices").createNotice("warning",' . wp_json_encode($message) . ',{isDismissible:false,actions:[{label:"去修改内容",url:' . wp_json_encode(admin_url('admin.php?page=bl-content-' . $page)) . '}]});});');
-    wp_enqueue_script('wp-dom-ready');
-});
+require_once __DIR__ . '/wp-native-admin.php';
 
-// On the site itself, the toolbar's "Edit page" for these two pages opens their content screen.
+// Structured pages open their content screen; native About and Privacy bodies keep the core edit link.
 add_action('admin_bar_menu', static function (WP_Admin_Bar $bar): void {
     if (is_admin() || !current_user_can('edit_pages')) return;
     $page = bl_content_page_for_post(get_queried_object() instanceof WP_Post ? get_queried_object() : null);
-    if ($page && $bar->get_node('edit')) $bar->add_node(['id' => 'edit', 'title' => '编辑页面内容', 'href' => admin_url('admin.php?page=bl-content-' . $page)]);
+    if ($page && !in_array($page, ['about', 'privacy'], true) && $bar->get_node('edit')) $bar->add_node(['id' => 'edit', 'title' => '编辑页面内容', 'href' => admin_url('admin.php?page=bl-content-' . $page)]);
 }, 81);

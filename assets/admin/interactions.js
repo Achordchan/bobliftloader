@@ -2,6 +2,24 @@
 (function () {
   'use strict';
 
+  document.addEventListener('click', async function (event) {
+    var button = event.target.closest('[data-bl-copy-policy]');
+    if (!button) return;
+    var card = button.closest('[data-bl-privacy-copy]');
+    var source = card.querySelector('textarea');
+    var status = card.querySelector('[data-bl-copy-status]');
+    try {
+      await navigator.clipboard.writeText(source.value);
+      source.hidden = true;
+      status.textContent = '已复制，请到隐私说明页面的“文本”编辑器粘贴并保存。';
+    } catch (error) {
+      source.hidden = false;
+      source.focus();
+      source.select();
+      status.textContent = '浏览器未允许访问剪贴板，正文已选中，请手动复制。';
+    }
+  });
+
   function changed(element) {
     element.dispatchEvent(new Event('input', { bubbles: true }));
     element.dispatchEvent(new Event('change', { bubbles: true }));

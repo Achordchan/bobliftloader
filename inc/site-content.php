@@ -120,6 +120,20 @@ function bl_privacy_body(string $section): string
     return function_exists('wp_kses_post') ? wp_kses_post($body) : $body;
 }
 
+/** Native page content replaces the general policy; the inquiry mode remains centrally maintained. */
+function bl_privacy_content(): string
+{
+    $mode = bl_privacy_body(bl_inquiry_form_id() ? 'submitted' : 'draft');
+    if (function_exists('bl_page_editor_content') && function_exists('get_queried_object')) {
+        $post = get_queried_object();
+        if ($post instanceof WP_Post && $post->post_type === 'page' && trim($post->post_content) !== '') {
+            return bl_page_editor_content() . $mode;
+        }
+    }
+    // Do not filter the legacy concatenation through the_content: its exact bytes are a compatibility contract.
+    return bl_privacy_body('intro') . $mode . bl_privacy_body('ending');
+}
+
 function bl_seo_content_page(array $route): string
 {
     if ($route['type'] === 'products') return match ($route['category'] ?? '') {

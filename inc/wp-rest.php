@@ -8,8 +8,11 @@ defined('ABSPATH') || exit;
  * edit the post can write it; a REST write changes only the fields the edit screens offer, cleaned the same way.
  */
 // The REST API only carries meta for types that support custom fields; the generic Custom Fields box stays off the
-// product screen, where the record has its own boxes.
-add_action('add_meta_boxes_bl_product', static fn() => remove_meta_box('postcustom', 'bl_product', 'normal'), 99);
+// product, news and case screens, where the record has its own boxes.
+foreach (['bl_product', 'bl_news', 'bl_application'] as $bl_meta_type) {
+    add_action('add_meta_boxes_' . $bl_meta_type, static fn() => remove_meta_box('postcustom', $bl_meta_type, 'normal'), 99);
+}
+unset($bl_meta_type);
 
 add_action('init', static function (): void {
     foreach (['bl_product', 'bl_news', 'bl_application'] as $type) {
