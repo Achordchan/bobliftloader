@@ -126,6 +126,12 @@ function setMotionPreference() {
 setMotionPreference();
 reducedMotion.addEventListener('change', setMotionPreference);
 
+// While a field of the page itself has focus (the keyboard is up), the phone contact bar steps aside (page-responsive.css).
+// Fields in the quick enquiry, which hangs from the bar, and in dialogs, which cover it, leave it be.
+const typingField = (element) => Boolean(element?.matches('input:not([type=radio],[type=checkbox],[type=submit],[type=button],[type=reset]),textarea,select') && !element.closest('.bl-quick,dialog'));
+document.addEventListener('focusin', (event) => document.documentElement.classList.toggle('bl-typing', typingField(event.target)));
+document.addEventListener('focusout', (event) => { if (!typingField(event.relatedTarget)) document.documentElement.classList.remove('bl-typing'); });
+
 // Past the first screen or so, the phone bar's Top button shows (page-responsive.css).
 const markScroll = () => {
   header.classList.toggle('bl-scrolled', window.scrollY > 30);

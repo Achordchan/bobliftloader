@@ -46,6 +46,8 @@
   .bl-site .bl-nav{position:absolute;top:100%;left:0;right:0;background:var(--ink);padding:12px var(--gutter) 32px;display:none;border-top:1px solid #425766;box-shadow:0 20px 25px #081c2b33;height:calc(100svh - var(--header-height) + 1px);overflow:auto;overscroll-behavior:contain}
   /* The open menu takes the whole screen below the header: the contact bar steps aside instead of covering its foot (main.js marks the root while it is open). */
   .bl-menu-on .bl-site .bl-side-contact,.bl-menu-on .bl-site .bl-quick{visibility:hidden}
+  /* The page behind holds still while the menu is open: a swipe on a menu too short to scroll would otherwise move the page underneath. */
+  .bl-menu-on{overflow:hidden}
   .bl-site .bl-nav.bl-open{display:flex;flex-direction:column;align-items:stretch;gap:0}
   .bl-site .bl-nav>a{font-family:var(--display);font-size:34px;line-height:1.3;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #425766;padding:12px 0}
   .bl-site .bl-nav-index{display:block;font:13px var(--sans);color:#8ca3b5}
@@ -229,6 +231,8 @@
   .bl-site .bl-hero-scroll{display:none}
   /* The enquiry form goes to one column, as on phones held upright. */
   .bl-site .bl-form-grid{grid-template-columns:1fr;gap:20px}
+  /* Fields at 16px, as upright: below that iOS zooms the page in when one is tapped. */
+  .bl-site .bl-inquiry-form input:not([type=radio]):not([type=submit]),.bl-site .bl-inquiry-form textarea{font-size:16px}
 }
 /* Landscape phones wider than 600px: the four-column footer gives the business column the room to keep "Visit our main
    website" and its arrow on one line. At 600px and below the compact two-column footer stays as it is. */

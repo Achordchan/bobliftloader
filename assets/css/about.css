@@ -173,6 +173,13 @@
   .bl-site .bl-tree-here>span{flex-wrap:wrap}
   .bl-site .bl-tree-here-links a{min-height:44px}
 }
+/* Phones: the company-website row starts where the name above it does; on the narrowest screens (320px) its label takes
+   a line of its own, so the address and arrow stay inside the card instead of pushing the page sideways. */
+@media(max-width:600px){.bl-site .bl-tree-link{padding-inline:24px}}
+@media(max-width:374px){
+  .bl-site .bl-tree-link{grid-template-columns:minmax(0,1fr) auto;row-gap:4px}
+  .bl-site .bl-tree-link>span{grid-column:1/-1}
+}
 /* Touch: a press shows the hover colour while the finger is down, and none of it stays behind afterwards. */
 @media(hover:none){
   .bl-site .bl-tree-link:active{background:#fff;color:var(--ink)}

@@ -128,7 +128,8 @@
   .bl-site .bl-story-pager-older{grid-column:auto;align-items:flex-start;text-align:left}
   /* A tall poster is shown whole within one screen, centred, at its own width. */
   .bl-site .bl-story-poster{float:none;width:fit-content;max-width:100%;margin:24px auto}
-  .bl-site .bl-story-poster img{width:auto;max-width:100%;max-height:calc(100svh - var(--header-height) - var(--bl-bar-height,0px) - 64px);margin-inline:auto}
+  /* Its height is set before the picture arrives (the width follows from its shape), so the text below never jumps down. */
+  .bl-site .bl-story-poster img{width:auto;max-width:100%;height:calc(100svh - var(--header-height) - var(--bl-bar-height,0px) - 64px);object-fit:contain;margin-inline:auto}
   /* One column: each picture near 3:2 in a frame of its own shape (news.php); posters sit whole on a light mat in a 3:2 frame, so lettering is never cropped. */
   .bl-site .bl-news-item-image{aspect-ratio:var(--bl-news-ratio,3/2)}
   .bl-site .bl-news-item-image-whole{background:#e9edf0}

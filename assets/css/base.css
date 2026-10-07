@@ -4,7 +4,12 @@
 @font-face{font-family:Manrope;src:url('../fonts/manrope-500.ttf') format('truetype');font-weight:500;font-style:normal;font-display:swap}
 @font-face{font-family:Manrope;src:url('../fonts/manrope-600.ttf') format('truetype');font-weight:600;font-style:normal;font-display:swap}
 @font-face{font-family:Manrope;src:url('../fonts/manrope-700.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
-.bl-site{--ink:#081c2b;--blue:#215bdb;--paper:#f1f2ed;--white:#fff;--muted:#56616b;--line:#cdd1ce;--display:'Barlow Condensed','Arial Narrow',sans-serif;--sans:Manrope,Arial,sans-serif;
+/* Stand-ins while the two families load (phones on a slow network see them longest): a system sans scaled to the same
+   widths and line metrics, so headings and paragraphs keep their line breaks when the real font swaps in. */
+@font-face{font-family:'BL Display Fallback';src:local('Arial Bold'),local('Arial-BoldMT'),local('Helvetica Bold'),local('Helvetica-Bold'),local('Roboto Bold'),local('Roboto-Bold'),local('Liberation Sans Bold'),local('LiberationSans-Bold');font-weight:600 700;size-adjust:72%;ascent-override:139%;descent-override:28%;line-gap-override:0%}
+@font-face{font-family:'BL Text Fallback';src:local('Arial'),local('ArialMT'),local('Helvetica'),local('Roboto'),local('Roboto-Regular'),local('Liberation Sans'),local('LiberationSans');font-weight:400;size-adjust:102%;ascent-override:104.5%;descent-override:29.4%;line-gap-override:0%}
+@font-face{font-family:'BL Text Fallback';src:local('Arial Bold'),local('Arial-BoldMT'),local('Helvetica Bold'),local('Helvetica-Bold'),local('Roboto Bold'),local('Roboto-Bold'),local('Liberation Sans Bold'),local('LiberationSans-Bold');font-weight:500 700;size-adjust:100%;ascent-override:106.6%;descent-override:30%;line-gap-override:0%}
+.bl-site{--ink:#081c2b;--blue:#215bdb;--paper:#f1f2ed;--white:#fff;--muted:#56616b;--line:#cdd1ce;--display:'Barlow Condensed','BL Display Fallback','Arial Narrow',sans-serif;--sans:Manrope,'BL Text Fallback',Arial,sans-serif;
   /* 2560-first fluid scale: each token reaches its max at 2560px and keeps a readable floor on laptops. */
   --fs-micro:clamp(11px,.47vw,12px);--fs-label:clamp(12px,.55vw,14px);--fs-small:clamp(13.5px,.66vw,17px);--fs-body:clamp(15px,.74vw,19px);--fs-lead:clamp(17px,.9vw,23px);
   --fs-h5:clamp(22px,1.2vw,31px);--fs-h4:clamp(28px,1.6vw,41px);--fs-h3:clamp(36px,2.1vw,54px);--fs-h2:clamp(48px,3vw,78px);--fs-display:clamp(64px,5.9vw,152px);--fs-hero:clamp(84px,8.4vw,216px);
@@ -13,6 +18,10 @@
 /* Phones: a shorter header, and no caption or label below 12px, no running text below 14px. */
 @media(max-width:800px){.bl-site{--header-height:73px}}
 @media(min-width:801px) and (max-width:1000px) and (max-height:500px){.bl-site{--header-height:64px}}
+/* Phones turned sideways: every width keeps the slimmer header (header and contact bar together leave the page two
+   thirds of a short screen), captions keep the 12px floor of phones held upright, and with viewport-fit=cover the
+   gutters clear the notch and rounded corners on either side. */
+@media (max-width:1000px) and (max-height:500px){.bl-site{--header-height:64px;--fs-micro:12px;--gutter:max(clamp(24px,4.2vw,108px),calc(env(safe-area-inset-left,0px) + 8px),calc(env(safe-area-inset-right,0px) + 8px))}}
 /* Phones also share one type scale (page title, section heading, card title) and two section rhythms: --m-sec between
    sections, --m-sec-tight where two sections of the same ground meet. */
 @media(max-width:600px){.bl-site{--header-height:60px;--fs-micro:12px;--fs-label:13px;--fs-small:14px;--m-h1:clamp(48px,14vw,60px);--m-h2:clamp(38px,11vw,46px);--m-h3:28px;--m-sec:56px;--m-sec-tight:40px}}
