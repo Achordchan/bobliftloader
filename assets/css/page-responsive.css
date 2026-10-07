@@ -63,7 +63,9 @@
   .bl-site .bl-contact-main{padding-bottom:var(--m-sec,56px)}
   .bl-site .bl-contact-intro h1{font-size:var(--m-h1,clamp(48px,14vw,60px))}
   .bl-site .bl-contact-channels b{font-size:24px}
-  .bl-site .bl-contact-prepare ol{grid-template-columns:1fr}
+  /* The four points swipe in one row on phones (pages.css): no column template here. */
+  .bl-site .bl-contact-grid{row-gap:28px}
+  .bl-site .bl-contact-prepare ol{grid-template-columns:none}
   .bl-site .bl-not-found{padding-block:70px}
   .bl-site .bl-not-found h1{font-size:var(--m-h1,clamp(48px,14vw,60px));font-weight:700;letter-spacing:-.8px;line-height:.9;margin:22px 0 24px}
   .bl-site .bl-not-found>div{flex-direction:column;align-items:flex-start}
@@ -160,6 +162,24 @@
 @media(max-width:800px),(max-width:1000px) and (max-height:500px){
   .bl-site .bl-inquiry-form textarea{field-sizing:content;min-height:calc(4.5em + 27px);max-height:240px}
   .bl-site .bl-contact-form-panel .bl-inquiry-form textarea{height:auto}
+}
+/* Phones held upright: three lines of message at a slightly tighter line, the box no taller than its three lines. */
+@media(max-width:600px){
+  .bl-site .bl-inquiry-form textarea{min-height:calc(4.5em + 20px);padding-block:10px;line-height:1.5}
+  .bl-site .bl-contact-form-panel .bl-inquiry-form textarea{padding-block:10px}
+  /* The note and button follow the message a little closer than one step follows another, and the box keeps no drag
+     handle (it grows with its text: field-sizing here, main.js elsewhere). The quick panel keeps its own. */
+  .bl-site .bl-inquiry-form:not(.bl-quick-form *) fieldset:last-of-type{margin-bottom:22px}
+  .bl-site .bl-inquiry-form:not(.bl-quick-form *) textarea{vertical-align:top;resize:none}
+  /* Product pages: the heading block above the form packs closer, the two direct lines side by side (label over link,
+     each link keeping its 44px target), and the equipment chips swipe out to the edge of the white panel. */
+  .bl-site .bl-product-enquiry .bl-product-enquiry-aside{gap:12px}
+  .bl-site .bl-product-enquiry .bl-product-enquiry-aside>p:not(.bl-product-display){line-height:1.7}
+  .bl-site .bl-product-enquiry .bl-product-enquiry-direct{grid-template-columns:repeat(2,minmax(0,max-content));gap:0 28px;margin-top:4px}
+  .bl-site .bl-product-enquiry .bl-product-enquiry-direct li{flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;min-height:48px;min-width:0}
+  .bl-site .bl-product-enquiry .bl-product-enquiry-direct span{min-width:0}
+  .bl-site .bl-product-enquiry .bl-product-enquiry-direct a{overflow-wrap:anywhere}
+  .bl-site .bl-product-enquiry-form .bl-inquiry-form{--bl-form-bleed:16px}
 }
 
 /* With the WordPress toolbar showing: on phones WordPress lets the toolbar scroll away with the page (absolute there,

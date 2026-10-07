@@ -156,14 +156,30 @@
 .bl-site .bl-contact-form-panel .bl-form-bottom{margin-top:clamp(20px,1.6vw,36px)}
 /* Phones: the form sits on the page between the same margins as the rest, its fields underlined like the site's other forms. */
 @media(max-width:600px){
-  .bl-site .bl-contact-grid>.bl-contact-form-panel{margin-inline:0;padding:28px 0 0;background:none;border:0;border-top:1px solid var(--ink)}
-  .bl-site .bl-contact-grid>.bl-contact-form-panel>h2{margin:16px 0 28px;font-size:var(--m-h2,clamp(38px,11vw,46px))}
-  .bl-site .bl-contact-form-panel .bl-inquiry-form input:not([type=radio]),.bl-site .bl-contact-form-panel .bl-inquiry-form textarea{margin-top:2px;padding:12px 0;border:0;border-bottom:1px solid #a0afbc;background:transparent;font-size:16px}
-  .bl-site .bl-contact-form-panel .bl-inquiry-form input:not([type=radio]):focus,.bl-site .bl-contact-form-panel .bl-inquiry-form textarea:focus{border-color:var(--blue);background:transparent;box-shadow:0 1px var(--blue)}
-  .bl-site .bl-contact-form-panel .bl-inquiry-form textarea{min-height:96px;height:96px}
-  .bl-site .bl-contact-prepare li{grid-template-columns:auto minmax(0,1fr);column-gap:14px;align-items:baseline}
-  .bl-site .bl-contact-prepare li>span{font:600 36px/1 var(--display);letter-spacing:0;font-variant-numeric:tabular-nums}
+  /* The page title already sits above, so the form's own heading takes the card-title size and less room around it. */
+  .bl-site .bl-contact-grid>*{min-width:0}
+  .bl-site .bl-contact-grid>.bl-contact-form-panel{margin-inline:0;padding:20px 0 0;background:none;border:0;border-top:1px solid var(--ink)}
+  .bl-site .bl-contact-grid>.bl-contact-form-panel>h2{margin:10px 0 18px;font-size:var(--m-h3,28px);line-height:1}
+  /* The panel's own desktop spacing is stronger than responsive.css, so the phone values are restated for it here; the
+     message box's size and line come from page-responsive.css for every form. */
+  .bl-site .bl-contact-form-panel .bl-inquiry-form fieldset{margin-bottom:24px;padding-top:14px}
+  .bl-site .bl-contact-form-panel .bl-inquiry-form legend{margin-bottom:12px}
+  .bl-site .bl-contact-form-panel .bl-message-label{margin-top:14px}
+  .bl-site .bl-contact-form-panel .bl-form-bottom{margin-top:0}
+  .bl-site .bl-contact-form-panel .bl-inquiry-form input:not([type=radio]):not([type=submit]),.bl-site .bl-contact-form-panel .bl-inquiry-form textarea{margin-top:2px;padding:9px 0;border:0;border-bottom:1px solid #a0afbc;background:transparent;font-size:16px}
+  .bl-site .bl-contact-form-panel .bl-inquiry-form input:not([type=radio]):not([type=submit]):focus,.bl-site .bl-contact-form-panel .bl-inquiry-form textarea:focus{border-color:var(--blue);background:transparent;box-shadow:0 1px var(--blue)}
+  /* What helps us reply well: after the form, the four points become cards in one row that swipes, edge to edge,
+     instead of a long column below the button (page-responsive.css clears the column template, after its tablet rule). */
+  .bl-site .bl-contact-prepare ol{grid-auto-flow:column;grid-auto-columns:min(78%,300px);gap:10px;margin-inline:calc(var(--gutter) * -1);padding:0 var(--gutter) 2px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gutter);overscroll-behavior-x:contain;scrollbar-width:none}
+  .bl-site .bl-contact-prepare ol::-webkit-scrollbar{display:none}
+  .bl-site .bl-contact-prepare li{grid-template-columns:auto minmax(0,1fr);column-gap:12px;align-items:baseline;padding:16px;border:1px solid var(--line);background:var(--white);scroll-snap-align:start}
+  .bl-site .bl-contact-prepare li>span{font:600 32px/1 var(--display);letter-spacing:0;font-variant-numeric:tabular-nums}
   .bl-site .bl-contact-prepare h2{font-size:22px}
+  .bl-site .bl-contact-prepare p:not(.bl-eyebrow){line-height:1.6}
+  /* The intro: a shorter lede gap and slimmer contact rows; every row keeps a 44px or taller target. */
+  .bl-site .bl-contact-lede{margin-top:14px;line-height:1.7}
+  .bl-site .bl-contact-channels{margin-top:20px}
+  .bl-site .bl-contact-channels a{padding-block:10px}
 }
 /* Factory visit: an actual loader workshop photograph paired with practical arrival information. */
 .bl-site .bl-contact-visit{padding-block:var(--sp-section);border-top:1px solid var(--line);background:#f8f9f5}
@@ -556,6 +572,92 @@
   .bl-site .bl-ruler-axis>span:not(.bl-ruler-ticks){display:none}
   .bl-site .bl-ruler-range{height:44px;margin-top:2px}
   .bl-site .bl-range-story-options strong{font-size:var(--m-h2,clamp(38px,11vw,46px))}
+}
+
+/* ---------- Family pages on phones: the long sections under the models fold into thumb-sized pieces ----------
+   Portrait phones only. catalog.js builds the accordion buttons, the attachment tabs and the two-model comparison while
+   this query matches (the classes below exist only then); without the script every section reads in full, as before. */
+@media(max-width:600px){
+  /* The range's options (running gear, operator position, engines, colour) are one sideways row of cards, each as tall as
+     its own text, the link straight after it. */
+  .bl-site .bl-range-story-options,.bl-site .bl-range-story-options:not(.bl-range-story-with-colour),.bl-site .bl-range-story-with-colour{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:75%;align-items:start;gap:12px;overflow-x:auto;margin:40px calc(-1 * var(--gutter)) 0;padding:0 var(--gutter) 4px;border-top:0;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gutter);overscroll-behavior-x:contain;scrollbar-width:none}
+  .bl-site .bl-range-story-options::-webkit-scrollbar{display:none}
+  .bl-site .bl-range-story-options>li{padding:20px 20px 22px;background:#fff;border:1px solid var(--line);scroll-snap-align:start}
+  .bl-site .bl-range-story-options strong{padding-bottom:14px;font-size:var(--m-h3,28px)}
+  .bl-site .bl-range-story-options h3{margin:14px 0 6px}
+  .bl-site .bl-range-story-options .bl-text-link{margin-top:0;padding-top:14px}
+  .bl-site .bl-range-story-options>li.bl-range-story-colour{grid-column:auto;padding:0;border-color:var(--ink);background:var(--ink)}
+  .bl-site .bl-range-story-colour img{height:112px;aspect-ratio:auto}
+  .bl-site .bl-range-story-colour>div{padding:16px 20px 22px}
+  .bl-site .bl-range-story-colour h3{margin-top:12px}
+  /* The chart's rows sit closer: the same model, figure, bar and bucket note, less air between them. */
+  .bl-site .bl-ruler-rows a{gap:4px 12px;padding:10px 0 11px}
+  .bl-site .bl-ruler-track{height:22px}
+
+  /* Where it works: each title is a button that opens its text and tools (catalog.js). */
+  .bl-site .bl-attachments-jobs .bl-fold-list{margin-top:10px;border-bottom:1px solid var(--line)}
+  .bl-site .bl-attachments-jobs .bl-fold{gap:0;padding:0}
+  .bl-site .bl-attachments-jobs .bl-fold>strong{font-size:var(--fs-h5)}
+  .bl-site .bl-fold-body{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding-bottom:18px}
+  .bl-site .bl-fold:not(.bl-fold-open) .bl-fold-body{display:none}
+  .bl-site .bl-fold-toggle{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:58px;padding:12px 0;border:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-align:left;cursor:pointer;transition:color .2s}
+  .bl-site .bl-fold-toggle::after{content:'';flex:none;width:32px;height:32px;border:1px solid #b9c4c9;border-radius:50%;background:linear-gradient(var(--ink),var(--ink)) center/12px 1.5px no-repeat,linear-gradient(var(--ink),var(--ink)) center/1.5px 12px no-repeat;transition:transform .25s,background-color .2s,border-color .2s}
+  .bl-site .bl-fold-toggle[aria-expanded=true]::after{transform:rotate(45deg);border-color:var(--ink);background:linear-gradient(#fff,#fff) center/12px 1.5px no-repeat,linear-gradient(#fff,#fff) center/1.5px 12px no-repeat,var(--ink)}
+  .bl-site .bl-fold-toggle:active{color:var(--blue)}
+  @media(hover:hover){.bl-site .bl-fold-toggle:hover{color:var(--blue)}}
+
+  /* Attachments: one row of group tabs over the chosen group's sideways strip (catalog.js). */
+  .bl-site .bl-attachments-tabbed{border-top:0;padding-top:0}
+  .bl-site .bl-attachments-tabs{display:flex;gap:8px;overflow-x:auto;margin:0 calc(-1 * var(--gutter)) 16px;padding:0 var(--gutter);scroll-padding-inline:var(--gutter);scrollbar-width:none}
+  .bl-site .bl-attachments-tabs::-webkit-scrollbar{display:none}
+  .bl-site .bl-attachments-tabs [role=tab]{display:inline-flex;flex:none;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid #b9c4c9;background:none;color:var(--ink);font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+  .bl-site .bl-attachments-tabs small{font-size:12px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+  .bl-site .bl-attachments-tabs [aria-selected=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+  .bl-site .bl-attachments-tabs [aria-selected=true] small{color:#9fb3c2}
+  .bl-site .bl-attachments-tabs [role=tab]:active{border-color:var(--ink)}
+  @media(hover:hover){.bl-site .bl-attachments-tabs [role=tab]:hover{border-color:var(--ink)}}
+  .bl-site .bl-attachments-tabbed .bl-attachments-group{padding:0;border-top:0}
+  .bl-site .bl-attachments-tabbed .bl-attachments-group[hidden]{display:none}
+  .bl-site .bl-attachments-tabbed .bl-attachments-group h3{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* The comparison: two models picked above the table, every row full width under them (catalog.js). */
+  .bl-site .bl-compare-picker{position:sticky;top:calc(var(--header-height) + var(--section-nav-height));z-index:3;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:10px 0;background:var(--paper)}
+  .bl-site .bl-compare-picker label{display:block;min-width:0}
+  .bl-site .bl-compare-picker select{width:100%;min-height:48px;padding:0 36px 0 12px;border:1px solid var(--ink);border-radius:0;background:#fff url(../icons/arrow-down.svg) right 10px center/16px no-repeat;color:var(--ink);font:700 18px/1.1 var(--display);-webkit-appearance:none;appearance:none;text-overflow:ellipsis}
+  .bl-site .bl-compare-picker select:focus-visible{outline:3px solid #efaa49;outline-offset:2px}
+  .bl-site .bl-compare-picked .bl-compare-scroll{overflow:visible;border:0;background:none;-webkit-mask-image:none;mask-image:none}
+  .bl-site .bl-compare-picked .bl-compare-table{display:block;width:100%;min-width:0;font-size:15px}
+  .bl-site .bl-compare-picked .bl-compare-table :is(thead,tbody){display:block}
+  .bl-site .bl-compare-picked .bl-compare-table tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px;border-bottom:1px solid var(--line)}
+  .bl-site .bl-compare-picked .bl-compare-table :is(td,thead th){display:none}
+  .bl-site .bl-compare-picked .bl-compare-table :is(td,th):is(.bl-compare-a,.bl-compare-b){display:block;width:auto;min-width:0;max-width:none;padding:0 0 11px;border:0;background:none;box-shadow:none;white-space:normal}
+  .bl-site .bl-compare-picked .bl-compare-a{order:1}
+  .bl-site .bl-compare-picked .bl-compare-b{order:2}
+  .bl-site .bl-compare-picked .bl-compare-table tbody th{grid-column:1/-1;position:static;width:auto;min-width:0;max-width:none;padding:11px 0 3px;border:0;background:none;box-shadow:none;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .bl-site .bl-compare-picked .bl-compare-table thead tr{border-bottom:2px solid var(--ink)}
+  .bl-site .bl-compare-picked .bl-compare-table thead th:is(.bl-compare-a,.bl-compare-b){padding:0 0 10px}
+  .bl-site .bl-compare-picked .bl-compare-table thead :is(img,.bl-compare-noimage){max-width:none;aspect-ratio:16/10;margin:0;padding:6px}
+  .bl-site .bl-compare-picked .bl-compare-table thead span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .bl-site .bl-compare-picked .bl-compare-table tr.bl-compare-blank{display:none}
+  .bl-site .bl-compare-picked .bl-compare-table tr.bl-compare-actions{border-bottom:0}
+  .bl-site .bl-compare-picked .bl-compare-actions th{display:none}
+  .bl-site .bl-compare-picked .bl-compare-actions td:is(.bl-compare-a,.bl-compare-b){padding:14px 0 10px}
+  /* The short view counts the rows a pair actually shows (catalog.js marks those after the eighth): a hidden blank row
+     no longer takes one of the eight places. */
+  .bl-site .bl-compare-picked.bl-compare-short .bl-compare-table tbody tr:nth-child(n+9):not(.bl-compare-actions):not(.bl-compare-blank){display:grid}
+  .bl-site .bl-compare-picked.bl-compare-short .bl-compare-table tbody tr.bl-compare-later:not(.bl-compare-actions):not(.bl-compare-blank){display:none}
+  .bl-site .bl-compare-picked.bl-compare-few .bl-compare-more{display:none}
+  /* The button closes its own box; the Quote row above it draws no line of its own. */
+  .bl-site .bl-compare-picked .bl-compare-more{border-top:1px solid var(--line)}
+  /* Pinned under the header, the two lists draw a rule under them so the rows pass beneath a clear edge. */
+  .bl-site .bl-compare-picker-marker{height:0}
+  .bl-site .bl-compare-picker.bl-compare-picker-pinned{box-shadow:0 1px 0 var(--line),0 8px 14px -10px rgba(8,26,40,.28)}
+
+  /* Model names: the heading opens the key; closed, the section is its eyebrow and heading (catalog.js). */
+  .bl-site .bl-model-key.bl-fold{gap:20px}
+  .bl-site .bl-model-key.bl-fold .bl-fold-toggle{align-items:flex-end;min-height:0;padding:0}
+  .bl-site .bl-model-key.bl-fold .bl-fold-toggle::after{margin-bottom:2px}
+  .bl-site .bl-model-key.bl-fold:not(.bl-fold-open) :is(.bl-model-key-intro,.bl-model-key-parts){display:none}
 }
 
 /* Loader family page: how the loaders are made. Sticky step index beside a column of workshop photographs. */

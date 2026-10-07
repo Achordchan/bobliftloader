@@ -240,6 +240,51 @@ if (!CSS.supports('field-sizing', 'content')) {
   phoneForm.addEventListener('change', () => boxes.forEach(fit));
 }
 
+// On phones the equipment choices swipe in one row: a choice made beforehand (Parts & service, say) is brought into view
+// inside its row, and so is a chip tapped while partly cut off. Only the row scrolls, never the page.
+document.querySelectorAll('.bl-product-choices, .bl-inquiry-form .wpcf7-radio').forEach((row) => {
+  const reveal = (input) => {
+    if (!input || row.scrollWidth <= row.clientWidth) return;
+    const chip = input.closest('label').getBoundingClientRect();
+    const view = row.getBoundingClientRect();
+    const pad = parseFloat(getComputedStyle(row).paddingLeft) || 0;
+    // The chips snap by their start (responsive.css), so a cut chip is brought to the start of the row (or as far as the
+    // row goes): a smaller step would be snapped straight back.
+    if (chip.right > view.right - pad || chip.left < view.left + pad) row.scrollLeft += chip.left - view.left - pad;
+  };
+  const edge = () => row.classList.toggle('bl-edge-start', row.scrollLeft > 2);
+  row.addEventListener('scroll', edge, { passive: true });
+  reveal(row.querySelector('input:checked'));
+  edge();
+  row.addEventListener('change', (event) => reveal(event.target));
+});
+
+// A required field left empty: the browser brings it into view and focuses it, but can leave it under the pinned header
+// and section bar. The first such field of each try is moved to just below them, its label showing (and above the phone
+// bar where that is up). Only the first: the others of the same try fire too, and would each scroll again.
+let settling = false;
+document.querySelectorAll('form.bl-inquiry-form').forEach((form) => form.addEventListener('invalid', (event) => {
+  if (settling || form.closest('.bl-quick')) return;
+  settling = true;
+  const field = event.target;
+  setTimeout(() => {
+    settling = false;
+    const pinned = [...document.querySelectorAll('.bl-header,.bl-section-nav,.bl-product-section-nav,.bl-side-contact')].filter((bar) => {
+      const style = getComputedStyle(bar);
+      if (style.visibility === 'hidden' || !bar.offsetHeight) return false;
+      // A sticky bar counts only while it is held at its place, not where it sits in the page.
+      return style.position === 'fixed' || (style.position === 'sticky' && Math.abs(bar.getBoundingClientRect().top - (parseFloat(style.top) || 0)) < 1);
+    }).map((bar) => bar.getBoundingClientRect());
+    const ceiling = Math.max(0, ...pinned.filter((box) => box.top < innerHeight / 2).map((box) => box.bottom)) + 12;
+    const floor = Math.min(innerHeight, ...pinned.filter((box) => box.top >= innerHeight / 2).map((box) => box.top)) - 12;
+    const top = (field.closest('label') || field).getBoundingClientRect().top;
+    const bottom = field.getBoundingClientRect().bottom;
+    if (top < ceiling) window.scrollBy({ top: top - ceiling, behavior: 'instant' });
+    else if (bottom > floor) window.scrollBy({ top: Math.min(bottom - floor, top - ceiling), behavior: 'instant' });
+    if (document.activeElement !== field) field.focus({ preventScroll: true });
+  });
+}, true));
+
 // The three support topics form one disclosure group, retaining native keyboard behavior.
 document.querySelectorAll('.bl-accordions details').forEach((detail) => {
   detail.addEventListener('toggle', () => {

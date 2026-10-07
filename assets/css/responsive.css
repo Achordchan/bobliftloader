@@ -71,27 +71,46 @@
   .bl-site .bl-applications .bl-section-description{max-width:100%;font-size:14px}
   .bl-site .bl-applications .bl-section-description br{display:none}
   .bl-site .bl-contact{padding-block:var(--m-sec,56px)}
-  .bl-site .bl-contact-layout{gap:40px}
-  .bl-site .bl-contact-copy h2{font-size:var(--m-h1,clamp(48px,14vw,60px));letter-spacing:-.8px}
-  .bl-site .bl-contact-copy>.bl-eyebrow{font-size:12px;margin-bottom:24px}
-  .bl-site .bl-contact-email{font-size:16px;margin-top:23px}
+  /* The heading block above the form stays short, so the form starts within the first screen of the section: the title
+     takes the section-heading size the other home sections use, with tighter spacing around the line and the email. */
+  .bl-site .bl-contact-layout{gap:28px}
+  .bl-site .bl-contact-layout>*{min-width:0}
+  .bl-site .bl-contact-copy h2{font-size:var(--m-h2,clamp(38px,11vw,46px));letter-spacing:-.5px}
+  .bl-site .bl-contact-copy>.bl-eyebrow{font-size:12px;margin-bottom:14px}
+  .bl-site .bl-contact-copy>p:not(.bl-eyebrow){margin-top:12px;line-height:1.7}
+  .bl-site .bl-contact-email{font-size:16px;margin-top:10px}
   /* Text links keep their look; an invisible layer gives them a 44px tall target. */
   .bl-site .bl-text-link,.bl-site .bl-contact-email{position:relative}
   .bl-site .bl-text-link::before,.bl-site .bl-contact-email::before{content:'';position:absolute;left:0;right:0;top:50%;height:max(100%,44px);transform:translateY(-50%)}
-  .bl-site .bl-product-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-  /* The quick panel's own choices are left out; kept as a rule of its own, so a browser without complex :not() still lays out the rest. */
-  .bl-site .bl-inquiry-form:not(.bl-quick-form *) .wpcf7-radio{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-  .bl-site .bl-product-choices label,.bl-site .bl-product-choices span,.bl-site .bl-inquiry-form .wpcf7-radio label{height:100%}
-  .bl-site .bl-product-choices span{justify-content:space-between;min-height:48px;padding:8px 12px;font-size:14px;line-height:1.3;gap:8px}
-  .bl-site .bl-inquiry-form:not(.bl-quick-form *) .wpcf7-list-item-label{justify-content:space-between;min-height:48px;padding:8px 12px;font-size:14px;line-height:1.3;gap:8px}
+  /* The enquiry form, compact: the four equipment choices sit in one row of 44px chips that swipes sideways, running out to
+     the edge of the screen (or of the white panel on product pages, which sets --bl-form-bleed), so the chip cut at the
+     edge shows there is more. They stay radio buttons: arrow keys move the choice and bring it into view (main.js brings a
+     choice made beforehand into view too). Fields sit closer, each 44px or more with 16px type. The quick panel keeps its
+     own choices, so the CF7 rule leaves it out; kept as a rule of its own, so a browser without complex :not() still lays
+     out the theme's own form. */
+  .bl-site .bl-inquiry-form{--bl-form-bleed:var(--gutter)}
+  .bl-site .bl-product-choices{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;margin:-5px calc(var(--bl-form-bleed) * -1);padding:5px var(--bl-form-bleed);scroll-padding-inline:var(--bl-form-bleed);scroll-snap-type:x proximity;overscroll-behavior-x:contain;scrollbar-width:none}
+  .bl-site .bl-inquiry-form:not(.bl-quick-form *) .wpcf7-radio{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;margin:-5px calc(var(--bl-form-bleed) * -1);padding:5px var(--bl-form-bleed);scroll-padding-inline:var(--bl-form-bleed);scroll-snap-type:x proximity;overscroll-behavior-x:contain;scrollbar-width:none}
+  .bl-site .bl-product-choices::-webkit-scrollbar,.bl-site .bl-inquiry-form .wpcf7-radio::-webkit-scrollbar{display:none}
+  /* Once the row has been swiped, its left edge fades like the right edge of the site's other sideways strips
+     (pages.css, bl-edge-fade), so a chip half gone reads as scrolled away rather than cut; main.js marks the row. */
+  .bl-site .bl-product-choices.bl-edge-start,.bl-site .bl-inquiry-form .wpcf7-radio.bl-edge-start{-webkit-mask-image:linear-gradient(90deg,#0000,#000 calc(var(--bl-form-bleed) + 32px));mask-image:linear-gradient(90deg,#0000,#000 calc(var(--bl-form-bleed) + 32px))}
+  .bl-site .bl-product-choices label,.bl-site .bl-inquiry-form:not(.bl-quick-form *) .wpcf7-list-item{flex:none;scroll-snap-align:start}
+  .bl-site .bl-product-choices span{min-height:44px;padding:0 12px;font-size:14px;line-height:1.3;gap:8px;white-space:nowrap}
+  .bl-site .bl-inquiry-form:not(.bl-quick-form *) .wpcf7-list-item-label{min-height:44px;padding:0 12px;font-size:14px;line-height:1.3;gap:8px;white-space:nowrap}
   .bl-site .bl-product-choices .bl-icon,.bl-site .bl-inquiry-form .wpcf7-list-item-label::after{width:12px;height:12px;flex-shrink:0}
-  .bl-site .bl-inquiry-form legend{padding:0;font-size:12px}
-  .bl-site .bl-form-grid{grid-template-columns:1fr;gap:20px}
-  .bl-site .bl-form-grid label{font-size:14px}
-  .bl-site .bl-inquiry-form input:not([type=radio]),.bl-site .bl-inquiry-form textarea{font-size:16px}
+  .bl-site .bl-product-choices input:focus-visible+span,.bl-site .bl-inquiry-form .wpcf7-radio input:focus-visible+.wpcf7-list-item-label{outline-offset:-3px}
+  .bl-site .bl-inquiry-form fieldset{margin-bottom:24px;min-width:0}
+  .bl-site .bl-inquiry-form legend{padding:0;font-size:12px;margin-bottom:12px}
+  .bl-site .bl-inquiry-form .bl-selected-model{margin-bottom:10px;line-height:1.5}
+  .bl-site .bl-form-grid{grid-template-columns:1fr;gap:14px}
+  .bl-site .bl-form-grid label,.bl-site .bl-message-label{font-size:13px;line-height:1.4}
+  .bl-site .bl-message-label{margin-top:14px}
+  .bl-site .bl-inquiry-form input:not([type=radio]):not([type=submit]),.bl-site .bl-inquiry-form textarea{font-size:16px}
+  .bl-site .bl-inquiry-form input:not([type=radio]):not([type=submit]):not([type=hidden]){min-height:44px;padding-block:9px}
   .bl-site .bl-inquiry-form input::placeholder,.bl-site .bl-inquiry-form textarea::placeholder{font-size:14px}
   .bl-site .bl-form-bottom{display:block}
-  .bl-site .bl-form-bottom p{font-size:13px;margin-bottom:18px}
+  .bl-site .bl-form-bottom p{font-size:13px;line-height:1.6;margin-bottom:12px}
   .bl-site .bl-form-bottom .bl-button{width:100%}
   /* A compact footer: the tagline stays for wider screens; the three link groups pack into two columns
      (Equipment over Contact, beside Explore), the business block runs underneath. */

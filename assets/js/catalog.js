@@ -38,6 +38,7 @@ function keepTogether(root) {
 }
 
 export function initializeCatalog() {
+  initializePhoneSections();
   // Only the family and product pages, and only where the contact bar runs along the foot (page-responsive.css).
   if (document.querySelector('.bl-catalog, .bl-product-hero')) {
     const phone = window.matchMedia('(max-width: 800px), (max-width: 1000px) and (max-height: 500px)');
@@ -155,4 +156,258 @@ export function initializeCatalog() {
     form.querySelectorAll('.bl-chip input').forEach((input) => { input.checked = input.type === 'radio' && input.value === ''; });
     apply();
   }));
+}
+
+/*
+ * Family pages on phones (portrait, up to 600px): the long sections under the models fold into shapes made for a thumb.
+ * Each part is built while the phone query matches and taken apart when it stops, so tablets, phones on their side and
+ * desktops keep the page exactly as written; without this script phones read every section in full, as before. What the
+ * visitor opened or chose is kept while they are taken apart, so turning the phone and back finds the page as they left it. No
+ * words are added or removed: buttons carry the titles the page already shows, and folded text stays in the page.
+ *   - Where it works (loader attachments, dumper jobs): an accordion, each title a button that opens its text.
+ *   - Attachment groups: one row of group tabs over a single sideways strip.
+ *   - The comparison: two models side by side, each picked from a list of the whole range, every row full width.
+ *   - Model names: the heading opens the key; a link to #model-names opens it on the way.
+ */
+const PHONE = '(max-width: 600px)';
+let phoneUid = 0;
+const phoneId = (prefix) => `${prefix}-${++phoneUid}`;
+
+function phoneOnly(build) {
+  const query = window.matchMedia(PHONE);
+  let undo = null;
+  const sync = () => {
+    if (query.matches && !undo) undo = build() || (() => {});
+    else if (!query.matches && undo) { undo(); undo = null; }
+  };
+  sync();
+  query.addEventListener('change', sync);
+}
+
+// A title becomes the button that shows or hides the content after it (wrapped in one region for aria-controls).
+function foldItem(item, title, open) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'bl-fold-toggle';
+  while (title.firstChild) button.append(title.firstChild);
+  title.append(button);
+  const body = document.createElement('div');
+  body.className = 'bl-fold-body';
+  body.id = phoneId('bl-fold');
+  [...item.childNodes].filter((node) => node !== title).forEach((node) => body.append(node));
+  item.append(body);
+  item.classList.add('bl-fold');
+  button.setAttribute('aria-controls', body.id);
+  const set = (state) => {
+    button.setAttribute('aria-expanded', String(state));
+    item.classList.toggle('bl-fold-open', state);
+  };
+  set(open);
+  button.addEventListener('click', () => set(button.getAttribute('aria-expanded') !== 'true'));
+  return {
+    set,
+    open: () => button.getAttribute('aria-expanded') === 'true',
+    undo: () => {
+      [...body.childNodes].forEach((node) => item.append(node));
+      body.remove();
+      while (button.firstChild) title.append(button.firstChild);
+      button.remove();
+      item.classList.remove('bl-fold', 'bl-fold-open');
+    },
+  };
+}
+
+function initializePhoneSections() {
+  // Where it works: the first job stays open as a sample of what each title holds.
+  document.querySelectorAll('.bl-attachments-jobs ul').forEach((list) => {
+    let opened = [0];
+    phoneOnly(() => {
+      const folds = [...list.children].map((item, i) => foldItem(item, item.querySelector('strong'), opened.includes(i)));
+      list.classList.add('bl-fold-list');
+      return () => {
+        opened = folds.flatMap((fold, i) => (fold.open() ? [i] : []));
+        folds.forEach((fold) => fold.undo());
+        list.classList.remove('bl-fold-list');
+      };
+    });
+  });
+
+  // Attachment groups: tabs named and counted as the group headings are; the chosen group's strip shows below.
+  document.querySelectorAll('.bl-attachments-groups').forEach((wrap) => { let chosen = 0; phoneOnly(() => {
+    const groups = [...wrap.querySelectorAll(':scope > .bl-attachments-group')];
+    if (groups.length < 2) return null;
+    const tabs = document.createElement('div');
+    tabs.className = 'bl-attachments-tabs';
+    tabs.setAttribute('role', 'tablist');
+    const heading = wrap.closest('section')?.querySelector('h2');
+    if (heading?.id) tabs.setAttribute('aria-labelledby', heading.id);
+    const buttons = groups.map((group) => {
+      const tab = document.createElement('button');
+      tab.type = 'button';
+      tab.id = phoneId('bl-attachments-tab');
+      tab.setAttribute('role', 'tab');
+      group.querySelector('h3').childNodes.forEach((node) => tab.append(node.cloneNode(true)));
+      if (!group.id) group.id = phoneId('bl-attachments-panel'); // no ||=: Safari before 14 rejects it, and the whole script
+      group.setAttribute('role', 'tabpanel');
+      group.setAttribute('aria-labelledby', tab.id);
+      tab.setAttribute('aria-controls', group.id);
+      tabs.append(tab);
+      return tab;
+    });
+    const select = (index, focus) => {
+      chosen = index;
+      buttons.forEach((tab, i) => {
+        const on = i === index;
+        tab.setAttribute('aria-selected', String(on));
+        tab.tabIndex = on ? 0 : -1;
+        groups[i].hidden = !on;
+      });
+      const row = groups[index].querySelector('[data-swipe-row]');
+      if (row) {
+        row.scrollLeft = 0;
+        if (row.scrollWidth > row.clientWidth + 1) row.tabIndex = 0;
+      }
+      if (focus) buttons[index].focus();
+      buttons[index].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    };
+    tabs.addEventListener('click', (event) => {
+      const tab = event.target.closest('[role=tab]');
+      if (tab) select(buttons.indexOf(tab), false);
+    });
+    tabs.addEventListener('keydown', (event) => {
+      const current = buttons.indexOf(document.activeElement);
+      const next = { ArrowRight: current + 1, ArrowLeft: current - 1, Home: 0, End: buttons.length - 1 }[event.key];
+      if (current < 0 || next === undefined) return;
+      event.preventDefault();
+      select((next + buttons.length) % buttons.length, true);
+    });
+    wrap.prepend(tabs);
+    wrap.classList.add('bl-attachments-tabbed');
+    if (chosen >= groups.length) chosen = 0;
+    buttons.forEach((tab, i) => { tab.setAttribute('aria-selected', String(i === chosen)); tab.tabIndex = i === chosen ? 0 : -1; groups[i].hidden = i !== chosen; });
+    return () => {
+      tabs.remove();
+      wrap.classList.remove('bl-attachments-tabbed');
+      groups.forEach((group) => {
+        group.hidden = false;
+        group.removeAttribute('role');
+        group.removeAttribute('aria-labelledby');
+        if (group.id.startsWith('bl-attachments-panel')) group.removeAttribute('id');
+      });
+    };
+  }); });
+
+  // The comparison: two models, each chosen from the range under the table's own "Model" heading; the other columns
+  // stay in the table for the rest of the page and for wider screens.
+  document.querySelectorAll('.bl-compare').forEach((section) => { const picked = [0, 1]; phoneOnly(() => {
+    const table = section.querySelector('.bl-compare-table');
+    const box = section.querySelector('.bl-compare-scroll');
+    const heads = [...table.querySelectorAll('thead th')];
+    const models = heads.slice(1);
+    if (models.length < 2) return null;
+    const rows = [...table.rows];
+    const names = models.map((th) => th.querySelector('span')?.textContent.trim() || th.textContent.trim());
+    const label = heads[0].textContent.trim();
+    const picker = document.createElement('div');
+    picker.className = 'bl-compare-picker';
+    const selects = picked.map((start, side) => {
+      const field = document.createElement('label');
+      const caption = document.createElement('span');
+      caption.className = 'bl-visually-hidden';
+      caption.textContent = label;
+      const select = document.createElement('select');
+      names.forEach((name, i) => select.add(new Option(name, String(i), false, i === start)));
+      field.append(caption, select);
+      picker.append(field);
+      select.addEventListener('change', () => {
+        const value = Number(select.value);
+        const other = 1 - side;
+        // Choosing the model already on the other side swaps the two, so two different models are always shown.
+        if (value === picked[other]) { picked[other] = picked[side]; selects[other].value = String(picked[other]); }
+        picked[side] = value;
+        paint();
+      });
+      return select;
+    });
+    // A figure neither of the two models publishes (a dash in both columns) steps aside until another pair has it. The
+    // short view counts only the rows left, so it always shows eight figures (or all of them, and no button, if a pair has no more).
+    const paint = () => {
+      let shown = 0;
+      rows.forEach((row) => {
+        const cells = [...row.cells].slice(1);
+        cells.forEach((cell, i) => {
+          cell.classList.toggle('bl-compare-a', i === picked[0]);
+          cell.classList.toggle('bl-compare-b', i === picked[1]);
+        });
+        const figure = row.parentElement.tagName === 'TBODY' && !row.classList.contains('bl-compare-actions');
+        const blank = figure && picked.every((i) => cells[i]?.textContent.trim() === '—');
+        row.classList.toggle('bl-compare-blank', blank);
+        if (figure && !blank) shown += 1;
+        row.classList.toggle('bl-compare-later', figure && !blank && shown > 8);
+      });
+      section.classList.toggle('bl-compare-few', shown <= 8);
+    };
+    if (Math.max(...picked) >= models.length) picked.splice(0, 2, 0, 1);
+    paint();
+    box.before(picker);
+    section.classList.add('bl-compare-picked');
+    // The two lists draw a rule under them only while they are pinned under the header (a marker just above them has
+    // gone under that line).
+    const marker = document.createElement('div');
+    marker.className = 'bl-compare-picker-marker';
+    picker.before(marker);
+    const pinnedAt = parseFloat(getComputedStyle(picker).top) || 0;
+    const watch = new IntersectionObserver(([entry]) => {
+      picker.classList.toggle('bl-compare-picker-pinned', !entry.isIntersecting && entry.boundingClientRect.top < pinnedAt + 1);
+    }, { rootMargin: `${-Math.ceil(pinnedAt + 1)}px 0px 100000px 0px` }); // everything below the line counts, so a jump past it still reports
+    watch.observe(marker);
+    box.dispatchEvent(new Event('scroll')); // the fade's end marker reads the box again now that nothing overflows
+    return () => {
+      watch.disconnect();
+      marker.remove();
+      picker.remove();
+      section.classList.remove('bl-compare-picked', 'bl-compare-few');
+      rows.forEach((row) => { row.classList.remove('bl-compare-blank', 'bl-compare-later'); [...row.cells].forEach((cell) => cell.classList.remove('bl-compare-a', 'bl-compare-b')); });
+      box.dispatchEvent(new Event('scroll'));
+    };
+  }); });
+
+  // Model names: the heading opens the key. Arriving at #model-names, or following a link to it, opens it first.
+  const key = document.querySelector('.bl-model-key');
+  let keyOpen = false;
+  if (key) phoneOnly(() => {
+    const head = key.querySelector('.bl-model-key-head');
+    const title = head.querySelector('h2');
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'bl-fold-toggle';
+    while (title.firstChild) button.append(title.firstChild);
+    title.append(button);
+    const parts = [head.querySelector('.bl-model-key-intro'), key.querySelector('.bl-model-key-parts')].filter(Boolean);
+    parts.forEach((part) => { if (!part.id) part.id = phoneId('bl-model-key-part'); });
+    button.setAttribute('aria-controls', parts.map((part) => part.id).join(' '));
+    const set = (open) => {
+      button.setAttribute('aria-expanded', String(open));
+      key.classList.toggle('bl-fold-open', open);
+    };
+    key.classList.add('bl-fold');
+    set(keyOpen || location.hash === `#${key.id}`);
+    button.addEventListener('click', () => set(button.getAttribute('aria-expanded') !== 'true'));
+    const follow = (event) => {
+      const link = event.target.closest?.('a[href]');
+      if (link && link.hash === `#${key.id}` && link.pathname === location.pathname) set(true);
+    };
+    const arrive = () => { if (location.hash === `#${key.id}`) set(true); };
+    document.addEventListener('click', follow, true);
+    window.addEventListener('hashchange', arrive);
+    return () => {
+      keyOpen = button.getAttribute('aria-expanded') === 'true';
+      document.removeEventListener('click', follow, true);
+      window.removeEventListener('hashchange', arrive);
+      while (button.firstChild) title.append(button.firstChild);
+      button.remove();
+      parts.forEach((part) => { if (part.id.startsWith('bl-model-key-part')) part.removeAttribute('id'); });
+      key.classList.remove('bl-fold', 'bl-fold-open');
+    };
+  });
 }
