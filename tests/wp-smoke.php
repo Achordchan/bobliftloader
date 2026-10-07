@@ -26,6 +26,8 @@ $storyMeta = get_post_meta($story->ID, '_bl_record', true);
 try {
     update_post_meta($story->ID, '_bl_record', array_diff_key($storyMeta, ['hide_cover' => true]));
     bl_test_assert(bl_wp_article_record(get_post($story->ID))['hide_cover'] === true, 'A story saved without hide_cover lost its seed value');
+    update_post_meta($story->ID, '_bl_record', ['image' => 'https://example.com/replacement.jpg'] + array_diff_key($storyMeta, ['hide_cover' => true, 'image' => true]));
+    bl_test_assert(empty(bl_wp_article_record(get_post($story->ID))['hide_cover']), 'A replaced cover was hidden by the seed flag');
     update_post_meta($story->ID, '_bl_record', ['hide_cover' => false] + $storyMeta);
     bl_test_assert(empty(bl_wp_article_record(get_post($story->ID))['hide_cover']), 'A saved hide_cover was overridden by the seed');
 } finally {
