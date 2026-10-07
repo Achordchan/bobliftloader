@@ -109,7 +109,7 @@ $request = new WP_REST_Request(['id' => 6, 'meta' => ['_bl_content' => ['hero' =
 $check(!is_wp_error(run_filter('rest_pre_insert_bl_page_content', (object) [], $request)), 'loader REST save failed');
 $check($GLOBALS['options']['bl_content_loaders']['attachments']['items'][0]['aliases'] === [$oldName, 'Renamed bucket'], 'option write lost attachment aliases');
 $afterOptions = $GLOBALS['options'];
-unset($afterOptions['bl_content_loaders'], $beforeOptions['bl_content_loaders']);
+unset($afterOptions['bl_content_loaders'], $beforeOptions['bl_content_loaders'], $afterOptions['bl_content_snapshots_loaders'], $beforeOptions['bl_content_snapshots_loaders']); // the page's own history is expected
 $check($GLOBALS['meta'] === $beforeMeta && $afterOptions === $beforeOptions, 'loader save wrote another record');
 $product = ['category' => 'skid-steer-loaders', 'attachments' => [strtoupper($oldName)]];
 $check(bl_product_attachments($product)[0]['name'] === 'Current bucket', 'product attachment alias unresolved');
