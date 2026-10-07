@@ -43,7 +43,8 @@ add_action('admin_menu', static function (): void {
     global $submenu;
     // Core may append a return URL to customize.php; remove every such menu entry for all roles.
     foreach ($submenu['themes.php'] ?? [] as $key => $item) {
-        if (strtok(html_entity_decode((string) $item[2]), '?') === 'customize.php' || $item[2] === 'theme-editor.php') unset($submenu['themes.php'][$key]);
+        // Fonts: this theme ships its own typefaces and never reads the font library, so the screen would change nothing.
+        if (strtok(html_entity_decode((string) $item[2]), '?') === 'customize.php' || in_array($item[2], ['theme-editor.php', 'font-library.php'], true)) unset($submenu['themes.php'][$key]);
     }
 }, 999);
 
