@@ -50,15 +50,12 @@ function bl_spec_choices(): array
     ];
 }
 
-/**
- * Validate the units the existing readers understand; never reinterpret or rewrite a published value. A row left exactly as
- * it is stored in $stored is not checked, so a product saved before these rules can still be saved without touching it.
- */
-function bl_specs_error(array $specs, array $stored = []): string
+/** Value formats the frontend reads (filters, charts, comparisons): pattern and an example editors can copy. */
+function bl_spec_rules(): array
 {
     $integer = '(?:[1-9][0-9]*|[1-9][0-9]{0,2}(?:,[0-9]{3})+)';
     $decimal = '(?:0|[1-9][0-9]*)(?:\.[0-9]+)?';
-    $rules = [
+    return [
         'Rated load' => [$integer . '\s*kg', '1,000 kg（整数，单位 kg）'],
         'Bucket capacity' => [$decimal . '\s*m³', '0.5 m³（数值，单位 m³）'],
         'Engine power' => [$decimal . '\s*kW', '12.1 kW（数值，单位 kW）'],
@@ -69,6 +66,15 @@ function bl_specs_error(array $specs, array $stored = []): string
         'Running gear' => ['(?=.*(?:track|tire|wheel))[^<>]+', 'Rubber tracks / Rubber tires / Wheeled（需含 track、tire 或 wheel）'],
         'Operator station' => ['(?=.*(?:stand|seat))[^<>]+', 'Stand-on platform / Seat（需含 stand 或 seat）'],
     ];
+}
+
+/**
+ * Validate the units the existing readers understand; never reinterpret or rewrite a published value. A row left exactly as
+ * it is stored in $stored is not checked, so a product saved before these rules can still be saved without touching it.
+ */
+function bl_specs_error(array $specs, array $stored = []): string
+{
+    $rules = bl_spec_rules();
     $seen = [];
     foreach ($specs as $key => $value) {
         $key = function_exists('sanitize_text_field') ? sanitize_text_field((string) $key) : trim(strip_tags((string) $key));

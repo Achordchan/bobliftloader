@@ -109,3 +109,8 @@
   /* The image strip stays within the screen (fields themselves stack via admin.css). */
   .bl-gallery { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); max-width: 100%; }
 }
+
+/* A spec value the frontend can't read: message under the row, the value box outlined. */
+.bl-specs .bl-row.has-error .bl-spec-value { border-color: #d63638; box-shadow: 0 0 0 1px #d63638; }
+.bl-spec-error { margin: 0 0 6px 40px; color: #b32d2e; font-size: 12px; }
+@media (max-width: 782px) { .bl-spec-error { margin-left: 8px; } }

@@ -142,7 +142,7 @@ function bl_product_specs_box(WP_Post $post): void
 {
     $record = bl_admin_record($post);
     echo '<p class="bl-box-intro">产品页“Specifications”参数表，前台按固定参数组排列，组内使用固定参数顺序，未归组参数按录入顺序显示。常用参数按中文名称选择，保存为英文显示名；列表之外可选择自定义。</p>';
-    echo '<div class="bl-specs"><div class="bl-specs-head" aria-hidden="true"><span>参数名</span><span>参数值</span></div><ol class="bl-rows bl-rows-compact" data-bl-rows="specs" data-bl-max="' . BL_CONTENT_LIMITS['specs'] . '">';
+    echo '<div class="bl-specs" data-bl-spec-rules="' . esc_attr((string) wp_json_encode(array_map(static fn($rule) => ['pattern' => $rule[0], 'example' => $rule[1]], bl_spec_rules()))) . '"><div class="bl-specs-head" aria-hidden="true"><span>参数名</span><span>参数值</span></div><ol class="bl-rows bl-rows-compact" data-bl-rows="specs" data-bl-max="' . BL_CONTENT_LIMITS['specs'] . '">';
     // A new product starts with the three parameters the filters read; rows left without a value are not saved.
     foreach ((array) ($record['specs'] ?? []) ?: ['Rated load' => '', 'Bucket capacity' => '', 'Engine power' => ''] as $key => $value) echo bl_product_spec_row((string) $key, (string) $value);
     echo '</ol><template data-bl-template="specs">' . bl_product_spec_row('', '') . '</template>';
