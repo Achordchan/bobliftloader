@@ -114,11 +114,14 @@
   .bl-site .bl-side-contact .bl-side-enquiry{flex:1.4;flex-direction:row;gap:9px;background:var(--blue);color:#fff;border-right:0;font-size:13px}
   .bl-site .bl-side-contact .bl-side-enquiry span{font-size:13px}
   .bl-quick-on .bl-site .bl-side-contact .bl-side-enquiry{background:#1746ad}
-  .bl-site .bl-side-contact .bl-side-top{position:fixed;right:16px;bottom:calc(var(--bl-bar-height) + env(safe-area-inset-bottom,0px) + 14px);flex:none;width:44px;height:44px;padding:0;border:1px solid #ffffff2e;border-radius:50%;background:#081c2bdb;color:#fff;box-shadow:0 6px 20px #081c2b40;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .25s,transform .25s,visibility 0s linear .25s}
+  .bl-site .bl-side-contact .bl-side-top{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(var(--bl-bar-height) + env(safe-area-inset-bottom,0px) + 14px);flex:none;width:44px;height:44px;padding:0;border:1px solid #ffffff2e;border-radius:50%;background:#081c2bdb;color:#fff;box-shadow:0 6px 20px #081c2b40;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .25s,transform .25s,visibility 0s linear .25s}
   .bl-site .bl-side-contact a.bl-side-top span{display:none}
   .bl-past-fold .bl-site .bl-side-contact .bl-side-top{opacity:1;visibility:visible;transform:none;transition-delay:0s}
   /* It also steps aside while the menu or the quick enquiry is open, or while it would cover a control (main.js). */
-  :is(.bl-quick-on,.bl-menu-on,.bl-top-aside) .bl-site .bl-side-contact .bl-side-top{opacity:0;visibility:hidden;transition:opacity .2s,visibility 0s linear .2s}
+  :is(.bl-quick-on,.bl-menu-on,.bl-top-aside,.bl-typing) .bl-site .bl-side-contact .bl-side-top{opacity:0;visibility:hidden;transition:opacity .2s,visibility 0s linear .2s}
+  /* While a field of the page has focus the keyboard is up: the bar steps aside too, so it never sits over the field being
+     typed in or the button that sends it (where the keyboard shrinks the screen), and comes back when typing ends (main.js). */
+  .bl-typing .bl-site .bl-side-contact{visibility:hidden}
   /* At the foot of the page the Top button settles beside Privacy rather than over it. */
   .bl-site .bl-footer-bottom{padding-right:76px}
   .bl-site .bl-footer{padding-bottom:calc(var(--bl-bar-height) + env(safe-area-inset-bottom,0px))}

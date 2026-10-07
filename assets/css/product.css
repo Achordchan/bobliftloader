@@ -315,6 +315,35 @@
   .bl-site .bl-product-actions{margin-top:16px}
   .bl-site .bl-product-section-nav{position:static}
 }
+/* Round 4, phones in the hand. Wherever the contact bar runs along the foot: the model links under each job and the
+   WhatsApp / email lines beside the form keep their look, an invisible layer making each a 44px tall target; a field
+   the keyboard brings into view stops clear of the header above (its label too) and the contact bar below. */
+@media(max-width:800px),(max-width:1000px) and (max-height:500px){
+  .bl-site .bl-product-jobs span a{position:relative}
+  .bl-site .bl-product-jobs span a::before{content:'';position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%)}
+  .bl-site .bl-product-enquiry-direct{gap:0}
+  .bl-site .bl-product-enquiry-direct li{align-items:center;min-height:44px}
+  .bl-site .bl-product-enquiry-direct a{position:relative}
+  .bl-site .bl-product-enquiry-direct a::before{content:'';position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%)}
+  .bl-site .bl-product-enquiry :is(input:not([type=radio]),textarea,[type=submit]){scroll-margin-block:calc(var(--header-height) + 32px) calc(var(--bl-bar-height,58px) + 12px)}
+}
+/* The photograph counter stays "1 / 5" on one line under a caption that wraps. */
+@media(max-width:600px),(max-width:1000px) and (max-height:500px){.bl-site .bl-lightbox figcaption small{white-space:nowrap}}
+/* Phones on their side: the photograph takes the screen's height (the caption and arrows keep to its edges), and the
+   enquiry fields keep 16px type so iOS does not zoom in on them. */
+@media(max-width:1000px) and (max-height:500px){
+  .bl-site .bl-lightbox{padding:12px 76px}
+  .bl-site .bl-lightbox figure{gap:8px}
+  .bl-site .bl-lightbox figure img{max-height:calc(100dvh - 88px)}
+  .bl-site .bl-lightbox figcaption{line-height:1.4}
+  .bl-site .bl-product-enquiry .bl-inquiry-form :is(input:not([type=radio]),textarea){font-size:16px}
+}
+/* Touch screens: the cards and buttons that only answered a hover now answer a tap. */
+@media(hover:none){
+  .bl-site :is(.bl-product-apps a,.bl-product-docs a,.bl-product-docs button,.bl-spec-drawing button):active{border-color:var(--ink);background:#f4f6f7}
+  .bl-site .bl-product-photo-grid button:active img{opacity:.85}
+  .bl-site .bl-product-jobs span a:active{color:var(--ink)}
+}
 @media(prefers-reduced-motion:reduce){
   .bl-site .bl-product-photo-grid img,.bl-site .bl-product-apps .bl-icon{transition:none}
 }

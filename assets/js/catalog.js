@@ -50,7 +50,9 @@ export function initializeCatalog() {
   // Phones scroll the comparison, the filter row and a model name's key sideways; each right edge fades (pages.css) until
   // the end is in view. Only strips marked here fade, so without the script nothing stays faded.
   document.querySelectorAll('.bl-compare-scroll, .bl-catalog-filters, .bl-model-decode').forEach((box) => {
-    const edge = () => box.classList.toggle('bl-edge-end', box.scrollLeft + box.clientWidth >= box.scrollWidth - 2);
+    // A box that wraps instead of scrolling (the name's key on phones) has no hidden end; a link's enlarged tap layer
+    // reaching past its edge must not keep it faded.
+    const edge = () => box.classList.toggle('bl-edge-end', getComputedStyle(box).overflowX === 'visible' || box.scrollLeft + box.clientWidth >= box.scrollWidth - 2);
     box.classList.add('bl-edge-fade');
     box.addEventListener('scroll', edge, { passive: true });
     const sizes = new ResizeObserver(edge);

@@ -22,7 +22,7 @@ if (bl_is_wordpress()) status_header($route['status']); else http_response_code(
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#081c2b">
   <?php bl_render_seo($route); ?>
   <link rel="icon" href="<?= bl_escape(bl_brand_icon('images/icons/favicon.ico', 48)) ?>" sizes="48x48">
