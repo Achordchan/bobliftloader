@@ -103,8 +103,9 @@ function bl_product_attachments(array $product): array
     if ($product['category'] !== 'skid-steer-loaders') return [];
     $names = array_values(array_filter(array_map('strval', (array) ($product['attachments'] ?? []))));
     if (!$names) $names = array_map('trim', explode(',', (string) (bl_product_shared($product)['attachments'] ?? '')));
-    $byName = [];
-    foreach (bl_attachments() as $items) foreach ($items as $item) $byName[strtolower($item['name'])] = $item;
+    $items = [];
+    foreach (bl_attachments() as $group) $items = [...$items, ...$group];
+    $byName = bl_named_record_index($items, 'name', 'aliases');
     $chosen = [];
     foreach ($names as $name) if (isset($byName[strtolower($name)]) && !in_array($byName[strtolower($name)], $chosen, true)) $chosen[] = $byName[strtolower($name)];
     return array_slice($chosen, 0, BL_CONTENT_LIMITS['attachments']);
@@ -130,7 +131,7 @@ function bl_product_applications(array $product): array
 /** Application cases that list this model among the machines used. */
 function bl_product_cases(array $product): array
 {
-    return array_slice(array_values(array_filter(bl_application_cases(), static fn(array $case): bool => in_array($product['slug'], (array) ($case['products'] ?? []), true))), 0, 3);
+    return array_slice(array_values(array_filter(bl_application_cases(), static fn(array $case): bool => in_array($product['slug'], array_map(static fn($slug) => bl_find_record(bl_products(), $slug)['slug'] ?? $slug, (array) ($case['products'] ?? [])), true))), 0, 3);
 }
 
 /** Machines per 20GP and 40HQ container for this model, or null when no figure is published. */

@@ -47,6 +47,10 @@ function bl_resolve_route(): array
             if (bl_application_slug($application) === $matches[1]) $route = array_replace($route, ['type' => 'application', 'title' => $application['title'] . ' Equipment', 'description' => $application['description'], 'record' => $application, 'status' => 200]);
         }
     }
+    // Scenario paths are owned by the option, including hidden records and virtual pages.
+    if (preg_match('~^/applications/([a-z0-9-]+)/$~', $path, $matches) && isset(bl_editable('applications')['jobs'][$matches[1]])) {
+        return $route;
+    }
     // An editor's preview (draft, or unsaved changes to a published post) arrives at the site root with the post id.
     if (bl_is_wordpress() && ($preview = bl_wp_preview())) {
         $route = array_replace($route, ['type' => $preview['type'], 'title' => $preview['title'], 'description' => $preview['type'] === 'product' ? bl_product_description($preview['record']) : $preview['record']['excerpt'], 'record' => $preview['record'], 'status' => 200, 'preview' => true, 'path' => $preview['path']]);
@@ -97,5 +101,26 @@ function bl_serve_discovery(): void
         foreach (bl_sitemap_paths() as $page) echo '<url><loc>' . bl_escape(bl_public_base() . $page) . '</loc></url>';
         echo '</urlset>';
         exit;
+    }
+}
+
+/** Resolve virtual scenario URLs before canonical redirects; no post or rewrite-rule writes are needed. */
+function bl_wp_application_route(): void
+{
+    $path = '/' . trim((string) ($GLOBALS['wp']->request ?? ''), '/') . '/';
+    if (!preg_match('~^/applications/[a-z0-9-]+/$~', $path)) return;
+    if (!isset(bl_editable('applications')['jobs'][basename($path)])) return;
+    remove_action('template_redirect', 'redirect_canonical');
+    remove_action('template_redirect', 'wp_old_slug_redirect');
+    $visible = bl_apply_application_content($GLOBALS['bl_application_base']);
+    $slug = basename($path);
+    $found = false;
+    foreach ($visible as $app) if (bl_application_slug($app) === $slug) $found = true;
+    if ($found) {
+        $GLOBALS['wp_query']->is_404 = false;
+        status_header(200);
+    } else {
+        $GLOBALS['wp_query']->set_404();
+        status_header(404);
     }
 }

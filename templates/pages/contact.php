@@ -5,7 +5,8 @@ $requestedApplication = bl_query('application');
 // ?application= may carry the application's current name, the theme's original name (links shared before an editor renamed it) or its URL slug.
 $application = null;
 if ($requestedApplication !== '') foreach ($applications as $index => $candidate) {
-    $original = $GLOBALS['bl_application_base'][$index]['title'] ?? $candidate['title'];
+    $original = $candidate['title'];
+    foreach ($GLOBALS['bl_application_base'] as $base) if (bl_application_slug($base) === bl_application_slug($candidate)) $original = $base['title'];
     if (in_array($requestedApplication, [$candidate['title'], $original, bl_application_slug($candidate)], true)) { $application = $candidate; break; }
 }
 $applicationName = $application['title'] ?? '';

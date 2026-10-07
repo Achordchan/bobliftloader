@@ -27,6 +27,7 @@ foreach ([1, 2, 3] as $id) {
     $GLOBALS['meta'][$id]['_bl_record'] = $original;
     $check(bl_record_locked($id, static fn() => $current) === true, 'record save failed');
     $history = get_post_meta($id, '_bl_record_history', true);
+    if ($id === 1) $original['model_aliases'] = ['NEW'];
     $check(bl_record_history_restore($id, $history[0]['id']) === true && get_post_meta($id, '_bl_record', true) === $original, 'restore did not replace whole record');
     $check(get_post_meta($id, '_bl_record_history', true)[0]['record'] === $current, 'restore omitted current record backup');
     $beforeHistory = get_post_meta($id, '_bl_record_history', true);

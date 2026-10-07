@@ -65,39 +65,4 @@ add_action('admin_menu', static function (): void {
     add_submenu_page('bl-content-home', '资料下载', '资料下载', 'edit_pages', 'bl-downloads', 'bl_downloads_screen');
 }, 20);
 
-function bl_downloads_screen(): void
-{
-    $url = (string) get_option('bl_catalogue_url');
-    $size = (int) get_option('bl_catalogue_size');
-    $name = $url ? wp_basename((string) parse_url($url, PHP_URL_PATH)) : '';
-    echo '<div class="wrap bl-downloads"><div class="bl-page-head"><div><h1>资料下载</h1><p>Support 页“资料下载”一栏里供访客下载的产品画册。栏目标题和说明文字在<a href="' . esc_url(admin_url('admin.php?page=bl-content-support')) . '">采购与售后</a>里改。</p></div>';
-    echo '<div class="bl-page-head-actions"><a class="button" href="' . esc_url(home_url('/support/#downloads')) . '" target="_blank" rel="noopener">查看 Support 页</a></div></div><hr class="wp-header-end">';
-    settings_errors();
-    echo '<form method="post" action="options.php" class="bl-ce-form">';
-    settings_fields('bl_downloads');
-    $current = $url ? '<strong class="bl-dl-name">' . esc_html($name) . '</strong> <span class="bl-dl-size">' . esc_html($size ? size_format($size, 1) : '大小未知') . '</span>' : '<span class="bl-chip bl-chip-warn">使用主题自带占位画册</span>';
-    echo '<details class="bl-panel" data-bl-card open><summary class="bl-panel-head">' . bl_admin_card_head(1, '产品画册 PDF', $url ? $name : '使用主题自带占位画册', 0) . '</summary><div class="bl-panel-body">';
-    echo '<p class="bl-card-note">换画册时从媒体库选一个 PDF（没有就在弹出的窗口里上传），保存后 Support 页的下载链接同步更新。</p>';
-    echo '<div class="bl-field"><span class="bl-field-label">当前画册</span><div class="bl-field-control"><div class="bl-dl-current" data-default="使用主题自带占位画册">' . $current . '</div>';
-    echo '<input type="hidden" id="bl-catalogue-url" name="bl_catalogue_url" value="' . esc_attr($url) . '">';
-    echo '<p class="bl-dl-tools"><button type="button" class="button" id="bl-catalogue-pick">从媒体库选择 PDF</button> <button type="button" class="button-link" id="bl-catalogue-clear"' . ($url ? '' : ' hidden') . '>清空，改用占位画册</button></p>';
-    echo '<p class="bl-field-help">文件大小自动读取。清空后保存，即恢复主题自带的占位画册。</p></div></div>';
-    echo '</div></details>';
-    echo '<div class="bl-savebar">';
-    submit_button('保存画册设置', 'primary', 'submit', false);
-    echo '</div>';
-    echo '</form></div>';
-}
-
-// Editors who can change the other 网站内容 screens can change the catalogue too (options.php asks manage_options otherwise).
-add_filter('option_page_capability_bl_downloads', static fn(): string => 'edit_pages');
 require_once __DIR__ . '/wp-catalogue-rest.php';
-
-// Keep the file size beside the address, so the Downloads list can show it without fetching the file on every visit.
-$bl_catalogue_size = static function ($old, $value): void {
-    $id = $value ? attachment_url_to_postid((string) $value) : 0;
-    $file = $id ? get_attached_file($id) : '';
-    update_option('bl_catalogue_size', $file && is_file($file) ? (int) filesize($file) : 0);
-};
-add_action('update_option_bl_catalogue_url', $bl_catalogue_size, 10, 2);
-add_action('add_option_bl_catalogue_url', static fn($option, $value) => $bl_catalogue_size(null, $value), 10, 2);

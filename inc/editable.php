@@ -376,17 +376,17 @@ function bl_dumpers_defaults(): array
 }
 
 /**
- * The Applications list page and the three application pages. The three jobs start from the records in inc/content.php
+ * The Applications list page and its scenario pages. Predefined jobs start from the records in inc/content.php
  * (also read by the home page tiles, the contact form and site search); each job's URL is fixed, its words are not.
  */
 function bl_applications_defaults(): array
 {
     global $bl_application_base;
     $jobs = [];
-    foreach ($bl_application_base as $app) {
+    foreach ($bl_application_base as $index => $app) {
         $checks = [];
         foreach ($app['checks'] as $check) $checks[] = ['title' => $check['title'], 'text' => $check['text'], 'measure' => $check['measure'], 'link_label' => $check['link'][1] ?? '', 'link_url' => $check['link'][0] ?? ''];
-        $jobs[bl_application_slug($app)] = ['title' => $app['title'], 'subtitle' => $app['subtitle'], 'description' => $app['description'], 'image' => '', 'alt' => $app['alt'], 'models' => implode(', ', $app['models'] ?? []), 'checks' => $checks];
+        $jobs[bl_application_slug($app)] = ['title' => $app['title'], 'subtitle' => $app['subtitle'], 'description' => $app['description'], 'image' => '', 'alt' => $app['alt'], 'models' => implode(', ', $app['models'] ?? []), 'checks' => $checks, 'hidden' => '0', 'order' => (string) ($index + 1), 'product' => $app['product'], 'focus' => $app['focus']];
     }
     return [
         'seo' => [
@@ -423,12 +423,24 @@ require_once __DIR__ . '/site-content.php';
 function bl_apply_application_content(array $applications, ?array $content = null): array
 {
     $jobs = ($content ?? bl_editable('applications'))['jobs'];
+    $known = array_fill_keys(array_map('bl_application_slug', $applications), true);
+    foreach ($jobs as $slug => $job) {
+        if (!isset($known[$slug]) && preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', (string) $slug)) {
+            $applications[] = array_replace(bl_application_empty(), $job, ['slug' => $slug]);
+        }
+    }
     foreach ($applications as &$app) {
         $slug = bl_application_slug($app);
         $app['slug'] = $slug;
         $job = $jobs[$slug] ?? null;
         if (!is_array($job)) continue;
         foreach (['title', 'alt', 'image'] as $key) if (($job[$key] ?? '') !== '') $app[$key] = $job[$key];
+        foreach (['product', 'focus'] as $key) if (isset($job[$key])) $app[$key] = $job[$key];
+        // A new scenario without its own picture shows its machine family's studio photograph rather than a broken image.
+        if (($app['image'] ?? '') === '') {
+            $app['image'] = bl_asset('images/range-' . (($app['product'] ?? '') === 'dumper' ? 'dumper' : 'loader') . '-studio.webp');
+            if (($app['alt'] ?? '') === '') $app['alt'] = ($app['product'] ?? '') === 'dumper' ? 'BOB-LIFT mini dumper' : 'BOB-LIFT mini skid steer loader';
+        }
         foreach (['subtitle', 'description'] as $key) if (array_key_exists($key, $job)) $app[$key] = $job[$key];
         // Named machines: a cleared field means none, so the page falls back to the family's first three.
         if (array_key_exists('models', $job)) $app['models'] = array_values(array_filter(array_map('trim', explode(',', (string) $job['models']))));
@@ -440,6 +452,9 @@ function bl_apply_application_content(array $applications, ?array $content = nul
         }
         if (array_key_exists('checks', $job)) $app['checks'] = $checks;
     }
+    unset($app);
+    $applications = array_values(array_filter($applications, static fn($app) => empty($jobs[bl_application_slug($app)]['hidden'])));
+    usort($applications, static fn($a, $b) => (int) ($jobs[bl_application_slug($a)]['order'] ?? 0) <=> (int) ($jobs[bl_application_slug($b)]['order'] ?? 0));
     return $applications;
 }
 
@@ -517,7 +532,7 @@ function bl_merge_content(array $defaults, array $saved, array $dynamic = [], st
 {
     foreach ($saved as $key => $value) {
         if (in_array($path, $dynamic, true)) {
-            if (is_array($value)) $defaults[$key] = $value;
+            if (is_array($value)) $defaults[$key] = $path === 'jobs' ? array_replace($defaults[$key] ?? bl_application_empty(), $value) : $value;
             continue;
         }
         if (!array_key_exists($key, $defaults)) continue;

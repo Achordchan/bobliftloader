@@ -53,6 +53,9 @@ class WP_REST_Request {
     function __construct(public array $params) {}
     function get_param($key) { return $this->params[$key] ?? null; }
     function set_param($key, $value) { $this->params[$key] = $value; }
+    function get_params() { return $this->params; }
+    function get_method() { return 'POST'; }
+    function offsetUnset($key): void { unset($this->params[$key]); }
 }
 class WP_Post {
     public string $post_content = '';
@@ -97,7 +100,9 @@ function admin_url($path) { return home_url('/wp-admin/' . $path); }
 class TestRedirect extends RuntimeException {}
 function wp_safe_redirect($url) { throw new TestRedirect($url); }
 function wp_die($message, $title = '', $args = []) { throw new RuntimeException($message); }
+if (!defined('BL_TEST_REAL_PRODUCT_READER')) {
 function bl_wp_products() { return array_map(fn($p) => ['slug' => $p->post_name, 'model' => (string) (get_post_meta($p->ID, '_bl_record', true)['model'] ?? $p->post_name)], get_posts(['post_type' => 'bl_product', 'post_status' => 'publish'])); }
+}
 class MemoryWpdb {
     public string $options = 'options';
     function prepare($sql, ...$args) { return [$sql, $args]; }

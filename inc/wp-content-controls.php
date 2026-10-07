@@ -47,7 +47,7 @@ function bl_content_editor_schema(string $page, array $sections): array
         }
         if ($page === 'applications' && str_ends_with($key, '.models')) {
             $field['type'] = 'models';
-            $field['help'] = '勾选并按推荐顺序排列；留空时按场景自动推荐。未找到的旧值保留，可主动取消。';
+            $field['help'] = '勾选并按推荐顺序排列；前台仅显示所属系列的机型；留空时按场景自动推荐。未找到的旧值保留，可主动取消。';
         }
         if ($key === 'product.factory.images') $field['max'] = BL_CONTENT_LIMITS['factory'];
         if ($key === 'product.faq') $field['max'] = BL_CONTENT_LIMITS['faq'];
@@ -71,12 +71,14 @@ function bl_content_selector(string $kind, string $name, string|array $value): s
     $chosen = $array ? $value : array_values(array_filter(array_map('trim', explode(',', $value)), 'strlen'));
     $options = [];
     if ($kind === 'models') {
-        $category = '';
-        foreach ($GLOBALS['bl_application_base'] ?? [] as $app) {
-            if (str_contains($name, '[jobs][' . bl_application_slug($app) . ']')) $category = $app['product'] === 'dumper' ? 'mini-dumpers' : 'skid-steer-loaders';
-        }
-        foreach (bl_products() as $product) if ($product['model'] !== '' && ($category === '' || ($product['category'] ?? '') === $category)) $options[$product['model']] = $product['model'];
+        // Both families remain available while the scenario family is changed in this same form.
+        foreach (bl_products() as $product) if ($product['model'] !== '') $options[$product['model']] = $product['model'];
     } else foreach (bl_attachments() as $items) foreach ($items as $item) $options[$item['name']] = $item['name'];
+    $records = $kind === 'models' ? bl_products() : array_merge([], ...array_values(bl_attachments()));
+    $field = $kind === 'models' ? 'model' : 'name';
+    $index = bl_named_record_index($records, $field, $kind === 'models' ? 'model_aliases' : 'aliases');
+    $chosen = array_values(array_unique(array_map(static fn($choice) => isset($index[strtolower($choice)]) && isset($options[$index[strtolower($choice)][$field]]) ? $index[strtolower($choice)][$field] : $choice, $chosen)));
+    if (!$array) $value = implode(', ', $chosen);
     $html = '<div class="bl-picker" data-bl-selector data-bl-format="' . ($array ? 'array' : 'csv') . '" data-bl-name="' . esc_attr($name) . '" data-bl-choice-limit="' . ($kind === 'attachments' ? BL_CONTENT_LIMITS['attachments'] : 0) . '">';
     if (!$array) $html .= '<input type="hidden" name="' . esc_attr($name) . '" value="' . esc_attr($value) . '">';
     $html .= '<p class="bl-picker-hint">勾选的项目排在前面，用箭头调整前台的显示顺序。</p><ul class="bl-picker-list">';

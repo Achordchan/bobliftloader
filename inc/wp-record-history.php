@@ -36,10 +36,10 @@ function bl_record_history_save(int $postId, array $previous, array $next, bool 
 function bl_record_history_restore(int $postId, string $snapshotId): bool|WP_Error
 {
     if (!in_array(get_post_type($postId), ['bl_product', 'bl_news', 'bl_application'], true)) return new WP_Error('bl_record_invalid', '记录类型无效。', ['status' => 400]);
-    return bl_record_locked($postId, static function () use ($postId, $snapshotId) {
+    return bl_record_locked($postId, static function (array $previous) use ($postId, $snapshotId) {
         foreach ((array) get_post_meta($postId, '_bl_record_history', true) as $entry) {
             if (($entry['id'] ?? '') !== $snapshotId || !is_array($entry['record'] ?? null)) continue;
-            return $entry['record'];
+            return get_post_type($postId) === 'bl_product' ? bl_product_model_aliases($entry['record'], $previous) : $entry['record'];
         }
         return new WP_Error('bl_record_snapshot_missing', '没有可恢复的快照。', ['status' => 404]);
     }, true);

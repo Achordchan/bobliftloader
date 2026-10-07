@@ -5,11 +5,16 @@ defined('ABSPATH') || exit;
 /** Both form and REST writes migrate first, merge declared maps, clean fields and store only differences. */
 function bl_content_prepare(string $page, array $previous, array $input, bool $form = false): array|WP_Error
 {
+    if ($page === 'downloads') return bl_downloads_prepare($previous, $input, $form);
     if ($page === 'tracking' && !bl_can_manage_tracking()) throw new RuntimeException('没有保存统计代码的权限。');
     $previous = bl_content_migrate($page, $previous);
     if ($page === 'home') $input = bl_migrate_home_facts($input);
+    if ($page === 'applications') {
+        $input = bl_application_prepare_input($previous, $input);
+        if (is_wp_error($input)) return $input;
+    }
     // Empty HTML lists have no successful controls; a complete form explicitly clears these lists.
-    if ($form) foreach (bl_content_schema($page) as $section) foreach ($section['fields'] as $field) {
+    if ($form) foreach (bl_content_schema($page, bl_content_resolve($page, $previous)) as $section) foreach ($section['fields'] as $field) {
         if ($field['type'] === 'list' && bl_content_get($input, $field['key']) === null) bl_content_set($input, $field['key'], []);
     }
     // The WhatsApp links on every page are built from the sales number, so it cannot be cleared.
@@ -31,9 +36,18 @@ function bl_content_prepare(string $page, array $previous, array $input, bool $f
     }
     $current = bl_content_resolve($page, $previous);
     $merged = bl_merge_content($current, $input, bl_content_dynamic_paths($page));
-    $diff = bl_content_diff(bl_content_clean_all($page, $merged), bl_content_clean_all($page, bl_content_defaults($page)));
+    $clean = bl_content_clean_all($page, $merged);
+    if ($page === 'loaders') {
+        $previousRows = $current['attachments']['items'];
+        foreach ($previousRows as &$row) {
+            foreach (['name', 'group', 'use', 'image'] as $key) $row[$key] = bl_content_clean($key === 'image' ? 'image' : 'text', $row[$key] ?? '');
+        }
+        unset($row);
+        $clean['attachments']['items'] = bl_attachment_row_aliases($clean['attachments']['items'], $previousRows);
+    }
+    $diff = bl_content_diff($clean, bl_content_clean_all($page, bl_content_defaults($page)));
     // Keep historical fields outside the current editor schema without exposing them as new editable fields.
-    foreach (bl_content_schema($page) as $section) foreach ($section['fields'] as $field) {
+    foreach (bl_content_schema($page, $merged) as $section) foreach ($section['fields'] as $field) {
         $parts = explode('.', $field['key']);
         $last = array_pop($parts);
         $ref = &$previous;
@@ -50,8 +64,9 @@ function bl_content_prepare(string $page, array $previous, array $input, bool $f
 function bl_content_saved_now(string $page): array
 {
     global $wpdb;
-    foreach (['alloptions', 'notoptions', 'bl_content_' . $page] as $key) wp_cache_delete($key, 'options');
-    $saved = maybe_unserialize((string) $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'bl_content_' . $page)));
+    $option = $page === 'downloads' ? 'bl_downloads' : 'bl_content_' . $page;
+    foreach (['alloptions', 'notoptions', $option] as $key) wp_cache_delete($key, 'options');
+    $saved = maybe_unserialize((string) $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option)));
     return is_array($saved) ? $saved : [];
 }
 
@@ -70,14 +85,17 @@ function bl_content_locked(string $page, callable $compute, ?string $expected = 
         if (!bl_lock_owned('content_' . $page, $token)) return new WP_Error('bl_content_busy', '保存锁已失效，本次未保存。', ['status' => 409]);
         $key = 'bl_content_snapshots_' . $page;
         wp_cache_delete($key, 'options');
-        $history = get_option($key, []);
+        $history = bl_content_history($page, $previous);
         $history = is_array($history) ? $history : [];
-        array_unshift($history, ['id' => wp_generate_uuid4(), 'saved_at' => gmdate('c'), 'user_id' => get_current_user_id(), 'content' => $previous, 'changes' => bl_content_change_count(bl_content_resolve($page, $previous), bl_content_resolve($page, $diff))]);
-        if (!update_option($key, array_slice($history, 0, 10), false)) return new WP_Error('bl_content_backup_failed', '历史版本保存失败，本次未保存。', ['status' => 500]);
+        $snapshot = $previous;
+        if ($page === 'downloads') unset($snapshot['_bl_history']);
+        array_unshift($history, ['id' => wp_generate_uuid4(), 'saved_at' => gmdate('c'), 'user_id' => get_current_user_id(), 'content' => $snapshot, 'changes' => bl_content_change_count(bl_content_resolve($page, $previous), bl_content_resolve($page, $diff))]);
+        if ($page === 'downloads') $diff['_bl_history'] = array_slice($history, 0, 10);
+        elseif (!update_option($key, array_slice($history, 0, 10), false)) return new WP_Error('bl_content_backup_failed', '历史版本保存失败，本次未保存。', ['status' => 500]);
         if (!bl_lock_owned('content_' . $page, $token)) return new WP_Error('bl_content_busy', '保存锁已失效，本次未保存。', ['status' => 409]);
         $diff['_bl_schema_version'] = 1;
         $diff['_bl_revision'] = wp_generate_uuid4();
-        if (!update_option('bl_content_' . $page, $diff)) return new WP_Error('bl_content_write_failed', '内容写入失败，本次未保存。', ['status' => 500]);
+        if (!update_option($page === 'downloads' ? 'bl_downloads' : 'bl_content_' . $page, $diff)) return new WP_Error('bl_content_write_failed', '内容写入失败，本次未保存。', ['status' => 500]);
         return true;
     } finally {
         bl_lock_release('content_' . $page, $token);
@@ -93,7 +111,7 @@ function bl_content_request_page(): string
 {
     $page = isset($_POST['bl_page']) && is_string($_POST['bl_page']) ? sanitize_key(wp_unslash($_POST['bl_page'])) : '';
     if ($page === 'tracking' && !bl_can_manage_tracking()) wp_die('没有保存统计代码的权限。', '', ['response' => 403]);
-    if ($page !== 'tracking' && !isset(BL_CONTENT_PAGES[$page])) wp_die('未知页面。', '', ['response' => 400]);
+    if (!in_array($page, ['tracking', 'downloads'], true) && !isset(BL_CONTENT_PAGES[$page])) wp_die('未知页面。', '', ['response' => 400]);
     if (!current_user_can('edit_pages')) wp_die('没有编辑权限。', '', ['response' => 403]);
     return $page;
 }
@@ -116,13 +134,15 @@ function bl_content_handle_submission(string $operation): void
         wp_die('提交的内容不完整，没有保存任何修改。请返回检查服务器的 max_input_vars 限制。', '', ['response' => 400, 'back_link' => true]);
     }
     $result = bl_content_locked($page, static function (array $previous) use ($operation, $page, $input) {
-        if ($operation === 'reset') return [];
+        // Back to the theme's defaults, except that renamed attachments keep their old names as aliases (references
+        // saved under the newer names still resolve). Every other page resets to nothing stored.
+        if ($operation === 'reset') return $page === 'loaders' ? bl_content_restore_values($page, [], $previous) : [];
         if ($operation === 'restore') {
-            $history = get_option('bl_content_snapshots_' . $page, []);
+            $history = bl_content_history($page, $previous);
             $selected = isset($_POST['bl_snapshot']) && is_string($_POST['bl_snapshot']) ? wp_unslash($_POST['bl_snapshot']) : '';
             if ($selected !== '') $history = array_values(array_filter((array) $history, static fn($entry) => ($entry['id'] ?? '') === $selected));
             if (!isset($history[0]['content']) || !is_array($history[0]['content'])) return new WP_Error('bl_content_snapshot_missing', '没有可恢复的快照。', ['status' => 404]);
-            return bl_content_restore_values($page, $history[0]['content']);
+            return bl_content_restore_values($page, $history[0]['content'], $previous);
         }
         return bl_content_prepare($page, $previous, $input, true);
     }, $expected);
@@ -134,10 +154,10 @@ function bl_content_handle_submission(string $operation): void
             // If temporary storage is unavailable, keep an escaped copy in the response instead of losing the submission.
             wp_die(esc_html($result->get_error_message()) . '<p>临时保存失败，请复制以下输入后返回：</p><textarea readonly rows="25" cols="100">' . esc_textarea(wp_json_encode($input, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . '</textarea>', '', ['response' => 409, 'back_link' => true]);
         }
-        wp_safe_redirect(admin_url('admin.php?page=bl-content-' . $page . '&bl_recovery=' . $id));
+        wp_safe_redirect(admin_url('admin.php?page=' . ($page === 'downloads' ? 'bl-downloads' : 'bl-content-' . $page) . '&bl_recovery=' . $id));
         exit;
     }
-    wp_safe_redirect(admin_url('admin.php?page=bl-content-' . $page . ($operation === 'reset' ? '&bl_reset=1' : '&bl_saved=1')));
+    wp_safe_redirect(admin_url('admin.php?page=' . ($page === 'downloads' ? 'bl-downloads' : 'bl-content-' . $page) . ($operation === 'reset' ? '&bl_reset=1' : '&bl_saved=1')));
     exit;
 }
 
@@ -148,3 +168,5 @@ unset($bl_operation);
 
 require_once __DIR__ . '/wp-content-history.php';
 require_once __DIR__ . '/wp-record-state.php';
+
+require_once __DIR__ . '/wp-downloads.php';
