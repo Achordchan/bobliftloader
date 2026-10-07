@@ -129,29 +129,26 @@ function bl_product_basics_box(WP_Post $post): void
 
 function bl_product_spec_row(string $key, string $value): string
 {
-    return '<li class="bl-row"><div class="bl-row-head">' . bl_admin_input('', 'bl_record[specs][key][]', $key, 'text', ' class="bl-spec-key" list="bl-spec-keys" aria-label="参数名" placeholder="参数名，如 Rated load"') . bl_admin_input('', 'bl_record[specs][value][]', $value, 'text', ' class="bl-spec-value" aria-label="参数值" placeholder="参数值，如 1,000 kg"') . bl_admin_row_tools() . '</div></li>';
+    $known = array_key_exists($key, bl_spec_choices());
+    $options = ['' => '自定义参数（英文名）'];
+    foreach (bl_spec_choices() as $name => $label) $options[$name] = $label . ' · ' . $name;
+    return '<li class="bl-row"><div class="bl-row-head"><div class="bl-spec-key">'
+        . str_replace('<select id=""', '<select aria-label="常用参数"', bl_admin_select('', 'bl_record[specs][choice][]', $options, $known ? $key : ''))
+        . bl_admin_input('', 'bl_record[specs][key][]', $key, 'text', ' class="regular-text" aria-label="自定义参数名" placeholder="自定义英文参数名"')
+        . '</div>' . bl_admin_input('', 'bl_record[specs][value][]', $value, 'text', ' class="bl-spec-value" aria-label="参数值" placeholder="数值与单位，如 1,000 kg"') . bl_admin_row_tools() . '</div></li>';
 }
 
 function bl_product_specs_box(WP_Post $post): void
 {
     $record = bl_admin_record($post);
-    echo '<p class="bl-box-intro">产品页“Specifications”参数表，前台按固定参数组排列，组内使用固定参数顺序，未归组参数按录入顺序显示。参数名和参数值都用英文。</p>';
-    echo '<div class="bl-specs"><div class="bl-specs-head" aria-hidden="true"><span>参数名</span><span>参数值</span></div><ol class="bl-rows bl-rows-compact" data-bl-rows="specs" data-bl-max="' . BL_CONTENT_LIMITS['specs'] . '">';
+    echo '<p class="bl-box-intro">产品页“Specifications”参数表，前台按固定参数组排列，组内使用固定参数顺序，未归组参数按录入顺序显示。常用参数按中文名称选择，保存为英文显示名；列表之外可选择自定义。</p>';
+    echo '<div class="bl-specs" data-bl-spec-rules="' . esc_attr((string) wp_json_encode(array_map(static fn($rule) => ['pattern' => $rule[0], 'example' => $rule[1]], bl_spec_rules()))) . '"><div class="bl-specs-head" aria-hidden="true"><span>参数名</span><span>参数值</span></div><ol class="bl-rows bl-rows-compact" data-bl-rows="specs" data-bl-max="' . BL_CONTENT_LIMITS['specs'] . '">';
     // A new product starts with the three parameters the filters read; rows left without a value are not saved.
     foreach ((array) ($record['specs'] ?? []) ?: ['Rated load' => '', 'Bucket capacity' => '', 'Engine power' => ''] as $key => $value) echo bl_product_spec_row((string) $key, (string) $value);
     echo '</ol><template data-bl-template="specs">' . bl_product_spec_row('', '') . '</template>';
     echo '<p class="bl-rows-add"><button type="button" class="button" data-bl="add" data-bl-target="specs"><span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span> 添加参数</button></p></div>';
-    // Names already used on other products, offered while typing so the same parameter is always spelled the same way.
-    $keys = ['Rated load', 'Bucket capacity', 'Engine power'];
-    foreach (get_posts(['post_type' => 'bl_product', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids']) as $id) {
-        $other = get_post_meta($id, '_bl_record', true);
-        if (is_array($other)) $keys = array_merge($keys, array_map('strval', array_keys((array) ($other['specs'] ?? []))));
-    }
-    echo '<datalist id="bl-spec-keys">';
-    foreach (array_unique($keys) as $key) echo '<option value="' . esc_attr($key) . '">';
-    echo '</datalist>';
     $filters = [['额定载荷', (int) ($record['load'] ?? 0) ?: '', ' kg'], ['斗容', (string) ($record['capacity'] ?? ''), ' m³'], ['功率', (string) ($record['power'] ?? ''), ' kW']];
-    echo '<div class="bl-spec-filters"><p class="bl-field-help">筛选和首页范围从三项参数自动计算，参数名要一字不差：<code>Rated load</code> 填“1,000 kg”，<code>Bucket capacity</code> 填“0.5 m³”，<code>Engine power</code> 填“12.1 kW”。</p><p class="bl-spec-chips"><span class="bl-spec-chips-label">当前筛选值（保存后更新）</span>';
+    echo '<div class="bl-spec-filters"><p class="bl-field-help">关键参数在保存前校验；尺寸使用 mm、标准尺寸使用“长 × 宽 × 高 mm”。例如：<code>Rated load</code> 填“1,000 kg”，<code>Bucket capacity</code> 填“0.5 m³”，<code>Engine power</code> 填“12.1 kW”。</p><p class="bl-spec-chips"><span class="bl-spec-chips-label">当前筛选值（保存后更新）</span>';
     foreach ($filters as [$label, $value, $unit]) echo $value !== '' ? '<span class="bl-chip bl-chip-info">' . esc_html($label . ' ' . $value . $unit) . '</span>' : '<span class="bl-chip">' . esc_html($label . ' 未识别') . '</span>';
     echo '</p></div>';
 }
@@ -370,7 +367,7 @@ add_action('save_post', static function (int $postId): void {
             if ($alt !== '') $record['gallery_alt'][$url] = $alt;
         }
         $record['specs'] = [];
-        foreach (bl_admin_posted_rows($input['specs'] ?? '', ['key', 'value']) as $row) {
+        foreach (bl_product_posted_specs($input['specs'] ?? '') as $row) {
             $key = sanitize_text_field($row['key']);
             $value = sanitize_text_field($row['value']);
             if ($key !== '' && $value !== '') $record['specs'][$key] = $value;
