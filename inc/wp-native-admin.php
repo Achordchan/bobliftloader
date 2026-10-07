@@ -25,7 +25,9 @@ add_action('load-post.php', static function (): void {
 /** No content input is emitted: WordPress preserves the existing post_content on title/status updates. */
 add_action('edit_form_after_title', static function (WP_Post $post): void {
     $page = bl_content_page_for_post($post);
-    if (!$page) return;
+    // Only About, Privacy and pages that really render from 网站内容 get a card; an ordinary child page under
+    // Applications shows its own body, so it gets none.
+    if (!$page || (!in_array($page, ['privacy', 'about'], true) && !bl_page_body_is_structured($post))) return;
     if ($page === 'privacy') $message = '正文在这里写；与询盘模式相关的段落在 网站内容 → 隐私说明';
     elseif ($page === 'about') $message = '公司介绍在这里写；其他文字与图片在 网站内容 → 关于我们';
     else $message = '本页编辑器正文不在网站上显示。内容在 网站内容 → ' . BL_CONTENT_PAGES[$page]['menu'] . '。这里只管理标题、网址和发布状态。';

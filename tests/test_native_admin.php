@@ -53,6 +53,8 @@ if ($apps) {
     $guide = new WP_Post(901, 'page', 'installation-guide', 'Installation guide'); $guide->post_parent = $apps->ID; $GLOBALS['posts'][901] = $guide;
     $scenario = new WP_Post(902, 'page', 'landscaping', 'Landscaping'); $scenario->post_parent = $apps->ID; $GLOBALS['posts'][902] = $scenario;
     $check(!bl_page_body_is_structured($guide) && bl_page_body_is_structured($scenario), 'non-scenario child page lost its editor');
+    $card = $capture(static fn() => run_hook('edit_form_after_title', $guide));
+    $check($card === '', 'an ordinary child page was told its body does not show');
     unset($GLOBALS['posts'][901], $GLOBALS['posts'][902]);
 }
 $GLOBALS['options']['show_on_front'] = 'posts';
