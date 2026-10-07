@@ -65,9 +65,12 @@ $_POST = [];
 // REST changes to an empty body take ownership; metadata-only requests do not. Clients cannot unset ownership.
 $rest = static function (array $params): WP_REST_Request {
     $request = new WP_REST_Request(['id' => 2] + $params);
-    $result = run_filter('rest_pre_insert_bl_news', (object) [], $request);
+    // Like core: only a string (or content.raw) becomes post_content on the prepared post.
+    $content = $params['content'] ?? null;
+    $body = is_string($content) ? $content : (is_array($content) && is_string($content['raw'] ?? null) ? $content['raw'] : null);
+    $result = run_filter('rest_pre_insert_bl_news', (object) ($body === null ? [] : ['post_content' => $body]), $request);
     if (is_wp_error($result)) throw new RuntimeException($result->get_error_message());
-    $data = run_filter('wp_insert_post_data', ['post_type' => 'bl_news', 'post_content' => $params['content'] ?? get_post(2)->post_content], (array) $result);
+    $data = run_filter('wp_insert_post_data', ['post_type' => 'bl_news', 'post_content' => $body ?? get_post(2)->post_content], (array) $result);
     foreach ($data as $key => $value) $GLOBALS['posts'][2]->$key = $value;
     if (isset($request->params['meta']['_bl_record'])) update_post_meta(2, '_bl_record', $request->params['meta']['_bl_record']);
     return $request;
@@ -75,6 +78,8 @@ $rest = static function (array $params): WP_REST_Request {
 $oldNews = get_post_meta(2, '_bl_record', true);
 $rest(['meta' => ['_bl_record' => ['caption' => 'Changed']]]);
 $check(empty(get_post_meta(2, '_bl_record', true)['_bl_body_managed']), 'metadata edit claimed news body');
+$rest(['content' => ['rendered' => 'ignored']]);
+$check(!bl_news_body_managed(get_post(2), get_post_meta(2, '_bl_record', true)), 'a content object without raw claimed the news body');
 $rest(['content' => '']);
 $owned = get_post_meta(2, '_bl_record', true);
 $check(bl_news_body_managed(get_post(2), $owned) && $owned['sections'] === $oldNews['sections'], 'empty REST body did not take over or erased legacy sections');

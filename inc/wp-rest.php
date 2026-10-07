@@ -167,7 +167,9 @@ foreach (array_keys(BL_REST_FIELDS) as $bl_rest_type) {
     add_filter('rest_pre_insert_' . $bl_rest_type, static function ($prepared, WP_REST_Request $request) use ($bl_rest_type) {
         $type = $bl_rest_type;
         $meta = $request->get_param('meta');
-        if ($type === 'bl_news' && $request->get_param('content') !== null && !is_wp_error($prepared)) $prepared->post_content_filtered = 'bl-body-managed';
+        // Only a request that really updates the body (a string or content.raw, which core turns into post_content,
+        // an empty string included) takes it over; {} or a rendered-only object leaves imported news as it was.
+        if ($type === 'bl_news' && !is_wp_error($prepared) && property_exists($prepared, 'post_content') && is_string($prepared->post_content)) $prepared->post_content_filtered = 'bl-body-managed';
         if (is_wp_error($prepared) || !is_array($meta) || !array_key_exists('_bl_record', $meta)) return $prepared;
         $sent = $meta['_bl_record'];
         if (!is_array($sent)) return new WP_Error('bl_record_invalid', 'The BOB-LIFT record must be an object; it cannot be removed through the API.', ['status' => 400]);
