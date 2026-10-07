@@ -9,7 +9,7 @@
 // Each kind is led by a group holding the start of the text or the one character before it (one that cannot belong to a
 // longer word, name or number, so a match never starts inside one); the group after it is the part kept. No look-behind:
 // Safari before 16.4 rejects it, and the whole script with it.
-const KEEP_TOGETHER = /(^|[^\w-])((?=[A-Z0-9-]*\d)[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+(?![\w-]))|(^|[^\w.,])(\d[\d.,]*(?:[–-]\d[\d.,]*)?[  ](?:mm|cm|m³|m²|m|kg|kW|hp|km\/h|V|L|t|MPa|bar|rpm|°)(?![\p{L}\d]))|(^|[^\w.,])(\d[\d.,]*[  ]×(?=[  ]\d))/gu;
+const KEEP_TOGETHER = /(^|[^\w-])((?=[A-Z0-9-]*\d)[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+(?![\w-]))|(^|[^\w.,])(\d[\d.,]*(?:[–-]\d[\d.,]*)?[ \u00a0](?:mm|cm|m³|m²|m|kg|kW|hp|km\/h|V|L|t|MPa|bar|rpm|°)(?![\p{L}\d]))|(^|[^\w.,])(\d[\d.,]*[ \u00a0]×(?=[ \u00a0]\d))/gu;
 const KEEP_ANY = new RegExp(KEEP_TOGETHER.source, 'u'); // the same pattern without the global flag's lastIndex, for testing a node
 function keepTogether(root) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
