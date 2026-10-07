@@ -8,7 +8,9 @@ require_once __DIR__ . '/wp-news-body.php';
 /** Serialize one record's history and value writes; a failed value write leaves its before-image available. */
 function bl_record_locked(int $postId, callable $compute, bool $forceHistory = false): bool|WP_Error
 {
-    $token = bl_lock_acquire('record_' . $postId, 1);
+    // A product form submission holds its record's lock for the whole request (see below), so its boxes share it.
+    $held = $GLOBALS['bl_record_held'][$postId] ?? '';
+    $token = $held !== '' ? $held : bl_lock_acquire('record_' . $postId, 1);
     if ($token === '') return new WP_Error('bl_record_busy', '该记录正在保存，请稍后重试。', ['status' => 409]);
     try {
         wp_cache_delete($postId, 'post_meta');
@@ -26,8 +28,24 @@ function bl_record_locked(int $postId, callable $compute, bool $forceHistory = f
         finally { unset($GLOBALS['bl_record_writing'][$postId]); }
         if ($saved === false) return new WP_Error('bl_record_write_failed', '记录保存失败。', ['status' => 500]);
         return true;
-    } finally { bl_lock_release('record_' . $postId, $token); }
+    } finally { if ($held === '') bl_lock_release('record_' . $postId, $token); }
 }
+
+// The classic product form saves through several boxes (main fields, product page, videos). One lock, taken before core
+// writes and kept to the end of the request, makes them one save with one before-image no other writer can split.
+add_action('load-post.php', static function (): void {
+    if (($_POST['action'] ?? '') !== 'editpost' || ($_POST['bl_product_complete'] ?? '') !== '1') return;
+    $postId = isset($_POST['post_ID']) && is_scalar($_POST['post_ID']) ? (int) $_POST['post_ID'] : 0;
+    if (!$postId || get_post_type($postId) !== 'bl_product' || !current_user_can('edit_post', $postId)) return;
+    if (!empty($GLOBALS['bl_record_held'][$postId])) return;
+    $token = bl_lock_acquire('record_' . $postId, 5);
+    if ($token === '') wp_die('这个产品正在被另一个保存使用，请稍后再保存。', '', ['response' => 409, 'back_link' => true]);
+    $GLOBALS['bl_record_held'][$postId] = $token;
+    register_shutdown_function(static function () use ($postId, $token): void {
+        unset($GLOBALS['bl_record_held'][$postId]);
+        bl_lock_release('record_' . $postId, $token);
+    });
+}, 5);
 
 add_filter('update_post_metadata', static function ($check, $postId, $key, $value) {
     if ($check !== null || $key !== '_bl_record' || !empty($GLOBALS['bl_record_writing'][$postId]) || !in_array(get_post_type($postId), ['bl_product', 'bl_news', 'bl_application'], true)) return $check;

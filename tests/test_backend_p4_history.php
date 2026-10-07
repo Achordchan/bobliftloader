@@ -127,9 +127,16 @@ bl_record_locked(1, static fn(array $r) => array_replace($r, ['spec_source' => '
 bl_record_locked(1, static fn(array $r) => array_replace($r, ['caption' => 'Box three']));
 $history = get_post_meta(1, '_bl_record_history', true);
 $check(count($history) === min(10, $count + 1) && $history[0]['record'] === $before && $history[0]['changes'] >= 2, 'one submission took several history entries or lost its before-image');
+// While a product form holds its record's lock, its boxes save under it and other writers wait.
+$held = bl_lock_acquire('record_1', 1);
+$GLOBALS['bl_record_held'][1] = $held;
+$check(bl_record_locked(1, static fn(array $r) => array_replace($r, ['caption' => 'Box under held lock'])) === true && bl_lock_owned('record_1', $held), 'a box released the form-wide lock');
+unset($GLOBALS['bl_record_held'][1]);
+$check(is_wp_error(bl_record_locked(1, static fn(array $r) => $r + ['x' => 1])), 'another writer got in while the form held the lock');
+bl_lock_release('record_1', $held);
 // If updating that shared entry fails, the next box is not written either.
 $GLOBALS['fail_meta_key'] = '_bl_record_history';
 $beforeBox = get_post_meta(1, '_bl_record', true);
-$check(is_wp_error(bl_record_locked(1, static fn(array $r) => array_replace($r, ['source' => 'https://example.test/four', 'caption' => 'Box four']))) && get_post_meta(1, '_bl_record', true) === $beforeBox, 'a failed history update still saved the next box');
+$check(is_wp_error(bl_record_locked(1, static fn(array $r) => array_replace($r, ['source' => 'https://example.test/four', 'caption' => 'Box four', 'hub' => 'changes the count']))) && get_post_meta(1, '_bl_record', true) === $beforeBox, 'a failed history update still saved the next box');
 unset($GLOBALS['fail_meta_key'], $GLOBALS['bl_record_history_entry'], $_POST['bl_product_complete']);
 echo "backend P4 history ok ($checks checks)\n";
