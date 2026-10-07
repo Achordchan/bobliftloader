@@ -55,8 +55,8 @@ function bl_content_saved_now(string $page): array
     return is_array($saved) ? $saved : [];
 }
 
-/** Version checks, backups and writes share the same lock, including reset and undo. */
-function bl_content_locked(string $page, callable $compute, ?string $expected = null, bool $snapshot = false): bool|WP_Error
+/** Version checks, backups and writes share the page's lock. */
+function bl_content_locked(string $page, callable $compute, ?string $expected = null): bool|WP_Error
 {
     $token = bl_lock_acquire('content_' . $page);
     if ($token === '') return new WP_Error('bl_content_busy', '另一个保存正在进行，本次未保存。请稍后重试。', ['status' => 409]);
@@ -68,14 +68,12 @@ function bl_content_locked(string $page, callable $compute, ?string $expected = 
         $diff = $compute($previous);
         if (is_wp_error($diff)) return $diff;
         if (!bl_lock_owned('content_' . $page, $token)) return new WP_Error('bl_content_busy', '保存锁已失效，本次未保存。', ['status' => 409]);
-        if ($snapshot) {
-            $key = 'bl_content_snapshots_' . $page;
-            wp_cache_delete($key, 'options');
-            $history = get_option($key, []);
-            $history = is_array($history) ? $history : [];
-            array_unshift($history, ['id' => wp_generate_uuid4(), 'saved_at' => gmdate('c'), 'user_id' => get_current_user_id(), 'content' => $previous]);
-            if (!update_option($key, array_slice($history, 0, 5), false)) return new WP_Error('bl_content_backup_failed', '快照保存失败，未恢复默认。', ['status' => 500]);
-        }
+        $key = 'bl_content_snapshots_' . $page;
+        wp_cache_delete($key, 'options');
+        $history = get_option($key, []);
+        $history = is_array($history) ? $history : [];
+        array_unshift($history, ['id' => wp_generate_uuid4(), 'saved_at' => gmdate('c'), 'user_id' => get_current_user_id(), 'content' => $previous, 'changes' => bl_content_change_count(bl_content_resolve($page, $previous), bl_content_resolve($page, $diff))]);
+        if (!update_option($key, array_slice($history, 0, 10), false)) return new WP_Error('bl_content_backup_failed', '历史版本保存失败，本次未保存。', ['status' => 500]);
         if (!bl_lock_owned('content_' . $page, $token)) return new WP_Error('bl_content_busy', '保存锁已失效，本次未保存。', ['status' => 409]);
         $diff['_bl_schema_version'] = 1;
         $diff['_bl_revision'] = wp_generate_uuid4();
@@ -121,11 +119,13 @@ function bl_content_handle_submission(string $operation): void
         if ($operation === 'reset') return [];
         if ($operation === 'restore') {
             $history = get_option('bl_content_snapshots_' . $page, []);
+            $selected = isset($_POST['bl_snapshot']) && is_string($_POST['bl_snapshot']) ? wp_unslash($_POST['bl_snapshot']) : '';
+            if ($selected !== '') $history = array_values(array_filter((array) $history, static fn($entry) => ($entry['id'] ?? '') === $selected));
             if (!isset($history[0]['content']) || !is_array($history[0]['content'])) return new WP_Error('bl_content_snapshot_missing', '没有可恢复的快照。', ['status' => 404]);
-            return bl_content_migrate($page, $history[0]['content']);
+            return bl_content_restore_values($page, $history[0]['content']);
         }
         return bl_content_prepare($page, $previous, $input, true);
-    }, $expected, $operation === 'reset');
+    }, $expected);
     if (is_wp_error($result)) {
         if ($operation !== 'save') wp_die(esc_html($result->get_error_message()), '', ['response' => 409, 'back_link' => true]);
         $id = wp_generate_uuid4();
@@ -145,3 +145,6 @@ foreach (['save', 'reset', 'restore'] as $bl_operation) {
     add_action('admin_post_bl_' . $bl_operation . '_content', static fn() => bl_content_handle_submission($bl_operation));
 }
 unset($bl_operation);
+
+require_once __DIR__ . '/wp-content-history.php';
+require_once __DIR__ . '/wp-record-state.php';

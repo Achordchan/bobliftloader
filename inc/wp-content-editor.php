@@ -424,7 +424,9 @@ function bl_content_clean_all(string $page, array $input): array
                     if (!is_array($row)) continue;
                     $clean = [];
                     foreach ($field['fields'] as $name => $sub) $clean[$name] = bl_content_clean($sub['type'], $row[$name] ?? '');
-                    if (implode('', $clean) !== '') $rows[] = $clean;
+                    if (implode('', $clean) !== '') {
+                        $rows[] = $clean;
+                    }
                 }
                 $value = $rows;
                 break;
@@ -544,7 +546,7 @@ function bl_content_screen(string $page): void
     echo '<input type="hidden" name="bl_content_complete" value="1"><div class="bl-savebar">';
     submit_button('保存修改', 'primary', 'submit', false);
     echo '<span class="bl-savebar-status" role="status">' . ($recovery ? '有未保存的修改（版本已过期）' : '没有未保存的修改') . '</span>';
-    if ($total > 0) echo '<button type="submit" form="bl-ce-reset" class="button bl-danger-button" title="本页有 ' . $total . ' 项内容改过；恢复前保存快照，保留最近 5 份。">整页恢复默认</button>';
+    if ($total > 0) echo '<button type="submit" form="bl-ce-reset" class="button bl-danger-button" title="本页有 ' . $total . ' 项内容改过；恢复前保存快照，保留最近 10 份。">整页恢复默认</button>';
     echo '</div></form>';
     if ($total > 0) {
         echo '<form method="post" id="bl-ce-reset" action="' . esc_url(admin_url('admin-post.php')) . '" onsubmit="return confirm(\'确定把整页恢复为主题默认内容吗？恢复前将保存当前内容快照，可撤销。\')"><input type="hidden" name="action" value="bl_reset_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
@@ -552,13 +554,7 @@ function bl_content_screen(string $page): void
         echo bl_content_revision_input($revision);
         echo '</form>';
     }
-    if (get_option('bl_content_snapshots_' . $page, [])) {
-        echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="bl_restore_content"><input type="hidden" name="bl_page" value="' . esc_attr($page) . '">';
-        wp_nonce_field('bl_restore_content_' . $page);
-        echo bl_content_revision_input($revision);
-        submit_button('撤销最近一次恢复默认', 'secondary', 'submit', false);
-        echo '</form>';
-    }
+    bl_content_history_screen($page, $revision);
 
     echo '</div>';
 }
@@ -571,7 +567,8 @@ function bl_content_card_meta(array $section, array $values): string
             if (($field['type'] ?? '') !== $type) continue;
             $text = trim((string) preg_replace('/\s+/', ' ', str_replace('*', '', wp_strip_all_tags((string) bl_content_get($values, $field['key'])))));
             // wp_html_excerpt() shortens by characters and works without the mbstring extension, which WordPress does not require.
-            if ($text !== '') return wp_html_excerpt($text, 90, '…');
+            // The folded preview reads like the page: {warranty_months} and the other purchasing figures show their values.
+            if ($text !== '') return wp_html_excerpt(strtr($text, bl_business_variables(bl_editable('support')['terms'])), 90, '…');
         }
     }
     return '';
