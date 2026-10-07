@@ -113,5 +113,7 @@ $check(str_contains($html, $product['model'] . ': 24 months') && str_contains($h
 // A row saved before the rules is left alone while untouched, and checked again once it is edited.
 $check(bl_specs_error(['Rated load' => 'about 1 ton'], ['Rated load' => 'about 1 ton']) === '', 'an untouched legacy spec blocked saving');
 $check(bl_specs_error(['Rated load' => 'about 2 ton'], ['Rated load' => 'about 1 ton']) !== '', 'an edited spec skipped validation');
+// A number sent over REST for a free-form spec is accepted, as it was before the unit rules.
+$check(bl_specs_error(['Number of cylinders' => 4]) === '', 'a numeric free-form spec was refused');
 if ($failures) { fwrite(STDERR, implode("\n", $failures) . "\n"); exit(1); }
 echo "backend P4 fields regression ok\n";

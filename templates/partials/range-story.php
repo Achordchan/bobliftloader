@@ -12,7 +12,7 @@ if ($storyCategory === 'skid-steer-loaders') {
     $rangeCopy = bl_editable('loaders')['range_story'];
     foreach ($storyProducts as $p) {
         $body = (int) $number($p['specs']['Machine width'] ?? '');
-        $bucket = (int) $number($p['specs'][$rangeCopy['legend_bucket']] ?? '');
+        $bucket = (int) $number($p['specs']['Bucket width'] ?? ''); // the legend is wording only; the data key stays fixed
         if ($body) $rows[] = ['model' => $p['model'], 'url' => bl_product_url($p), 'value' => $body, 'sub' => $bucket, 'label' => number_format($body) . ' mm', 'note' => $bucket ? 'Bucket ' . number_format($bucket) . ' mm' : '', 'hit' => $body < 1000];
     }
     usort($rows, static fn($a, $b) => [$a['value'], $a['model']] <=> [$b['value'], $b['model']]);

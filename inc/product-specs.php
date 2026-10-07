@@ -81,7 +81,9 @@ function bl_specs_error(array $specs, array $stored = []): string
         if ($key === '' && $value !== '') return '有参数值但未填写参数名。';
         if (isset($seen[$key])) return '参数“' . $key . '”重复，请合并或修改参数名。';
         $seen[$key] = true;
-        if (!is_string($value)) return '规格参数值必须是文字或数值与单位组成的字符串。';
+        // Numbers sent over REST for a free-form spec are kept as text, as before; only arrays and the like are refused.
+        if (!is_scalar($value)) return '规格参数值必须是文字或数值与单位组成的字符串。';
+        $value = (string) $value;
         if ($value === '') continue;
         if (array_key_exists($key, $stored) && $stored[$key] === $value) continue;
         foreach (bl_spec_choices() as $known => $_label) {
