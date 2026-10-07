@@ -134,6 +134,15 @@ $check(bl_record_locked(1, static fn(array $r) => array_replace($r, ['caption' =
 unset($GLOBALS['bl_record_held'][1]);
 $check(is_wp_error(bl_record_locked(1, static fn(array $r) => $r + ['x' => 1])), 'another writer got in while the form held the lock');
 bl_lock_release('record_1', $held);
+// A writer whose lock expired and was taken over writes neither history nor record.
+$historyBefore = get_post_meta(3, '_bl_record_history', true);
+$recordBefore = get_post_meta(3, '_bl_record', true);
+$result = bl_record_locked(3, static function (array $r) {
+    $GLOBALS['options']['bl_lock_record_3'] = 'someone-else'; // the lock expired and another request took it
+    return array_replace($r, ['caption' => 'Stale writer']);
+});
+$check(is_wp_error($result) && get_post_meta(3, '_bl_record_history', true) === $historyBefore && get_post_meta(3, '_bl_record', true) === $recordBefore, 'an expired writer touched history or record');
+unset($GLOBALS['options']['bl_lock_record_3']);
 // If updating that shared entry fails, the next box is not written either.
 $GLOBALS['fail_meta_key'] = '_bl_record_history';
 $beforeBox = get_post_meta(1, '_bl_record', true);
