@@ -126,15 +126,14 @@ function bl_dumper_jobs(): array
  */
 function bl_dumper_model_index(array $products): array
 {
-    $index = [];
-    foreach ($products as $product) if ($product['category'] === 'mini-dumpers') $index[strtolower($product['model'])] = $product;
+    $index = bl_named_record_index(array_values(array_filter($products, static fn($p) => $p['category'] === 'mini-dumpers')), 'model', 'model_aliases');
     $aliases = [];
     foreach (BL_FORMER_MODELS as $model => $former) foreach ($former as $name) {
         // Current name written, record still on the former name; and former name written, record already renamed.
         if (isset($index[strtolower($name)])) $aliases[strtolower($model)] ??= $index[strtolower($name)];
         if (isset($index[strtolower($model)])) $aliases[strtolower($name)] ??= $index[strtolower($model)];
     }
-    return bl_named_record_index(array_values(array_filter($products, static fn($p) => $p['category'] === 'mini-dumpers')), 'model', 'model_aliases') + $aliases;
+    return $index + $aliases;
 }
 
 /** A product's videos: each has a source, a poster and a caption. Theme paths (videos/…) resolve to the theme's assets. */

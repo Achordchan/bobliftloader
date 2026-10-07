@@ -43,8 +43,12 @@ function bl_application_link(string $url): string
     return bl_url($url);
 }
 
-/** Restore the complete snapshot through the existing content migrations. */
-function bl_content_restore_values(string $page, array $snapshot): array
+/** Restore the complete snapshot while retaining row history from the value read under the page lock. */
+function bl_content_restore_values(string $page, array $snapshot, array $previous = []): array
 {
-    return bl_content_migrate($page, $snapshot);
+    $restored = bl_content_migrate($page, $snapshot);
+    if ($page === 'loaders' && isset($restored['attachments']['items'])) {
+        $restored['attachments']['items'] = bl_attachment_restore_aliases($restored['attachments']['items'], (array) ($previous['attachments']['items'] ?? []));
+    }
+    return $restored;
 }

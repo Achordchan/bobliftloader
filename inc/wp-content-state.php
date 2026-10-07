@@ -131,7 +131,7 @@ function bl_content_handle_submission(string $operation): void
             $selected = isset($_POST['bl_snapshot']) && is_string($_POST['bl_snapshot']) ? wp_unslash($_POST['bl_snapshot']) : '';
             if ($selected !== '') $history = array_values(array_filter((array) $history, static fn($entry) => ($entry['id'] ?? '') === $selected));
             if (!isset($history[0]['content']) || !is_array($history[0]['content'])) return new WP_Error('bl_content_snapshot_missing', '没有可恢复的快照。', ['status' => 404]);
-            return bl_content_restore_values($page, $history[0]['content']);
+            return bl_content_restore_values($page, $history[0]['content'], $previous);
         }
         return bl_content_prepare($page, $previous, $input, true);
     }, $expected);

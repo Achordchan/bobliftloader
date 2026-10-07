@@ -26,14 +26,23 @@ function bl_named_record_index(array $records, string $field, string $aliases): 
     return $index;
 }
 
-/** Retain history in the same product record; submitted alias fields are never trusted. */
+/** Merge stored history in the same product record; callers exclude submitted alias fields. */
 function bl_product_model_aliases(array $record, array $previous): array
 {
     $old = (string) ($previous['model'] ?? '');
-    if ($old !== '' && $old !== (string) ($record['model'] ?? '')) {
-        $record['model_aliases'] = array_values(array_unique([...(array) ($previous['model_aliases'] ?? []), $old]));
-    }
+    $aliases = [...(array) ($record['model_aliases'] ?? []), ...(array) ($previous['model_aliases'] ?? []), $old];
+    $aliases = array_values(array_unique(array_filter($aliases, static fn($name) => is_string($name) && $name !== '' && strcasecmp($name, (string) ($record['model'] ?? '')) !== 0)));
+    if ($aliases || array_key_exists('model_aliases', $record)) $record['model_aliases'] = $aliases;
     return $record;
+}
+
+/**
+ * Restoring the loaders page matches rows the same way a save does (same name, or same position with the same picture,
+ * group and use), so the restored row keeps the names it had since, in either direction.
+ */
+function bl_attachment_restore_aliases(array $rows, array $previous): array
+{
+    return bl_attachment_row_aliases($rows, $previous);
 }
 
 /** Resolve loading keys in memory; explicit current keys (including empty values) take precedence. */
@@ -67,9 +76,10 @@ function bl_attachment_row_aliases(array $rows, array $previous): array
                 && $image === ($candidate['image'] ?? '') && ($row['group'] ?? '') === ($candidate['group'] ?? '') && ($row['use'] ?? '') === ($candidate['use'] ?? '')) $old = $candidate;
         }
         if ($old === null) continue;
-        $aliases = (array) ($old['aliases'] ?? []);
-        if ($old['name'] !== '' && $old['name'] !== $row['name']) $aliases[] = $old['name'];
-        if ($aliases) $row['aliases'] = array_values(array_unique($aliases));
+        // Aliases only grow: the row's own, the matched row's, and the matched row's name if it differs.
+        $aliases = [...(array) ($row['aliases'] ?? []), ...(array) ($old['aliases'] ?? []), (string) ($old['name'] ?? '')];
+        $aliases = array_values(array_unique(array_filter($aliases, static fn($name) => is_string($name) && $name !== '' && strcasecmp($name, (string) ($row['name'] ?? '')) !== 0)));
+        if ($aliases) $row['aliases'] = $aliases;
     }
     unset($row);
     return $rows;
