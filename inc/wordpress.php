@@ -68,6 +68,11 @@ function bl_wp_article_record(WP_Post $post): array
     $meta['line'] = bl_news_line($meta, $post->post_name);
     $record = array_replace(['category' => '', 'line' => 'compact', 'source' => '', 'image' => '', 'caption' => '', 'sections' => [], 'event' => [], 'poster' => [], 'products' => []], $meta);
     if (!empty($record['poster']['image'])) $record['poster']['image'] = bl_wp_image($record['poster']['image']);
+    // Stories saved before 'hide_cover' existed take it from their seed record; a value saved since is the editor's.
+    if (!array_key_exists('hide_cover', $meta)) {
+        $seed = bl_find_record(bl_read_data('news'), $post->post_name);
+        $record['hide_cover'] = !empty($seed['hide_cover']);
+    }
     $record['slug'] = $post->post_name;
     $record['title'] = get_the_title($post);
     $record['url'] = get_permalink($post);
