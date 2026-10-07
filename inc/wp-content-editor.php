@@ -143,10 +143,13 @@ function bl_content_schema_fields(string $page): array
         ]], ...$makingSection, $productPage('loader'),
     ];
     if ($page === 'dumpers') return [...$extra,
-        ['title' => '栏目介绍与配置', 'note' => '翻斗车栏目页产品列表下方的介绍（#about-the-range）：标题、介绍和下面一排配置说明。中间的载荷图由产品数据自动生成。', 'fields' => [
+        ['title' => '栏目介绍与配置', 'note' => '翻斗车栏目页产品列表下方的介绍（#about-the-range）：标题、介绍、载荷图旁的说明和下面一排配置说明。载荷图本身由产品数据自动生成。', 'fields' => [
             ['key' => 'about.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'about.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
             ['key' => 'about.intro', 'label' => '标题旁介绍', 'type' => 'textarea'],
+            ['key' => 'about.chart_text', 'label' => '载荷图说明', 'type' => 'textarea', 'help' => '花括号变量按当前产品参数计算：{model_count} 有额定载荷的机型数（英文单词），{lightest_load}、{heaviest_load} 最小、最大额定载荷（如 5,000 kg）。'],
+            ['key' => 'about.chart_bucket', 'label' => '载荷图说明：斗容', 'type' => 'textarea', 'help' => '有产品填写斗容（Bucket capacity）时接在上一句后面。{bucket_min}、{bucket_max} 为最小、最大斗容数值。留空不显示。'],
+            ['key' => 'about.chart_mixer', 'label' => '载荷图说明：搅拌车', 'type' => 'textarea', 'help' => '有搅拌车时接在最后。{mixer_model} 为型号，{drum_capacity} 为搅拌筒容量。留空不显示。'],
             ['key' => 'about.options', 'label' => '配置说明', 'type' => 'list', 'add' => '添加一项', 'summary' => ['big', 'title'], 'fields' => [
                 'big' => ['label' => '大字', 'type' => 'text', 'help' => '如 WHEELS / TRACKS；斜杠显示为蓝色。'],
                 'title' => ['label' => '名称', 'type' => 'text'],

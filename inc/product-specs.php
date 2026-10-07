@@ -50,6 +50,31 @@ function bl_spec_choices(): array
     ];
 }
 
+/**
+ * Specs as sent over REST: the stored object (name => value), or an ordered list of {"key", "value"} rows for clients that
+ * reorder object keys (the WordPress.com connector sorts them alphabetically). A list becomes the same object in the
+ * list's order, so the table keeps the order it was written in; rows with an empty value are dropped, as on the edit
+ * screen. Returns [specs, error]; a malformed row or a name given twice is an error and nothing is converted.
+ */
+function bl_specs_normalize($value): array
+{
+    if (!is_array($value)) return [null, '规格参数必须为英文参数名到显示值的对象，或按顺序排列的 {"key","value"} 列表。'];
+    if (!$value || !array_is_list($value)) return [$value, ''];
+    $specs = [];
+    foreach ($value as $i => $row) {
+        if (!is_array($row) || !array_key_exists('key', $row) || !is_string($row['key']) || !array_key_exists('value', $row) || (!is_scalar($row['value']) && $row['value'] !== null)) {
+            return [null, '规格列表第 ' . ($i + 1) . ' 项格式不对，每项须为 {"key": 英文参数名, "value": 显示值}。'];
+        }
+        $key = trim($row['key']);
+        $item = $row['value'] === null ? '' : trim((string) $row['value']);
+        if ($key === '' && $item === '') continue;
+        if ($key !== '' && array_key_exists($key, $specs)) return [null, '参数“' . $key . '”重复，请合并或修改参数名。'];
+        if ($item === '' && $key !== '') continue;
+        $specs[$key] = $item;
+    }
+    return [$specs, ''];
+}
+
 /** Value formats the frontend reads (filters, charts, comparisons): pattern and an example editors can copy. */
 function bl_spec_rules(): array
 {
@@ -63,7 +88,7 @@ function bl_spec_rules(): array
         'Bucket width' => [$integer . '\s*mm', '1,050 mm（整数，单位 mm）'],
         'Overall height' => [$integer . '\s*mm', '1,550 mm（整数，单位 mm）'],
         'Standard dimensions' => [$integer . '\s*×\s*' . $integer . '\s*×\s*' . $integer . '\s*mm', '2050 × 880 × 1300 mm（长 × 宽 × 高，使用乘号 ×）'],
-        'Running gear' => ['(?=.*(?:track|tire|wheel))[^<>]+', 'Rubber tracks / Rubber tires / Wheeled（需含 track、tire 或 wheel）'],
+        'Running gear' => ['(?=.*(?:track|tyre|tire|wheel))[^<>]+', 'Rubber tracks / Rubber tyres / Wheeled（需含 track、tyre、tire 或 wheel）'],
         'Operator station' => ['(?=.*(?:stand|seat))[^<>]+', 'Stand-on platform / Seat（需含 stand 或 seat）'],
     ];
 }

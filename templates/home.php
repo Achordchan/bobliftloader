@@ -20,7 +20,7 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
     $items = array_values(array_filter($allProducts, static fn($p) => $p['category'] === $cat));
     $loads = array_filter(array_column($items, 'load'));
     $caps = array_filter(array_column($items, 'capacity'));
-    $familyFacts[$key] = ['count' => count($items), 'load' => $loads ? number_format(min($loads)) . '–' . number_format(max($loads)) . ' kg' : '', 'capacity' => $caps ? min($caps) . '–' . max($caps) . ' m³' : '', 'url' => bl_url('/products/' . $cat . '/')];
+    $familyFacts[$key] = ['count' => count($items), 'load' => $loads ? bl_load_range([min($loads), max($loads)]) : '', 'capacity' => $caps ? min($caps) . '–' . max($caps) . ' m³' : '', 'url' => bl_url('/products/' . $cat . '/')];
 }
 ?>
 <section class="bl-hero" aria-labelledby="hero-title" data-hero>
@@ -69,7 +69,7 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
         <p class="bl-eyebrow"><span><span class="bl-status-dot"></span> <?= bl_escape($item['label']) ?></span><span class="bl-range-index"><?= $item['index'] ?> / 02</span></p>
         <h3 id="range-<?= $key ?>-title"><?= bl_heading($item['title']) ?></h3>
         <p class="bl-machine-description"><?= bl_escape($item['description']) ?></p>
-        <dl class="bl-range-facts"><div><dt>Models</dt><dd><?= $facts['count'] ?></dd></div><?php if ($facts['load']): ?><div><dt>Rated load</dt><dd><?= bl_escape($facts['load']) ?></dd></div><div><dt>Bucket</dt><dd><?= bl_escape($facts['capacity']) ?></dd></div><?php else: ?><div><dt>Running gear</dt><dd>Tracks / tires</dd></div><div><dt>Controls</dt><dd>Joystick</dd></div><?php endif; ?></dl>
+        <dl class="bl-range-facts"><div><dt>Models</dt><dd><?= $facts['count'] ?></dd></div><?php if ($facts['load']): ?><div><dt>Rated load</dt><dd><?= bl_escape($facts['load']) ?></dd></div><div><dt>Bucket</dt><dd><?= bl_escape($facts['capacity']) ?></dd></div><?php else: ?><div><dt>Running gear</dt><dd><?= bl_escape(bl_family_ranges($key)['gear']) ?></dd></div><div><dt>Controls</dt><dd>Joystick</dd></div><?php endif; ?></dl>
         <a class="bl-button" href="<?= bl_escape($facts['url']) ?>">Explore <?= $key === 'loader' ? 'loaders' : 'dumpers' ?> <?= bl_icon('arrow-up-right') ?></a>
       </div>
     </article>

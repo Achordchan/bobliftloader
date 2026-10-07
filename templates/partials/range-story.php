@@ -69,7 +69,12 @@ if ($storyCategory === 'skid-steer-loaders') {
         'intro' => $about['intro'],
         'chartEyebrow' => 'RATED LOAD',
         'chartTitle' => 'PICK YOUR PAYLOAD.',
-        'chartText' => ucfirst($inWords(count($rows))) . ' models' . ($lightest && $heaviest ? ' from ' . ($lightest['value'] < 1000 ? $lightest['value'] . ' kg' : ($lightest['value'] / 1000) . ' t') . ' to ' . ($heaviest['value'] / 1000) . ' t' : '') . '.' . ($buckets ? ' Bucket capacity runs from ' . min($buckets) . ' m³ to ' . max($buckets) . ' m³ on the wheeled dumpers.' : '') . ($mixer ? ' The ' . $mixer['model'] . ' carries a ' . $mixer['specs']['Drum capacity'] . ' drum instead of a hopper.' : ''),
+        // Loads in kilograms, as the specifications write them; the bucket range covers every model that publishes one.
+        'chartText' => ucfirst(trim(implode(' ', array_filter(array_map('trim', [
+            strtr($about['chart_text'], ['{model_count}' => $inWords(count($rows)), '{lightest_load}' => $lightest ? number_format($lightest['value']) . ' kg' : '', '{heaviest_load}' => $heaviest ? number_format($heaviest['value']) . ' kg' : '']),
+            $buckets ? strtr($about['chart_bucket'], ['{bucket_min}' => (string) min($buckets), '{bucket_max}' => (string) max($buckets)]) : '',
+            $mixer ? strtr($about['chart_mixer'], ['{mixer_model}' => $mixer['model'], '{drum_capacity}' => $mixer['specs']['Drum capacity']]) : '',
+        ]))))),
         'chartNote' => 'Rated loads from each model’s published specifications. Confirm your material and typical load with our team.',
         'legend' => ['bar' => 'Rated load', 'marker' => 'Your load'],
         'control' => ['name' => 'payload', 'label' => 'Your load per trip', 'hint' => 'Per trip, not per day', 'step' => 100, 'default' => 0, 'unit' => 'kg'],

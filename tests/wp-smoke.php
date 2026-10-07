@@ -20,6 +20,19 @@ bl_test_assert(count(bl_wp_products()) === count(bl_read_data('products')), 'Exp
 $newsCount = count(bl_read_data('news'));
 $productCount = count(bl_read_data('products'));
 bl_test_assert(count(bl_wp_articles()) === $newsCount, 'Expected every news record to be published');
+// A story saved before 'hide_cover' existed takes it from its seed record; a value saved since wins.
+$story = get_page_by_path('canton-fair-2026', OBJECT, 'bl_news');
+$storyMeta = get_post_meta($story->ID, '_bl_record', true);
+try {
+    update_post_meta($story->ID, '_bl_record', array_diff_key($storyMeta, ['hide_cover' => true]));
+    bl_test_assert(bl_wp_article_record(get_post($story->ID))['hide_cover'] === true, 'A story saved without hide_cover lost its seed value');
+    update_post_meta($story->ID, '_bl_record', ['image' => 'https://example.com/replacement.jpg'] + array_diff_key($storyMeta, ['hide_cover' => true, 'image' => true]));
+    bl_test_assert(empty(bl_wp_article_record(get_post($story->ID))['hide_cover']), 'A replaced cover was hidden by the seed flag');
+    update_post_meta($story->ID, '_bl_record', ['hide_cover' => false] + $storyMeta);
+    bl_test_assert(empty(bl_wp_article_record(get_post($story->ID))['hide_cover']), 'A saved hide_cover was overridden by the seed');
+} finally {
+    update_post_meta($story->ID, '_bl_record', $storyMeta);
+}
 $post = get_page_by_path('bl-t1000-h-mini-skid-steer-loader', OBJECT, 'bl_product');
 $original = get_post_meta($post->ID, '_bl_record', true);
 try {
