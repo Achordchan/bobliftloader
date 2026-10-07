@@ -17,7 +17,7 @@ function bl_content_change_count(array $before, array $after): int
 
 function bl_content_history_screen(string $page, string $revision): void
 {
-    $history = get_option('bl_content_snapshots_' . $page, []);
+    $history = bl_content_history($page);
     if (!is_array($history) || !$history) return;
     // Each entry is the page as it stood just before someone saved over it, so restoring brings that earlier text back.
     echo '<details class="bl-panel bl-history"><summary class="bl-panel-head"><h2 class="bl-card-title"><span class="bl-card-name">历史版本</span><span class="bl-card-meta">最近 ' . count($history) . ' 次保存前的内容，可恢复</span></h2></summary><div class="bl-panel-body">';
@@ -37,4 +37,11 @@ function bl_content_history_screen(string $page, string $revision): void
         echo '<button type="submit" class="button button-small">恢复到保存前</button></form></td></tr>';
     }
     echo '</tbody></table></div></details>';
+}
+
+/** Downloads keep their history in the same option; existing pages retain their original history keys. */
+function bl_content_history(string $page, ?array $saved = null): array
+{
+    $history = $page === 'downloads' ? (($saved ?? bl_content_saved_now($page))['_bl_history'] ?? []) : get_option('bl_content_snapshots_' . $page, []);
+    return is_array($history) ? $history : [];
 }

@@ -487,7 +487,7 @@ add_action('admin_enqueue_scripts', static function (string $hook): void {
     $asset = static fn(string $file): array => [get_template_directory_uri() . '/assets/admin/' . $file, (string) filemtime(get_template_directory() . '/assets/admin/' . $file)];
     [$css, $cssVersion] = $asset('content-editor.css');
     [$js, $jsVersion] = $asset('content-editor.js');
-    if ($contentPage) wp_enqueue_style('bl-content-editor', $css, ['bl-admin'], $cssVersion);
+    if ($contentPage || str_ends_with($hook, '_page_bl-downloads')) wp_enqueue_style('bl-content-editor', $css, ['bl-admin'], $cssVersion);
     wp_enqueue_script('bl-content-editor', $js, ['media-editor'], $jsVersion, true);
 });
 

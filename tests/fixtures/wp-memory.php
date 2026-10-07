@@ -53,6 +53,9 @@ class WP_REST_Request {
     function __construct(public array $params) {}
     function get_param($key) { return $this->params[$key] ?? null; }
     function set_param($key, $value) { $this->params[$key] = $value; }
+    function get_params() { return $this->params; }
+    function get_method() { return 'POST'; }
+    function offsetUnset($key): void { unset($this->params[$key]); }
 }
 class WP_Post {
     public string $post_content = '';
