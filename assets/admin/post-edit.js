@@ -15,7 +15,15 @@
   }
 
   var form = document.getElementById('post');
-  if (!form || !document.getElementById('bl_main-sortables')) return;
+  // News or cases under the Classic Editor: only the media pickers (poster, fallback image) need wiring.
+  if (form && !document.getElementById('bl_main-sortables')) {
+    form.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-bl-media] [data-bl]');
+      if (button) { event.preventDefault(); mediaAction(button); }
+    });
+    return;
+  }
+  if (!form) return;
   // The select owns known keys; custom text is disclosed only when that choice is selected.
   function specChoice(select) {
     var custom = select.parentElement.querySelector('input');

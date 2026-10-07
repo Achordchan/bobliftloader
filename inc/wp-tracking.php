@@ -41,6 +41,7 @@ function bl_tracking_screen(): void
     echo '</div></div><input type="hidden" name="bl_content_complete" value="1"><div class="bl-savebar">';
     submit_button('保存', 'primary', 'submit', false);
     echo '<span class="bl-savebar-status" role="status">没有未保存的修改</span></div></form>';
+    bl_content_history_screen('tracking', $revision);
 }
 
 function bl_render_tracking(string $position): void

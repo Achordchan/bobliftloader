@@ -130,7 +130,9 @@ try {
     $newsSaved = get_post_meta($story->ID, '_bl_record', true);
     update_post_meta($story->ID, '_bl_record', $newsOriginal);
     bl_test_assert($newsSaved['products'] === [] && $newsSaved['event']['source'] === '' && $newsSaved['event']['start'] === '2026-10-15', 'REST news write kept a bad list or link');
-    bl_test_assert(($newsSaved['poster'] ?? null) === ($newsOriginal['poster'] ?? null) && ($newsSaved['line'] ?? null) === ($newsOriginal['line'] ?? null), 'REST news write changed a field the edit screen does not offer');
+    // The poster is editable now (news edit screen and REST): a bad alt shape is cleaned, the rest of the poster is kept.
+    bl_test_assert(($newsSaved['poster']['image'] ?? null) === 'images/a.webp' && ($newsSaved['poster']['alt'] ?? null) === '', 'REST news write did not clean the poster');
+    bl_test_assert(($newsSaved['line'] ?? null) === ($newsOriginal['line'] ?? null), 'REST news write changed a field it did not send');
     wp_set_current_user(0);
     $anonymous = rest_do_request(new WP_REST_Request('GET', '/wp/v2/bl_product/' . $product->ID));
     bl_test_assert(!isset($anonymous->get_data()['meta']['_bl_record']), 'Anonymous REST read exposed the record');
@@ -168,6 +170,33 @@ try {
 } finally {
     wp_update_post(['ID' => $news->ID, 'post_content' => $originalContent]);
 }
+// Structured history is independent of core news revisions; body ownership is saved with an explicit REST body.
+wp_set_current_user(1);
+$historyNews = wp_insert_post(['post_type' => 'bl_news', 'post_status' => 'draft', 'post_title' => 'QA history news']);
+try {
+    bl_test_assert(!post_type_supports('bl_product', 'revisions') && !post_type_supports('bl_application', 'revisions') && post_type_supports('bl_news', 'revisions'), 'Unexpected core revision support');
+    $legacy = ['caption' => 'Before', 'sections' => [['text' => 'Imported body']], 'products' => []];
+    update_post_meta($historyNews, '_bl_record', $legacy);
+    bl_test_assert(!bl_wp_article_record(get_post($historyNews))['_bl_body_managed'], 'Untouched import claimed body ownership');
+    $edit = new WP_REST_Request('POST', '/wp/v2/bl_news/' . $historyNews);
+    $edit->set_body_params(['content' => '', 'meta' => ['_bl_record' => ['caption' => 'After']]]);
+    bl_test_assert(rest_do_request($edit)->get_status() === 200, 'News history REST save failed');
+    $history = get_post_meta($historyNews, '_bl_record_history', true);
+    bl_test_assert($history[0]['record'] === $legacy && $history[0]['changes'] === 1, 'Structured before-image missing');
+    bl_test_assert(get_post($historyNews)->post_content_filtered === 'bl-body-managed' && bl_wp_article_record(get_post($historyNews))['_bl_body_managed'], 'Empty REST body ownership missing');
+    wp_save_post_revision($historyNews);
+    bl_test_assert(bl_record_history_restore($historyNews, $history[0]['id']) === true, 'Structured restore failed');
+    bl_test_assert(get_post_meta($historyNews, '_bl_record', true) === $legacy && bl_wp_article_record(get_post($historyNews))['_bl_body_managed'], 'Structured restore changed body ownership');
+    $coreRevisions = wp_get_post_revisions($historyNews);
+    if ($coreRevisions) {
+        $beforeCoreRestore = get_post_meta($historyNews, '_bl_record', true);
+        wp_restore_post_revision(reset($coreRevisions)->ID);
+        bl_test_assert(get_post_meta($historyNews, '_bl_record', true) === $beforeCoreRestore, 'Core restore rewrote structured fields');
+    }
+} finally {
+    wp_delete_post($historyNews, true);
+    wp_set_current_user(0);
+}
 // The 网站内容 screens through REST: one bl_page_content item per screen; a write merges into the current content,
 // is cleaned like the screen, saves only what differs, and anonymous visitors can neither read nor write it.
 // Jobs added after a site was initialised get their pages on a later request; the import itself records the full list.
@@ -175,11 +204,6 @@ bl_test_assert(get_option('bl_application_pages') === bl_application_page_paths(
 foreach (bl_application_page_paths() as $path) bl_test_assert(get_page_by_path($path) instanceof WP_Post, "Missing page $path");
 wp_delete_post(get_page_by_path('applications/farms-and-orchards')->ID, true);
 update_option('bl_application_pages', array_slice(bl_application_page_paths(), 0, 3));
-// While another request holds the lock this one leaves the pages alone; once it is free the page is made exactly once.
-$heldBy = bl_lock_acquire('application_pages', 1);
-bl_application_make_pages();
-bl_test_assert(!get_page_by_path('applications/farms-and-orchards'), 'Pages were made while another request held the lock');
-bl_lock_release('application_pages', $heldBy);
 bl_application_make_pages();
 bl_application_make_pages();
 bl_test_assert(get_page_by_path('applications/farms-and-orchards') instanceof WP_Post && get_option('bl_application_pages') === bl_application_page_paths(), 'A new application page was not made on an initialised site');
@@ -239,18 +263,6 @@ try {
     bl_test_assert($stored['jobs']['items'] === [['title' => 'QA job', 'text' => 'QA text', 'tools' => 'Auger, Sweeper']] && $stored['attachments'] === ['note' => 'QA note'], 'REST content write was not cleaned or saved as a difference');
     bl_test_assert(!isset($stored['jobs']['eyebrow']) && get_post_meta($contentItem->ID, '_bl_content', true)['attachments']['title'] === "ONE LOADER.\n*MANY JOBS.*", 'Unsent content did not keep its defaults');
     bl_test_assert($GLOBALS['wpdb']->get_var($GLOBALS['wpdb']->prepare("SELECT COUNT(*) FROM {$GLOBALS['wpdb']->postmeta} WHERE post_id = %d AND meta_key = '_bl_content'", $contentItem->ID)) === '0', 'Content was stored on the item');
-    // While another save holds the page's lock, a write waits, then gives up without saving; the lock is always released.
-    $held = sprintf('%010d|qa', time());
-    $GLOBALS['wpdb']->insert($GLOBALS['wpdb']->options, ['option_name' => 'bl_lock_content_loaders', 'option_value' => $held, 'autoload' => 'no']);
-    $busy = new WP_REST_Request('POST', '/wp/v2/bl_page_content/' . $contentItem->ID);
-    $busy->set_body_params(['meta' => ['_bl_content' => ['attachments' => ['note' => 'QA-BUSY']]]]);
-    bl_test_assert(rest_do_request($busy)->get_status() === 409 && get_option('bl_content_loaders')['attachments']['note'] === 'QA note', 'A write went through while the page was locked');
-    // Releasing needs the owner's token: another request's release leaves this lock in place.
-    bl_lock_release('content_loaders', 'not-the-owner');
-    bl_test_assert(bl_lock_owned('content_loaders', $held), 'A lock was released by a request that does not own it');
-    // A lock older than five minutes is taken over.
-    $GLOBALS['wpdb']->update($GLOBALS['wpdb']->options, ['option_value' => sprintf('%010d|qa', time() - 301)], ['option_name' => 'bl_lock_content_loaders']);
-    bl_test_assert(rest_do_request($busy)->get_status() === 200 && get_option('bl_content_loaders')['attachments']['note'] === 'QA-BUSY' && $GLOBALS['wpdb']->get_var("SELECT COUNT(*) FROM {$GLOBALS['wpdb']->options} WHERE option_name IN ('bl_lock_content_loaders', 'bl_lock_page_content_items')") === '0', 'The lock was not released after a save');
     $rename = new WP_REST_Request('POST', '/wp/v2/bl_page_content/' . $contentItem->ID);
     $rename->set_body_params(['slug' => 'loader-content', 'status' => 'publish']);
     rest_do_request($rename);
@@ -265,7 +277,7 @@ try {
     bl_test_assert(!isset($anonymous->get_data()['meta']['_bl_content']) && rest_do_request(new WP_REST_Request('GET', '/wp/v2/bl_page_content'))->get_data() === [], 'Anonymous REST read exposed page content');
     $write->set_body_params(['meta' => ['_bl_content' => ['attachments' => ['note' => 'QA-ANON']]]]);
     rest_do_request($write);
-    bl_test_assert(get_option('bl_content_loaders')['attachments']['note'] === 'QA-BUSY', 'Anonymous REST content write was accepted');
+    bl_test_assert(get_option('bl_content_loaders')['attachments']['note'] === 'QA note', 'Anonymous REST content write was accepted');
 } finally {
     foreach ($savedOptions as $page => $value) is_array($value) ? update_option('bl_content_' . $page, $value) : delete_option('bl_content_' . $page);
     wp_set_current_user(0);

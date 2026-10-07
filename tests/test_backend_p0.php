@@ -63,18 +63,20 @@ $restSave(1, ['hero' => ['eyebrow' => 'Latest']], $revision);
 $current = get_option('bl_content_support');
 $error = $restSave(1, ['hero' => ['eyebrow' => 'Stale']], $revision);
 $check(is_wp_error($error) && $error->code === 'bl_content_conflict' && get_option('bl_content_support') === $current, 'stale REST snapshot overwrote content');
-$error = bl_content_locked('support', fn() => [], $revision, true);
-$check(is_wp_error($error) && !get_option('bl_content_snapshots_support'), 'stale reset wrote snapshot/content');
+$historyBeforeConflict = get_option('bl_content_snapshots_support');
+$error = bl_content_locked('support', fn() => [], $revision);
+$check(is_wp_error($error) && get_option('bl_content_snapshots_support') === $historyBeforeConflict, 'stale reset wrote snapshot/content');
 $GLOBALS['fail_option'] = 'bl_content_snapshots_support';
-$error = bl_content_locked('support', fn() => [], bl_content_revision($current), true);
+$error = bl_content_locked('support', fn() => [], bl_content_revision($current));
 $check(is_wp_error($error) && get_option('bl_content_support') === $current, 'reset proceeded after snapshot failure');
 unset($GLOBALS['fail_option']);
-$check(bl_content_locked('support', fn() => [], bl_content_revision($current), true) === true, 'reset failed');
+$check(bl_content_locked('support', fn() => [], bl_content_revision($current)) === true, 'reset failed');
 $check(get_option('bl_content_snapshots_support')[0]['content'] === $current && bl_page_content_current('support') === bl_support_defaults(), 'reset did not back up original or restore defaults');
 $check(bl_content_revision(get_option('bl_content_support')) !== bl_content_revision([]), 'reset lost revision');
 $_POST = ['bl_page' => 'support', 'bl_content_revision' => bl_content_revision(get_option('bl_content_support'))];
 try { bl_content_handle_submission('restore'); } catch (TestRedirect $redirect) {}
-$check(bl_content_resolve('support', get_option('bl_content_support')) === bl_content_resolve('support', $current), 'undo did not restore snapshot content');
+$expectedRestore = bl_content_resolve('support', $current);
+$check(bl_content_resolve('support', get_option('bl_content_support')) === $expectedRestore, 'undo did not restore the complete snapshot');
 $beforeFailure = get_option('bl_content_support');
 $GLOBALS['fail_option'] = 'bl_content_support';
 $error = bl_content_locked('support', fn() => [], bl_content_revision($beforeFailure));
@@ -82,8 +84,8 @@ $check(is_wp_error($error) && get_option('bl_content_support') === $beforeFailur
 unset($GLOBALS['fail_option']);
 $error = bl_content_locked('support', static function () { unset($GLOBALS['options']['bl_lock_content_support']); return []; });
 $check(is_wp_error($error) && get_option('bl_content_support') === $beforeFailure, 'expired lock allowed a write');
-for ($i = 0; $i < 6; $i++) bl_content_locked('support', fn() => [], null, true);
-$check(count(get_option('bl_content_snapshots_support')) === 5, 'snapshot history unbounded');
+for ($i = 0; $i < 12; $i++) bl_content_locked('support', fn() => [], null);
+$check(count(get_option('bl_content_snapshots_support')) === 10, 'snapshot history unbounded');
 $_POST = ['bl_page' => 'home', 'bl_content_complete' => '1', 'bl_content_revision' => 'stale', 'bl_content' => ['hero' => ['eyebrow' => 'Keep my input']]];
 try { bl_content_handle_submission('save'); $check(false, 'stale form was accepted'); } catch (TestRedirect $redirect) {
     parse_str(parse_url($redirect->getMessage(), PHP_URL_QUERY), $_GET);

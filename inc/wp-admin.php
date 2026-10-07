@@ -51,7 +51,7 @@ add_action('admin_enqueue_scripts', static function (string $hook): void {
     $dir = get_template_directory();
     $uri = get_template_directory_uri();
     wp_enqueue_style('bl-post-edit', $uri . '/assets/admin/post-edit.css', ['bl-admin'], (string) filemtime($dir . '/assets/admin/post-edit.css'));
-    if ($screen->post_type === 'bl_product') wp_enqueue_media();
+    wp_enqueue_media();
     $deps = $screen->post_type === 'bl_product' ? ['jquery', 'jquery-ui-sortable'] : ['wp-data', 'wp-preferences'];
     wp_enqueue_script('bl-post-edit', $uri . '/assets/admin/post-edit.js', $deps, (string) filemtime($dir . '/assets/admin/post-edit.js'), true);
 });
@@ -215,7 +215,13 @@ function bl_news_image_box(WP_Post $post): void
     bl_admin_field('备用图片', '', bl_admin_media('bl_record[image]', (string) ($record['image'] ?? '')), '未设置特色图片时生效；两者都为空则使用主题默认图片。');
     echo '<p><label><input type="checkbox" name="bl_record[hide_cover]" value="1"' . checked(!empty($record['hide_cover']), true, false) . '> 备用图片是从展位海报裁出来的，文章页不重复显示</label></p>';
     echo '</details>';
-    echo '</div>';
+    $poster = (array) ($record['poster'] ?? []);
+    bl_admin_field('正文海报', '', bl_admin_media('bl_record[poster][image]', (string) ($poster['image'] ?? '')), '显示当前海报；可从媒体库替换或移除，保存后生效。');
+    echo '<details><summary>海报说明（可选）</summary>';
+    foreach (['alt' => '海报替代文字', 'caption' => '海报说明'] as $key => $label) {
+        bl_admin_field($label, 'bl-poster-' . $key, bl_admin_input('bl-poster-' . $key, 'bl_record[poster][' . $key . ']', (string) ($poster[$key] ?? '')));
+    }
+    echo '</details></div>';
 }
 
 function bl_news_products_box(WP_Post $post): void
@@ -343,57 +349,59 @@ add_action('save_post', static function (int $postId): void {
     if (get_post_type($postId) === 'bl_product' && !bl_product_submission_complete()) return;
     $input = wp_unslash($_POST['bl_record']);
     $text = static fn(string $key): string => isset($input[$key]) && is_scalar($input[$key]) ? sanitize_text_field((string) $input[$key]) : '';
-    $record = get_post_meta($postId, '_bl_record', true);
-    if (!is_array($record)) $record = [];
-    $record['source'] = esc_url_raw($text('source'), ['http', 'https']);
-    $image = $text('image');
-    $record['image'] = str_starts_with($image, 'images/') && !str_contains($image, '..') ? $image : esc_url_raw($image, ['http', 'https']);
-    if (get_post_type($postId) === 'bl_product') {
-        $record['model'] = $text('model');
-        // Older forms without the field keep the stored value instead of clearing it.
-        if (array_key_exists('spec_source', $input)) $record['spec_source'] = $text('spec_source');
-        $record['category'] = in_array($text('category'), ['skid-steer-loaders', 'mini-dumpers'], true) ? $text('category') : 'skid-steer-loaders';
-        $record['gallery'] = [];
-        $gallery = $input['gallery'] ?? [];
-        $alts = is_array($input['gallery_alt'] ?? null) ? array_values($input['gallery_alt']) : [];
-        // Older forms without the alt fields keep the stored text for the photographs still in the gallery.
-        $kept = array_key_exists('gallery_alt', $input) ? [] : (is_array($record['gallery_alt'] ?? null) ? $record['gallery_alt'] : []);
-        $record['gallery_alt'] = [];
-        foreach ((is_string($gallery) ? preg_split('/\R/', $gallery) : (array) $gallery) as $i => $line) {
-            $line = is_scalar($line) ? trim(sanitize_text_field((string) $line)) : '';
-            $url = str_starts_with($line, 'images/') && !str_contains($line, '..') ? $line : esc_url_raw($line, ['http', 'https']);
-            if (!$url) continue;
-            $record['gallery'][] = $url;
-            $alt = isset($alts[$i]) && is_scalar($alts[$i]) ? mb_substr(sanitize_text_field((string) $alts[$i]), 0, 160) : (string) ($kept[$url] ?? '');
-            if ($alt !== '') $record['gallery_alt'][$url] = $alt;
+    $result = bl_record_locked($postId, static function (array $record) use ($postId, $input, $text): array {
+        $record['source'] = esc_url_raw($text('source'), ['http', 'https']);
+        $image = $text('image');
+        $record['image'] = str_starts_with($image, 'images/') && !str_contains($image, '..') ? $image : esc_url_raw($image, ['http', 'https']);
+        if (get_post_type($postId) === 'bl_product') {
+            $record['model'] = $text('model');
+            // Older forms without the field keep the stored value instead of clearing it.
+            if (array_key_exists('spec_source', $input)) $record['spec_source'] = $text('spec_source');
+            $record['category'] = in_array($text('category'), ['skid-steer-loaders', 'mini-dumpers'], true) ? $text('category') : 'skid-steer-loaders';
+            $record['gallery'] = [];
+            $gallery = $input['gallery'] ?? [];
+            $alts = is_array($input['gallery_alt'] ?? null) ? array_values($input['gallery_alt']) : [];
+            // Older forms without the alt fields keep the stored text for the photographs still in the gallery.
+            $kept = array_key_exists('gallery_alt', $input) ? [] : (is_array($record['gallery_alt'] ?? null) ? $record['gallery_alt'] : []);
+            $record['gallery_alt'] = [];
+            foreach ((is_string($gallery) ? preg_split('/\R/', $gallery) : (array) $gallery) as $i => $line) {
+                $line = is_scalar($line) ? trim(sanitize_text_field((string) $line)) : '';
+                $url = str_starts_with($line, 'images/') && !str_contains($line, '..') ? $line : esc_url_raw($line, ['http', 'https']);
+                if (!$url) continue;
+                $record['gallery'][] = $url;
+                $alt = isset($alts[$i]) && is_scalar($alts[$i]) ? mb_substr(sanitize_text_field((string) $alts[$i]), 0, 160) : (string) ($kept[$url] ?? '');
+                if ($alt !== '') $record['gallery_alt'][$url] = $alt;
+            }
+            $record['specs'] = [];
+            foreach (bl_product_posted_specs($input['specs'] ?? '') as $row) {
+                $key = sanitize_text_field($row['key']);
+                $value = sanitize_text_field($row['value']);
+                if ($key !== '' && $value !== '') $record['specs'][$key] = $value;
+            }
+            $record = bl_product_derived($record);
+        } elseif (get_post_type($postId) === 'bl_application') {
+            $record['hub'] = isset(bl_case_hubs()[$text('hub')]) ? $text('hub') : '';
+            $record['products'] = bl_rest_product_slugs($input['products'] ?? [], (array) ($record['products'] ?? []));
+            $record['facts'] = [];
+            foreach (['location', 'customer', 'task', 'site', 'duration', 'result'] as $key) $record['facts'][$key] = isset($input['facts'][$key]) && is_scalar($input['facts'][$key]) ? sanitize_text_field((string) $input['facts'][$key]) : '';
+        } else {
+            $record['category'] = isset(BL_NEWS_CATEGORIES[$text('category')]) ? $text('category') : '';
+            $record['products'] = bl_rest_product_slugs($input['products'] ?? [], (array) ($record['products'] ?? []));
+            $record['line'] = $text('line') === 'group' ? 'group' : 'compact';
+            $record['caption'] = $text('caption');
+            $record['hide_cover'] = !empty($input['hide_cover']);
+            if (array_key_exists('poster', $input)) $record['poster'] = array_replace((array) ($record['poster'] ?? []), bl_rest_field('bl_news', 'poster', $input['poster']));
+            $event = [];
+            foreach (['name', 'venue', 'address', 'booth', 'booth_note', 'source_label'] as $key) $event[$key] = $text('event_' . $key);
+            // Only real dates are kept (the pages compute the status from them); an end before the start is dropped.
+            foreach (['start', 'end'] as $key) $event[$key] = bl_is_date($text('event_' . $key)) ? $text('event_' . $key) : '';
+            if ($event['end'] && $event['end'] < $event['start']) $event['end'] = '';
+            $event['source'] = esc_url_raw($text('event_source'), ['http', 'https']);
+            $record['event'] = $event;
         }
-        $record['specs'] = [];
-        foreach (bl_product_posted_specs($input['specs'] ?? '') as $row) {
-            $key = sanitize_text_field($row['key']);
-            $value = sanitize_text_field($row['value']);
-            if ($key !== '' && $value !== '') $record['specs'][$key] = $value;
-        }
-        $record = bl_product_derived($record);
-    } elseif (get_post_type($postId) === 'bl_application') {
-        $record['hub'] = isset(bl_case_hubs()[$text('hub')]) ? $text('hub') : '';
-        $record['products'] = bl_rest_product_slugs($input['products'] ?? [], (array) ($record['products'] ?? []));
-        $record['facts'] = [];
-        foreach (['location', 'customer', 'task', 'site', 'duration', 'result'] as $key) $record['facts'][$key] = isset($input['facts'][$key]) && is_scalar($input['facts'][$key]) ? sanitize_text_field((string) $input['facts'][$key]) : '';
-    } else {
-        $record['category'] = isset(BL_NEWS_CATEGORIES[$text('category')]) ? $text('category') : '';
-        $record['products'] = bl_rest_product_slugs($input['products'] ?? [], (array) ($record['products'] ?? []));
-        $record['line'] = $text('line') === 'group' ? 'group' : 'compact';
-        $record['caption'] = $text('caption');
-        $record['hide_cover'] = !empty($input['hide_cover']);
-        $event = [];
-        foreach (['name', 'venue', 'address', 'booth', 'booth_note', 'source_label'] as $key) $event[$key] = $text('event_' . $key);
-        // Only real dates are kept (the pages compute the status from them); an end before the start is dropped.
-        foreach (['start', 'end'] as $key) $event[$key] = bl_is_date($text('event_' . $key)) ? $text('event_' . $key) : '';
-        if ($event['end'] && $event['end'] < $event['start']) $event['end'] = '';
-        $event['source'] = esc_url_raw($text('event_source'), ['http', 'https']);
-        $record['event'] = $event;
-    }
-    update_post_meta($postId, '_bl_record', $record);
+        return $record;
+    });
+    if (is_wp_error($result)) wp_die(esc_html($result->get_error_message()), '', ['response' => 500, 'back_link' => true]);
 });
 
 // A job title for news authors (shown under their name on stories), kept on the user's own profile.

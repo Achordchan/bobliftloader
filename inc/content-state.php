@@ -26,7 +26,8 @@ function bl_content_migrate(string $page, array $saved): array
 
 function bl_content_resolve(string $page, array $saved): array
 {
-    return bl_merge_content(bl_content_defaults($page), bl_content_migrate($page, $saved), bl_content_dynamic_paths($page));
+    $content = bl_merge_content(bl_content_defaults($page), bl_content_migrate($page, $saved), bl_content_dynamic_paths($page));
+    return $content;
 }
 
 /** A hash includes the stored revision, detecting edits even when a reset returns to identical content. */
@@ -40,4 +41,10 @@ function bl_application_link(string $url): string
 {
     if (preg_match('~^(?:https?://|mailto:|tel:|#|\?)~i', $url)) return $url;
     return bl_url($url);
+}
+
+/** Restore the complete snapshot through the existing content migrations. */
+function bl_content_restore_values(string $page, array $snapshot): array
+{
+    return bl_content_migrate($page, $snapshot);
 }

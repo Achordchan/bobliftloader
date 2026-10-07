@@ -49,11 +49,11 @@ function bl_rest_product_slugs($value, array $existing = []): array
 
 /**
  * The fields the edit screens let people change, per type. Through REST these are the only ones that can change;
- * everything else in a record (imported sections, posters, dates…) keeps its stored value whatever a client sends.
+ * everything else in a record (imported sections, dates…) keeps its stored value whatever a client sends.
  */
 const BL_REST_FIELDS = [
     'bl_product' => ['model', 'category', 'source', 'spec_source', 'image', 'gallery', 'gallery_alt', 'specs', 'videos', 'seo_description', 'highlights', 'faq', 'attachments', 'photos'],
-    'bl_news' => ['category', 'line', 'caption', 'source', 'image', 'hide_cover', 'products', 'event'],
+    'bl_news' => ['category', 'line', 'caption', 'source', 'image', 'hide_cover', 'products', 'event', 'poster'],
     'bl_application' => ['hub', 'products', 'facts', 'source', 'image'],
 ];
 
@@ -144,6 +144,12 @@ function bl_rest_field(string $type, string $key, $value)
             $facts = [];
             foreach (['location', 'customer', 'task', 'site', 'duration', 'result'] as $fact) $facts[$fact] = isset($value[$fact]) && is_scalar($value[$fact]) ? sanitize_text_field((string) $value[$fact]) : '';
             return $facts;
+        case 'poster':
+            $input = is_array($value) ? $value : [];
+            $poster = ['image' => bl_rest_clean_url($input['image'] ?? '')];
+            foreach (['alt', 'caption'] as $field) $poster[$field] = is_scalar($input[$field] ?? null) ? sanitize_text_field((string) $input[$field]) : '';
+            if (isset($input['after'])) $poster['after'] = max(0, (int) $input['after']);
+            return $poster;
         case 'event':
             $input = is_array($value) ? $value : [];
             $event = [];
@@ -165,13 +171,18 @@ foreach (array_keys(BL_REST_FIELDS) as $bl_rest_type) {
     add_filter('rest_pre_insert_' . $bl_rest_type, static function ($prepared, WP_REST_Request $request) use ($bl_rest_type) {
         $type = $bl_rest_type;
         $meta = $request->get_param('meta');
+        // Only a request that really updates the body (a string or content.raw, which core turns into post_content,
+        // an empty string included) takes it over; {} or a rendered-only object leaves imported news as it was.
+        if ($type === 'bl_news' && !is_wp_error($prepared) && property_exists($prepared, 'post_content') && is_string($prepared->post_content)) $prepared->post_content_filtered = 'bl-body-managed';
         if (is_wp_error($prepared) || !is_array($meta) || !array_key_exists('_bl_record', $meta)) return $prepared;
         $sent = $meta['_bl_record'];
         if (!is_array($sent)) return new WP_Error('bl_record_invalid', 'The BOB-LIFT record must be an object; it cannot be removed through the API.', ['status' => 400]);
         $id = (int) $request->get_param('id');
         $record = $id ? get_post_meta($id, '_bl_record', true) : [];
         if (!is_array($record)) $record = [];
+        $previousPoster = (array) ($record['poster'] ?? []);
         foreach (BL_REST_FIELDS[$type] as $key) if (array_key_exists($key, $sent)) $record[$key] = $key === 'products' ? bl_rest_product_slugs($sent[$key], (array) ($record['products'] ?? [])) : bl_rest_field($type, $key, $sent[$key]);
+        if ($type === 'bl_news' && array_key_exists('poster', $sent)) $record['poster'] = array_replace($previousPoster, $record['poster']);
         if ($type === 'bl_product') $record = bl_product_derived($record);
         $meta['_bl_record'] = $record;
         $request->set_param('meta', $meta);
@@ -274,7 +285,8 @@ add_filter('wp_insert_post_data', static function (array $data, array $postarr):
 
 add_filter('get_post_metadata', static function ($value, $postId, $key, $single) {
     if ($key !== '_bl_content' || !($page = bl_page_content_key((int) $postId))) return $value;
-    return [bl_content_resolve($page, bl_rest_content_snapshot($page))];
+    $content = bl_content_resolve($page, bl_rest_content_snapshot($page));
+    return [$content];
 }, 10, 4);
 
 // Nothing is ever stored on the item itself.

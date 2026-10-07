@@ -25,6 +25,7 @@ function wp_cache_set(...$args) {}
 function wp_cache_delete(...$args) {}
 function is_email($value) { return filter_var($value, FILTER_VALIDATE_EMAIL); }
 function sanitize_email($value) { $value = trim((string) $value); return filter_var($value, FILTER_VALIDATE_EMAIL) ? $value : ''; }
+function wp_date($format, $time = null) { return gmdate($format, $time ?? time()); }
 function sanitize_text_field($value) { return trim(strip_tags($value)); }
 function sanitize_textarea_field($value) { return trim(strip_tags($value)); }
 function sanitize_title($value) { return strtolower(preg_replace('/[^a-zA-Z0-9-]/', '', $value)); }
@@ -45,6 +46,7 @@ class WP_HTML_Tag_Processor {
 class WP_Error {
     function __construct(public string $code, public string $message, public array $data = []) {}
     function get_error_message() { return $this->message; }
+    function get_error_code() { return $this->code; }
 }
 function is_wp_error($value) { return $value instanceof WP_Error; }
 class WP_REST_Request {
@@ -53,20 +55,32 @@ class WP_REST_Request {
     function set_param($key, $value) { $this->params[$key] = $value; }
 }
 class WP_Post {
+    public string $post_content = '';
+    public string $post_content_filtered = '';
+    public string $post_excerpt = '';
     function __construct(public int $ID, public string $post_type, public string $post_name, public string $post_title = '', public string $post_status = 'publish') {}
 }
 function get_post($id) { return $GLOBALS['posts'][$id] ?? null; }
 function get_post_type($id) { return get_post($id)->post_type; }
-function get_posts($query) { return array_values(array_filter($GLOBALS['posts'], fn($p) => $p->post_type === $query['post_type'] && $p->post_status === $query['post_status'])); }
+function get_posts($query) { return array_values(array_filter($GLOBALS['posts'], fn($p) => $p->post_type === $query['post_type'] && ($query['post_status'] === 'any' || in_array($p->post_status, (array) $query['post_status'], true)))); }
 function get_page_by_path($slug, $output, $type) { foreach ($GLOBALS['posts'] as $post) if ($post->post_type === $type && $post->post_name === $slug) return $post; return null; }
 function get_post_meta($id, $key, $single) { return $GLOBALS['meta'][$id][$key] ?? []; }
-function update_post_meta($id, $key, $value) { $GLOBALS['meta'][$id][$key] = $value; }
+function update_post_meta($id, $key, $value) {
+    $check = run_filter('update_post_metadata', null, $id, $key, $value, '');
+    if ($check !== null) return $check;
+    if (($GLOBALS['fail_meta'] ?? 0) === $id || ($GLOBALS['fail_meta_key'] ?? '') === $key) return false;
+    if (($GLOBALS['meta'][$id][$key] ?? null) === $value) return false;
+    $GLOBALS['meta'][$id][$key] = $value; return true;
+}
+function wp_slash($value) { return $value; }
+function get_userdata($id) { return (object) ['display_name' => 'Editor ' . $id]; }
 function get_option($key, $default = false) { return $GLOBALS['options'][$key] ?? $default; }
 function update_option($key, $value, $autoload = null) {
     if (($GLOBALS['fail_option'] ?? '') === $key) return false;
     if (get_option($key) === $value) return false;
     $GLOBALS['options'][$key] = $value; return true;
 }
+function delete_option($key) { unset($GLOBALS['options'][$key]); return true; }
 function set_transient($key, $value, $ttl) { $GLOBALS['transients'][$key] = $value; return true; }
 function get_transient($key) { return $GLOBALS['transients'][$key] ?? false; }
 function maybe_unserialize($value) { return $value === '' ? false : unserialize($value); }
