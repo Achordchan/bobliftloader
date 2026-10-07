@@ -22,7 +22,9 @@ $compareUses = static fn(string $row): int => count(array_filter($compareProduct
 $compareLabel = [];
 foreach ($compareRows as $row) {
     $names = array_values(array_filter(bl_spec_synonyms($row, $compareProducts), $compareUses));
-    usort($names, static fn($a, $b) => $compareUses($b) <=> $compareUses($a));
+    // Ties fall to the name listed first in BL_SPEC_SYNONYMS, so every name of a group settles on the same label.
+    $compareRank = static fn(string $name): int => (int) array_search($name, array_merge(...BL_SPEC_SYNONYMS), true);
+    usort($names, static fn($a, $b) => [$compareUses($b), $compareRank($a)] <=> [$compareUses($a), $compareRank($b)]);
     $compareLabel[$row] = $names[0] ?? $row;
 }
 $compareRows = array_values(array_unique(array_map(static fn($row) => $compareLabel[$row], $compareRows)));
