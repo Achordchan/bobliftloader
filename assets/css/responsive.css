@@ -127,7 +127,7 @@
 @media(max-width:600px) and (orientation:portrait){
   .bl-site .bl-product-choices label,.bl-site .bl-product-choices span,.bl-site .bl-inquiry-form .wpcf7-radio label{height:auto}
   .bl-site .bl-product-choices span{justify-content:normal}
-  .bl-site .bl-inquiry-form:not(.bl-quick-form *) .wpcf7-list-item-label{justify-content:normal}
+  .bl-site .bl-inquiry-form:not(.bl-quick-form *) .wpcf7-radio .wpcf7-list-item-label{justify-content:normal}
   /* The heading block above the form stays short, so the form starts within the first screen of the section: the title
      takes the section-heading size the other home sections use, with tighter spacing around the line and the email. */
   .bl-site .bl-contact-layout{gap:28px}
@@ -140,7 +140,8 @@
      the edge of the screen (or of the white panel on product pages, which sets --bl-form-bleed), so the chip cut at the
      edge shows there is more. They stay radio buttons: arrow keys move the choice and bring it into view (main.js brings a
      choice made beforehand into view too). Fields sit closer, each 44px or more with 16px type. The quick panel keeps its
-     own choices, so the CF7 rule leaves it out; kept as a rule of its own, so a browser without complex :not() still lays
+     own choices, so the CF7 rule leaves it out, and the chip rules hold only for the equipment radios (a consent
+     checkbox elsewhere in the form keeps wrapping); kept as a rule of its own, so a browser without complex :not() still lays
      out the theme's own form. */
   .bl-site .bl-inquiry-form{--bl-form-bleed:var(--gutter)}
   .bl-site .bl-product-choices{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;margin:-5px calc(var(--bl-form-bleed) * -1);padding:5px var(--bl-form-bleed);scroll-padding-inline:var(--bl-form-bleed);scroll-snap-type:x proximity;overscroll-behavior-x:contain;scrollbar-width:none}
@@ -149,9 +150,9 @@
   /* Once the row has been swiped, its left edge fades like the right edge of the site's other sideways strips
      (pages.css, bl-edge-fade), so a chip half gone reads as scrolled away rather than cut; main.js marks the row. */
   .bl-site .bl-product-choices.bl-edge-start,.bl-site .bl-inquiry-form .wpcf7-radio.bl-edge-start{-webkit-mask-image:linear-gradient(90deg,#0000,#000 calc(var(--bl-form-bleed) + 32px));mask-image:linear-gradient(90deg,#0000,#000 calc(var(--bl-form-bleed) + 32px))}
-  .bl-site .bl-product-choices label,.bl-site .bl-inquiry-form:not(.bl-quick-form *) .wpcf7-list-item{flex:none;scroll-snap-align:start}
+  .bl-site .bl-product-choices label,.bl-site .bl-inquiry-form:not(.bl-quick-form *) .wpcf7-radio .wpcf7-list-item{flex:none;scroll-snap-align:start}
   .bl-site .bl-product-choices span{min-height:44px;padding:0 12px;font-size:14px;line-height:1.3;gap:8px;white-space:nowrap}
-  .bl-site .bl-inquiry-form:not(.bl-quick-form *) .wpcf7-list-item-label{min-height:44px;padding:0 12px;font-size:14px;line-height:1.3;gap:8px;white-space:nowrap}
+  .bl-site .bl-inquiry-form:not(.bl-quick-form *) .wpcf7-radio .wpcf7-list-item-label{min-height:44px;padding:0 12px;font-size:14px;line-height:1.3;gap:8px;white-space:nowrap}
   .bl-site .bl-product-choices input:focus-visible+span,.bl-site .bl-inquiry-form .wpcf7-radio input:focus-visible+.wpcf7-list-item-label{outline-offset:-3px}
   .bl-site .bl-inquiry-form fieldset{margin-bottom:24px;min-width:0}
   .bl-site .bl-inquiry-form legend{padding:0;font-size:12px;margin-bottom:12px}
@@ -165,7 +166,7 @@
 }
 @media(max-width:360px){
   .bl-site .bl-product-choices span{padding-inline:10px}
-  .bl-site .bl-inquiry-form:not(.bl-quick-form *) .wpcf7-list-item-label{padding-inline:10px}
+  .bl-site .bl-inquiry-form:not(.bl-quick-form *) .wpcf7-radio .wpcf7-list-item-label{padding-inline:10px}
 }
 
 /* ---- Hero / range / applications responsive composition ---- */

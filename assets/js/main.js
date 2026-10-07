@@ -247,6 +247,7 @@ if (!CSS.supports('field-sizing', 'content')) {
 const guarded = (step) => (...args) => {
   try { step(...args); } catch { /* a layout this does not know: the row keeps its own scroll */ }
 };
+const uprightPhone = window.matchMedia('(max-width: 600px) and (orientation: portrait)');
 document.querySelectorAll('.bl-product-choices, .bl-inquiry-form .wpcf7-radio').forEach(guarded((row) => {
   const reveal = guarded((input) => {
     if (!input || row.scrollWidth <= row.clientWidth) return;
@@ -261,9 +262,11 @@ document.querySelectorAll('.bl-product-choices, .bl-inquiry-form .wpcf7-radio').
   });
   const edge = guarded(() => row.classList.toggle('bl-edge-start', row.scrollLeft > 2));
   row.addEventListener('scroll', edge, { passive: true });
-  reveal(row.querySelector('input:checked'));
-  edge();
+  const settle = () => { reveal(row.querySelector('input:checked')); edge(); };
+  settle();
   row.addEventListener('change', (event) => reveal(event.target));
+  // The row only swipes once the phone is held upright, so turning it upright brings the choice made beforehand into view.
+  uprightPhone.addEventListener?.('change', () => { if (uprightPhone.matches) requestAnimationFrame(guarded(settle)); });
 }));
 
 // A required field left empty: the browser brings it into view and focuses it, but can leave it under the pinned header
