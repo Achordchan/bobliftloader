@@ -52,4 +52,6 @@ foreach (['zip' => 'ZIP', 'docx' => 'DOCX'] as $extension => $kind) {
 }
 $GLOBALS['options']['bl_downloads']['items'] = [$primary];
 $check($render('support') === $defaultSupport && $render('product', $loader) === $defaultProduct && $render('thanks') === $defaultThanks, 'PDF output bytes changed after non-PDF selection');
+// The thanks page names the catalogue's real format too.
+$check(str_contains(file_get_contents(__DIR__ . '/../templates/pages/thanks.php'), "\$catalogue['format']") && bl_download_format('https://example.test/a/b.zip') === 'ZIP' && bl_download_format('https://example.test/c.pdf') === 'PDF', 'thanks page format label');
 echo "Download templates: $checks checks passed\n";

@@ -44,6 +44,13 @@ function bl_download_size(int $bytes): string
     return $bytes ? number_format($bytes / 1048576, 1) . ' MB' : '';
 }
 
+/** A file's format as shown to visitors: its extension in capitals (PDF, ZIP…), else "File". */
+function bl_download_format(string $url): string
+{
+    $extension = strtoupper(pathinfo((string) parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+    return preg_match('/^[A-Z0-9]{1,10}$/', $extension) ? $extension : 'File';
+}
+
 /** The stable primary row supplies all existing catalogue-only consumers, regardless of list order. */
 function bl_downloads_catalogue_row(?array $saved = null): array
 {
@@ -76,8 +83,7 @@ function bl_downloads_for(?array $product = null): array
             if (!$matches) continue;
         }
         $file = bl_download_file($row['url']);
-        $extension = strtoupper(pathinfo((string) parse_url($file['url'], PHP_URL_PATH), PATHINFO_EXTENSION));
-        $kind = preg_match('/^[A-Z0-9]{1,10}$/', $extension) ? $extension : 'File';
+        $kind = bl_download_format($file['url']);
         $size = bl_download_size($file['size']);
         $copy = bl_editable('support')['downloads'];
         $result[] = array_merge($row, ['url' => $file['url'], 'size' => $file['size'], 'kind' => $kind . ($size ? ' · ' . $size : ''),

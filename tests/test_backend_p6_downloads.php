@@ -24,7 +24,7 @@ $check(str_ends_with(bl_catalogue()['url'], '/assets/downloads/boblift-compact-e
 $GLOBALS['options']['bl_catalogue_url'] = 'https://example.test/legacy.pdf';
 $GLOBALS['options']['bl_catalogue_size'] = 2097152;
 $before = $GLOBALS['options'];
-$check(bl_catalogue() === ['url' => 'https://example.test/legacy.pdf', 'size' => '2.0 MB'], 'legacy front-end result changed');
+$check(bl_catalogue() === ['url' => 'https://example.test/legacy.pdf', 'size' => '2.0 MB', 'format' => 'PDF'], 'legacy front-end result changed');
 $check(bl_catalogue_rest_read() === ['bl_catalogue_url' => 'https://example.test/legacy.pdf', 'bl_catalogue_size' => 2097152], 'legacy REST result changed');
 $check($GLOBALS['options'] === $before, 'read migrated options');
 $initial = $rows();

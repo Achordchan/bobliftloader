@@ -50,7 +50,7 @@ function bl_container_loading(): array
 function bl_catalogue(): array
 {
     $file = bl_download_file(bl_downloads_catalogue_row()['url']);
-    return ['url' => $file['url'], 'size' => bl_download_size($file['size'])];
+    return ['url' => $file['url'], 'size' => bl_download_size($file['size']), 'format' => bl_download_format($file['url'])];
 }
 
 /**
