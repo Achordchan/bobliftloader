@@ -118,7 +118,7 @@
   .bl-site .bl-side-contact a.bl-side-top span{display:none}
   .bl-past-fold .bl-site .bl-side-contact .bl-side-top{opacity:1;visibility:visible;transform:none;transition-delay:0s}
   /* It also steps aside while the menu or the quick enquiry is open, or while it would cover a control (main.js). */
-  :is(.bl-quick-on,.bl-menu-on,.bl-top-aside) .bl-site .bl-side-contact .bl-side-top{opacity:0;visibility:hidden;transition:opacity .2s,visibility 0s linear .2s}
+  :is(.bl-quick-on,.bl-menu-on,.bl-top-aside,.bl-typing) .bl-site .bl-side-contact .bl-side-top{opacity:0;visibility:hidden;transition:opacity .2s,visibility 0s linear .2s}
   /* While a field of the page has focus the keyboard is up: the bar steps aside too, so it never sits over the field being
      typed in or the button that sends it (where the keyboard shrinks the screen), and comes back when typing ends (main.js). */
   .bl-typing .bl-site .bl-side-contact{visibility:hidden}
