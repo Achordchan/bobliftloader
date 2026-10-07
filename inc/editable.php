@@ -438,7 +438,7 @@ function bl_apply_application_content(array $applications, ?array $content = nul
         foreach (['product', 'focus'] as $key) if (isset($job[$key])) $app[$key] = $job[$key];
         // A new scenario without its own picture shows its machine family's studio photograph rather than a broken image.
         if (($app['image'] ?? '') === '') {
-            $app['image'] = '/assets/images/range-' . (($app['product'] ?? '') === 'dumper' ? 'dumper' : 'loader') . '-studio.webp';
+            $app['image'] = bl_asset('images/range-' . (($app['product'] ?? '') === 'dumper' ? 'dumper' : 'loader') . '-studio.webp');
             if (($app['alt'] ?? '') === '') $app['alt'] = ($app['product'] ?? '') === 'dumper' ? 'BOB-LIFT mini dumper' : 'BOB-LIFT mini skid steer loader';
         }
         foreach (['subtitle', 'description'] as $key) if (array_key_exists($key, $job)) $app[$key] = $job[$key];
