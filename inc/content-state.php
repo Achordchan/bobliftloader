@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** Dynamic maps are declared by page and path; all other groups retain their fixed schema. */
 function bl_content_dynamic_paths(string $page): array
 {
-    return $page === 'support' ? ['containers.loading'] : [];
+    return match ($page) { 'support' => ['containers.loading'], 'applications' => ['jobs'], default => [] };
 }
 
 /** Version 1 preserves legacy empty-field fallback; subsequent explicit empty edits are authoritative. */
@@ -56,4 +56,10 @@ function bl_content_restore_values(string $page, array $snapshot, array $previou
         if ($merged !== $rows || isset($restored['attachments']['items'])) $restored['attachments']['items'] = $merged;
     }
     return $restored;
+}
+
+/** Complete shape for an editor-created scenario; predefined records retain their own defaults. */
+function bl_application_empty(): array
+{
+    return ['title' => '', 'subtitle' => '', 'description' => '', 'image' => '', 'alt' => '', 'models' => '', 'checks' => [], 'hidden' => '0', 'order' => '7', 'product' => 'loader', 'focus' => 'width'];
 }

@@ -8,8 +8,12 @@ function bl_content_prepare(string $page, array $previous, array $input, bool $f
     if ($page === 'tracking' && !bl_can_manage_tracking()) throw new RuntimeException('没有保存统计代码的权限。');
     $previous = bl_content_migrate($page, $previous);
     if ($page === 'home') $input = bl_migrate_home_facts($input);
+    if ($page === 'applications') {
+        $input = bl_application_prepare_input($previous, $input);
+        if (is_wp_error($input)) return $input;
+    }
     // Empty HTML lists have no successful controls; a complete form explicitly clears these lists.
-    if ($form) foreach (bl_content_schema($page) as $section) foreach ($section['fields'] as $field) {
+    if ($form) foreach (bl_content_schema($page, bl_content_resolve($page, $previous)) as $section) foreach ($section['fields'] as $field) {
         if ($field['type'] === 'list' && bl_content_get($input, $field['key']) === null) bl_content_set($input, $field['key'], []);
     }
     // The WhatsApp links on every page are built from the sales number, so it cannot be cleared.
@@ -42,7 +46,7 @@ function bl_content_prepare(string $page, array $previous, array $input, bool $f
     }
     $diff = bl_content_diff($clean, bl_content_clean_all($page, bl_content_defaults($page)));
     // Keep historical fields outside the current editor schema without exposing them as new editable fields.
-    foreach (bl_content_schema($page) as $section) foreach ($section['fields'] as $field) {
+    foreach (bl_content_schema($page, $merged) as $section) foreach ($section['fields'] as $field) {
         $parts = explode('.', $field['key']);
         $last = array_pop($parts);
         $ref = &$previous;

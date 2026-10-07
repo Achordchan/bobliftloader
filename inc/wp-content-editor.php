@@ -27,13 +27,14 @@ const BL_CONTENT_PAGES = [
  * empty; a list's "summary" names the row fields shown on its folded row.
  */
 require_once __DIR__ . '/wp-content-controls.php';
+require_once __DIR__ . '/wp-application-content.php';
 
-function bl_content_schema(string $page): array
+function bl_content_schema(string $page, ?array $content = null): array
 {
-    return bl_content_editor_schema($page, bl_content_schema_fields($page));
+    return bl_content_editor_schema($page, bl_content_schema_fields($page, $content));
 }
 
-function bl_content_schema_fields(string $page): array
+function bl_content_schema_fields(string $page, ?array $content = null): array
 {
     $extra = bl_site_content_definition($page)['sections'] ?? [];
     if ($page === 'tracking') return [['title' => '统计与跟踪代码', 'fields' => array_map(static fn($key) => ['key' => $key, 'type' => 'raw', 'label' => $key], ['head', 'body_open', 'footer'])]];
@@ -75,7 +76,7 @@ function bl_content_schema_fields(string $page): array
     if ($page === 'applications') {
         $names = ['landscaping' => '景观绿化', 'site-preparation' => '场地准备', 'material-transport' => '物料运输', 'gardens-and-homesteads' => '园林家用', 'farms-and-orchards' => '农场果园', 'building-sites' => '工地'];
         $sections = [
-            ['title' => '列表页首屏', 'note' => '“应用”列表页最上面的大标题和右侧说明；下面三张场景卡的图片和文字在各应用分区里改。', 'fields' => [
+            ['title' => '列表页首屏', 'note' => '“应用”列表页最上面的大标题和右侧说明；下面场景卡的图片和文字在各应用分区里改。', 'fields' => [
                 ['key' => 'hero.line1', 'label' => '大标题第一行', 'type' => 'text', 'help' => '普通实心字。'],
                 ['key' => 'hero.line2', 'label' => '大标题第二行', 'type' => 'text', 'help' => '描边字。'],
                 ['key' => 'hero.line3', 'label' => '大标题第三行', 'type' => 'text', 'help' => '蓝色字。'],
@@ -92,13 +93,19 @@ function bl_content_schema_fields(string $page): array
                 ]],
             ]],
         ];
-        foreach ($GLOBALS['bl_application_base'] as $app) {
-            $slug = bl_application_slug($app);
-            $sections[] = ['title' => ($names[$slug] ?? $app['title']) . ' ' . $app['title'], 'note' => '这个应用的详情页（' . '/applications/' . $slug . '/）。网址固定，改名称不会改网址；首页应用场景卡片、联系表单的下拉选项、站内搜索都读这里，改一处全站同步。', 'fields' => [
-                ['key' => "jobs.$slug.title", 'label' => '名称', 'type' => 'text', 'help' => '页面大标题、面包屑、卡片和联系表单选项都用它。留空使用主题自带名称。'],
+        foreach (($content ?? bl_editable('applications'))['jobs'] ?? [] as $slug => $job) {
+            if (!is_array($job)) continue;
+            $app = ['title' => $job['title'] ?? '', 'image' => ''];
+            foreach ($GLOBALS['bl_application_base'] as $base) if (bl_application_slug($base) === $slug) $app = $base;
+            $sections[] = ['title' => ($names[$slug] ?? $app['title']) . ' ' . $app['title'], 'note' => '这个应用的详情页（' . '/applications/' . $slug . '/）。网址固定，改名称不会改网址；首页应用场景卡片、联系页预填、已有应用下拉选项和站内搜索都读这里，改一处全站同步。', 'fields' => [
+                ['key' => "jobs.$slug.hidden", 'label' => '显示状态', 'type' => 'application_visibility'],
+                ['key' => "jobs.$slug.order", 'label' => '顺序（数字越小越靠前）', 'type' => 'application_order'],
+                ['key' => "jobs.$slug.product", 'label' => '所属设备系列', 'type' => 'application_product'],
+                ['key' => "jobs.$slug.focus", 'label' => '选型关键参数', 'type' => 'application_focus'],
+                ['key' => "jobs.$slug.title", 'label' => '名称', 'type' => 'text', 'help' => '页面大标题、面包屑、卡片和联系表单选项都用它。预置场景留空使用主题名称；新场景必须填写。'],
                 ['key' => "jobs.$slug.subtitle", 'label' => '副标题', 'type' => 'text', 'help' => '大标题下方的一句英文口号。'],
                 ['key' => "jobs.$slug.description", 'label' => '介绍', 'type' => 'textarea', 'help' => '详情页首屏右侧和首页卡片上的说明。'],
-                ['key' => "jobs.$slug.image", 'group' => '场景图', 'label' => '图片', 'type' => 'image', 'preview' => substr($app['image'], strlen('/assets/')), 'help' => '留空使用主题自带的场景图（3:2 横图）。列表页三联图、首页卡片、详情页大图共用这一张。'],
+                ['key' => "jobs.$slug.image", 'group' => '场景图', 'label' => '图片', 'type' => 'image', 'preview' => substr($app['image'], strlen('/assets/')), 'help' => ($app['image'] !== '' ? '留空使用主题自带的场景图。' : '新场景没有默认图片，请上传场景图。') . '建议 3:2 横图；列表页、首页卡片、详情页共用。'],
                 ['key' => "jobs.$slug.alt", 'group' => '场景图', 'label' => '替代文字', 'type' => 'text', 'help' => $alt],
                 ['key' => "jobs.$slug.models", 'label' => '推荐机型', 'type' => 'text', 'help' => '详情页“机器”一节显示的型号，用英文逗号分隔，按显示顺序写（如 FC10, FY15）。留空则按这个应用的关键参数自动选同类前三款。'],
                 ['key' => "jobs.$slug.checks", 'group' => '询价前要确认的事', 'label' => '事项', 'type' => 'list', 'add' => '添加事项', 'summary' => ['title'], 'fields' => [
@@ -392,6 +399,7 @@ function bl_content_clean(string $type, $value)
     if (!is_scalar($value)) $value = '';
     if ($type === 'raw' || $type === 'verbatim') return (string) $value;
     $value = str_replace("\r\n", "\n", (string) $value);
+    if (str_starts_with($type, 'application_')) return sanitize_text_field($value);
     switch ($type) {
         case 'html': return wp_kses_post($value);
         case 'models': case 'attachments': case 'text': return sanitize_text_field($value);
@@ -418,7 +426,7 @@ function bl_content_clean(string $type, $value)
 function bl_content_clean_all(string $page, array $input): array
 {
     $out = [];
-    foreach (bl_content_schema($page) as $section) foreach ($section['fields'] as $field) {
+    foreach (bl_content_schema($page, $input) as $section) foreach ($section['fields'] as $field) {
         $raw = bl_content_get($input, $field['key']);
         switch ($field['type']) {
             case 'list':
@@ -505,7 +513,7 @@ function bl_content_screen(string $page): void
         $values = bl_content_clean_all($page, $recovery['input']);
         $revision = $recovery['revision'];
     }
-    $sections = bl_content_schema($page);
+    $sections = bl_content_schema($page, $values);
     $changed = static fn(array $field): bool => bl_content_get($saved, $field['key']) !== null;
     $count = static fn(array $section): int => count(array_filter($section['fields'], $changed));
     $total = array_sum(array_map($count, $sections));
@@ -546,6 +554,7 @@ function bl_content_screen(string $page): void
         if ($group !== '') echo '</div></div>';
         echo '</div></details>';
     }
+    if ($page === 'applications') bl_application_add_screen((array) ($recovery['input']['new_jobs'][0] ?? []));
     echo '<input type="hidden" name="bl_content_complete" value="1"><div class="bl-savebar">';
     submit_button('保存修改', 'primary', 'submit', false);
     echo '<span class="bl-savebar-status" role="status">' . ($recovery ? '有未保存的修改（版本已过期）' : '没有未保存的修改') . '</span>';
@@ -585,6 +594,7 @@ function bl_content_name(string $key): string
 
 function bl_content_input(string $type, string $name, string $id, string $value, string $preview = ''): string
 {
+    if (str_starts_with($type, 'application_')) return bl_application_control($type, $name, $id, $value);
     switch ($type) {
         case 'models': case 'attachments':
             return bl_content_selector($type, $name, $value);

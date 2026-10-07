@@ -255,7 +255,7 @@ function bl_admin_product_checklist(WP_Post $post, string $intro): void
     echo '</div>';
 }
 
-/** The three application hubs an application case can belong to: slug => title (the theme's own names). */
+/** Current scenario choices; hidden selections remain identifiable without rewriting saved case references. */
 function bl_case_hubs(): array
 {
     $hubs = [];
@@ -265,6 +265,10 @@ function bl_case_hubs(): array
         $slug = bl_application_slug($application);
         $title = (string) ($content['jobs'][$slug]['title'] ?? $application['title']);
         $hubs[$slug] = $title !== $application['title'] && $title !== '' ? $title : ($names[$slug] ?? $title);
+    }
+    foreach ($content['jobs'] as $slug => $job) {
+        if (!isset($hubs[$slug])) $hubs[$slug] = (string) $job['title'];
+        if (!empty($job['hidden'])) $hubs[$slug] .= '（场景已隐藏）';
     }
     return $hubs;
 }
