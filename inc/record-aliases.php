@@ -42,7 +42,22 @@ function bl_product_model_aliases(array $record, array $previous): array
  */
 function bl_attachment_restore_aliases(array $rows, array $previous): array
 {
-    return bl_attachment_row_aliases($rows, $previous);
+    // A current row that lists the restored name among its aliases is that same attachment, wherever it now sits.
+    $byAlias = [];
+    foreach ($previous as $i => $row) foreach ((array) ($row['aliases'] ?? []) as $alias) {
+        if (is_string($alias) && $alias !== '') $byAlias[strtolower($alias)][] = $i;
+    }
+    $currentNames = array_map(static fn($row) => strtolower((string) ($row['name'] ?? '')), $previous);
+    $rows = bl_attachment_row_aliases($rows, $previous);
+    foreach ($rows as &$row) {
+        $name = strtolower((string) ($row['name'] ?? ''));
+        if ($name === '' || in_array($name, $currentNames, true) || count(array_unique($byAlias[$name] ?? [])) !== 1) continue;
+        $old = $previous[$byAlias[$name][0]];
+        $aliases = [...(array) ($row['aliases'] ?? []), ...(array) ($old['aliases'] ?? []), (string) ($old['name'] ?? '')];
+        $row['aliases'] = array_values(array_unique(array_filter($aliases, static fn($alias) => is_string($alias) && $alias !== '' && strcasecmp($alias, (string) $row['name']) !== 0)));
+    }
+    unset($row);
+    return $rows;
 }
 
 /**

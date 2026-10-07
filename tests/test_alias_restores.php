@@ -70,4 +70,8 @@ $restoredDefaults = bl_content_restore_values('loaders', [], ['attachments' => [
 $check(($restoredDefaults['attachments']['items'][0]['aliases'] ?? null) === ['Renamed default'] && $restoredDefaults['attachments']['items'][0]['name'] === $defaults[0]['name'], 'restoring a snapshot without rows dropped alias history');
 // Two quick renames over REST: the second save merges the history it finds under the lock.
 $check(bl_product_model_aliases(['model' => 'C', 'model_aliases' => ['A']], ['model' => 'B', 'model_aliases' => ['A']])['model_aliases'] === ['A', 'B'], 'a second rename lost the first new name');
+// Renamed A to B and moved it: restoring the A snapshot finds B through B's own alias list, wherever it now sits.
+$x = array_replace($row, ['name' => 'Spare', 'image' => 'images/qa-spare.webp']);
+$restoredMoved = bl_attachment_restore_aliases([array_replace($row, ['name' => 'A tool', 'image' => 'images/qa-a.webp'])], [$x, array_replace($row, ['name' => 'B tool', 'image' => 'images/qa-b.webp', 'aliases' => ['A tool', 'Older tool']])]);
+$check($restoredMoved[0]['aliases'] === ['Older tool', 'B tool'], 'a moved, renamed row lost its history on restore');
 echo "PASS: $checks alias restore checks\n";
