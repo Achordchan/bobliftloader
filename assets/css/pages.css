@@ -53,7 +53,7 @@
   .bl-site .bl-family-switch>a{grid-template-columns:56px minmax(0,1fr);gap:12px;padding:8px 12px 8px 8px}
   .bl-site .bl-family-switch small{letter-spacing:1px}
   .bl-site .bl-family-switch b{margin:2px 0 3px;font-size:21px}
-  .bl-site .bl-family-switch a>span>span{font-size:13px;line-height:1.45}
+  .bl-site .bl-family-switch a>span>span{font-size:13px;line-height:1.45;text-wrap:pretty}
   .bl-site .bl-family-switch .bl-icon{position:absolute;top:12px;right:12px;width:18px;height:18px}
 }
 .bl-site .bl-card-note{font-size:var(--fs-label);color:var(--muted);border-top:1px solid var(--line);padding-top:15px}
@@ -288,18 +288,25 @@
   .bl-site .bl-catalog .bl-product-card{position:relative;display:grid;grid-template-columns:clamp(104px,31vw,124px) minmax(0,1fr);gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
   .bl-site .bl-catalog .bl-product-card-image{position:static;align-self:start;aspect-ratio:4/3}
   .bl-site .bl-catalog .bl-product-card-image>img{padding:6px}
-  .bl-site .bl-catalog .bl-product-image-empty{padding:6px;font-size:11px;line-height:1.3}
+  .bl-site .bl-catalog .bl-product-image-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px;background:#e9edf0;font-size:12px;line-height:1.3}
+  .bl-site .bl-catalog .bl-product-image-empty::before{content:'';flex:none;width:28px;height:21px;border:1.5px solid currentColor;border-radius:3px;background:radial-gradient(circle at 50% 55%,#0000 4px,currentColor 4px 5.5px,#0000 5.5px)}
   .bl-site .bl-catalog .bl-card-arrow{top:10px;right:0;bottom:auto;width:28px;height:28px;background:none;color:var(--ink)}
   .bl-site .bl-catalog .bl-card-arrow .bl-icon{width:16px;height:16px;filter:none}
   .bl-site .bl-catalog .bl-product-card-content{padding:0}
   .bl-site .bl-catalog .bl-product-card-content :is(h2,h3){padding-right:32px;font-size:24px;line-height:1}
   .bl-site .bl-catalog .bl-product-card-content :is(h2,h3) a::after{content:'';position:absolute;inset:0}
-  .bl-site .bl-catalog .bl-product-card-line{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;height:2.7em;margin:3px 0 8px;padding-bottom:0;font-size:13px;line-height:1.35;white-space:normal}
-  .bl-site .bl-catalog .bl-product-card-content dl{grid-template-columns:repeat(3,minmax(0,auto));justify-content:space-between;gap:10px;padding-top:8px}
-  .bl-site .bl-catalog .bl-product-card-content dt{font-size:10.5px;line-height:1.3;letter-spacing:.04em;overflow-wrap:anywhere}
+  .bl-site .bl-catalog .bl-product-card-line{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;height:2.7em;margin:3px 0 8px;padding-bottom:0;font-size:13px;line-height:1.35;white-space:normal;text-wrap:pretty}
+  /* Fixed column shares, so the three figures line up from card to card down the list. */
+  .bl-site .bl-catalog .bl-product-card-content dl{grid-template-columns:minmax(72px,1.25fr) minmax(48px,.9fr) minmax(51px,1fr);justify-content:stretch;gap:10px 6px;padding-top:8px}
+  .bl-site .bl-catalog .bl-product-card-content dt{font-size:12px;line-height:1.3;letter-spacing:0;overflow-wrap:normal}
   .bl-site .bl-catalog .bl-product-card-content dd{margin-top:2px;font-size:14px;line-height:1.3;overflow-wrap:anywhere}
   .bl-site .bl-catalog .bl-product-card:has(h2 a:active,h3 a:active){opacity:.85}
 }
+
+/* Family and product pages where the contact bar runs along the foot (catalog.js, the same query): model names and a
+   figure with its unit come wrapped in <bl-nowrap>, which keeps each on one line. Text straight in a flex or grid box is
+   not wrapped. */
+@media(max-width:800px),(max-width:1000px) and (max-height:500px){.bl-site bl-nowrap{white-space:nowrap}}
 
 /* ---------- Comparison table ---------- */
 .bl-site .bl-compare{padding-top:var(--sp-section);padding-bottom:var(--sp-block);border-top:1px solid var(--line)}
@@ -320,6 +327,11 @@
 .bl-site .bl-compare-actions td{border-bottom:0}
 .bl-site .bl-compare-actions .bl-text-link{font-size:var(--fs-label);gap:10px}
 .bl-site .bl-compare-more{display:none}
+/* Tablets upright and phones on their side: words wrap inside a column of bounded width, figures stay on one line, so
+   one long entry (the engine options) no longer stretches every column. */
+@media(min-width:601px) and (max-width:800px),(max-width:1000px) and (max-height:500px){
+  .bl-site .bl-compare-table td:not(.bl-compare-figure){white-space:normal;min-width:140px;max-width:200px}
+}
 /* Phones: a narrow label column and narrower model columns, so two models sit beside the labels. Here and on the other
    sideways strips the right edge fades while more waits off screen; catalog.js marks the strips it watches and their end. */
 @media(max-width:600px){
@@ -341,6 +353,7 @@
   .bl-site .bl-compare-more:active{background:#eef1f3}
   .bl-site .bl-compare-table thead th:first-child,.bl-site .bl-compare-table tbody th{min-width:100px;width:100px;max-width:100px;padding-inline:12px 8px;font-size:13px;line-height:1.4;box-shadow:inset -1px 0 var(--line)}
   .bl-site .bl-compare-table thead img,.bl-site .bl-compare-noimage{max-width:84px}
+  .bl-site .bl-compare-noimage{background:#e9edf0;border-style:solid;font-size:12px;line-height:1.3;text-align:center}
 }
 .bl-site .bl-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
@@ -509,6 +522,9 @@
 }
 @media(max-width:600px){
   .bl-site .bl-range-story{padding-block:var(--m-sec,56px) 0}
+  /* Same background either side: the last model row's rule, then the tighter gap, not two full section paddings. */
+  .bl-site .bl-catalog:has(+.bl-range-story){padding-bottom:0}
+  .bl-site .bl-catalog+.bl-range-story{padding-top:var(--m-sec-tight,40px)}
   .bl-site .bl-range-story+.bl-attachments{padding-top:var(--m-sec-tight,40px)}
   .bl-site .bl-range-story-head{padding-bottom:28px}
   .bl-site .bl-range-story-head h2{font-size:var(--m-h2,clamp(38px,11vw,46px));letter-spacing:-.5px}
@@ -606,6 +622,12 @@
 .bl-site .bl-section-nav-live.bl-section-nav-shown{visibility:visible;transform:none;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
 .bl-site:has(.bl-section-nav-live) section[id]{scroll-margin-top:calc(var(--header-height) + var(--section-nav-height))}
 .bl-site:has(.bl-section-nav-live) .bl-making-aside{top:calc(var(--header-height) + var(--section-nav-height) + clamp(20px,1.6vw,40px))}
+/* Phones on their side: the screen is too short for a third bar under the header and over the contact bar, so the
+   family pages scroll without the pinned list (the header and the page itself still lead to every part). */
+@media(max-width:1000px) and (max-height:500px){
+  .bl-site .bl-section-nav-live:has(+.bl-catalog){display:none}
+  .bl-site:has(.bl-section-nav-live+.bl-catalog) section[id]{scroll-margin-top:var(--header-height)}
+}
 @media(max-width:800px){
   .bl-site .bl-section-nav-title{display:none}
   .bl-site .bl-catalog-group-head{flex-direction:column;align-items:flex-start;gap:10px}
@@ -636,8 +658,12 @@
 @media(max-width:600px){
   .bl-site .bl-thanks{padding-bottom:var(--m-sec,56px)}
   .bl-site .bl-thanks-intro h1{font-size:var(--m-h1,clamp(48px,14vw,60px))}
-  .bl-site .bl-thanks-next{padding:28px 0 0;background:none;border:0;border-top:1px solid var(--ink)}
+  /* The last row of the list above already draws the rule between the two blocks. */
+  .bl-site .bl-thanks-next{padding:8px 0 0;background:none;border:0}
   .bl-site .bl-thanks-next>h2{font-size:var(--m-h2,clamp(38px,11vw,46px))}
+  /* One fixed column for 01-03, so every step's title starts at the same x. */
+  .bl-site .bl-thanks-next li{grid-template-columns:28px minmax(0,1fr)}
+  .bl-site .bl-thanks-next li>span{font-variant-numeric:tabular-nums}
 }
 /* Quick enquiry (templates/partials/quick-enquiry.php): a button in the bottom-right corner, under the contact rail, that
    opens the enquiry form in a short panel above it. Up to 800 px the rail is a bottom bar whose Enquiry opens the panel as

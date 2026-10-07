@@ -39,6 +39,7 @@ $partsImage = bl_content_image($after['parts_image'], ['src' => bl_asset('images
       </div>
       <div class="bl-sup-hero-side">
         <p><?= bl_escape($hero['text']) ?></p>
+        <a class="bl-button bl-button-blue bl-sup-hero-cta" href="<?= bl_escape(bl_application_link(bl_content_value('global', 'cta.url'))) ?>"><?= bl_content_text('global', 'cta.button') ?><?= bl_icon('arrow-up-right') ?></a>
         <a class="bl-text-link" href="#buying"><?= bl_escape($hero['link']) ?> <?= bl_icon('arrow-down') ?></a>
       </div>
     </div>

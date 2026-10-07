@@ -23,7 +23,9 @@
 .bl-site .bl-about-plate dt{font-size:var(--fs-micro);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--night-muted)}
 .bl-site .bl-about-plate>div:last-child dt{color:#d6e2ff}
 .bl-site .bl-about-plate dd{margin:clamp(10px,.8vw,18px) 0 0;font:700 clamp(44px,3.6vw,96px)/.9 var(--display);white-space:nowrap}
-.bl-site .bl-about-plate small{margin-left:.18em;font-size:.36em;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--night-muted)}
+.bl-site .bl-about-plate small{margin-left:.18em;font-size:.36em;font-weight:600;letter-spacing:.5px;color:var(--night-muted)}
+/* Units keep their own case (m², not M²); a word after a place name (China) reads as a label. */
+.bl-site .bl-about-plate dd.bl-about-plate-word small{text-transform:uppercase}
 .bl-site .bl-about-plate>div:last-child small{color:#d6e2ff}
 
 /* How we fit: company tree on ink. The dim branch is outlined, the branch this site belongs to is lit. */
@@ -48,8 +50,8 @@
 .bl-site .bl-tree-root-name p{font-size:var(--fs-small);line-height:1.5;color:var(--night-text)}
 .bl-site .bl-tree-link{display:grid;grid-template-columns:auto auto;align-content:center;align-items:center;gap:8px 14px;padding:0 clamp(28px,2.6vw,68px);border-left:1px solid var(--night-line);font-size:var(--fs-body);font-weight:700;white-space:nowrap;transition:background .2s,color .2s}
 .bl-site .bl-tree-link>span{grid-column:1/-1;font-size:var(--fs-micro);letter-spacing:1.2px;text-transform:uppercase;color:var(--night-muted)}
-.bl-site .bl-tree-link:hover{background:#fff;color:var(--ink)}
-.bl-site .bl-tree-link:hover .bl-icon{filter:none}
+@media(hover:hover){.bl-site .bl-tree-link:hover{background:#fff;color:var(--ink)}}
+@media(hover:hover){.bl-site .bl-tree-link:hover .bl-icon{filter:none}}
 
 .bl-site .bl-tree-branches{--stem:clamp(36px,2.8vw,72px);--gap:clamp(16px,1.4vw,36px);position:relative;display:grid;grid-template-columns:2fr 3fr;gap:var(--gap);padding-top:calc(var(--stem) * 2)}
 /* Stem from the company down, a bar across, and one drop into each branch (centred on the 2fr / 3fr columns). */
@@ -66,10 +68,10 @@
 .bl-site .bl-tree-here h3{-webkit-text-stroke:0;color:#fff}
 .bl-site .bl-tree-here-links{display:flex;flex-wrap:wrap;gap:0 clamp(24px,2vw,48px);margin-top:auto;padding-top:clamp(22px,1.6vw,40px)}
 .bl-site .bl-tree-here-links a{display:inline-flex;align-items:center;gap:10px;padding:10px 0 8px;border-bottom:1px solid #ffffff80;font-size:var(--fs-small);font-weight:700;color:#fff}
-.bl-site .bl-tree-here-links a:hover{border-bottom-color:#fff}
+@media(hover:hover){.bl-site .bl-tree-here-links a:hover{border-bottom-color:#fff}}
 .bl-site .bl-tree-here-links b{font:700 1.5em/1 var(--display)}
 .bl-site .bl-tree-here-links .bl-icon{width:16px;height:16px;transition:transform .2s}
-.bl-site .bl-tree-here-links a:hover .bl-icon{transform:translate(3px,-3px)}
+@media(hover:hover){.bl-site .bl-tree-here-links a:hover .bl-icon{transform:translate(3px,-3px)}}
 /* Draw the connectors once the tree scrolls in. */
 .bl-site.bl-motion .bl-about-tree .bl-tree-branches::before,.bl-site.bl-motion .bl-about-tree .bl-tree-branch::before{transform:scaleY(0);transition:transform .45s cubic-bezier(.3,.6,.2,1)}
 .bl-site.bl-motion .bl-about-tree .bl-tree-branches::after{transform:scaleX(0);transition:transform .5s cubic-bezier(.3,.6,.2,1) .35s}
@@ -86,7 +88,7 @@
 .bl-site .bl-about-promises h3{margin:clamp(14px,1vw,24px) 0 clamp(10px,.8vw,18px);font:600 var(--fs-h4)/1.05 var(--display)}
 .bl-site .bl-about-promises p{max-width:28em;font-size:var(--fs-small);line-height:1.85;color:var(--night-text)}
 .bl-site .bl-about-promises a{color:#fff;border-bottom:1px solid #ffffff66}
-.bl-site .bl-about-promises a:hover{border-bottom-color:#fff}
+@media(hover:hover){.bl-site .bl-about-promises a:hover{border-bottom-color:#fff}}
 
 
 
@@ -164,9 +166,15 @@
   /* A place name sits smaller than the figures; every value keeps to the foot of its cell, so the two in a row share a baseline. */
   .bl-site .bl-about-plate>div{display:flex;flex-direction:column;justify-content:space-between}
   .bl-site .bl-about-plate dd.bl-about-plate-word{font-size:clamp(24px,7vw,32px);line-height:1}
+  .bl-site .bl-about-plate dd.bl-about-plate-word small{font-size:12px;letter-spacing:.08em}
   .bl-site .bl-tree-root-name h3{font-size:calc(var(--m-h3,28px) + 6px)}
   .bl-site .bl-tree-branch{padding:24px 22px 26px}
   .bl-site .bl-tree-branch h3{font-size:var(--m-h3,28px)}
   .bl-site .bl-tree-here>span{flex-wrap:wrap}
   .bl-site .bl-tree-here-links a{min-height:44px}
+}
+/* Touch: a press shows the hover colour while the finger is down, and none of it stays behind afterwards. */
+@media(hover:none){
+  .bl-site .bl-tree-link:active{background:#fff;color:var(--ink)}
+  .bl-site .bl-tree-link:active .bl-icon{filter:none}
 }

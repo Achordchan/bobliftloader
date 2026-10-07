@@ -31,7 +31,7 @@ $articles = $current ? array_values(array_filter($allArticles, static fn($a) => 
       <span class="bl-news-item-image<?= $whole ? ' bl-news-item-image-whole' : '' ?>"<?= !$whole && abs($ratio - 1.5) > .02 ? ' style="--bl-news-ratio:' . round($ratio, 3) . '"' : '' ?>><img src="<?= bl_escape($article['image']) ?>" alt="" width="900" height="600"<?= $i ? ' loading="lazy"' : '' ?>></span>
       <span class="bl-news-item-body">
         <span class="bl-news-item-meta"><span class="bl-news-tag<?= bl_news_category($article) ? '' : ' bl-news-tag-group' ?>"><?= bl_escape(bl_news_label($article)) ?></span><time datetime="<?= bl_escape($article['date']) ?>"><?= date('j M Y', strtotime($article['date'])) ?></time></span>
-        <span class="bl-news-item-title"><?= bl_escape($article['title']) ?></span>
+        <span class="bl-news-item-title"><?= bl_title_text($article['title']) ?></span>
         <span class="bl-news-item-excerpt"><?= bl_escape($article['excerpt']) ?></span>
         <?php if ($status): ?><span class="bl-news-item-event"><span><?= bl_escape(bl_event_dates($event)) ?></span><?php if (!empty($event['booth'])): ?><span>Booth <?= bl_escape($event['booth']) ?></span><?php endif; ?><span class="bl-news-when bl-news-when-<?= $status['state'] ?>"><?= bl_escape($status['label']) ?></span></span><?php endif; ?>
       </span>

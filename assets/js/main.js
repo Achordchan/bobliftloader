@@ -154,10 +154,27 @@ if (swipeRows.length) {
 }
 
 // The phone bar's Top button never covers something to press or type in: it steps aside while a field has focus, or
-// while a link, button or control passes beneath it, and comes back once the spot is clear.
+// while a link, button or control passes beneath it, and comes back once the spot is clear. Figures set against the
+// right edge (a spec value, a table cell, a fact, any right-aligned line) count too, but only where their characters
+// reach under the button itself: a row that is empty beneath it keeps it.
 const topButton = document.querySelector('.bl-side-top');
 if (topButton) {
   const controls = 'a[href],button,input,select,textarea,summary,label,[role=button],[role=tab],[tabindex]:not([tabindex="-1"])';
+  const figures = 'dd,td,th,.bl-approach-facts li>*';
+  // A line box runs a few pixels above and below its letters, and the button is round: a line that only grazes the
+  // button's square counts as clear.
+  // Only the text itself is measured, never a block inside the figure, whose box runs the full width.
+  const wordsUnder = (figure, box) => {
+    const graze = 4;
+    const range = document.createRange();
+    const walker = document.createTreeWalker(figure, NodeFilter.SHOW_TEXT);
+    for (let text = walker.nextNode(); text; text = walker.nextNode()) {
+      if (!text.data.trim()) continue;
+      range.selectNodeContents(text);
+      if ([...range.getClientRects()].some((r) => r.width > 0 && r.right > box.left + graze && r.left < box.right - graze && r.bottom > box.top + graze && r.top < box.bottom - graze)) return true;
+    }
+    return false;
+  };
   let pending = false;
   const checkTop = () => {
     pending = false;
@@ -171,10 +188,20 @@ if (topButton) {
     const pad = 6;
     const xs = [box.left - pad, box.left + 4, box.left + box.width / 2, box.right - 4, box.right + pad];
     const ys = [box.top - pad, box.top + 4, box.top + box.height / 2, box.bottom - 4, box.bottom + pad];
+    const checked = new Map();
     const covered = !typing && xs.some((x) => ys.some((y) => {
       const element = document.elementsFromPoint(x, y).find((item) => !item.closest('.bl-side-contact'));
       const control = element?.closest(controls);
-      if (!control) return false;
+      if (!control) {
+        if (!element) return false;
+        // The figure itself, or, from the gap beside a short one ("8"), the figures of the row the point falls in.
+        const own = element.closest(figures) || (/^(right|end)$/.test(getComputedStyle(element).textAlign) ? element : null);
+        const row = own ? null : element.closest('tr,dl>div,li');
+        return (own ? [own] : row ? [...row.querySelectorAll(figures)] : []).some((figure) => {
+          if (!checked.has(figure)) checked.set(figure, wordsUnder(figure, box));
+          return checked.get(figure);
+        });
+      }
       // It may sit over the photograph of a large card, which stays easy to tap around it; never over a card's words,
       // or over anything button-sized.
       return control.getBoundingClientRect().height < 160 || !(element.matches('img') && element.getBoundingClientRect().width > 120);
@@ -191,6 +218,20 @@ if (topButton) {
   new ResizeObserver(scheduleTop).observe(document.body);
   document.addEventListener('click', () => setTimeout(scheduleTop, 50), { passive: true });
   scheduleTop();
+}
+
+// On phones the enquiry message grows with its text (a prefilled model line runs to four lines at 360px), up to 240px.
+// The stylesheet does it with field-sizing where supported; elsewhere the box takes its text's height here.
+if (!CSS.supports('field-sizing', 'content')) {
+  const phoneForm = window.matchMedia('(max-width: 800px), (max-width: 1000px) and (max-height: 500px)');
+  const fit = (box) => {
+    box.style.height = '';
+    if (!phoneForm.matches || box.closest('.bl-quick-form') || box.scrollHeight <= box.clientHeight) return;
+    box.style.height = `${Math.min(box.scrollHeight + box.offsetHeight - box.clientHeight, 240)}px`;
+  };
+  const boxes = [...document.querySelectorAll('.bl-inquiry-form textarea')];
+  boxes.forEach((box) => { fit(box); box.addEventListener('input', () => fit(box)); });
+  phoneForm.addEventListener('change', () => boxes.forEach(fit));
 }
 
 // The three support topics form one disclosure group, retaining native keyboard behavior.

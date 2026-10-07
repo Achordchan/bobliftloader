@@ -13,6 +13,7 @@ $send = $content['send'];
       </div>
       <div class="bl-apps-hero-side">
         <p><?= bl_escape($hero['text']) ?></p>
+        <a class="bl-button bl-button-blue bl-apps-hero-cta" href="<?= bl_escape(bl_url('/contact/') . '#enquiry') ?>">Start an enquiry <?= bl_icon('arrow-up-right') ?></a>
         <a class="bl-text-link" href="#before-you-enquire"><?= bl_escape($hero['link']) ?> <?= bl_icon('arrow-down') ?></a>
       </div>
     </div>

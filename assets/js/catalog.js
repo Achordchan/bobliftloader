@@ -2,7 +2,51 @@
  * Catalogue filters: refilter the rendered cards in place as chips change, update the count beside each chip, and keep
  * the address shareable. Without this script the form submits and PHP filters the same way.
  */
+// Phones (the same widths as the contact bar): a model name (BL-T360-H, FY20-2) or a figure and its unit (0.15 m³,
+// 1,089 mm, the 2600 × of a size) never breaks across two lines. Each is wrapped in a <bl-nowrap> element (its own tag,
+// so no span rule of the site reaches it; pages.css keeps it on one line). The words and characters are untouched, so
+// copying, search and the page source read as before, and wider screens are left exactly as they were.
+// Each kind is led by a group holding the start of the text or the one character before it (one that cannot belong to a
+// longer word, name or number, so a match never starts inside one); the group after it is the part kept. No look-behind:
+// Safari before 16.4 rejects it, and the whole script with it.
+const KEEP_TOGETHER = /(^|[^\w-])((?=[A-Z0-9-]*\d)[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+(?![\w-]))|(^|[^\w.,])(\d[\d.,]*(?:[–-]\d[\d.,]*)?[ \u00a0](?:mm|cm|m³|m²|m|kg|kW|hp|km\/h|V|L|t|MPa|bar|rpm|°)(?![\p{L}\d]))|(^|[^\w.,])(\d[\d.,]*[ \u00a0]×(?=[ \u00a0]\d))/gu;
+const KEEP_ANY = new RegExp(KEEP_TOGETHER.source, 'u'); // the same pattern without the global flag's lastIndex, for testing a node
+function keepTogether(root) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    // Text that sits straight in a flex or grid box (a filter chip's label) is left alone: there each piece would become
+    // an item of its own, losing the space beside it and gaining the box's gap.
+    acceptNode: (node) => (KEEP_ANY.test(node.nodeValue) && !node.parentElement.closest('script, style, textarea, option, title, svg, bl-nowrap, [contenteditable]') && !/^(inline-)?(flex|grid)$/.test(getComputedStyle(node.parentElement).display) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT),
+  });
+  const nodes = [];
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) nodes.push(node);
+  nodes.forEach((node) => {
+    const text = node.nodeValue;
+    const parts = document.createDocumentFragment();
+    let last = 0;
+    for (const match of text.matchAll(KEEP_TOGETHER)) {
+      const kept = match[2] ?? match[4] ?? match[6];
+      const start = match.index + match[0].length - kept.length;
+      if (start > last) parts.append(text.slice(last, start));
+      const keep = document.createElement('bl-nowrap');
+      keep.textContent = kept;
+      parts.append(keep);
+      last = start + kept.length;
+    }
+    if (last < text.length) parts.append(text.slice(last));
+    node.replaceWith(parts);
+  });
+}
+
 export function initializeCatalog() {
+  // Only the family and product pages, and only where the contact bar runs along the foot (page-responsive.css).
+  if (document.querySelector('.bl-catalog, .bl-product-hero')) {
+    const phone = window.matchMedia('(max-width: 800px), (max-width: 1000px) and (max-height: 500px)');
+    const main = document.querySelector('main') || document.body;
+    let kept = false;
+    const keep = () => { if (phone.matches && !kept) { kept = true; keepTogether(main); } };
+    keep();
+    phone.addEventListener('change', keep);
+  }
   // Phones scroll the comparison, the filter row and a model name's key sideways; each right edge fades (pages.css) until
   // the end is in view. Only strips marked here fade, so without the script nothing stays faded.
   document.querySelectorAll('.bl-compare-scroll, .bl-catalog-filters, .bl-model-decode').forEach((box) => {

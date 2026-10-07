@@ -65,7 +65,16 @@
   .bl-site .bl-contact-channels b{font-size:24px}
   .bl-site .bl-contact-prepare ol{grid-template-columns:1fr}
   .bl-site .bl-not-found{padding-block:70px}
+  .bl-site .bl-not-found h1{font-size:var(--m-h1,clamp(48px,14vw,60px));font-weight:700;letter-spacing:-.8px;line-height:.9;margin:22px 0 24px}
   .bl-site .bl-not-found>div{flex-direction:column;align-items:flex-start}
+  .bl-site .bl-privacy-content{padding:0 var(--gutter) var(--m-sec,56px)}
+  /* Contact channels: icon and arrow line up with the large number, and the small label keeps to one line where it can. */
+  .bl-site .bl-contact-channels a{align-items:end;column-gap:14px}
+  .bl-site .bl-contact-channels small{font-size:13px;line-height:1.4;text-wrap:balance}
+}
+/* Phones turned sideways: two stories fill two columns instead of two thirds of three. */
+@media (max-width:1000px) and (max-height:500px){
+  .bl-site .bl-news-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:25px}
 }
 /* The section bar on long pages pins under the header, whatever height the header has at this width. */
 @media(max-width:800px){
@@ -135,7 +144,17 @@
   .bl-site .bl-contact-visit-grid{grid-template-columns:1fr;gap:32px}
 }
 @media(max-width:600px){
+  /* The foot line keeps the link columns above: Privacy starts where the right column does, well clear of Top. */
+  .bl-site .bl-footer-bottom{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;padding-right:var(--gutter)}
+  .bl-site .bl-footer-bottom>a{justify-self:start}
+  .bl-site .bl-footer-bottom>span{text-wrap:balance}
   .bl-site .bl-contact-visit{padding-block:var(--m-sec,56px)}
   .bl-site .bl-contact-visit-actions{align-items:flex-start;flex-direction:column}
   .bl-site .bl-contact-visit-business{align-items:flex-start;flex-direction:column}
+}
+/* Phones (and phones sideways): the message box grows with a prefilled message instead of cutting its last line, from
+   its usual three lines up to 240px (main.js does the same where field-sizing is not supported). */
+@media(max-width:800px),(max-width:1000px) and (max-height:500px){
+  .bl-site .bl-inquiry-form textarea{field-sizing:content;min-height:calc(4.5em + 27px);max-height:240px}
+  .bl-site .bl-contact-form-panel .bl-inquiry-form textarea{height:auto}
 }

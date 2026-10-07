@@ -74,7 +74,12 @@ export function initializeQuick() {
     if (pageForm && panel.hidden) {
       const title = pageForm.querySelector('h2') || pageForm;
       if (!title.hasAttribute('tabindex')) title.tabIndex = -1;
-      pageForm.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      // Focus goes to the section's heading, which names what the form is for. The heading or the form, whichever stands
+      // higher, comes to the top of the screen (scroll margins clear the header, product.css): side by side that is the
+      // form itself, so its first field shows; in one column the heading, so the focused heading is never above the screen.
+      const form = pageForm.querySelector('.bl-product-enquiry-form') || pageForm;
+      const target = title !== pageForm && title.getBoundingClientRect().top < form.getBoundingClientRect().top ? title : form;
+      target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
       title.focus({ preventScroll: true });
       return;
     }

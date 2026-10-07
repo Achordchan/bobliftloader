@@ -67,7 +67,7 @@
 }
 /* Phones: headings balance their lines, and a button takes the full width unless it shares a row. */
 @media(max-width:600px){
-  .bl-site :is(h1,h2,h3,.bl-display){text-wrap:balance}
+  .bl-site :is(h1,h2,h3,.bl-display,.bl-news-item-title){text-wrap:balance}
   .bl-site .bl-button{width:100%}
   .bl-site :is(.bl-hero-action,.bl-review-actions) .bl-button{width:auto}
 }
