@@ -13,8 +13,13 @@ function bl_record_history_save(int $postId, array $previous, array $next, bool 
     $entry = $form ? ($GLOBALS['bl_record_history_entry'][$postId] ?? '') : '';
     // A restore always gets its own entry, so it can itself be undone.
     if ($entry !== '' && ($history[0]['id'] ?? '') === $entry) {
-        $history[0]['changes'] = bl_content_change_count((array) $history[0]['record'], $next);
-        update_post_meta($postId, '_bl_record_history', wp_slash($history));
+        $changes = bl_content_change_count((array) $history[0]['record'], $next);
+        if ($changes === (int) ($history[0]['changes'] ?? -1)) return true;
+        $history[0]['changes'] = $changes;
+        // An unchanged count needs no write; a refused write stops this box from saving, as for a new entry.
+        if (!update_post_meta($postId, '_bl_record_history', wp_slash($history))) {
+            return new WP_Error('bl_record_backup_failed', '修改历史保存失败，本次未保存。', ['status' => 500]);
+        }
         return true;
     }
     $id = wp_generate_uuid4();
