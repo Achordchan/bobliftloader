@@ -213,6 +213,7 @@ function bl_news_image_box(WP_Post $post): void
     bl_admin_field('图片说明', 'bl-caption', bl_admin_input('bl-caption', 'bl_record[caption]', (string) ($record['caption'] ?? '')), '英文，显示在文章顶部大图下方。');
     echo '<details><summary>备用图片</summary>';
     bl_admin_field('备用图片', '', bl_admin_media('bl_record[image]', (string) ($record['image'] ?? '')), '未设置特色图片时生效；两者都为空则使用主题默认图片。');
+    echo '<p><label><input type="checkbox" name="bl_record[hide_cover]" value="1"' . checked(!empty($record['hide_cover']), true, false) . '> 备用图片是从展位海报裁出来的，文章页不重复显示</label></p>';
     echo '</details>';
     echo '</div>';
 }
@@ -383,6 +384,7 @@ add_action('save_post', static function (int $postId): void {
         $record['products'] = bl_rest_product_slugs($input['products'] ?? [], (array) ($record['products'] ?? []));
         $record['line'] = $text('line') === 'group' ? 'group' : 'compact';
         $record['caption'] = $text('caption');
+        $record['hide_cover'] = !empty($input['hide_cover']);
         $event = [];
         foreach (['name', 'venue', 'address', 'booth', 'booth_note', 'source_label'] as $key) $event[$key] = $text('event_' . $key);
         // Only real dates are kept (the pages compute the status from them); an end before the start is dropped.

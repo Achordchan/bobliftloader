@@ -18,9 +18,9 @@ $index = (int) array_search($article['slug'], array_column($all, 'slug'), true);
 $newer = $all[$index - 1] ?? null;
 $older = $all[$index + 1] ?? null;
 $posterFigure = static fn(array $poster): string => '<figure class="bl-story-poster"><img src="' . bl_escape($poster['image']) . '" alt="' . bl_escape($poster['alt']) . '" width="889" height="2000" loading="lazy"><figcaption>' . bl_escape($poster['caption']) . '</figcaption></figure>';
-// A story with stand artwork leads with the artwork alone: its cover is cut from that artwork for the news list, so showing
-// both repeats the picture. A featured image chosen in WordPress is a picture of its own and still leads the story.
-$leadFigure = !$poster || !empty($article['image_id']);
+// An editor can mark a cover as cut from the story's stand artwork ('hide_cover'): the story then leads with the artwork
+// alone, since showing both repeats the picture. A featured image chosen in WordPress is a picture of its own and still leads.
+$leadFigure = !$poster || empty($article['hide_cover']) || !empty($article['image_id']);
 // Text written in WordPress places the artwork as imported sections do: at the head of section 'after' (floated beside it
 // on wide screens), or after the text when that section does not exist. Sections start at each <h2>.
 $contentHtml = !empty($article['content_html']) ? wp_kses_post($article['content_html']) : '';

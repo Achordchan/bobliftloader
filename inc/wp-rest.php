@@ -53,7 +53,7 @@ function bl_rest_product_slugs($value, array $existing = []): array
  */
 const BL_REST_FIELDS = [
     'bl_product' => ['model', 'category', 'source', 'spec_source', 'image', 'gallery', 'gallery_alt', 'specs', 'videos', 'seo_description', 'highlights', 'faq', 'attachments', 'photos'],
-    'bl_news' => ['category', 'line', 'caption', 'source', 'image', 'products', 'event'],
+    'bl_news' => ['category', 'line', 'caption', 'source', 'image', 'hide_cover', 'products', 'event'],
     'bl_application' => ['hub', 'products', 'facts', 'source', 'image'],
 ];
 
@@ -74,6 +74,8 @@ function bl_rest_field(string $type, string $key, $value)
             return isset(BL_NEWS_CATEGORIES[$text]) ? $text : '';
         case 'line':
             return $text === 'group' ? 'group' : 'compact';
+        case 'hide_cover':
+            return filter_var($value, FILTER_VALIDATE_BOOLEAN);
         case 'hub':
             return isset(bl_case_hubs()[$text]) ? $text : '';
         case 'products':

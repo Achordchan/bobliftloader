@@ -11,6 +11,8 @@ $render = static function (array $changes): string {
 $body = '<h2>One</h2><p>a</p><h2>Two</h2><p>b</p><h2>Three</h2><p>c</p>';
 $html = $render([]);
 if (str_contains($html, 'bl-story-figure')) $failures[] = 'lead picture repeats the stand artwork';
+$html = $render(['hide_cover' => false]);
+if (!str_contains($html, 'bl-story-figure') || !str_contains($html, 'bl-story-poster')) $failures[] = 'a cover not marked as cut from the artwork was hidden';
 if (!preg_match('~A real machine, outside</h2>.*?bl-story-poster.*?<h2>One machine~s', $html)) $failures[] = 'imported sections lost the artwork position';
 $html = $render(['content_html' => $body]);
 if (!preg_match('~<h2>One</h2><p>a</p><figure class="bl-story-poster">.*?</figure><h2>Two</h2>~s', $html)) $failures[] = 'WordPress text ignores poster.after';
