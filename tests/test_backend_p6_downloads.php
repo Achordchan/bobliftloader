@@ -98,4 +98,21 @@ $state = $GLOBALS['options'];
 unset($_POST['bl_content_complete']);
 try { bl_content_handle_submission('save'); } catch (RuntimeException $error) { $check(str_contains($error->getMessage(), '不完整'), 'incomplete form error missing'); }
 $check($GLOBALS['options'] === $state, 'incomplete form changed data');
+// Unicode media paths remain usable both when selected now and inherited from the old option.
+$GLOBALS['options'] = ['bl_catalogue_url' => 'https://example.test/uploads/产品画册.pdf'];
+$unicodePrimary = $rows()[0];
+$unicodeManual = array_replace($manual, ['url' => 'https://example.test/uploads/用户手册.pdf']);
+$check(!is_wp_error($save([$unicodePrimary, $unicodeManual])), 'Unicode media URLs blocked list save');
+$check($rows()[0]['url'] === $unicodePrimary['url'] && $rows()[1]['url'] === $unicodeManual['url'], 'Unicode URL bytes changed');
+$unicodeManual['title'] = 'Updated manual';
+$check(!is_wp_error($save([$unicodePrimary, $unicodeManual])), 'unchanged Unicode URLs blocked metadata edit');
+$encoded = array_replace($unicodeManual, ['url' => 'https://example.test/uploads/%E7%94%A8%E6%88%B7.pdf?download=1#page=2']);
+$check(!is_wp_error($save([$unicodePrimary, $encoded])) && $rows()[1]['url'] === $encoded['url'], 'encoded path was double encoded');
+foreach (['https:///manual.pdf', 'https://bad_host.test/用户手册.pdf', 'ftp://example.test/manual.pdf', 'https://example.test:99999/file.pdf'] as $url) {
+    $state = $GLOBALS['options'];
+    $check(is_wp_error($save([$unicodePrimary, array_replace($manual, ['url' => $url])])) && $GLOBALS['options'] === $state, 'invalid scheme/host/port accepted');
+}
+$GLOBALS['options'] = ['bl_catalogue_url' => 'https://legacy_host.test/旧画册.pdf'];
+$oldPrimary = $rows()[0];
+$check(!is_wp_error($save([$oldPrimary, $manual])) && $rows()[0]['url'] === $oldPrimary['url'], 'unchanged historical URL blocked saving other rows');
 echo "P6 downloads: $checks checks passed\n";

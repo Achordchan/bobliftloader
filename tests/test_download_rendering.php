@@ -44,4 +44,12 @@ $GLOBALS['options']['bl_downloads']['items'][0]['models'] = $dumper['model'];
 $check(str_contains($render('product', $dumper), $manual['url']) && !str_contains($render('product', $loader), $manual['url']), 'model scope did not select the specified product');
 $GLOBALS['options']['bl_downloads']['items'] = [$primary];
 $check($render('support') === $defaultSupport && $render('product', $loader) === $defaultProduct, 'removing extra documents failed to restore original bytes');
+foreach (['zip' => 'ZIP', 'docx' => 'DOCX'] as $extension => $kind) {
+    $GLOBALS['options']['bl_downloads']['items'] = [array_replace($primary, ['url' => 'https://example.test/catalogue.' . $extension])];
+    $check(bl_downloads_extended(), 'non-PDF primary did not select resolved format');
+    $check(str_contains($render('support'), '>' . $kind . '<'), 'Support primary format is incorrect');
+    $check(str_contains($render('product', $loader), '<small>' . $kind . '</small>'), 'product primary format is incorrect');
+}
+$GLOBALS['options']['bl_downloads']['items'] = [$primary];
+$check($render('support') === $defaultSupport && $render('product', $loader) === $defaultProduct && $render('thanks') === $defaultThanks, 'PDF output bytes changed after non-PDF selection');
 echo "Download templates: $checks checks passed\n";

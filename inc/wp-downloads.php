@@ -9,6 +9,7 @@ function bl_downloads_prepare(array $previous, array $input, bool $form = false)
     $items = $input['items'] ?? [];
     $invalid = static fn(string $message) => new WP_Error('bl_downloads_invalid', $message, ['status' => 400]);
     if (!is_array($items) || count($items) > 50) return $invalid('资料列表最多 50 项。');
+    $previousUrls = array_column(bl_content_resolve('downloads', $previous)['items'], 'url', 'id');
     $clean = []; $ids = [];
     foreach ($items as $row) {
         if (!is_array($row)) return $invalid('资料格式无效。');
@@ -19,14 +20,17 @@ function bl_downloads_prepare(array $previous, array $input, bool $form = false)
         if (!preg_match('/^[a-zA-Z0-9_-]{1,80}$/', $id) || isset($ids[$id])) return $invalid('资料标识重复或无效。');
         $ids[$id] = true;
         $url = trim($row['url'] ?? '');
-        if ($url !== '' && (!preg_match('~^https?://[^\s<>"\x27]+$~i', $url) || !filter_var($url, FILTER_VALIDATE_URL))) return $invalid('文件地址必须是有效的 HTTP 或 HTTPS 链接。');
+        $unchanged = isset($previousUrls[$id]) && $url === $previousUrls[$id];
+        // Encode Unicode bytes only for validation; keep media URLs and existing percent escapes intact in storage.
+        $validationUrl = preg_replace_callback('/[\x80-\xff]+/', static fn(array $match): string => rawurlencode($match[0]), $url);
+        if (!$unchanged && $url !== '' && (!preg_match('~^https?://[^\s<>"\x27]+$~i', $url) || !filter_var($validationUrl, FILTER_VALIDATE_URL))) return $invalid('文件地址必须是有效的 HTTP 或 HTTPS 链接。');
         $title = sanitize_text_field($row['title'] ?? '');
         if ($id !== 'catalogue' && ($url === '' || $title === '')) return $invalid('新增资料必须填写文件地址和标题。');
         $type = $row['type'] ?? 'other'; $scope = $row['scope'] ?? 'all';
         if (!isset(BL_DOWNLOAD_TYPES[$type], BL_DOWNLOAD_SCOPES[$scope]) || ($id === 'catalogue' && $type !== 'catalogue')) return $invalid('资料类型或适用范围无效，默认画册须保留产品画册类型。');
         $models = sanitize_text_field($row['models'] ?? '');
         if ($scope === 'models' && trim($models) === '') return $invalid('指定型号时请至少选择一个型号。');
-        $clean[] = ['id' => $id, 'url' => esc_url_raw($url, ['http', 'https']), 'title' => $title, 'description' => sanitize_textarea_field($row['description'] ?? ''), 'type' => $type, 'scope' => $scope, 'models' => $models];
+        $clean[] = ['id' => $id, 'url' => $unchanged ? $url : esc_url_raw($url, ['http', 'https']), 'title' => $title, 'description' => sanitize_textarea_field($row['description'] ?? ''), 'type' => $type, 'scope' => $scope, 'models' => $models];
     }
     if (!isset($ids['catalogue'])) return $invalid('请保留默认画册；清空其文件地址可使用主题自带画册。');
     $previous['items'] = $clean;

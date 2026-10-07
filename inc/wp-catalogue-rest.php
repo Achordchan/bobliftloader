@@ -2,6 +2,46 @@
 declare(strict_types=1);
 defined('ABSPATH') || exit;
 
+function bl_register_catalogue_setting(): void
+{
+    register_setting('bl_downloads', 'bl_catalogue_url', [
+        'type' => 'string', 'default' => '', 'show_in_rest' => true,
+        'description' => '产品画册 URL；具有 edit_pages 权限的用户也可通过 boblift/v1/catalogue 读写，文件大小（只读）也在那里。',
+        'sanitize_callback' => static fn($value): string => esc_url_raw((string) $value, ['http', 'https']),
+    ]);
+}
+add_action('admin_init', 'bl_register_catalogue_setting');
+add_action('rest_api_init', 'bl_register_catalogue_setting');
+
+add_filter('rest_pre_get_setting', static function ($value, string $name) {
+    return $name === 'bl_catalogue_url' ? bl_downloads_catalogue_row()['url'] : $value;
+}, 10, 2);
+
+/** Both REST interfaces update only the primary row under the unified content lock. */
+function bl_catalogue_save_url(string $url): bool|WP_Error
+{
+    return bl_content_locked('downloads', static function (array $previous) use ($url) {
+        $input = bl_content_resolve('downloads', $previous);
+        foreach ($input['items'] as &$row) if ($row['id'] === 'catalogue') $row['url'] = $url;
+        unset($row);
+        return bl_content_prepare('downloads', $previous, $input);
+    });
+}
+
+/** Dispatch after core validation/permissions so writer errors remain REST errors, not successful setting updates. */
+add_filter('rest_dispatch_request', static function ($result, WP_REST_Request $request, string $route, array $handler) {
+    if ($result !== null || $route !== '/wp/v2/settings' || !in_array($request->get_method(), ['POST', 'PUT', 'PATCH'], true)
+        || !array_key_exists('bl_catalogue_url', $request->get_params())) return $result;
+    if (!current_user_can('manage_options')) return new WP_Error('rest_forbidden', '没有设置编辑权限。', ['status' => 403]);
+    // Keep the original setting sanitizer; null resets the primary URL to its empty default.
+    $saved = bl_catalogue_save_url(esc_url_raw((string) $request->get_param('bl_catalogue_url'), ['http', 'https']));
+    if (is_wp_error($saved)) return $saved;
+    // Core still handles all other settings and builds its usual response; never write the legacy option.
+    $remaining = clone $request;
+    $remaining->offsetUnset('bl_catalogue_url');
+    return call_user_func($handler['callback'], $remaining);
+}, 10, 4);
+
 /** Keep the legacy response keys while sourcing the primary row from the unified content state. */
 function bl_catalogue_rest_read(): array
 {
@@ -18,12 +58,7 @@ function bl_catalogue_rest_save(WP_REST_Request $request): array|WP_Error
     $url = $request->get_param('bl_catalogue_url');
     if ($url !== null) {
         if (!is_string($url)) return new WP_Error('bl_catalogue_invalid', '画册地址必须是文本。', ['status' => 400]);
-        $result = bl_content_locked('downloads', static function (array $previous) use ($url) {
-            $input = bl_content_resolve('downloads', $previous);
-            foreach ($input['items'] as &$row) if ($row['id'] === 'catalogue') $row['url'] = $url;
-            unset($row);
-            return bl_content_prepare('downloads', $previous, $input);
-        });
+        $result = bl_catalogue_save_url($url);
         if (is_wp_error($result)) return $result;
     }
     return bl_catalogue_rest_read();

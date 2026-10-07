@@ -75,7 +75,7 @@ $check(is_wp_error(bl_content_locked('tracking', static fn($previous) => [], $ex
 // Registrations are exercised without a database; the proxy-creation hook at priority 20 is intentionally excluded.
 foreach ($GLOBALS['hooks']['init'][10] ?? [] as $callback) $callback();
 run_hook('rest_api_init');
-$check(!isset($GLOBALS['settings']['bl_catalogue_url']), 'legacy setting bypasses unified content saving');
+$check($GLOBALS['settings']['bl_catalogue_url']['show_in_rest'] === true, 'legacy settings API field missing');
 $endpoint = $GLOBALS['rest_routes']['boblift/v1/catalogue'];
 $GLOBALS['caps']['edit_pages'] = false;
 $check(!$endpoint[0]['permission_callback']() && !$endpoint[1]['permission_callback'](), 'catalogue permits non-editor');

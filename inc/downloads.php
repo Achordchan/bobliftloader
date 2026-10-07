@@ -56,7 +56,8 @@ function bl_downloads_extended(): bool
     $items = bl_content_resolve('downloads', bl_downloads_saved())['items'];
     if (count($items) > 1) return true;
     $row = $items[0] ?? [];
-    return ($row['title'] ?? '') !== '' || ($row['description'] ?? '') !== '' || ($row['scope'] ?? 'all') !== 'all';
+    $extension = strtoupper(pathinfo((string) parse_url(bl_download_file($row['url'] ?? '')['url'], PHP_URL_PATH), PATHINFO_EXTENSION));
+    return $extension !== 'PDF' || ($row['title'] ?? '') !== '' || ($row['description'] ?? '') !== '' || ($row['scope'] ?? 'all') !== 'all';
 }
 
 /** Resolve model aliases on reads, leaving saved references and product records untouched. */
