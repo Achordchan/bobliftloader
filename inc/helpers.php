@@ -183,7 +183,7 @@ function bl_product_facets(array $product, string $category): array
     $bands = $category === 'skid-steer-loaders' ? [250, 400] : [1000, 2000];
     return [
         // Every tracked model says so; the wheeled site dumpers publish no running-gear row at all.
-        'gear' => str_contains($gear, 'track') ? 'tracked' : (str_contains($gear, 'tire') || str_contains($gear, 'wheel') || !$loader ? 'wheeled' : ''),
+        'gear' => str_contains($gear, 'track') ? 'tracked' : (str_contains($gear, 'tyre') || str_contains($gear, 'tire') || str_contains($gear, 'wheel') || !$loader ? 'wheeled' : ''),
         'operator' => str_contains($station, 'stand') ? 'stand-on' : (str_contains($station, 'seat') ? 'seated' : ''),
         'load' => !$load ? '' : ($load <= $bands[0] ? 'light' : ($load <= $bands[1] ? 'mid' : 'heavy')),
     ];
@@ -498,8 +498,16 @@ function bl_family_ranges(string $family): array
         'width' => $widths ? [min($widths), max($widths)] : [0, 0],
         'load' => $loads ? [min($loads), max($loads)] : [0, 0],
         'loaded' => count($loads),
-        'gear' => $tracked === count($models) ? 'Tracks' : ($tracked ? ($family === 'loader' ? 'Tracks / tires' : 'Wheels / tracks') : ($family === 'loader' ? 'Tires' : 'Wheels')),
+        'gear' => $tracked === count($models) ? 'Tracks' : ($tracked ? 'Wheels / tracks' : 'Wheels'),
     ];
+}
+
+/** A family's name ('loader' / 'dumper' or its category slug) as its catalogue card is titled in WordPress; blank falls back to the default. */
+function bl_family_label(string $family): string
+{
+    $page = in_array($family, ['dumper', 'mini-dumpers'], true) ? 'dumpers' : 'loaders';
+    $label = trim(bl_content_value($page, 'catalog.card_label'));
+    return $label !== '' ? $label : (string) bl_content_defaults($page)['catalog']['card_label'];
 }
 
 /** A family's studio picture ('loader' or 'dumper'): the one chosen on the home page's family card, else the theme's own. */
@@ -508,13 +516,11 @@ function bl_family_image(string $family): string
     return bl_editable('home')['families'][$family]['image'] ?: bl_asset('images/range-' . $family . '-studio.webp');
 }
 
-/** "200–500 kg", or tonnes once both ends reach a tonne ("1–5 t"); a mixed range reads "0.5–5 t". */
+/** "200–500 kg", "500–5,000 kg": always kilograms, as the specifications and the home page write rated loads. */
 function bl_load_range(array $range): string
 {
     [$low, $high] = $range;
-    if ($high < 1000) return number_format($low) . '–' . number_format($high) . ' kg';
-    $t = static fn(int $kg): string => rtrim(rtrim(number_format($kg / 1000, 1), '0'), '.');
-    return $t($low) . '–' . $t($high) . ' t';
+    return number_format($low) . '–' . number_format($high) . ' kg';
 }
 
 /** The machines an application names in 'models', in that order, matched by current or former model name; none named, none returned. */
@@ -546,6 +552,6 @@ function bl_application_focus(array $application): array
     $noun = $application['product'] === 'dumper' ? 'dumpers' : 'loaders';
     return match ($application['focus']) {
         'width' => ['value' => number_format($widths ? min($widths) : 0), 'unit' => 'mm', 'label' => $application['product'] === 'dumper' ? 'Narrowest dumper' : 'Narrowest loader, bucket fitted'],
-        default => ['value' => str_replace([' kg', ' t'], '', bl_load_range($load)), 'unit' => $load[1] < 1000 ? 'kg' : 't', 'label' => 'Rated load across ' . count($loads) . ' ' . $noun],
+        default => ['value' => str_replace(' kg', '', bl_load_range($load)), 'unit' => 'kg', 'label' => 'Rated load across ' . count($loads) . ' ' . $noun],
     };
 }

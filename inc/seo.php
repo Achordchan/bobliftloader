@@ -37,7 +37,7 @@ function bl_structured_data(array $route): array
     }
     if ($route['path'] !== '/' && $route['status'] === 200) {
         $items = [['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => $base . '/']];
-        $parent = $route['type'] === 'product' ? ($route['record']['category'] === 'mini-dumpers' ? ['Mini dumpers', '/products/mini-dumpers/'] : ['Skid steer loaders', '/products/skid-steer-loaders/']) : ($route['type'] === 'article' ? ['News', '/news/'] : (in_array($route['type'], ['application', 'application_case'], true) ? ['Applications', '/applications/'] : null));
+        $parent = $route['type'] === 'product' ? [bl_family_label($route['record']['category']), '/products/' . ($route['record']['category'] === 'mini-dumpers' ? 'mini-dumpers' : 'skid-steer-loaders') . '/'] : ($route['type'] === 'article' ? ['News', '/news/'] : (in_array($route['type'], ['application', 'application_case'], true) ? ['Applications', '/applications/'] : null));
         if ($parent) $items[] = ['@type' => 'ListItem', 'position' => count($items) + 1, 'name' => $parent[0], 'item' => $base . $parent[1]];
         // A case sits under its job: Home > Applications > Landscaping > this case.
         $hub = $route['type'] === 'application_case' ? bl_application_hub((string) $route['record']['hub']) : null;

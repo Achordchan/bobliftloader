@@ -4,11 +4,11 @@ $slug = bl_application_slug($application);
 $position = (int) array_search($slug, array_map('bl_application_slug', $applications), true);
 $ranges = bl_family_ranges($application['product']);
 $category = $application['product'] === 'dumper' ? 'mini-dumpers' : 'skid-steer-loaders';
-$familyLabel = $application['product'] === 'dumper' ? 'Mini dumpers' : 'Mini skid steer loaders';
+$familyLabel = bl_family_label($application['product']);
 // The plate: the family's published ranges, with the figure that decides this job last and lit.
 $plate = [
     'width' => ['label' => 'Widest point', 'value' => number_format($ranges['width'][0]) . '–' . number_format($ranges['width'][1]), 'unit' => 'mm'],
-    'load' => ['label' => 'Rated load', 'value' => str_replace([' kg', ' t'], '', bl_load_range($ranges['load'])), 'unit' => $ranges['load'][1] < 1000 ? 'kg' : 't'],
+    'load' => ['label' => 'Rated load', 'value' => str_replace(' kg', '', bl_load_range($ranges['load'])), 'unit' => 'kg'],
     'gear' => ['label' => 'Running gear', 'value' => $ranges['gear'], 'unit' => ''],
 ];
 $focusKey = $application['focus'] === 'width' ? 'width' : 'load';

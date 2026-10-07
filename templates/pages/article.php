@@ -18,6 +18,18 @@ $index = (int) array_search($article['slug'], array_column($all, 'slug'), true);
 $newer = $all[$index - 1] ?? null;
 $older = $all[$index + 1] ?? null;
 $posterFigure = static fn(array $poster): string => '<figure class="bl-story-poster"><img src="' . bl_escape($poster['image']) . '" alt="' . bl_escape($poster['alt']) . '" width="889" height="2000" loading="lazy"><figcaption>' . bl_escape($poster['caption']) . '</figcaption></figure>';
+// A story with stand artwork leads with the artwork alone: its cover is cut from that artwork for the news list, so showing
+// both repeats the picture. A featured image chosen in WordPress is a picture of its own and still leads the story.
+$leadFigure = !$poster || !empty($article['image_id']);
+// Text written in WordPress places the artwork as imported sections do: at the head of section 'after' (floated beside it
+// on wide screens), or after the text when that section does not exist. Sections start at each <h2>.
+$contentHtml = !empty($article['content_html']) ? wp_kses_post($article['content_html']) : '';
+if ($contentHtml !== '' && $poster) {
+    $parts = preg_split('/(?=<h2[\s>])/i', $contentHtml); // [text before the first heading, section 1, section 2, …]
+    $contentHtml = $posterAfter >= 1 && $posterAfter < count($parts)
+        ? implode('', array_slice($parts, 0, $posterAfter)) . $posterFigure($poster) . implode('', array_slice($parts, $posterAfter))
+        : $contentHtml . $posterFigure($poster);
+}
 ?>
 <article class="bl-story bl-shell" aria-labelledby="story-title">
   <?php bl_breadcrumbs([['label' => 'News', 'url' => bl_url('/news/')], ['label' => $article['title']]]); ?>
@@ -29,9 +41,9 @@ $posterFigure = static fn(array $poster): string => '<figure class="bl-story-pos
 
   <div class="bl-story-layout">
     <div class="bl-story-main">
-      <figure class="bl-story-figure"><img src="<?= bl_escape($article['image']) ?>" alt="<?= bl_escape($article['caption']) ?>" width="1500" height="900" fetchpriority="high"><figcaption><?= bl_escape($article['caption']) ?></figcaption></figure>
+      <?php if ($leadFigure): ?><figure class="bl-story-figure"><img src="<?= bl_escape($article['image']) ?>" alt="<?= bl_escape($article['caption']) ?>" width="1500" height="900" fetchpriority="high"><figcaption><?= bl_escape($article['caption']) ?></figcaption></figure><?php endif; ?>
       <div class="bl-story-text">
-        <?php if (!empty($article['content_html'])): ?><?= $poster ? $posterFigure($poster) : '' ?><div class="bl-wp-article-content"><?= wp_kses_post($article['content_html']) ?></div>
+        <?php if ($contentHtml !== ''): ?><div class="bl-wp-article-content"><?= $contentHtml ?></div>
         <?php else: foreach ($article['sections'] as $i => $section): ?><?= $poster && $i + 1 === $posterAfter ? $posterFigure($poster) : '' ?><h2><?= bl_escape($section['heading']) ?></h2><p><?= bl_escape($section['text']) ?></p><?php endforeach; ?><?= $poster && ($posterAfter < 1 || $posterAfter > count($article['sections'])) ? $posterFigure($poster) : '' ?><?php endif; ?>
         <?php if ($status && $status['state'] !== 'past'): ?><p class="bl-story-visit">Planning to visit? <a href="<?= bl_escape(bl_url('/contact/') . '#enquiry') ?>">Tell us your dates</a> or <a href="<?= bl_escape(bl_company('sales_whatsapp_url')) ?>" target="_blank" rel="noopener">message us on WhatsApp</a>, so the compact equipment team can expect you.</p><?php endif; ?>
       </div>

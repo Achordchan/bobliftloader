@@ -70,8 +70,13 @@ add_filter('rest_pre_insert_bl_product', static function ($prepared, WP_REST_Req
     $meta = $request->get_param('meta');
     $record = is_array($meta) ? ($meta['_bl_record'] ?? null) : null;
     if (!is_array($record) || !array_key_exists('specs', $record)) return $prepared;
-    if (!is_array($record['specs'])) return new WP_Error('bl_specs_invalid', '规格参数必须为英文参数名到显示值的对象。', ['status' => 400]);
+    // An ordered list of {"key","value"} rows is turned into the stored object here, before the checks and the write.
+    [$specs, $error] = bl_specs_normalize($record['specs']);
+    if ($error !== '') return new WP_Error('bl_specs_invalid', $error, ['status' => 400]);
     $stored = $request->get_param('id') ? get_post_meta((int) $request->get_param('id'), '_bl_record', true) : [];
-    $error = bl_specs_error($record['specs'], is_array($stored) ? (array) ($stored['specs'] ?? []) : []);
-    return $error === '' ? $prepared : new WP_Error('bl_specs_invalid', $error, ['status' => 400]);
+    $error = bl_specs_error($specs, is_array($stored) ? (array) ($stored['specs'] ?? []) : []);
+    if ($error !== '') return new WP_Error('bl_specs_invalid', $error, ['status' => 400]);
+    $meta['_bl_record']['specs'] = $specs;
+    $request->set_param('meta', $meta);
+    return $prepared;
 }, 9, 2);

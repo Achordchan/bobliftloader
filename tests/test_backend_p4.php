@@ -49,6 +49,34 @@ $request = new WP_REST_Request(['id' => 1, 'meta' => ['_bl_record' => ['specs' =
 $check(!is_wp_error(run_filter('rest_pre_insert_bl_product', (object) [], $request)), 'valid REST specs refused');
 $record = $request->get_param('meta')['_bl_record'];
 $check($record['specs'] === $valid && $record['load'] === 1500 && $record['capacity'] === '0.8' && $record['power'] === '17.8', 'display strings or derived metrics changed');
+// British spelling: "Rubber tyres" passes the running-gear check and still files the loader under Wheeled.
+foreach (['Rubber tyres', 'Rubber-tyred wheels', 'Rubber tires', 'Rubber tracks'] as $gear) $check(bl_specs_error(['Running gear' => $gear]) === '', 'running gear refused: ' . $gear);
+$request = new WP_REST_Request(['id' => 1, 'meta' => ['_bl_record' => ['specs' => ['Running gear' => 'Rubber tyres']]]]);
+$check(!is_wp_error(run_filter('rest_pre_insert_bl_product', (object) [], $request)), 'REST refused Rubber tyres');
+$tyred = ['category' => 'skid-steer-loaders', 'load' => 260, 'specs' => ['Running gear' => 'Rubber tyres', 'Operator station' => 'Seat']];
+$check(bl_product_facets($tyred, 'skid-steer-loaders')['gear'] === 'wheeled', 'Rubber tyres not filtered as wheeled');
+$check(bl_product_facets(['specs' => ['Running gear' => 'Rubber tracks']] + $tyred, 'skid-steer-loaders')['gear'] === 'tracked', 'tracks no longer filtered as tracked');
+// Ordered rows for clients that sort object keys: saved as the usual object, in the order sent, under the same checks.
+$GLOBALS['meta'][1]['_bl_record'] = ['model' => 'Kept', 'specs' => ['Rated load' => '250 kg']];
+$rows = [['key' => 'Rated load', 'value' => '1,500 kg'], ['key' => 'Engine power', 'value' => '17.8 kW'], ['key' => 'Bucket capacity', 'value' => '0.8 m³'], ['key' => 'Custom', 'value' => ''], ['key' => 'Drive', 'value' => '4×4']];
+$request = new WP_REST_Request(['id' => 1, 'meta' => ['_bl_record' => ['specs' => $rows]]]);
+$result = run_filter('rest_pre_insert_bl_product', (object) [], $request);
+$record = $request->get_param('meta')['_bl_record'];
+$check(!is_wp_error($result) && $record['specs'] === ['Rated load' => '1,500 kg', 'Engine power' => '17.8 kW', 'Bucket capacity' => '0.8 m³', 'Drive' => '4×4'] && array_keys($record['specs']) === ['Rated load', 'Engine power', 'Bucket capacity', 'Drive'], 'list specs not saved in list order');
+$check($record['load'] === 1500 && $record['capacity'] === '0.8' && $record['power'] === '17.8' && $record['model'] === 'Kept', 'list specs lost derived figures or other fields');
+foreach ([
+    [['key' => 'Rated load', 'value' => '1 t']], [['key' => 'Bucket capacity', 'value' => '0.5 m3']], [['key' => 'rated load', 'value' => '250 kg']],
+    [['key' => 'Rated load', 'value' => '250 kg'], ['key' => 'Rated load', 'value' => '300 kg']], [['key' => '', 'value' => '250 kg']],
+    [['Rated load', '250 kg']], [['key' => 'Rated load']], [['key' => 'Rated load', 'value' => ['250 kg']]], ['250 kg'],
+] as $specs) {
+    $before = $GLOBALS['meta'];
+    $request = new WP_REST_Request(['id' => 1, 'meta' => ['_bl_record' => ['specs' => $specs, 'model' => 'Must not save']]]);
+    $result = run_filter('rest_pre_insert_bl_product', (object) [], $request);
+    $check(is_wp_error($result) && $result->code === 'bl_specs_invalid' && $GLOBALS['meta'] === $before, 'invalid list accepted: ' . json_encode($specs, JSON_UNESCAPED_UNICODE));
+}
+$request = new WP_REST_Request(['id' => 1, 'meta' => ['_bl_record' => ['specs' => ['Rated load' => '400 kg', 'Drive' => '4×2']]]]);
+$check(!is_wp_error(run_filter('rest_pre_insert_bl_product', (object) [], $request)) && $request->get_param('meta')['_bl_record']['specs'] === ['Rated load' => '400 kg', 'Drive' => '4×2'], 'object specs no longer saved');
+$check(bl_rest_field('bl_product', 'specs', [['key' => 'Drive', 'value' => '4×4'], ['key' => 'Rated load', 'value' => '250 kg']]) === ['Drive' => '4×4', 'Rated load' => '250 kg'], 'REST field cleaning ignores list order');
 $GLOBALS['meta'][1]['_bl_record'] = ['model' => 'Original', 'specs' => ['Rated load' => '250 kg'], 'legacy_field' => ['keep']];
 $_POST = ['action' => 'editpost', 'post_ID' => '1', 'post_title' => 'Retain <title>', 'content' => '<p>Retain body & text</p>', 'excerpt' => 'Retain excerpt', 'bl_product_complete' => '1', 'bl_record_nonce' => 'bl_save_record', 'bl_page_nonce' => 'bl_save_product_page', 'bl_page' => ['faq' => ['q' => ['New question'], 'a' => ['New answer']]], 'bl_record' => ['model' => 'New', 'specs' => ['key' => ['Rated load'], 'value' => ['3 tons']]]];
 $before = $GLOBALS['meta'];

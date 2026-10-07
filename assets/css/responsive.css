@@ -153,11 +153,12 @@
   .bl-site .bl-hero-eyebrow{font-size:12px;letter-spacing:.08em;margin-bottom:22px}
   .bl-site .bl-hero-action .bl-text-link{display:none}
   .bl-site .bl-hero-scroll{display:none}
-  /* The switch spans the hero: two equal tabs, number over a one-line name, each line filling under its own tab. The 44px
+  /* The switch spans the hero: two equal tabs, number over the name, each line filling under its own tab. A name too long for
+     its half (MINI SKID STEER LOADERS at 360px) wraps to a second, balanced line; both lines stay level at the foot. The 44px
      pause sits at the foot of the hero, level with the button, where the scroll cue stood. */
   .bl-site .bl-hero-switch-row{bottom:0;align-items:flex-start;padding-top:14px}
   .bl-site .bl-hero-switch{display:grid;grid-template-columns:repeat(var(--hero-tabs,2),minmax(0,1fr));gap:14px;width:100%}
-  .bl-site .bl-hero-tab{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:5px;min-height:44px;padding:6px 0 12px;font-size:12px;line-height:1.25;letter-spacing:.06em;text-align:left;white-space:nowrap}
+  .bl-site .bl-hero-tab{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:5px;min-height:44px;padding:6px 0 12px;font-size:12px;line-height:1.25;letter-spacing:.06em;text-align:left;white-space:normal;text-wrap:balance}
   .bl-site .bl-hero-tab small{font-size:16px}
   .bl-site .bl-hero-pause{position:absolute;right:var(--gutter);bottom:49px;width:44px;height:44px}
   .bl-site .bl-range-facts{grid-template-columns:1fr;gap:0;padding-top:0}

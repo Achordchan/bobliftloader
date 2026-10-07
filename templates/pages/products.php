@@ -24,7 +24,7 @@ $facetCount = static fn(string $key, string $value): int => count(array_filter($
 $heading = $category ? $catalogCopy('hero_title') : 'FIND YOUR<br>NEXT MACHINE.';
 ?>
 <section class="bl-page-hero bl-catalog-hero bl-shell">
-  <?php bl_breadcrumbs([['label' => $category ? ($category === 'mini-dumpers' ? 'Mini dumpers' : 'Skid steer loaders') : 'Search']]); ?>
+  <?php bl_breadcrumbs([['label' => $category ? bl_family_label($category) : 'Search']]); ?>
   <div class="bl-page-heading"><div><p class="bl-eyebrow"><?= $catalogCopy('hero_eyebrow') ?></p><h1><?= $heading ?></h1></div><p><?= $catalogCopy('hero_intro') ?></p></div>
 </section>
 <?php if ($category) require __DIR__ . '/../partials/section-nav.php'; // appears once the family switch scrolls away ?>

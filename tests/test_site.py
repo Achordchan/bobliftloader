@@ -328,7 +328,9 @@ class WebsiteTests(unittest.TestCase):
         self.assertEqual(html.count('class="bl-apps-panel-index"'), 6)
         dumpers = {p['slug']: p for p in self.products if p['category'] == 'mini-dumpers'}
         self.assertIn(f"{mm(dumpers['500kg-tracked-mini-dumper']['specs']['Standard dimensions'].split('×')[1]):,}<small>mm</small></b><span>Narrowest dumper", html)
-        self.assertIn('1–2<small>t</small></b><span>Rated load across 3 dumpers', html)
+        # Rated loads read in kilograms everywhere, as the specifications write them.
+        self.assertIn('1,000–2,000<small>kg</small></b><span>Rated load across 3 dumpers', html)
+        self.assertIn('models · rated 500–5,000 kg', html)
 
     def test_family_pages_introduce_their_range(self):
         loaders = [p for p in self.products if p['category'] == 'skid-steer-loaders']
@@ -352,6 +354,8 @@ class WebsiteTests(unittest.TestCase):
         _, html, _ = fetch('/products/mini-dumpers/')
         self.assertNotIn('id="how-they-are-made"', html)
         self.assertEqual(html.count('<li class="bl-ruler-'), len(loaded_dumpers))
+        # The chart's sentence is edited in WordPress; loads in kilograms, the bucket range across every model that has one.
+        self.assertIn('Nine models from 500 kg to 5,000 kg. Bucket capacity runs from 0.5 m³ to 2 m³. The ', html)
         self.assertNotIn('Painted to order.', html)
         # Where the dumpers work: between the introduction and the comparison, each job linking to real dumper pages.
         self.assertLess(html.index('id="about-the-range"'), html.index('id="dumper-jobs"'))

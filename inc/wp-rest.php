@@ -16,7 +16,7 @@ add_action('init', static function (): void {
         register_post_meta($type, '_bl_record', [
             'type' => 'object',
             'single' => true,
-            'description' => 'BOB-LIFT record: model, category, specs (label => value), images, videos, event and links.',
+            'description' => 'BOB-LIFT record: model, category, specs (label => value; writes may also send an ordered list of {"key","value"} rows), images, videos, event and links.',
             // Edit context only: the record also holds where product data came from, which the site never shows.
             'show_in_rest' => ['schema' => ['type' => 'object', 'context' => ['edit'], 'additionalProperties' => true, 'properties' => $type === 'bl_application' ? ['image' => ['type' => 'string', 'deprecated' => true, 'description' => '已弃用：封面以特色图片 featured_media 为准；此字段仅保留历史数据。']] : []]],
             'auth_callback' => static fn(bool $allowed, string $key, int $postId): bool => current_user_can('edit_post', $postId),
@@ -82,6 +82,8 @@ function bl_rest_field(string $type, string $key, $value)
             return array_values(array_filter(array_map('bl_rest_clean_url', array_values((array) $value))));
         case 'specs':
             $specs = [];
+            // A {"key","value"} list arrives already converted (rest_pre_insert_bl_product, priority 9); convert here too.
+            $value = bl_specs_normalize($value)[0] ?? [];
             foreach ((is_array($value) ? $value : []) as $label => $item) {
                 $label = sanitize_text_field((string) $label);
                 $item = is_scalar($item) ? sanitize_text_field((string) $item) : '';
