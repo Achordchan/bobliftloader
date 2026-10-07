@@ -125,7 +125,9 @@ function bl_content_handle_submission(string $operation): void
         wp_die('提交的内容不完整，没有保存任何修改。请返回检查服务器的 max_input_vars 限制。', '', ['response' => 400, 'back_link' => true]);
     }
     $result = bl_content_locked($page, static function (array $previous) use ($operation, $page, $input) {
-        if ($operation === 'reset') return [];
+        // Back to the theme's defaults, except that renamed attachments keep their old names as aliases (references
+        // saved under the newer names still resolve). Every other page resets to nothing stored.
+        if ($operation === 'reset') return $page === 'loaders' ? bl_content_restore_values($page, [], $previous) : [];
         if ($operation === 'restore') {
             $history = get_option('bl_content_snapshots_' . $page, []);
             $selected = isset($_POST['bl_snapshot']) && is_string($_POST['bl_snapshot']) ? wp_unslash($_POST['bl_snapshot']) : '';

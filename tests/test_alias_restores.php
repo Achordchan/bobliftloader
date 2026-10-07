@@ -74,4 +74,7 @@ $check(bl_product_model_aliases(['model' => 'C', 'model_aliases' => ['A']], ['mo
 $x = array_replace($row, ['name' => 'Spare', 'image' => 'images/qa-spare.webp']);
 $restoredMoved = bl_attachment_restore_aliases([array_replace($row, ['name' => 'A tool', 'image' => 'images/qa-a.webp'])], [$x, array_replace($row, ['name' => 'B tool', 'image' => 'images/qa-b.webp', 'aliases' => ['A tool', 'Older tool']])]);
 $check($restoredMoved[0]['aliases'] === ['Older tool', 'B tool'], 'a moved, renamed row lost its history on restore');
+// Resetting the loaders page keeps the renamed default row's history too.
+$resetRows = bl_content_restore_values('loaders', [], ['attachments' => ['items' => $renamed]])['attachments']['items'];
+$check(($resetRows[0]['aliases'] ?? null) === ['Renamed default'], 'reset to defaults dropped alias history');
 echo "PASS: $checks alias restore checks\n";
