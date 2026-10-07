@@ -34,9 +34,16 @@ function bl_service_steps(): array
  * Approximate machines per container [20GP, 40HQ], open-seat versions with loader buckets taken off and packed alongside.
  * Estimated from each model's published dimensions; the loading plan is confirmed per order. A model without figures is left out.
  */
+/** The loading figures an editor saved (not the theme defaults filled in around them). */
+function bl_loading_saved(): array
+{
+    $saved = bl_is_wordpress() ? get_option('bl_content_support', []) : [];
+    return is_array($saved['containers']['loading'] ?? null) ? $saved['containers']['loading'] : [];
+}
+
 function bl_container_loading(): array
 {
-    return array_filter(bl_editable('support')['containers']['loading'], static fn($fit): bool => is_array($fit) && count($fit) === 2);
+    return array_filter(bl_loading_aliases(bl_editable('support')['containers']['loading'], bl_products(), bl_loading_saved()), static fn($fit): bool => is_array($fit) && count($fit) === 2);
 }
 
 /** The catalogue on the Downloads list. WordPress can point it at an uploaded file (网站内容 → 资料下载). */
@@ -82,7 +89,9 @@ function bl_attachments(): array
 {
     $groups = [];
     foreach (bl_editable('loaders')['attachments']['items'] as $item) {
-        $groups[$item['group']][] = ['name' => $item['name'], 'use' => $item['use'], 'image' => $item['image']];
+        $row = ['name' => $item['name'], 'use' => $item['use'], 'image' => $item['image']];
+        if (!empty($item['aliases'])) $row['aliases'] = $item['aliases'];
+        $groups[$item['group']][] = $row;
     }
     return $groups;
 }
@@ -124,8 +133,7 @@ function bl_dumper_jobs(): array
  */
 function bl_dumper_model_index(array $products): array
 {
-    $index = [];
-    foreach ($products as $product) if ($product['category'] === 'mini-dumpers') $index[strtolower($product['model'])] = $product;
+    $index = bl_named_record_index(array_values(array_filter($products, static fn($p) => $p['category'] === 'mini-dumpers')), 'model', 'model_aliases');
     $aliases = [];
     foreach (BL_FORMER_MODELS as $model => $former) foreach ($former as $name) {
         // Current name written, record still on the former name; and former name written, record already renamed.

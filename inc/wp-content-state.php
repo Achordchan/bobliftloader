@@ -31,7 +31,16 @@ function bl_content_prepare(string $page, array $previous, array $input, bool $f
     }
     $current = bl_content_resolve($page, $previous);
     $merged = bl_merge_content($current, $input, bl_content_dynamic_paths($page));
-    $diff = bl_content_diff(bl_content_clean_all($page, $merged), bl_content_clean_all($page, bl_content_defaults($page)));
+    $clean = bl_content_clean_all($page, $merged);
+    if ($page === 'loaders') {
+        $previousRows = $current['attachments']['items'];
+        foreach ($previousRows as &$row) {
+            foreach (['name', 'group', 'use', 'image'] as $key) $row[$key] = bl_content_clean($key === 'image' ? 'image' : 'text', $row[$key] ?? '');
+        }
+        unset($row);
+        $clean['attachments']['items'] = bl_attachment_row_aliases($clean['attachments']['items'], $previousRows);
+    }
+    $diff = bl_content_diff($clean, bl_content_clean_all($page, bl_content_defaults($page)));
     // Keep historical fields outside the current editor schema without exposing them as new editable fields.
     foreach (bl_content_schema($page) as $section) foreach ($section['fields'] as $field) {
         $parts = explode('.', $field['key']);
@@ -116,13 +125,15 @@ function bl_content_handle_submission(string $operation): void
         wp_die('提交的内容不完整，没有保存任何修改。请返回检查服务器的 max_input_vars 限制。', '', ['response' => 400, 'back_link' => true]);
     }
     $result = bl_content_locked($page, static function (array $previous) use ($operation, $page, $input) {
-        if ($operation === 'reset') return [];
+        // Back to the theme's defaults, except that renamed attachments keep their old names as aliases (references
+        // saved under the newer names still resolve). Every other page resets to nothing stored.
+        if ($operation === 'reset') return $page === 'loaders' ? bl_content_restore_values($page, [], $previous) : [];
         if ($operation === 'restore') {
             $history = get_option('bl_content_snapshots_' . $page, []);
             $selected = isset($_POST['bl_snapshot']) && is_string($_POST['bl_snapshot']) ? wp_unslash($_POST['bl_snapshot']) : '';
             if ($selected !== '') $history = array_values(array_filter((array) $history, static fn($entry) => ($entry['id'] ?? '') === $selected));
             if (!isset($history[0]['content']) || !is_array($history[0]['content'])) return new WP_Error('bl_content_snapshot_missing', '没有可恢复的快照。', ['status' => 404]);
-            return bl_content_restore_values($page, $history[0]['content']);
+            return bl_content_restore_values($page, $history[0]['content'], $previous);
         }
         return bl_content_prepare($page, $previous, $input, true);
     }, $expected);

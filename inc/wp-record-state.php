@@ -52,5 +52,7 @@ add_action('load-post.php', static function (): void {
 add_filter('update_post_metadata', static function ($check, $postId, $key, $value) {
     if ($check !== null || $key !== '_bl_record' || !empty($GLOBALS['bl_record_writing'][$postId]) || !in_array(get_post_type($postId), ['bl_product', 'bl_news', 'bl_application'], true)) return $check;
     if (!is_array($value)) return false;
-    return !is_wp_error(bl_record_locked((int) $postId, static fn() => $value));
+    // Model history is merged from the value read under the lock, so two quick renames both keep their old names.
+    $product = get_post_type($postId) === 'bl_product';
+    return !is_wp_error(bl_record_locked((int) $postId, static fn(array $locked) => $product ? bl_product_model_aliases($value, $locked) : $value));
 }, 10, 4);
