@@ -32,7 +32,12 @@ assert.equal(added.input.hidden, true, 'delegated change must work on newly inse
 let warned = false;
 windowHandlers.beforeunload({preventDefault: () => warned = true});
 assert.equal(warned, true, 'select-only changes must warn before leaving');
-handlers.submit.forEach(fn => fn());
+// A submission stopped beside a bad value keeps the leave warning; a real one clears it.
+handlers.submit.forEach(fn => fn({defaultPrevented: true, preventDefault() {}}));
+warned = false;
+windowHandlers.beforeunload({preventDefault: () => warned = true});
+assert.equal(warned, true, 'a blocked save must keep the leave warning');
+handlers.submit.forEach(fn => fn({defaultPrevented: false, preventDefault() {}}));
 warned = false;
 windowHandlers.beforeunload({preventDefault: () => warned = true});
 assert.equal(warned, false);

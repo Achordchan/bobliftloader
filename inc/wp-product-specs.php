@@ -57,13 +57,13 @@ function bl_product_validate_submission(): void
     wp_die($html, '规格参数未保存', ['response' => 400, 'back_link' => true]);
 }
 
-// Also cover programmatic classic save-hook dispatch without the normal post.php screen-load hook.
-add_action('save_post_bl_product', static function (int $id): void {
-    if (current_user_can('edit_post', $id) && !wp_is_post_revision($id) && !wp_is_post_autosave($id)) bl_product_validate_submission();
-}, 0);
-add_action('save_post', static function (int $id): void {
-    if (get_post_type($id) === 'bl_product' && current_user_can('edit_post', $id) && !wp_is_post_revision($id) && !wp_is_post_autosave($id)) bl_product_validate_submission();
-}, 0);
+// Also cover a programmatic wp_update_post() with a product form in $_POST but no post.php screen-load check: validate
+// before core writes anything, so a refused save leaves the title and body untouched too.
+add_filter('wp_insert_post_data', static function (array $data, array $postarr): array {
+    $id = (int) ($postarr['ID'] ?? 0);
+    if (($data['post_type'] ?? '') === 'bl_product' && ($data['post_status'] ?? '') !== 'auto-draft' && (!$id || current_user_can('edit_post', $id))) bl_product_validate_submission();
+    return $data;
+}, 0, 2);
 
 add_filter('rest_pre_insert_bl_product', static function ($prepared, WP_REST_Request $request) {
     if (is_wp_error($prepared)) return $prepared;

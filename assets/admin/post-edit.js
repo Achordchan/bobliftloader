@@ -208,7 +208,8 @@
   }
 
   // WordPress only warns about unsaved title and text; the product boxes need the same care.
-  form.addEventListener('submit', function () { dirty = false; });
+  // A save stopped beside a bad spec value is not a save: the leave-page warning stays.
+  form.addEventListener('submit', function (event) { if (!event.defaultPrevented) dirty = false; });
   window.addEventListener('beforeunload', function (event) {
     if (!dirty) return;
     event.preventDefault();
