@@ -125,3 +125,10 @@ details.bl-panel[open] .bl-card-meta { visibility: hidden; }
   .bl-field-control { min-width: 0; }
   .bl-ce-table { display: block; max-width: 100%; overflow-x: auto; }
 }
+
+/* 历史版本: a quiet table under the save bar. */
+.bl-history { margin-top: var(--bl-gap, 16px); }
+.bl-history-table { max-width: 760px; }
+.bl-history-table td { vertical-align: middle; }
+.bl-history-action { width: 1%; white-space: nowrap; text-align: right; }
+.bl-history-action form { margin: 0; }

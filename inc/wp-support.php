@@ -49,10 +49,11 @@ add_action('save_post_bl_product', static function (int $postId): void {
         $src = $url($row['src']);
         if ($src) $videos[] = ['src' => $src, 'poster' => $url($row['poster']), 'caption' => sanitize_text_field($row['caption'])];
     }
-    $record = get_post_meta($postId, '_bl_record', true);
-    if (!is_array($record)) $record = [];
-    $record['videos'] = $videos;
-    update_post_meta($postId, '_bl_record', $record);
+    $result = bl_record_locked($postId, static function (array $record) use ($videos): array {
+        $record['videos'] = $videos;
+        return $record;
+    });
+    if (is_wp_error($result)) wp_die(esc_html($result->get_error_message()), '', ['response' => 500, 'back_link' => true]);
 }, 20);
 
 // 资料下载 sits under 网站内容 (registered after that menu, priority 20). The old Settings address forwards here.

@@ -6,4 +6,4 @@ function add_rewrite_tag(...$args) {}
 function add_rewrite_rule(...$args) {}
 require dirname(__DIR__, 2) . '/inc/wordpress.php';
 bl_register_content_types();
-echo json_encode($GLOBALS['types']['bl_news']['supports']);
+echo json_encode(($argv[1] ?? '') === 'all' ? array_map(static fn($type) => $type['supports'], $GLOBALS['types']) : $GLOBALS['types']['bl_news']['supports']);

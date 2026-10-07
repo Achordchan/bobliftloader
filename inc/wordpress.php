@@ -12,7 +12,7 @@ function bl_register_content_types(): void
     register_post_type('bl_news', [
         'labels' => ['name' => '企业新闻', 'singular_name' => '企业新闻', 'add_new_item' => '新增企业新闻', 'edit_item' => '编辑企业新闻', 'view_item' => '查看文章', 'featured_image' => '封面图片', 'set_featured_image' => '设置封面图片', 'remove_featured_image' => '移除封面图片', 'use_featured_image' => '用作封面图片'],
         'public' => true, 'show_in_rest' => true, 'has_archive' => 'news', 'rewrite' => ['slug' => 'news', 'with_front' => false],
-        'supports' => ['title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'author'], 'menu_icon' => 'dashicons-media-document',
+        'supports' => ['revisions', 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'author'], 'menu_icon' => 'dashicons-media-document',
     ]);
     // A specific application (one job, one site, the machines used), written in the block editor. Its hub is a saved choice.
     register_post_type('bl_application', [
@@ -65,6 +65,7 @@ function bl_wp_article_record(WP_Post $post): array
 {
     $meta = get_post_meta($post->ID, '_bl_record', true);
     if (!is_array($meta)) $meta = [];
+    $meta['_bl_body_managed'] = bl_news_body_managed($post, $meta);
     $meta['line'] = bl_news_line($meta, $post->post_name);
     $record = array_replace(['category' => '', 'line' => 'compact', 'source' => '', 'image' => '', 'caption' => '', 'sections' => [], 'event' => [], 'poster' => [], 'products' => []], $meta);
     if (!empty($record['poster']['image'])) $record['poster']['image'] = bl_wp_image($record['poster']['image']);

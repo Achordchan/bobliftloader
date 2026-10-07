@@ -75,13 +75,14 @@ add_action('save_post_bl_product', static function (int $postId): void {
     if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['bl_page_nonce'])), 'bl_save_product_page')) return;
     $input = wp_unslash($_POST['bl_page'] ?? []);
     if (!is_array($input)) $input = [];
-    $record = get_post_meta($postId, '_bl_record', true);
-    if (!is_array($record)) $record = [];
-    // The REST cleaner (inc/wp-rest.php) holds the rules, so a value saved here and one written through the API match.
-    $record['seo_description'] = bl_rest_field('bl_product', 'seo_description', is_scalar($input['seo_description'] ?? null) ? (string) $input['seo_description'] : '');
-    $record['highlights'] = bl_rest_field('bl_product', 'highlights', bl_admin_posted_rows($input['highlights'] ?? [], ['title', 'text']));
-    $record['faq'] = bl_rest_field('bl_product', 'faq', bl_admin_posted_rows($input['faq'] ?? [], ['q', 'a', 'link_label', 'link_url']));
-    $record['attachments'] = bl_rest_field('bl_product', 'attachments', (array) ($input['attachments'] ?? []));
-    $record['photos'] = bl_rest_field('bl_product', 'photos', bl_admin_posted_rows($input['photos'] ?? [], ['src', 'group', 'alt', 'caption']));
-    update_post_meta($postId, '_bl_record', $record);
+    $result = bl_record_locked($postId, static function (array $record) use ($input): array {
+        // The REST cleaner (inc/wp-rest.php) holds the rules, so a value saved here and one written through the API match.
+        $record['seo_description'] = bl_rest_field('bl_product', 'seo_description', is_scalar($input['seo_description'] ?? null) ? (string) $input['seo_description'] : '');
+        $record['highlights'] = bl_rest_field('bl_product', 'highlights', bl_admin_posted_rows($input['highlights'] ?? [], ['title', 'text']));
+        $record['faq'] = bl_rest_field('bl_product', 'faq', bl_admin_posted_rows($input['faq'] ?? [], ['q', 'a', 'link_label', 'link_url']));
+        $record['attachments'] = bl_rest_field('bl_product', 'attachments', (array) ($input['attachments'] ?? []));
+        $record['photos'] = bl_rest_field('bl_product', 'photos', bl_admin_posted_rows($input['photos'] ?? [], ['src', 'group', 'alt', 'caption']));
+        return $record;
+    });
+    if (is_wp_error($result)) wp_die(esc_html($result->get_error_message()), '', ['response' => 500, 'back_link' => true]);
 }, 20);
