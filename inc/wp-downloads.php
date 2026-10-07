@@ -67,7 +67,11 @@ function bl_downloads_row(string $i, array $row): string
     $text = static fn(string $key): string => is_string($row[$key] ?? null) ? $row[$key] : '';
     $body = '<input type="hidden" name="' . esc_attr($name . '[id]') . '" value="' . esc_attr($text('id')) . '">';
     foreach (['url' => ['文件地址', 'url'], 'title' => ['标题', 'text'], 'description' => ['说明', 'textarea']] as $key => [$label, $type]) {
-        $body .= bl_content_row_field(['label' => $label, 'type' => $type], $name . '[' . $key . ']', $id . '-' . $key, $text($key));
+        $field = bl_content_row_field(['label' => $label, 'type' => $type], $name . '[' . $key . ']', $id . '-' . $key, $text($key));
+        // The default catalogue may be left blank: say what shows then, instead of an empty box that looks unset.
+        $hint = $primary ? ['url' => '留空则使用主题自带的产品画册 PDF', 'title' => '留空则使用“采购与售后”资料区里画册的标题', 'description' => '留空则使用“采购与售后”资料区里画册的说明'][$key] : '';
+        if ($hint !== '') $field = preg_replace('~<(input|textarea)\b~', '<$1 placeholder="' . esc_attr($hint) . '"', $field, 1);
+        $body .= $field;
         if ($key === 'url') {
             $size = ($primary || $text('url') !== '') ? bl_download_file($text('url'))['size'] : 0;
             $body .= '<p class="bl-dl-tools"><button type="button" class="button" data-bl-download-pick>从媒体库选择文件</button> <span>文件大小：<output data-bl-download-size>' . esc_html($size ? size_format($size, 1) : '大小未知') . '</output></span></p>';
