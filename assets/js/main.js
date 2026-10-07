@@ -241,23 +241,30 @@ if (!CSS.supports('field-sizing', 'content')) {
 }
 
 // On phones the equipment choices swipe in one row: a choice made beforehand (Parts & service, say) is brought into view
-// inside its row, and so is a chip tapped while partly cut off. Only the row scrolls, never the page.
-document.querySelectorAll('.bl-product-choices, .bl-inquiry-form .wpcf7-radio').forEach((row) => {
-  const reveal = (input) => {
+// inside its row, and so is a chip tapped while partly cut off. Only the row scrolls, never the page. A Contact Form 7
+// list without label elements has its .wpcf7-list-item as the chip. Nothing here may stop the rest of this script: each
+// step is guarded, and a row it cannot measure is simply left as it is.
+const guarded = (step) => (...args) => {
+  try { step(...args); } catch { /* a layout this does not know: the row keeps its own scroll */ }
+};
+document.querySelectorAll('.bl-product-choices, .bl-inquiry-form .wpcf7-radio').forEach(guarded((row) => {
+  const reveal = guarded((input) => {
     if (!input || row.scrollWidth <= row.clientWidth) return;
-    const chip = input.closest('label').getBoundingClientRect();
+    const item = input.closest('label, .wpcf7-list-item');
+    if (!item || !row.contains(item)) return;
+    const chip = item.getBoundingClientRect();
     const view = row.getBoundingClientRect();
     const pad = parseFloat(getComputedStyle(row).paddingLeft) || 0;
     // The chips snap by their start (responsive.css), so a cut chip is brought to the start of the row (or as far as the
     // row goes): a smaller step would be snapped straight back.
     if (chip.right > view.right - pad || chip.left < view.left + pad) row.scrollLeft += chip.left - view.left - pad;
-  };
-  const edge = () => row.classList.toggle('bl-edge-start', row.scrollLeft > 2);
+  });
+  const edge = guarded(() => row.classList.toggle('bl-edge-start', row.scrollLeft > 2));
   row.addEventListener('scroll', edge, { passive: true });
   reveal(row.querySelector('input:checked'));
   edge();
   row.addEventListener('change', (event) => reveal(event.target));
-});
+}));
 
 // A required field left empty: the browser brings it into view and focuses it, but can leave it under the pinned header
 // and section bar. The first such field of each try is moved to just below them, its label showing (and above the phone
@@ -267,7 +274,7 @@ document.querySelectorAll('form.bl-inquiry-form').forEach((form) => form.addEven
   if (settling || form.closest('.bl-quick')) return;
   settling = true;
   const field = event.target;
-  setTimeout(() => {
+  setTimeout(guarded(() => {
     settling = false;
     const pinned = [...document.querySelectorAll('.bl-header,.bl-section-nav,.bl-product-section-nav,.bl-side-contact')].filter((bar) => {
       const style = getComputedStyle(bar);
@@ -282,7 +289,7 @@ document.querySelectorAll('form.bl-inquiry-form').forEach((form) => form.addEven
     if (top < ceiling) window.scrollBy({ top: top - ceiling, behavior: 'instant' });
     else if (bottom > floor) window.scrollBy({ top: Math.min(bottom - floor, top - ceiling), behavior: 'instant' });
     if (document.activeElement !== field) field.focus({ preventScroll: true });
-  });
+  }));
 }, true));
 
 // The three support topics form one disclosure group, retaining native keyboard behavior.

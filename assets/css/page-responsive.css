@@ -63,9 +63,7 @@
   .bl-site .bl-contact-main{padding-bottom:var(--m-sec,56px)}
   .bl-site .bl-contact-intro h1{font-size:var(--m-h1,clamp(48px,14vw,60px))}
   .bl-site .bl-contact-channels b{font-size:24px}
-  /* The four points swipe in one row on phones (pages.css): no column template here. */
-  .bl-site .bl-contact-grid{row-gap:28px}
-  .bl-site .bl-contact-prepare ol{grid-template-columns:none}
+  .bl-site .bl-contact-prepare ol{grid-template-columns:1fr}
   .bl-site .bl-not-found{padding-block:70px}
   .bl-site .bl-not-found h1{font-size:var(--m-h1,clamp(48px,14vw,60px));font-weight:700;letter-spacing:-.8px;line-height:.9;margin:22px 0 24px}
   .bl-site .bl-not-found>div{flex-direction:column;align-items:flex-start}
@@ -73,6 +71,11 @@
   /* Contact channels: icon and arrow line up with the large number, and the small label keeps to one line where it can. */
   .bl-site .bl-contact-channels a{align-items:end;column-gap:14px}
   .bl-site .bl-contact-channels small{font-size:13px;line-height:1.4;text-wrap:balance}
+}
+/* Phones held upright: the four points swipe in one row (pages.css), so no column template here. */
+@media(max-width:600px) and (orientation:portrait){
+  .bl-site .bl-contact-grid{row-gap:28px}
+  .bl-site .bl-contact-prepare ol{grid-template-columns:none}
 }
 /* Phones turned sideways: two stories fill two columns instead of two thirds of three. */
 @media (max-width:1000px) and (max-height:500px){
@@ -164,7 +167,7 @@
   .bl-site .bl-contact-form-panel .bl-inquiry-form textarea{height:auto}
 }
 /* Phones held upright: three lines of message at a slightly tighter line, the box no taller than its three lines. */
-@media(max-width:600px){
+@media(max-width:600px) and (orientation:portrait){
   .bl-site .bl-inquiry-form textarea{min-height:calc(4.5em + 20px);padding-block:10px;line-height:1.5}
   .bl-site .bl-contact-form-panel .bl-inquiry-form textarea{padding-block:10px}
   /* The note and button follow the message a little closer than one step follows another, and the box keeps no drag
