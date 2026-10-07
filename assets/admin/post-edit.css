@@ -27,6 +27,8 @@
 .bl-rows-compact .bl-row { margin-bottom: 4px; }
 .bl-rows-compact .bl-row-head { display: grid; grid-template-columns: 20px minmax(0, 2fr) minmax(0, 3fr) auto; gap: 8px; padding: 4px 4px 4px 12px; }
 .bl-rows-compact input[type="text"] { width: 100%; margin: 0; }
+.bl-specs .bl-spec-key { min-width: 0; }
+.bl-specs .bl-spec-key select { width: 100%; max-width: 100%; }
 .bl-spec-filters { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--bl-border-soft); }
 .bl-spec-filters .bl-field-help { max-width: none; margin-top: 0; }
 .bl-spec-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 0; }
@@ -107,3 +109,8 @@
   /* The image strip stays within the screen (fields themselves stack via admin.css). */
   .bl-gallery { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); max-width: 100%; }
 }
+
+/* A spec value the frontend can't read: message under the row, the value box outlined. */
+.bl-specs .bl-row.has-error .bl-spec-value { border-color: #d63638; box-shadow: 0 0 0 1px #d63638; }
+.bl-spec-error { margin: 0 0 6px 40px; color: #b32d2e; font-size: 12px; }
+@media (max-width: 782px) { .bl-spec-error { margin-left: 8px; } }

@@ -16,6 +16,48 @@
 
   var form = document.getElementById('post');
   if (!form || !document.getElementById('bl_main-sortables')) return;
+  // The select owns known keys; custom text is disclosed only when that choice is selected.
+  function specChoice(select) {
+    var custom = select.parentElement.querySelector('input');
+    if (!custom) return;
+    custom.hidden = select.value !== '';
+  }
+  form.querySelectorAll('select[name="bl_record[specs][choice][]"]').forEach(specChoice);
+  form.addEventListener('change', function (event) {
+    if (event.target.matches('select[name="bl_record[specs][choice][]"]')) { specChoice(event.target); dirty = true; }
+  });
+
+  // Values the frontend reads (load, bucket, power, sizes…) are checked beside their row before the form is sent; rows left
+  // as they were loaded are not, so products saved before these rules still save. The server checks again.
+  var specBox = form.querySelector('[data-bl-spec-rules]');
+  var specRules = specBox ? JSON.parse(specBox.dataset.blSpecRules || '{}') : {};
+  function specError(row, message) {
+    var note = row.querySelector('.bl-spec-error');
+    if (!message) { if (note) note.remove(); row.classList.remove('has-error'); return; }
+    if (!note) { note = document.createElement('p'); note.className = 'bl-spec-error'; note.setAttribute('role', 'alert'); row.appendChild(note); }
+    note.textContent = message;
+    row.classList.add('has-error');
+  }
+  if (specBox) form.addEventListener('submit', function (event) {
+    var first = null;
+    form.querySelectorAll('[data-bl-rows="specs"] > .bl-row').forEach(function (row) {
+      var select = row.querySelector('select[name="bl_record[specs][choice][]"]');
+      var custom = row.querySelector('input[name="bl_record[specs][key][]"]');
+      var value = row.querySelector('input[name="bl_record[specs][value][]"]');
+      var key = select && select.value ? select.value : (custom ? custom.value.trim() : '');
+      var rule = specRules[key];
+      var untouched = value.value === value.defaultValue && (!select || select.value === (select.querySelector('option[selected]') || {}).value);
+      var ok = !rule || value.value.trim() === '' || untouched || new RegExp('^(?:' + rule.pattern + ')$', key === 'Bucket capacity' ? 'u' : 'iu').test(value.value.trim());
+      specError(row, ok ? '' : '这个值读不出来，前台筛选和图表会用不上。请写成：' + rule.example);
+      if (!ok && !first) first = value;
+    });
+    if (first) { event.preventDefault(); first.focus(); first.scrollIntoView({ block: 'center' }); }
+  }, true);
+  form.addEventListener('input', function (event) {
+    var row = event.target.closest('[data-bl-rows="specs"] > .bl-row');
+    if (row) specError(row, '');
+  });
+
   var gallery = form.querySelector('[data-bl-gallery]');
   var base = gallery ? gallery.dataset.blBase : '';
   var GALLERY_MAX = gallery ? +gallery.dataset.blMax : 0;
@@ -166,7 +208,8 @@
   }
 
   // WordPress only warns about unsaved title and text; the product boxes need the same care.
-  form.addEventListener('submit', function () { dirty = false; });
+  // A save stopped beside a bad spec value is not a save: the leave-page warning stays.
+  form.addEventListener('submit', function (event) { if (!event.defaultPrevented) dirty = false; });
   window.addEventListener('beforeunload', function (event) {
     if (!dirty) return;
     event.preventDefault();
