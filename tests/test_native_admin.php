@@ -47,9 +47,23 @@ foreach ([7, 8, 9, 10] as $id) {
     run_hook('load-post.php');
     $check($GLOBALS['removed_support'] === [], 'native editor support removed');
 }
+// An ordinary child page under Applications (not a scenario) keeps its editor; a scenario page does not.
+$apps = array_values(array_filter($GLOBALS['posts'], static fn($p) => $p->post_type === 'page' && $p->post_name === 'applications'))[0] ?? null;
+if ($apps) {
+    $guide = new WP_Post(901, 'page', 'installation-guide', 'Installation guide'); $guide->post_parent = $apps->ID; $GLOBALS['posts'][901] = $guide;
+    $scenario = new WP_Post(902, 'page', 'landscaping', 'Landscaping'); $scenario->post_parent = $apps->ID; $GLOBALS['posts'][902] = $scenario;
+    $check(!bl_page_body_is_structured($guide) && bl_page_body_is_structured($scenario), 'non-scenario child page lost its editor');
+    unset($GLOBALS['posts'][901], $GLOBALS['posts'][902]);
+}
 $GLOBALS['options']['show_on_front'] = 'posts';
 $check(!bl_page_body_is_structured(get_post(1)), 'inactive static front page locked');
 $check($before === serialize($GLOBALS['posts']), 'editor setup changed stored bodies');
+// A password-protected privacy page shows the password form, never its body.
+$GLOBALS['posts'][8]->post_content = '<p>Secret policy</p>';
+$GLOBALS['posts'][8]->post_password = 'pw';
+$GLOBALS['queried'] = get_post(8);
+$check(str_contains(bl_privacy_content(), 'post-password-form') && !str_contains(bl_privacy_content(), 'Secret policy'), 'protected privacy body exposed');
+$GLOBALS['posts'][8]->post_password = '';
 $GLOBALS['posts'][8]->post_content = '';
 $GLOBALS['queried'] = get_post(8);
 foreach ([0, 9] as $mode) {

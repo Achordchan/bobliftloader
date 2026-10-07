@@ -5,7 +5,14 @@ defined('ABSPATH') || exit;
 /** Structured pages keep native publishing controls without offering an unused body editor. */
 function bl_page_body_is_structured(?WP_Post $post): bool
 {
-    return in_array(bl_content_page_for_post($post), ['home', 'support', 'applications', 'contact', 'thanks'], true);
+    $page = bl_content_page_for_post($post);
+    if (!in_array($page, ['home', 'support', 'applications', 'contact', 'thanks'], true)) return false;
+    if ($page !== 'applications' || !$post->post_parent) return true;
+    // Under Applications only the scenario pages (built-in or added, shown or hidden) render from 网站内容; any other child
+    // page is an ordinary page whose body shows, so it keeps its editor.
+    $slugs = array_map('bl_application_slug', $GLOBALS['bl_application_base'] ?? []);
+    $slugs = array_merge($slugs, array_keys((array) (bl_editable('applications')['jobs'] ?? [])));
+    return in_array($post->post_name, $slugs, true);
 }
 
 // Privacy retains the native classic body editor so its guidance sits above the body without a notice bar.

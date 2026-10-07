@@ -156,5 +156,7 @@ function bl_page_editor_content(): string
 {
     if (!is_page()) return '';
     $post = get_queried_object();
-    return $post instanceof WP_Post && $post->post_content ? apply_filters('the_content', $post->post_content) : '';
+    // Same rule as the_content(): a password-protected page's body stays hidden until the password is given.
+    if (!$post instanceof WP_Post || !$post->post_content || post_password_required($post)) return '';
+    return apply_filters('the_content', $post->post_content);
 }

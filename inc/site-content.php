@@ -127,6 +127,8 @@ function bl_privacy_content(): string
     if (function_exists('bl_page_editor_content') && function_exists('get_queried_object')) {
         $post = get_queried_object();
         if ($post instanceof WP_Post && $post->post_type === 'page' && trim($post->post_content) !== '') {
+            // A password-protected page shows WordPress's password form, never its body.
+            if (post_password_required($post)) return get_the_password_form($post);
             return bl_page_editor_content() . $mode;
         }
     }
