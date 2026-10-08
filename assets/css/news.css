@@ -149,9 +149,75 @@
   .bl-site .bl-story-pager{row-gap:4px}
   .bl-site .bl-story-pager a{padding-block:10px}
   .bl-site .bl-story-pager span{min-height:24px}
+  .bl-site .bl-story-pager-list{order:1} /* the way back to the list comes last, after Newer and Older */
   .bl-site .bl-story-product-image{background:#fff}
   .bl-site .bl-story-product-image img{padding:0}
 }
 @media(hover:none){
   .bl-site .bl-news-item:active .bl-news-item-title,.bl-site .bl-story-product-list a:active b,.bl-site .bl-story-pager a:active b{color:var(--blue)}
+}
+
+/* Pictures that open larger (article.php, lightbox.js): a button laid over each picture, hidden until the script runs.
+   On wider screens it adds nothing to see, only the zoom pointer; on phones a small magnifier sits in the corner. */
+.bl-site .bl-story-zoom-frame{display:block;position:relative}
+.bl-site .bl-story-zoom{position:absolute;inset:0;width:100%;height:100%;cursor:zoom-in}
+.bl-site .bl-story-zoom[hidden],.bl-site .bl-story-zoom>.bl-icon{display:none}
+/* Shown on phones only (below): who wrote the story and when, the event's dates and booth, and a second way back to the list. */
+.bl-site .bl-story-byline,.bl-site .bl-story-when,.bl-site .bl-story-pager .bl-story-pager-extra{display:none}
+
+/* The lightbox, as on product pages (product.css), which story pages do not load. */
+.bl-site .bl-lightbox{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:clamp(56px,4vw,96px) clamp(16px,6vw,140px);border:0;background:#03111ceb;color:#fff}
+.bl-site .bl-lightbox[open]{display:grid;place-items:center}
+.bl-site .bl-lightbox::backdrop{background:#03111c99}
+.bl-site .bl-lightbox figure{margin:0;display:grid;gap:14px;justify-items:center;max-width:100%;max-height:100%}
+.bl-site .bl-lightbox figure img{max-width:100%;max-height:calc(100dvh - 200px);object-fit:contain;background:#fff}
+.bl-site .bl-lightbox figcaption{display:flex;gap:18px;align-items:baseline;font-size:var(--fs-small);color:#c9d6df}
+.bl-site .bl-lightbox figcaption small{font-variant-numeric:tabular-nums;color:#8fa3b2}
+.bl-site .bl-lightbox-close{position:absolute;top:clamp(12px,1.4vw,32px);right:clamp(12px,1.4vw,32px)}
+.bl-site .bl-lightbox .bl-circle-button{background:#fff;border-color:#fff;color:var(--ink)}
+.bl-site .bl-lightbox-step{position:absolute;top:50%;transform:translateY(-50%)}
+.bl-site .bl-lightbox-prev{left:clamp(8px,1.4vw,32px)}
+.bl-site .bl-lightbox-next{right:clamp(8px,1.4vw,32px)}
+.bl-site .bl-lightbox-next .bl-icon{transform:rotate(180deg)}
+.bl-site .bl-lightbox-step[hidden]{display:none}
+@media(hover:hover){.bl-site .bl-lightbox-step:hover,.bl-site .bl-lightbox-close:hover{background:var(--blue);border-color:var(--blue)}}
+@media(hover:hover){.bl-site .bl-lightbox-step:hover{transform:translateY(-50%)}}
+@media(max-width:600px){.bl-site .bl-lightbox-step,.bl-site .bl-lightbox-step:hover{top:auto;bottom:16px;transform:none}}
+/* Phones held upright: a tall poster fitted to the screen's height would come out no larger than in the story, so it
+   takes the full width instead and scrolls inside the lightbox, its small print readable; the buttons stay put. */
+@media(max-width:600px) and (orientation:portrait){
+  .bl-site #story-lightbox[open]{display:block;overflow-y:auto;overscroll-behavior:contain;padding:76px 0 88px}
+  .bl-site #story-lightbox figure img{width:100%;max-height:none}
+  .bl-site #story-lightbox figcaption{padding-inline:var(--gutter)}
+  .bl-site #story-lightbox :is(.bl-lightbox-close,.bl-lightbox-step){position:fixed;box-shadow:0 2px 12px #03111c59}
+}
+@media(max-width:1000px) and (max-height:500px){
+  .bl-site .bl-lightbox{padding:12px 76px}
+  .bl-site .bl-lightbox figure{gap:8px}
+  .bl-site .bl-lightbox figure img{max-height:calc(100dvh - 88px)}
+  .bl-site .bl-lightbox figcaption{line-height:1.4}
+}
+
+/* Phones, upright or on their side. */
+@media(max-width:600px),(max-width:1000px) and (max-height:500px){
+  .bl-site .bl-lightbox figcaption small{white-space:nowrap}
+  /* Author and date in one line under the lede; the Written by box then leaves out the repeated date. */
+  .bl-site .bl-story-byline{display:flex;flex-wrap:wrap;align-items:center;margin-top:14px;font-size:var(--fs-label);font-weight:700;line-height:1.5}
+  .bl-site .bl-story-byline time{font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+  .bl-site .bl-story-byline>*+*::before{content:'';display:inline-block;width:3px;height:3px;margin:0 10px;border-radius:50%;background:#a4adb1;vertical-align:middle}
+  .bl-site .bl-story-author dl>div:first-child{display:none}
+  .bl-site .bl-story-author .bl-story-box-link{margin-top:2px}
+  /* The event's dates, how soon it opens and the booth, near the top; the full details stay in the side column. */
+  .bl-site .bl-story-when{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px 32px;margin:18px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+  .bl-site .bl-story-when dt{font-size:var(--fs-micro);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+  .bl-site .bl-story-when dd{margin:4px 0 0;font-size:var(--fs-small);font-weight:600;line-height:1.4}
+  .bl-site .bl-story-when dd strong{font:700 var(--fs-h5)/1 var(--display);color:var(--blue)}
+  .bl-site .bl-story-when .bl-news-when{display:block;margin-top:2px;font-size:var(--fs-micro);letter-spacing:.5px;text-transform:uppercase}
+  /* A small magnifier in the picture's corner says it opens larger; the whole picture is the button. */
+  .bl-site .bl-story-zoom>.bl-icon{display:block;position:absolute;right:6px;bottom:6px;box-sizing:content-box;width:18px;height:18px;max-width:none;max-height:none;margin:0;padding:8px;border:1px solid var(--line);background:#ffffffe6;object-fit:fill}
+  .bl-site .bl-story-zoom:active>.bl-icon{background:#fff;border-color:var(--ink)}
+  /* The pager always offers the way back to the list; the side column runs straight on to it. */
+  .bl-site .bl-story-pager .bl-story-pager-extra{display:flex}
+  .bl-site .bl-story:not(.bl-story-case){padding-bottom:0}
+  .bl-site .bl-story:not(.bl-story-case)+.bl-story-pager{margin-top:var(--m-sec-tight,40px)}
 }

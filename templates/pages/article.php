@@ -17,10 +17,14 @@ $all = bl_articles();
 $index = (int) array_search($article['slug'], array_column($all, 'slug'), true);
 $newer = $all[$index - 1] ?? null;
 $older = $all[$index + 1] ?? null;
-$posterFigure = static fn(array $poster): string => '<figure class="bl-story-poster"><img src="' . bl_escape($poster['image']) . '" alt="' . bl_escape($poster['alt']) . '" width="889" height="2000" loading="lazy"><figcaption>' . bl_escape($poster['caption']) . '</figcaption></figure>';
 // An editor can mark a cover as cut from the story's stand artwork ('hide_cover'): the story then leads with the artwork
 // alone, since showing both repeats the picture. A featured image chosen in WordPress is a picture of its own and still leads.
 $leadFigure = !$poster || empty($article['hide_cover']) || !empty($article['image_id']);
+// The lead picture and the stand artwork open larger in the lightbox (assets/js/lightbox.js), lead picture first. The
+// button over each picture stays hidden until the script runs, so without it the pictures are plain images.
+$zoom = static fn(int $index, string $src, string $alt, string $caption): string => '<button class="bl-story-zoom" type="button" data-lightbox-open="' . $index . '" hidden>' . bl_icon('magnifying-glass') . '<span class="bl-visually-hidden">View larger</span></button><span hidden data-lightbox-item="' . $index . '" data-src="' . bl_escape($src) . '" data-alt="' . bl_escape($alt) . '" data-caption="' . bl_escape($caption) . '"></span>';
+$posterIndex = $leadFigure ? 1 : 0;
+$posterFigure = static fn(array $poster): string => '<figure class="bl-story-poster"><span class="bl-story-zoom-frame"><img src="' . bl_escape($poster['image']) . '" alt="' . bl_escape($poster['alt']) . '" width="889" height="2000" loading="lazy">' . $zoom($posterIndex, $poster['image'], $poster['alt'], $poster['caption']) . '</span><figcaption>' . bl_escape($poster['caption']) . '</figcaption></figure>';
 // Text written in WordPress places the artwork as imported sections do: at the head of section 'after' (floated beside it
 // on wide screens), or after the text when that section does not exist. Sections start at each <h2>.
 $contentHtml = !empty($article['content_html']) ? wp_kses_post($article['content_html']) : '';
@@ -37,11 +41,18 @@ if ($contentHtml !== '' && $poster) {
     <?php if ($category): ?><a class="bl-story-category" href="<?= bl_escape(bl_url('/news/') . '?category=' . $category) ?>"><?= bl_escape(BL_NEWS_CATEGORIES[$category]) ?></a><?php else: ?><span class="bl-story-category bl-story-category-group"><?= bl_escape(bl_news_label($article)) ?></span><?php endif; ?>
     <h1 id="story-title"><?= bl_title_text($article['title']) ?></h1>
     <p class="bl-story-lede"><?= bl_escape($article['excerpt']) ?></p>
+    <?php /* Phones only (news.css): who wrote it and when, and the event's dates and booth, which the side column shows
+       only after the whole story there. */ ?>
+    <p class="bl-story-byline"><span><?= bl_escape($author['name']) ?></span><time datetime="<?= bl_escape($article['date']) ?>"><?= date('j F Y', strtotime($article['date'])) ?></time></p>
+    <?php if ($status): ?><dl class="bl-story-when">
+      <div><dt>Dates</dt><dd><?php if ($status['state'] !== 'past'): ?><?= bl_escape(bl_event_dates($event)) ?> <?php endif; ?><span class="bl-news-when bl-news-when-<?= $status['state'] ?>"><?= bl_escape($status['label']) ?></span></dd></div>
+      <?php if (!empty($event['booth'])): ?><div><dt>Booth</dt><dd><strong><?= bl_escape($event['booth']) ?></strong></dd></div><?php endif; ?>
+    </dl><?php endif; ?>
   </header>
 
   <div class="bl-story-layout">
     <div class="bl-story-main">
-      <?php if ($leadFigure): ?><figure class="bl-story-figure"><img src="<?= bl_escape($article['image']) ?>" alt="<?= bl_escape($article['caption']) ?>" width="1500" height="900" fetchpriority="high"><figcaption><?= bl_escape($article['caption']) ?></figcaption></figure><?php endif; ?>
+      <?php if ($leadFigure): ?><figure class="bl-story-figure"><span class="bl-story-zoom-frame"><img src="<?= bl_escape($article['image']) ?>" alt="<?= bl_escape($article['caption']) ?>" width="1500" height="900" fetchpriority="high"><?= $zoom(0, $article['image'], $article['caption'], $article['caption']) ?></span><figcaption><?= bl_escape($article['caption']) ?></figcaption></figure><?php endif; ?>
       <div class="bl-story-text">
         <?php if ($contentHtml !== '' || !empty($article['_bl_body_managed'])): ?><?= $contentHtml === '' && $poster ? $posterFigure($poster) : '' ?><div class="bl-wp-article-content"><?= $contentHtml ?></div>
         <?php else: foreach ($article['sections'] as $i => $section): ?><?= $poster && $i + 1 === $posterAfter ? $posterFigure($poster) : '' ?><h2><?= bl_escape($section['heading']) ?></h2><p><?= bl_escape($section['text']) ?></p><?php endforeach; ?><?= $poster && ($posterAfter < 1 || $posterAfter > count($article['sections'])) ? $posterFigure($poster) : '' ?><?php endif; ?>
@@ -94,7 +105,9 @@ if ($contentHtml !== '' && $poster) {
 </article>
 
 <nav class="bl-story-pager bl-shell" aria-label="More stories">
-  <?php if ($newer): ?><a href="<?= bl_escape(bl_article_url($newer)) ?>"><span><?= bl_icon('arrow-left') ?> Newer</span><b><?= bl_title_text($newer['title']) ?></b></a><?php else: ?><a href="<?= bl_escape(bl_url('/news/')) ?>"><span><?= bl_icon('arrow-left') ?> All news</span><b>Back to the list</b></a><?php endif; ?>
+  <?php if ($newer): ?><a href="<?= bl_escape(bl_article_url($newer)) ?>"><span><?= bl_icon('arrow-left') ?> Newer</span><b><?= bl_title_text($newer['title']) ?></b></a><?php else: ?><a class="bl-story-pager-list" href="<?= bl_escape(bl_url('/news/')) ?>"><span><?= bl_icon('arrow-left') ?> All news</span><b>Back to the list</b></a><?php endif; ?>
   <?php if ($older): ?><a class="bl-story-pager-older" href="<?= bl_escape(bl_article_url($older)) ?>"><span>Older <?= bl_icon('arrow-up-right') ?></span><b><?= bl_title_text($older['title']) ?></b></a><?php endif; ?>
+  <?php /* Phones always offer the way back to the list (news.css); wider screens show it only in place of Newer. */ if ($newer): ?><a class="bl-story-pager-list bl-story-pager-extra" href="<?= bl_escape(bl_url('/news/')) ?>"><span><?= bl_icon('arrow-left') ?> All news</span><b>Back to the list</b></a><?php endif; ?>
 </nav>
+<?php if ($leadFigure || $poster): ?><dialog class="bl-lightbox" id="story-lightbox" aria-label="<?= bl_escape($article['title']) ?>"><figure><img alt=""><figcaption><span data-lightbox-caption></span><small data-lightbox-count></small></figcaption></figure><button class="bl-lightbox-close bl-circle-button" type="button" data-lightbox-close aria-label="Close"><?= bl_icon('x') ?></button><button class="bl-lightbox-step bl-lightbox-prev bl-circle-button" type="button" data-lightbox-step="-1" aria-label="Previous photograph"><?= bl_icon('arrow-left') ?></button><button class="bl-lightbox-step bl-lightbox-next bl-circle-button" type="button" data-lightbox-step="1" aria-label="Next photograph"><?= bl_icon('arrow-left') ?></button></dialog><?php endif; ?>
 <?php require __DIR__ . '/../partials/page-cta.php'; ?>
