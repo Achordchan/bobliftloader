@@ -66,7 +66,8 @@ $older = $index === false ? null : ($all[$index + 1] ?? null);
 </article>
 
 <nav class="bl-story-pager bl-shell" aria-label="More applications">
-  <?php if ($newer): ?><a href="<?= bl_escape(bl_case_url($newer)) ?>"><span><?= bl_icon('arrow-left') ?> Newer</span><b><?= bl_escape($newer['title']) ?></b></a><?php else: ?><a href="<?= bl_escape(bl_url('/applications/')) ?>"><span><?= bl_icon('arrow-left') ?> All applications</span><b>Back to the jobs we work on</b></a><?php endif; ?>
+  <?php if ($newer): ?><a href="<?= bl_escape(bl_case_url($newer)) ?>"><span><?= bl_icon('arrow-left') ?> Newer</span><b><?= bl_escape($newer['title']) ?></b></a><?php else: ?><a class="bl-story-pager-list" href="<?= bl_escape(bl_url('/applications/')) ?>"><span><?= bl_icon('arrow-left') ?> All applications</span><b>Back to the jobs we work on</b></a><?php endif; ?>
   <?php if ($older): ?><a class="bl-story-pager-older" href="<?= bl_escape(bl_case_url($older)) ?>"><span>Older <?= bl_icon('arrow-up-right') ?></span><b><?= bl_escape($older['title']) ?></b></a><?php endif; ?>
+  <?php /* Phones always offer the way back to the list (news.css); wider screens show it only in place of Newer. */ if ($newer): ?><a class="bl-story-pager-list bl-story-pager-extra" href="<?= bl_escape(bl_url('/applications/')) ?>"><span><?= bl_icon('arrow-left') ?> All applications</span><b>Back to the jobs we work on</b></a><?php endif; ?>
 </nav>
 <?php require __DIR__ . '/../partials/page-cta.php'; ?>
