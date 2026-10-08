@@ -240,6 +240,61 @@ if (!CSS.supports('field-sizing', 'content')) {
   phoneForm.addEventListener('change', () => boxes.forEach(fit));
 }
 
+// On phones the equipment choices swipe in one row: a choice made beforehand (Parts & service, say) is brought into view
+// inside its row, and so is a chip tapped while partly cut off. Only the row scrolls, never the page. A Contact Form 7
+// list without label elements has its .wpcf7-list-item as the chip. Nothing here may stop the rest of this script: each
+// step is guarded, and a row it cannot measure is simply left as it is.
+const guarded = (step) => (...args) => {
+  try { step(...args); } catch { /* a layout this does not know: the row keeps its own scroll */ }
+};
+const uprightPhone = window.matchMedia('(max-width: 600px) and (orientation: portrait)');
+document.querySelectorAll('.bl-product-choices, .bl-inquiry-form .wpcf7-radio').forEach(guarded((row) => {
+  const reveal = guarded((input) => {
+    if (!input || row.scrollWidth <= row.clientWidth) return;
+    const item = input.closest('label, .wpcf7-list-item');
+    if (!item || !row.contains(item)) return;
+    const chip = item.getBoundingClientRect();
+    const view = row.getBoundingClientRect();
+    const pad = parseFloat(getComputedStyle(row).paddingLeft) || 0;
+    // The chips snap by their start (responsive.css), so a cut chip is brought to the start of the row (or as far as the
+    // row goes): a smaller step would be snapped straight back.
+    if (chip.right > view.right - pad || chip.left < view.left + pad) row.scrollLeft += chip.left - view.left - pad;
+  });
+  const edge = guarded(() => row.classList.toggle('bl-edge-start', row.scrollLeft > 2));
+  row.addEventListener('scroll', edge, { passive: true });
+  const settle = () => { reveal(row.querySelector('input:checked')); edge(); };
+  settle();
+  row.addEventListener('change', (event) => reveal(event.target));
+  // The row only swipes once the phone is held upright, so turning it upright brings the choice made beforehand into view.
+  uprightPhone.addEventListener?.('change', () => { if (uprightPhone.matches) requestAnimationFrame(guarded(settle)); });
+}));
+
+// A required field left empty: the browser brings it into view and focuses it, but can leave it under the pinned header
+// and section bar. The first such field of each try is moved to just below them, its label showing (and above the phone
+// bar where that is up). Only the first: the others of the same try fire too, and would each scroll again.
+let settling = false;
+document.querySelectorAll('form.bl-inquiry-form').forEach((form) => form.addEventListener('invalid', (event) => {
+  if (settling || form.closest('.bl-quick')) return;
+  settling = true;
+  const field = event.target;
+  setTimeout(guarded(() => {
+    settling = false;
+    const pinned = [...document.querySelectorAll('.bl-header,.bl-section-nav,.bl-product-section-nav,.bl-side-contact')].filter((bar) => {
+      const style = getComputedStyle(bar);
+      if (style.visibility === 'hidden' || !bar.offsetHeight) return false;
+      // A sticky bar counts only while it is held at its place, not where it sits in the page.
+      return style.position === 'fixed' || (style.position === 'sticky' && Math.abs(bar.getBoundingClientRect().top - (parseFloat(style.top) || 0)) < 1);
+    }).map((bar) => bar.getBoundingClientRect());
+    const ceiling = Math.max(0, ...pinned.filter((box) => box.top < innerHeight / 2).map((box) => box.bottom)) + 12;
+    const floor = Math.min(innerHeight, ...pinned.filter((box) => box.top >= innerHeight / 2).map((box) => box.top)) - 12;
+    const top = (field.closest('label') || field).getBoundingClientRect().top;
+    const bottom = field.getBoundingClientRect().bottom;
+    if (top < ceiling) window.scrollBy({ top: top - ceiling, behavior: 'instant' });
+    else if (bottom > floor) window.scrollBy({ top: Math.min(bottom - floor, top - ceiling), behavior: 'instant' });
+    if (document.activeElement !== field) field.focus({ preventScroll: true });
+  }));
+}, true));
+
 // The three support topics form one disclosure group, retaining native keyboard behavior.
 document.querySelectorAll('.bl-accordions details').forEach((detail) => {
   detail.addEventListener('toggle', () => {

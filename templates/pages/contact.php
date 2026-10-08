@@ -42,8 +42,8 @@ if ($selectedFamily === 'service') $prefillMessage = "Model:\nSerial number:\nWh
       </ul>
     </div>
     <div class="bl-contact-prepare">
-      <p class="bl-eyebrow"><?= bl_content_text('contact', 'form.prepare_title') ?></p>
-      <ol>
+      <p class="bl-eyebrow" id="contact-prepare-title"><?= bl_content_text('contact', 'form.prepare_title') ?></p>
+      <ol aria-labelledby="contact-prepare-title" data-swipe-row>
         <?php foreach ($prepare as $i => $item): ?><li><span>0<?= $i + 1 ?></span><div><h2><?= bl_escape($item['title']) ?></h2><p><?= bl_rich($item['text']) ?></p></div></li><?php endforeach; ?>
       </ol>
     </div>

@@ -142,7 +142,7 @@ $at = static fn(int $v): string => rtrim(rtrim(number_format(($v - $scale['from'
       <div class="bl-ruler-axis" aria-hidden="true"><span></span><span class="bl-ruler-ticks"><?php for ($tick = $scale['from']; $tick <= $scale['to']; $tick += $scale['step']): ?><i style="--at:<?= $at($tick) ?>"><?= bl_escape($scale['tick']($tick)) ?></i><?php endfor; ?></span><span><?= $scale['unit'] ?></span></div>
     </figure>
   </div>
-  <ul class="bl-range-story-options<?= $story['colour'] ? ' bl-range-story-with-colour' : '' ?>" style="--options:<?= max(1, min(4, count($story['options']))) ?>">
+  <ul class="bl-range-story-options<?= $story['colour'] ? ' bl-range-story-with-colour' : '' ?>" style="--options:<?= max(1, min(4, count($story['options']))) ?>" data-swipe-row>
     <?php foreach ($story['options'] as $option): ?>
     <li class="bl-reveal"><strong><?= $option['big'] ?></strong><h3><?= bl_escape($option['title']) ?></h3><p><?= bl_escape($option['text']) ?></p><?php if (!empty($option['link'])): ?><a class="bl-text-link" href="<?= bl_escape($option['link'][0]) ?>"><?= bl_escape($option['link'][1]) ?> <?= bl_icon('arrow-down') ?></a><?php endif; ?></li>
     <?php endforeach; ?>
