@@ -192,6 +192,10 @@
   .bl-site #story-lightbox :is(.bl-lightbox-close,.bl-lightbox-step){position:fixed;box-shadow:0 2px 12px #03111c59}
 }
 @media(max-width:1000px) and (max-height:500px){
+  /* Three boxes in two columns: the event box runs down the right beside the other two, so none sits alone by an empty gap.
+     Where only one column fits, the boxes stack in order as before. */
+  .bl-site .bl-story-aside:has(>.bl-story-box:nth-child(3):last-child){grid-template-rows:auto 1fr}
+  .bl-site .bl-story-aside>.bl-story-box:nth-child(2):nth-last-child(2){grid-column:-2;grid-row:span 2}
   .bl-site .bl-lightbox{padding:12px 76px}
   .bl-site .bl-lightbox figure{gap:8px}
   .bl-site .bl-lightbox figure img{max-height:calc(100dvh - 88px)}
@@ -218,6 +222,6 @@
   .bl-site .bl-story-zoom:active>.bl-icon{background:#fff;border-color:var(--ink)}
   /* The pager always offers the way back to the list; the side column runs straight on to it. */
   .bl-site .bl-story-pager .bl-story-pager-extra{display:flex}
-  .bl-site .bl-story:not(.bl-story-case){padding-bottom:0}
-  .bl-site .bl-story:not(.bl-story-case)+.bl-story-pager{margin-top:var(--m-sec-tight,40px)}
+  .bl-site .bl-story{padding-bottom:0}
+  .bl-site .bl-story+.bl-story-pager{margin-top:var(--m-sec-tight,40px)}
 }
