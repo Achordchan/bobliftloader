@@ -1,8 +1,9 @@
 // Product photographs open larger in one lightbox: the gallery beside the main image, then the dimension drawing and the
 // photographs further down, in page order (templates/pages/product.php numbers them). Without the script the
-// photographs stay at their page size and nothing is lost.
+// photographs stay at their page size and nothing is lost. A news story's lead picture and stand artwork open in the same
+// way (templates/pages/article.php).
 export function initializeLightbox() {
-  const dialog = document.querySelector('#product-lightbox');
+  const dialog = document.querySelector('#product-lightbox, #story-lightbox');
   if (!dialog) return;
   const items = [...document.querySelectorAll('[data-lightbox-item]')]
     .sort((a, b) => Number(a.dataset.lightboxItem) - Number(b.dataset.lightboxItem));
