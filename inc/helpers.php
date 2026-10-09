@@ -111,11 +111,17 @@ function bl_key_specs(array $product, bool $short = false): array
     return $specs;
 }
 
+/** The retired "electric version" engine option, on its own; an engine described with an electric starter is not it. */
+function bl_is_retired_electric_option(string $option): bool
+{
+    return (bool) preg_match('/^electric(\s+versions?)?$/i', trim($option));
+}
+
 /** Engine options without the retired "electric version" choice, which products imported from the old seed data still store. */
 function bl_without_retired_engine_options(array $specs): array
 {
     if (!isset($specs['Engine options']) || stripos((string) $specs['Engine options'], 'electric') === false) return $specs;
-    $options = array_filter(array_map('trim', explode(' / ', (string) $specs['Engine options'])), static fn($option) => $option !== '' && stripos($option, 'electric') === false);
+    $options = array_filter(array_map('trim', explode(' / ', (string) $specs['Engine options'])), static fn($option) => $option !== '' && !bl_is_retired_electric_option($option));
     $specs['Engine options'] = implode(' / ', $options);
     return $specs;
 }
@@ -129,7 +135,7 @@ function bl_engine_brands(array $products): array
 {
     $names = [];
     foreach ($products as $p) foreach (array_filter(array_map('trim', explode(' / ', $p['specs']['Engine options'] ?? ''))) as $option) {
-        if (stripos($option, 'electric') !== false) continue;
+        if (bl_is_retired_electric_option($option)) continue;
         $name = trim((string) preg_replace('/\s*\S*\d\S*/u', '', $option));
         if ($name !== '') $names[] = $name;
     }

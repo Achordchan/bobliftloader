@@ -60,6 +60,7 @@ $check(bl_engine_brands([$p('Zongshen / Rato / Briggs & Stratton / KOOP / electr
 $legacy = ['Engine options' => 'Zongshen / Rato / Briggs & Stratton / KOOP / electric version', 'Starting' => 'Electric start', 'Fuel' => 'Petrol / diesel'];
 $check(bl_without_retired_engine_options($legacy) === ['Engine options' => 'Zongshen / Rato / Briggs & Stratton / KOOP', 'Starting' => 'Electric start', 'Fuel' => 'Petrol / diesel'], 'retired electric option kept on an imported product');
 $check(bl_without_retired_engine_options(['Engine options' => 'Yanmar / Kubota']) === ['Engine options' => 'Yanmar / Kubota'], 'plain engine options changed');
+$check(bl_without_retired_engine_options(['Engine options' => 'Kubota D1105 (electric start) / Yanmar / Electric']) === ['Engine options' => 'Kubota D1105 (electric start) / Yanmar'], 'engine with an electric starter dropped');
 $check(bl_support_faq_answer('Several loaders offer more than one engine brand, and some have an electric version. Each model lists its choices under Engine options on its specification sheet.') === 'Several loaders offer more than one engine brand. Each model lists its choices under Engine options on its specification sheet.', 'saved stock engine answer still offers an electric version');
 $check(bl_support_faq_answer('Our own answer.') === 'Our own answer.', 'edited FAQ answer changed');
 
