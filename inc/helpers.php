@@ -111,6 +111,15 @@ function bl_key_specs(array $product, bool $short = false): array
     return $specs;
 }
 
+/** Engine options without the retired "electric version" choice, which products imported from the old seed data still store. */
+function bl_without_retired_engine_options(array $specs): array
+{
+    if (!isset($specs['Engine options']) || stripos((string) $specs['Engine options'], 'electric') === false) return $specs;
+    $options = array_filter(array_map('trim', explode(' / ', (string) $specs['Engine options'])), static fn($option) => $option !== '' && stripos($option, 'electric') === false);
+    $specs['Engine options'] = implode(' / ', $options);
+    return $specs;
+}
+
 /**
  * Engine brands across products, in order of first mention: "Kubota D1105" and "Kubota" count once, as do "Briggs & Stratton
  * Vanguard" and "Briggs & Stratton" (model codes, the words holding a digit, are dropped; a name that extends an earlier

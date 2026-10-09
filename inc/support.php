@@ -63,12 +63,19 @@ function bl_support_faq_retired(array $item): bool
     return stripos((string) ($item['q'] ?? ''), 'Which certificates do you hold') === 0 || str_contains((string) ($item['link_url'] ?? ''), '#certificates');
 }
 
+/** The stock engine answer saved before the electric version was dropped reads as today's default; edited answers are kept. */
+function bl_support_faq_answer(string $answer): string
+{
+    $retired = 'Several loaders offer more than one engine brand, and some have an electric version. Each model lists its choices under Engine options on its specification sheet.';
+    return $answer === $retired ? 'Several loaders offer more than one engine brand. Each model lists its choices under Engine options on its specification sheet.' : $answer;
+}
+
 function bl_support_faq(): array
 {
     $groups = [];
     foreach (bl_editable('support')['faq']['items'] as $item) {
         if (bl_support_faq_retired($item)) continue;
-        $row = ['q' => $item['q'], 'a' => $item['a']];
+        $row = ['q' => $item['q'], 'a' => bl_support_faq_answer((string) $item['a'])];
         if ($item['link_label'] !== '' && $item['link_url'] !== '') $row['link'] = [$item['link_label'], $item['link_url']];
         if (!$groups || end($groups)['title'] !== $item['group']) $groups[] = ['title' => $item['group'], 'items' => []];
         $groups[array_key_last($groups)]['items'][] = $row;

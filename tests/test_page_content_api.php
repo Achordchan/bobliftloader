@@ -57,6 +57,11 @@ $engines = bl_engine_brands([$p('KOOP / Rato / Briggs & Stratton'), $p('Zongshen
 $check($engines === ['KOOP', 'Rato', 'Briggs & Stratton', 'Zongshen', 'Laidong', 'Yanmar', 'Kubota'], 'engine brands miscounted: ' . implode(', ', $engines));
 $check(bl_engine_brands([$p('Yanmar / Kubota')]) === ['Yanmar', 'Kubota'], 'plain brands changed');
 $check(bl_engine_brands([$p('Zongshen / Rato / Briggs & Stratton / KOOP / electric version')]) === ['Zongshen', 'Rato', 'Briggs & Stratton', 'KOOP'], 'legacy electric option counted as a brand');
+$legacy = ['Engine options' => 'Zongshen / Rato / Briggs & Stratton / KOOP / electric version', 'Starting' => 'Electric start', 'Fuel' => 'Petrol / diesel'];
+$check(bl_without_retired_engine_options($legacy) === ['Engine options' => 'Zongshen / Rato / Briggs & Stratton / KOOP', 'Starting' => 'Electric start', 'Fuel' => 'Petrol / diesel'], 'retired electric option kept on an imported product');
+$check(bl_without_retired_engine_options(['Engine options' => 'Yanmar / Kubota']) === ['Engine options' => 'Yanmar / Kubota'], 'plain engine options changed');
+$check(bl_support_faq_answer('Several loaders offer more than one engine brand, and some have an electric version. Each model lists its choices under Engine options on its specification sheet.') === 'Several loaders offer more than one engine brand. Each model lists its choices under Engine options on its specification sheet.', 'saved stock engine answer still offers an electric version');
+$check(bl_support_faq_answer('Our own answer.') === 'Our own answer.', 'edited FAQ answer changed');
 
 // Articles follow how the figure is read aloud, and old "a 18.6 kW" summaries still count as generated.
 foreach (['18.6 kW' => 'an', '8 kW' => 'an', '11 kW' => 'an', '800 kg' => 'an', '11,000 kg' => 'an', '7.6 kW' => 'a', '1,000 kg' => 'a', '180 kg' => 'a', '0.15 m³' => 'a', '110 kg' => 'a'] as $figure => $article) {
