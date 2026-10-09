@@ -20,12 +20,7 @@ if ($storyCategory === 'skid-steer-loaders') {
     $under = count(array_filter($rows, static fn($r) => $r['hit']));
     $widest = $rows ? max(array_column($rows, 'value')) : 0;
     $narrowest = $rows[0] ?? null;
-    $brands = [];
-    $electric = false;
-    foreach ($storyProducts as $p) foreach (array_filter(array_map('trim', explode(' / ', $p['specs']['Engine options'] ?? ''))) as $option) {
-        if (stripos($option, 'electric') !== false) $electric = true; else $brands[$option] = true;
-    }
-    $brands = array_keys($brands);
+    ['brands' => $brands, 'electric' => $electric] = bl_engine_brands($storyProducts);
     $story = [
         'eyebrow' => bl_content_text('loaders', 'range_story.eyebrow'),
         'title' => bl_content_html('loaders', 'range_story.title'),

@@ -2,8 +2,9 @@
 declare(strict_types=1);
 
 /**
- * /llms.txt: a Markdown map of the site for AI assistants (llmstxt.org format). The opening text can be replaced through the
- * bl_llms_txt_intro setting (REST /wp/v2/settings); the lists are built from the live products, applications, cases and news
+ * /llms.txt: a Markdown map of the site for AI assistants (llmstxt.org format). The opening text can be replaced in
+ * 网站内容 → 全站设置 (llms.intro, also writable through the global bl_page_content item), else through the older
+ * bl_llms_txt_intro setting; the lists are built from the live products, applications, cases and news
  * on every request. Served only while the site is public, so a coming-soon site lists nothing. Google does not read
  * llms.txt, so the response carries noindex to keep the plain-text file out of search results.
  */
@@ -16,7 +17,7 @@ function bl_llms_txt_default_intro(): string
 BOB-LIFT Loader is the mini skid steer loader and mini dumper line of Xuzhou BOB-LIFT Construction Machinery Co., Ltd., a manufacturer in Xuzhou, Jiangsu, China. Machines are welded, painted and assembled at the company's own factory in Xuzhou and built to order for export.
 
 Key facts:
-- Mini skid steer loaders rated from 200 to 500 kg: stand-on, tracked and wheeled seated models
+- Mini skid steer loaders rated from 200 to 500 kg: stand-on and seated models, on tracks or wheels
 - Mini dumpers rated from 0.5 to 5 tonnes, including tracked and mixer models
 - Loader model names read BL-{running gear}{size class}-{operator position}: T tracked, S wheeled; H stand-on, C seated cabin
 - Specifications on each product page are the published figures; confirm configuration and availability with the sales team
@@ -41,7 +42,8 @@ function bl_llms_txt_link(string $title, string $path, string $description = '')
 function bl_llms_txt(): string
 {
     $applications = bl_apply_application_content($GLOBALS['bl_application_base'] ?? []);
-    $intro = bl_is_wordpress() ? trim((string) get_option(BL_LLMS_TXT_INTRO_OPTION, '')) : '';
+    $intro = trim(bl_content_value('global', 'llms.intro'));
+    if ($intro === '' && bl_is_wordpress()) $intro = trim((string) get_option(BL_LLMS_TXT_INTRO_OPTION, ''));
     $products = ['skid-steer-loaders' => [], 'mini-dumpers' => []];
     foreach (bl_products() as $product) {
         $products[$product['category'] === 'mini-dumpers' ? 'mini-dumpers' : 'skid-steer-loaders'][] = bl_llms_txt_link(bl_product_page_title($product), '/product/' . $product['slug'] . '/', bl_product_description($product));

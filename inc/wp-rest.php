@@ -196,7 +196,7 @@ foreach (array_keys(BL_REST_FIELDS) as $bl_rest_type) {
 unset($bl_rest_type);
 
 /**
- * The 网站内容 screens (home, Support, Applications, loaders, dumpers) through REST. Each screen has one item of the hidden type
+ * The 网站内容 screens (home, Support, Applications, loaders, dumpers…) and 资料下载 through REST. Each screen has one item of the hidden type
  * bl_page_content, slug = the screen's key; its _bl_content meta reads as the page's current content (defaults with the
  * saved changes) and writes through the same cleaning and "keep only what differs" saving as the screen. The item itself
  * holds nothing: the content stays in the bl_content_{page} option the site reads.
@@ -225,11 +225,20 @@ add_action('init', static function (): void {
     ]);
 });
 
+/**
+ * Screens with an item: every 网站内容 screen plus 资料下载 (its "items" list, replaced whole, the catalogue row keeping
+ * id "catalogue"). Tracking codes stay off the API.
+ */
+function bl_page_content_pages(): array
+{
+    return BL_CONTENT_PAGES + ['downloads' => ['title' => '资料下载', 'menu' => '资料下载']];
+}
+
 /** The screen an item stands for, or '' for anything else. */
 function bl_page_content_key(int $postId): string
 {
     $post = get_post($postId);
-    return $post && $post->post_type === 'bl_page_content' && isset(BL_CONTENT_PAGES[$post->post_name]) ? $post->post_name : '';
+    return $post && $post->post_type === 'bl_page_content' && isset(bl_page_content_pages()[$post->post_name]) ? $post->post_name : '';
 }
 
 /** A page's content as it stands now (bl_editable() caches per request, which a write in the same request must not see). */
@@ -261,18 +270,18 @@ function bl_rest_content_state(string $page, bool $refresh = false): array
 // a request that finds the lock taken does not wait for it.
 function bl_page_content_make_items(): void
 {
-    if (get_option('bl_page_content_items') === array_keys(BL_CONTENT_PAGES) || !($token = bl_lock_acquire('page_content_items', 1))) return;
+    if (get_option('bl_page_content_items') === array_keys(bl_page_content_pages()) || !($token = bl_lock_acquire('page_content_items', 1))) return;
     try {
         // The marker is set only once every item is there under its own slug, so a failed insert is tried again later.
         $complete = true;
-        foreach (BL_CONTENT_PAGES as $page => $info) {
+        foreach (bl_page_content_pages() as $page => $info) {
             $page = (string) $page;
             $found = get_posts(['post_type' => 'bl_page_content', 'name' => $page, 'post_status' => 'any', 'numberposts' => 1, 'fields' => 'ids', 'suppress_filters' => true, 'cache_results' => false]);
             if ($found) continue;
             $id = wp_insert_post(['post_type' => 'bl_page_content', 'post_status' => 'private', 'post_name' => $page, 'post_title' => $info['title']], true);
             if (is_wp_error($id) || !$id || bl_page_content_key((int) $id) !== $page) $complete = false;
         }
-        if ($complete) update_option('bl_page_content_items', array_keys(BL_CONTENT_PAGES), true);
+        if ($complete) update_option('bl_page_content_items', array_keys(bl_page_content_pages()), true);
     } finally {
         bl_lock_release('page_content_items', $token);
     }

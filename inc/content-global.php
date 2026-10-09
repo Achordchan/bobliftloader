@@ -50,6 +50,7 @@ return [
         ],
         'cta' => ['eyebrow' => 'YOUR NEXT MOVE', 'title' => 'LET’S FIND YOUR FIT.', 'url' => '/contact/', 'button' => 'Talk to our team '],
         'side' => ['whatsapp' => 'WhatsApp', 'email' => 'Email', 'enquiry' => 'Enquiry', 'top' => 'Top', 'enquiry_url' => '/contact/#enquiry'],
+        'llms' => ['intro' => ''],
     ],
     'sections' => [
         [
@@ -126,6 +127,12 @@ return [
                 ['key' => 'side.enquiry', 'label' => '询盘名称', 'type' => 'text'],
                 ['key' => 'side.top', 'label' => '回顶部名称', 'type' => 'text'],
                 ['key' => 'side.enquiry_url', 'label' => '询盘链接', 'type' => 'url'],
+            ],
+        ],
+        [
+            'title' => '给 AI 助手的站点介绍（llms.txt）',
+            'fields' => [
+                ['key' => 'llms.intro', 'label' => '开头介绍', 'type' => 'textarea', 'help' => '显示在 /llms.txt 开头、产品清单之前，用 Markdown 写（“- ”开头为列表）。留空使用主题自带介绍。产品、应用和新闻清单按线上内容自动生成，不用写在这里。'],
             ],
         ],
     ],
