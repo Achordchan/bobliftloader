@@ -114,12 +114,13 @@ function bl_key_specs(array $product, bool $short = false): array
 /**
  * Engine brands across products, in order of first mention: "Kubota D1105" and "Kubota" count once, as do "Briggs & Stratton
  * Vanguard" and "Briggs & Stratton" (model codes, the words holding a digit, are dropped; a name that extends an earlier
- * one is that brand's product line).
+ * one is that brand's product line). A legacy "electric version" option, still stored on sites seeded before it was dropped, is skipped.
  */
 function bl_engine_brands(array $products): array
 {
     $names = [];
     foreach ($products as $p) foreach (array_filter(array_map('trim', explode(' / ', $p['specs']['Engine options'] ?? ''))) as $option) {
+        if (stripos($option, 'electric') !== false) continue;
         $name = trim((string) preg_replace('/\s*\S*\d\S*/u', '', $option));
         if ($name !== '') $names[] = $name;
     }
