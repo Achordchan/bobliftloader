@@ -40,6 +40,7 @@ function bl_wp_product_record(WP_Post $post): array
     $data = get_post_meta($post->ID, '_bl_record', true);
     if (!is_array($data)) $data = [];
     $record = array_replace(['model' => '', 'category' => 'skid-steer-loaders', 'load' => 0, 'capacity' => '', 'power' => '', 'image' => '', 'gallery' => [], 'source' => '', 'specs' => []], $data);
+    $record['specs'] = bl_without_retired_engine_options((array) $record['specs']);
     $oldSlugs = get_post_meta($post->ID, '_wp_old_slug', false);
     if ($oldSlugs) $record['_wp_old_slug'] = $oldSlugs;
     $record['slug'] = $post->post_name;

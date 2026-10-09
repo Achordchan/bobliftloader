@@ -67,6 +67,21 @@ function bl_downloads_extended(): bool
     return $extension !== 'PDF' || ($row['title'] ?? '') !== '' || ($row['description'] ?? '') !== '' || ($row['scope'] ?? 'all') !== 'all';
 }
 
+/**
+ * The catalogue to offer on a family's pages: a 资料下载 row of type "catalogue" whose scope is that family, else one
+ * for the whole range (scope "all"). Null when neither exists, so a family without its own book shows no button.
+ */
+function bl_family_catalogue(string $category): ?array
+{
+    $all = null;
+    foreach (bl_downloads_for() as $row) {
+        if ($row['type'] !== 'catalogue') continue;
+        if ($row['scope'] === $category) return $row;
+        if ($row['scope'] === 'all') $all ??= $row;
+    }
+    return $all;
+}
+
 /** Resolve model aliases on reads, leaving saved references and product records untouched. */
 function bl_downloads_for(?array $product = null): array
 {

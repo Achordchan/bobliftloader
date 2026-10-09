@@ -111,17 +111,31 @@ function bl_key_specs(array $product, bool $short = false): array
     return $specs;
 }
 
+/** The retired "electric version" engine option, on its own; an engine described with an electric starter is not it. */
+function bl_is_retired_electric_option(string $option): bool
+{
+    return (bool) preg_match('/^electric(\s+versions?)?$/i', trim($option));
+}
+
+/** Engine options without the retired "electric version" choice, which products imported from the old seed data still store. */
+function bl_without_retired_engine_options(array $specs): array
+{
+    if (!isset($specs['Engine options']) || stripos((string) $specs['Engine options'], 'electric') === false) return $specs;
+    $options = array_filter(array_map('trim', explode(' / ', (string) $specs['Engine options'])), static fn($option) => $option !== '' && !bl_is_retired_electric_option($option));
+    $specs['Engine options'] = implode(' / ', $options);
+    return $specs;
+}
+
 /**
  * Engine brands across products, in order of first mention: "Kubota D1105" and "Kubota" count once, as do "Briggs & Stratton
  * Vanguard" and "Briggs & Stratton" (model codes, the words holding a digit, are dropped; a name that extends an earlier
- * one is that brand's product line). An "electric version" option sets the electric flag instead of counting as a brand.
+ * one is that brand's product line). A legacy "electric version" option, still stored on sites seeded before it was dropped, is skipped.
  */
 function bl_engine_brands(array $products): array
 {
     $names = [];
-    $electric = false;
     foreach ($products as $p) foreach (array_filter(array_map('trim', explode(' / ', $p['specs']['Engine options'] ?? ''))) as $option) {
-        if (stripos($option, 'electric') !== false) { $electric = true; continue; }
+        if (bl_is_retired_electric_option($option)) continue;
         $name = trim((string) preg_replace('/\s*\S*\d\S*/u', '', $option));
         if ($name !== '') $names[] = $name;
     }
@@ -136,7 +150,7 @@ function bl_engine_brands(array $products): array
         foreach ($canonical as $known) if (stripos($name, $known . ' ') === 0) { $base = $known; break; }
         $canonical[$name] = $base;
     }
-    return ['brands' => array_values(array_unique(array_map(static fn($name) => $canonical[$name], $brands))), 'electric' => $electric];
+    return array_values(array_unique(array_map(static fn($name) => $canonical[$name], $brands)));
 }
 
 /** An indefinite article for a figure as it is read aloud: "an 18.6 kW", "an 8 kW", "an 11 kW", "a 7.6 kW". */
