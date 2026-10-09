@@ -32,6 +32,17 @@ $check(is_wp_error($write(2, ['items' => [['id' => 'manual', 'url' => $url, 'tit
 $check(bl_downloads_catalogue_row()['url'] === $url, 'a rejected write changed the catalogue');
 $check(!isset($read(2)['items'][0]['size']), 'read exposes the read-only size');
 
+// Family catalogues: a family's own book first, the whole-range one otherwise, none when neither exists.
+$check((bl_family_catalogue('mini-dumpers')['url'] ?? '') === $url, 'whole-range catalogue not offered to a family');
+$dumperUrl = 'https://bobliftloader.com/wp-content/uploads/2026/10/dumpers.pdf';
+$check(!is_wp_error($write(2, ['items' => [
+    ['id' => 'catalogue', 'url' => $url, 'title' => '', 'description' => '', 'type' => 'catalogue', 'scope' => 'skid-steer-loaders', 'models' => ''],
+    ['id' => 'dumper-catalogue', 'url' => $dumperUrl, 'title' => 'Mini dumper catalogue', 'description' => '', 'type' => 'catalogue', 'scope' => 'mini-dumpers', 'models' => ''],
+]])), 'two family catalogues not saved');
+$check((bl_family_catalogue('skid-steer-loaders')['url'] ?? '') === $url && (bl_family_catalogue('mini-dumpers')['url'] ?? '') === $dumperUrl, 'family catalogue picked the wrong book');
+$check(!is_wp_error($write(2, ['items' => [['id' => 'catalogue', 'url' => $url, 'type' => 'catalogue', 'scope' => 'skid-steer-loaders']]])), 'loader-only catalogue not saved');
+$check(bl_family_catalogue('mini-dumpers') === null, 'a family without a book still offers one');
+
 // llms.txt intro: the global item wins over the older setting (bl_editable() caches per request, so write before reading).
 $check(str_contains(bl_llms_txt_default_intro(), 'stand-on and seated models, on tracks or wheels') && !str_contains(bl_llms_txt_default_intro(), 'tracked and wheeled seated'), 'default intro still has the old range wording');
 $GLOBALS['options']['bl_llms_txt_intro'] = 'Older setting intro.';

@@ -24,6 +24,7 @@ function bl_product_copy_fields(bool $loader): array
         'hero_order' => ['起订量前缀', 'Order from', '首屏与采购提示', 'text'],
         'hero_buying' => ['采购链接', 'Shipping &amp; warranty', '首屏与采购提示', 'text'],
         'hero_availability' => ['采购确认提示', 'Confirm your configuration and current availability with our team.', '首屏与采购提示', 'text'],
+        'hero_catalogue' => ['画册链接', 'Catalogue', '首屏与采购提示', 'text'],
         'hero_model_names' => ['型号说明链接', 'How model names work', '首屏与采购提示', 'text'],
         'overview_label' => ['眉题', '{model} overview', '概述', 'text'],
         'overview_title' => ['标题', $loader ? 'A CLOSER LOOK<br>AT YOUR NEXT MACHINE.' : 'MOVE THE MATERIAL.<br>MOVE THE JOB FORWARD.', '概述', 'html'],

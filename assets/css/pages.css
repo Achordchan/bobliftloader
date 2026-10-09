@@ -876,3 +876,7 @@
 @media(max-width:340px){.bl-site .bl-quick-fallback{grid-template-columns:1fr}}
 @keyframes bl-quick-dim{from{opacity:0}}
 @media print{.bl-site .bl-quick{display:none}}
+/* The family's catalogue under the hero intro, so it is one click from the range rather than inside Support. */
+.bl-site .bl-catalog-download{display:block;margin-top:22px}
+.bl-site .bl-catalog-download .bl-text-link{color:var(--ink)}
+.bl-site .bl-catalog-download small{display:block;margin-top:4px;font-size:12px;font-weight:400;opacity:.7}

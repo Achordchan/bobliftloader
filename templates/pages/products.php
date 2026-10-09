@@ -22,10 +22,11 @@ $matches = static function (array $item, string $except = '') use ($active, $sea
 $visible = count(array_filter($scope, static fn($item) => $matches($item)));
 $facetCount = static fn(string $key, string $value): int => count(array_filter($scope, static fn($item) => $matches($item, $key) && ($value === '' || $item['facets'][$key] === $value)));
 $heading = $category ? $catalogCopy('hero_title') : 'FIND YOUR<br>NEXT MACHINE.';
+$familyCatalogue = $category ? bl_family_catalogue($category) : null;
 ?>
 <section class="bl-page-hero bl-catalog-hero bl-shell">
   <?php bl_breadcrumbs([['label' => $category ? bl_family_label($category) : 'Search']]); ?>
-  <div class="bl-page-heading"><div><p class="bl-eyebrow"><?= $catalogCopy('hero_eyebrow') ?></p><h1><?= $heading ?></h1></div><p><?= $catalogCopy('hero_intro') ?></p></div>
+  <div class="bl-page-heading"><div><p class="bl-eyebrow"><?= $catalogCopy('hero_eyebrow') ?></p><h1><?= $heading ?></h1></div><p><?= $catalogCopy('hero_intro') ?><?php if ($familyCatalogue): ?><span class="bl-catalog-download"><a class="bl-text-link" href="<?= bl_escape($familyCatalogue['url']) ?>" target="_blank" rel="noopener"><span><?= $catalogCopy('hero_download') ?><small><?= bl_escape($familyCatalogue['kind']) ?></small></span><?= bl_icon('arrow-down') ?></a></span><?php endif; ?></p></div>
 </section>
 <?php if ($category) require __DIR__ . '/../partials/section-nav.php'; // appears once the family switch scrolls away ?>
 <section class="bl-catalog bl-shell" id="models" aria-label="Product catalogue">
