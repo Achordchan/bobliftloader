@@ -111,12 +111,52 @@ function bl_key_specs(array $product, bool $short = false): array
     return $specs;
 }
 
+/**
+ * Engine brands across products, in order of first mention: "Kubota D1105" and "Kubota" count once, as do "Briggs & Stratton
+ * Vanguard" and "Briggs & Stratton" (model codes, the words holding a digit, are dropped; a name that extends an earlier
+ * one is that brand's product line). An "electric version" option sets the electric flag instead of counting as a brand.
+ */
+function bl_engine_brands(array $products): array
+{
+    $names = [];
+    $electric = false;
+    foreach ($products as $p) foreach (array_filter(array_map('trim', explode(' / ', $p['specs']['Engine options'] ?? ''))) as $option) {
+        if (stripos($option, 'electric') !== false) { $electric = true; continue; }
+        $name = trim((string) preg_replace('/\s*\S*\d\S*/u', '', $option));
+        if ($name !== '') $names[] = $name;
+    }
+    $brands = [];
+    foreach ($names as $name) $brands[$name] = true;
+    $brands = array_keys($brands);
+    $shortest = $brands;
+    usort($shortest, static fn($a, $b) => strlen($a) <=> strlen($b));
+    $canonical = [];
+    foreach ($shortest as $name) {
+        $base = $name;
+        foreach ($canonical as $known) if (stripos($name, $known . ' ') === 0) { $base = $known; break; }
+        $canonical[$name] = $base;
+    }
+    return ['brands' => array_values(array_unique(array_map(static fn($name) => $canonical[$name], $brands))), 'electric' => $electric];
+}
+
+/** An indefinite article for a figure as it is read aloud: "an 18.6 kW", "an 8 kW", "an 11 kW", "a 7.6 kW". */
+function bl_indefinite_article(string $figure): string
+{
+    $digits = preg_replace('/[^\d.]/', '', $figure);
+    $whole = (string) (int) strtok($digits === '' ? '0' : $digits, '.');
+    if ($digits === '' || $digits[0] === '.') return 'a';
+    if ($whole[0] === '8') return 'an';
+    // 11 and 18 ("eleven", "eighteen") and 11,000 / 18,000…; any group of 1-2 digits leading the number in thousands.
+    $lead = strlen($whole) % 3 === 0 ? substr($whole, 0, 3) : substr($whole, 0, strlen($whole) % 3);
+    return in_array($lead, ['11', '18'], true) ? 'an' : 'a';
+}
+
 /** "a 200 kg rated load, a 0.15 m³ bucket and a 7.6 kW engine", from whichever of those figures are published. */
 function bl_spec_phrase(array $product): string
 {
     $parts = [];
     foreach (['Rated load' => 'rated load', 'Drum capacity' => 'mixing drum', 'Bucket capacity' => 'bucket', 'Hopper capacity' => 'hopper', 'Engine power' => 'engine'] as $key => $noun) {
-        if (!empty($product['specs'][$key])) $parts[] = 'a ' . $product['specs'][$key] . ' ' . $noun;
+        if (!empty($product['specs'][$key])) $parts[] = bl_indefinite_article($product['specs'][$key]) . ' ' . $product['specs'][$key] . ' ' . $noun;
     }
     if (count($parts) < 2) return implode('', $parts);
     return implode(', ', array_slice($parts, 0, -1)) . ' and ' . end($parts);
@@ -137,7 +177,7 @@ function bl_product_excerpt(array $product): string
 function bl_is_generated_product_excerpt(string $excerpt, array $names): bool
 {
     $names = implode('|', array_map(static fn($name) => preg_quote($name, '/'), array_filter(array_unique($names), 'strlen')));
-    $figure = 'a [\\d.,]+ ?[^\\s,]* (?:rated load|mixing drum|bucket|hopper|engine)';
+    $figure = 'an? [\\d.,]+ ?[^\\s,]* (?:rated load|mixing drum|bucket|hopper|engine)';
     return ($names !== '' && preg_match('/^(?:' . $names . ') with ' . $figure . '(?:, ' . $figure . ')*(?: and ' . $figure . ')?\\. Explore published specifications and discuss your application with BOB-LIFT\\.$/u', $excerpt))
         || (bool) preg_match('/^Explore the BOB-LIFT [^.]+ (?:mini dumper|mini skid steer loader)\\. View original product photography and discuss the configuration for your next project\\.$/', $excerpt);
 }

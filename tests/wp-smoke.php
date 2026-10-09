@@ -266,7 +266,7 @@ bl_page_content_make_items();
 remove_filter('wp_insert_post_empty_content', $emptyHome, 10);
 bl_test_assert(get_option('bl_page_content_items') === false && !get_page_by_path('home', OBJECT, 'bl_page_content'), 'A failed item insert was marked complete');
 bl_page_content_make_items();
-bl_test_assert(get_option('bl_page_content_items') === array_keys(BL_CONTENT_PAGES) && get_page_by_path('home', OBJECT, 'bl_page_content'), 'A missing item was not made again');
+bl_test_assert(get_option('bl_page_content_items') === array_keys(bl_page_content_pages()) && get_page_by_path('home', OBJECT, 'bl_page_content'), 'A missing item was not made again');
 $supportItem = get_page_by_path('support', OBJECT, 'bl_page_content');
 $savedOptions = ['loaders' => get_option('bl_content_loaders'), 'support' => get_option('bl_content_support')];
 try {
