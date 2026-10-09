@@ -20,7 +20,8 @@ if ($storyCategory === 'skid-steer-loaders') {
     $under = count(array_filter($rows, static fn($r) => $r['hit']));
     $widest = $rows ? max(array_column($rows, 'value')) : 0;
     $narrowest = $rows[0] ?? null;
-    ['brands' => $brands, 'electric' => $electric] = bl_engine_brands($storyProducts);
+    $brands = bl_engine_brands($storyProducts);
+    // {electric_note} stays blanked for engine text saved before the electric note was dropped (no model has an electric version).
     $story = [
         'eyebrow' => bl_content_text('loaders', 'range_story.eyebrow'),
         'title' => bl_content_html('loaders', 'range_story.title'),
@@ -38,7 +39,7 @@ if ($storyCategory === 'skid-steer-loaders') {
         'options' => [
             ['big' => bl_content_html('loaders', 'range_story.gear_big'), 'title' => $rangeCopy['gear_title'], 'text' => $rangeCopy['gear_text']],
             ['big' => bl_content_html('loaders', 'range_story.operator_big'), 'title' => $rangeCopy['operator_title'], 'text' => $rangeCopy['operator_text'], 'link' => ['#model-names', $rangeCopy['operator_link']]],
-            ['big' => strtr(bl_content_html('loaders', 'range_story.engine_big'), ['{brand_count}' => (string) count($brands)]), 'title' => $rangeCopy['engine_title'], 'text' => strtr($rangeCopy['engine_text'], ['{engine_brands}' => (count($brands) > 1 ? implode(', ', array_slice($brands, 0, -1)) . ' or ' . end($brands) : implode('', $brands)), '{electric_note}' => $electric ? $rangeCopy['electric_note'] : ''])],
+            ['big' => strtr(bl_content_html('loaders', 'range_story.engine_big'), ['{brand_count}' => (string) count($brands)]), 'title' => $rangeCopy['engine_title'], 'text' => strtr($rangeCopy['engine_text'], ['{engine_brands}' => (count($brands) > 1 ? implode(', ', array_slice($brands, 0, -1)) . ' or ' . end($brands) : implode('', $brands)), '{electric_note}' => ''])],
         ],
         'colour' => true,
     ];

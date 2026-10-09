@@ -114,14 +114,12 @@ function bl_key_specs(array $product, bool $short = false): array
 /**
  * Engine brands across products, in order of first mention: "Kubota D1105" and "Kubota" count once, as do "Briggs & Stratton
  * Vanguard" and "Briggs & Stratton" (model codes, the words holding a digit, are dropped; a name that extends an earlier
- * one is that brand's product line). An "electric version" option sets the electric flag instead of counting as a brand.
+ * one is that brand's product line).
  */
 function bl_engine_brands(array $products): array
 {
     $names = [];
-    $electric = false;
     foreach ($products as $p) foreach (array_filter(array_map('trim', explode(' / ', $p['specs']['Engine options'] ?? ''))) as $option) {
-        if (stripos($option, 'electric') !== false) { $electric = true; continue; }
         $name = trim((string) preg_replace('/\s*\S*\d\S*/u', '', $option));
         if ($name !== '') $names[] = $name;
     }
@@ -136,7 +134,7 @@ function bl_engine_brands(array $products): array
         foreach ($canonical as $known) if (stripos($name, $known . ' ') === 0) { $base = $known; break; }
         $canonical[$name] = $base;
     }
-    return ['brands' => array_values(array_unique(array_map(static fn($name) => $canonical[$name], $brands))), 'electric' => $electric];
+    return array_values(array_unique(array_map(static fn($name) => $canonical[$name], $brands)));
 }
 
 /** An indefinite article for a figure as it is read aloud: "an 18.6 kW", "an 8 kW", "an 11 kW", "a 7.6 kW". */

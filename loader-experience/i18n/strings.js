@@ -200,7 +200,7 @@ window.BOBLIFT_I18N_ROWS = [
   ['启动方式', 'Starting', 'Запуск', 'Arranque'],
   ['电启动', 'Electric start', 'Электростартер', 'Arranque eléctrico'],
   ['动力品牌可选', 'Engine brand options', 'Варианты двигателя', 'Marcas de motor disponibles'],
-  ['宗申 / 润通 / 百利通 / 科普 / 电动', 'Zongshen / Rato / B&S / KOOP / Electric', 'Zongshen / Rato / B&S / KOOP / электро', 'Zongshen / Rato / B&S / KOOP / eléctrico'],
+  ['宗申 / 润通 / 百利通 / 科普', 'Zongshen / Rato / B&S / KOOP', 'Zongshen / Rato / B&S / KOOP', 'Zongshen / Rato / B&S / KOOP'],
   ['尺寸', 'Dimensions', 'Габариты', 'Dimensiones'],
   ['工作高度', 'Operating height', 'Рабочая высота', 'Altura de trabajo'],
   ['带铲斗长度', 'Length with bucket', 'Длина с ковшом', 'Longitud con cucharón'],

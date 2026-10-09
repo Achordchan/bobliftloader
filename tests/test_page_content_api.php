@@ -53,9 +53,9 @@ $check(($read(1)['llms']['intro'] ?? '') === "Intro from the item.\n\n- Fact one
 
 // Engine brands: model codes and product lines do not count as extra brands.
 $p = static fn(string $options) => ['specs' => ['Engine options' => $options]];
-$engines = bl_engine_brands([$p('KOOP / Rato / Briggs & Stratton'), $p('Zongshen / KOOP / Rato / Briggs & Stratton / electric version'), $p('Laidong / Yanmar / Kubota'), $p('Laidong 385B / Yanmar 3TNV80 / Kubota D1105'), $p('KOOP / Rato / Briggs & Stratton Vanguard')]);
-$check($engines['brands'] === ['KOOP', 'Rato', 'Briggs & Stratton', 'Zongshen', 'Laidong', 'Yanmar', 'Kubota'] && $engines['electric'], 'engine brands miscounted: ' . implode(', ', $engines['brands']));
-$check(bl_engine_brands([$p('Yanmar / Kubota')]) === ['brands' => ['Yanmar', 'Kubota'], 'electric' => false], 'plain brands changed');
+$engines = bl_engine_brands([$p('KOOP / Rato / Briggs & Stratton'), $p('Zongshen / KOOP / Rato / Briggs & Stratton'), $p('Laidong / Yanmar / Kubota'), $p('Laidong 385B / Yanmar 3TNV80 / Kubota D1105'), $p('KOOP / Rato / Briggs & Stratton Vanguard')]);
+$check($engines === ['KOOP', 'Rato', 'Briggs & Stratton', 'Zongshen', 'Laidong', 'Yanmar', 'Kubota'], 'engine brands miscounted: ' . implode(', ', $engines));
+$check(bl_engine_brands([$p('Yanmar / Kubota')]) === ['Yanmar', 'Kubota'], 'plain brands changed');
 
 // Articles follow how the figure is read aloud, and old "a 18.6 kW" summaries still count as generated.
 foreach (['18.6 kW' => 'an', '8 kW' => 'an', '11 kW' => 'an', '800 kg' => 'an', '11,000 kg' => 'an', '7.6 kW' => 'a', '1,000 kg' => 'a', '180 kg' => 'a', '0.15 m³' => 'a', '110 kg' => 'a'] as $figure => $article) {
