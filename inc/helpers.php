@@ -169,7 +169,8 @@ function bl_indefinite_article(string $figure): string
 function bl_spec_phrase(array $product): string
 {
     $parts = [];
-    foreach (['Rated load' => 'rated load', 'Drum capacity' => 'mixing drum', 'Bucket capacity' => 'bucket', 'Hopper capacity' => 'hopper', 'Engine power' => 'engine'] as $key => $noun) {
+    $capacity = ($product['category'] ?? '') === 'mini-dumpers' ? 'hopper' : 'bucket'; // a dumper's capacity is its hopper; the FJZ30's bucket is the front one
+    foreach (['Rated load' => 'rated load', 'Drum capacity' => 'mixing drum', 'Bucket capacity' => $capacity, 'Hopper capacity' => 'hopper', 'Engine power' => 'engine'] as $key => $noun) {
         if (!empty($product['specs'][$key])) $parts[] = bl_indefinite_article($product['specs'][$key]) . ' ' . $product['specs'][$key] . ' ' . $noun;
     }
     if (count($parts) < 2) return implode('', $parts);
@@ -255,10 +256,10 @@ function bl_spec_groups(array $specs): array
 {
     $specs = array_slice($specs, 0, BL_CONTENT_LIMITS['specs'], true);
     $groups = [
-        'Performance' => ['Rated load', 'Lifting capacity', 'Bucket capacity', 'Drum capacity', 'Travel speed', 'Max travel speed', 'Hydraulic pressure', 'Gradeability', 'Tipping', 'Tipping angle', 'Machine weight'],
-        'Engine' => ['Engine options', 'Engine model', 'Engine power', 'Engine type', 'Fuel', 'Starting', 'Emission standard', 'Operating voltage'],
-        'Dimensions' => ['Working height', 'Length with bucket', 'Length without bucket', 'Machine width', 'Bucket width', 'Overall height', 'Standard dimensions', 'Dimensions with roof / cab', 'Hopper size', 'Drum length', 'Drum opening diameter', 'Loading bucket length', 'Loading bucket opening width', 'Wheelbase', 'Minimum ground clearance'],
-        'Build' => ['Running gear', 'Drive', 'Brakes', 'Operator station', 'Controls', 'Body material', 'Bucket material'],
+        'Performance' => ['Rated load', 'Lifting capacity', 'Breakout force', 'Bucket capacity', 'Drum capacity', 'Travel speed', 'Max travel speed', 'Hydraulic pressure', 'Hydraulic pumps', 'Gradeability', 'Tipping', 'Tipping angle', 'Machine weight'],
+        'Engine' => ['Engine options', 'Engine model', 'Engine power', 'Engine type', 'Fuel', 'Fuel tank', 'Starting', 'Emission standard', 'Operating voltage'],
+        'Dimensions' => ['Working height', 'Max dumping height', 'Height with arms raised', 'Length with bucket', 'Length without bucket', 'Machine width', 'Bucket width', 'Overall height', 'Standard dimensions', 'Length with footplate', 'Dimensions with roof / cab', 'Hopper size', 'Drum length', 'Drum opening diameter', 'Loading bucket length', 'Loading bucket opening width', 'Wheelbase', 'Minimum ground clearance', 'Ground clearance'],
+        'Build' => ['Running gear', 'Drive', 'Brakes', 'Operator station', 'Controls', 'Travel control', 'Body material', 'Bucket material'],
     ];
     $result = [];
     foreach ($groups as $group => $labels) {
