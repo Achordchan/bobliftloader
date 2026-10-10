@@ -99,6 +99,15 @@ function bl_products(): array
     return $products;
 }
 
+/** A dumper's capacity figure: its hopper, or the older "Bucket capacity" name where a record still uses that. Empty values do not count. */
+function bl_dumper_capacity(array $specs): string
+{
+    foreach (['Hopper capacity', 'Bucket capacity'] as $key) {
+        if (trim((string) ($specs[$key] ?? '')) !== '') return trim((string) $specs[$key]);
+    }
+    return '';
+}
+
 /** Up to three headline figures, in the order buyers compare them; short labels suit the catalogue cards. */
 function bl_key_specs(array $product, bool $short = false): array
 {

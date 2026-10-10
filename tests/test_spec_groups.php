@@ -31,6 +31,11 @@ $check(isset($hopper['Performance']['Hopper capacity']) && !isset($hopper['Detai
 $choices = bl_spec_choices();
 foreach (['Hopper capacity', 'Breakout force', 'Hydraulic pumps', 'Fuel tank', 'Max dumping height', 'Height with arms raised', 'Dimensions with footplate', 'Ground clearance', 'Travel control'] as $label) $check(!empty($choices[$label]), "$label has no edit-screen name");
 
+// A dumper's capacity figure is its hopper, else the older bucket name; an empty value does not hide the other one.
+$check(bl_dumper_capacity(['Hopper capacity' => '1.5 m³', 'Bucket capacity' => '0.3 m³']) === '1.5 m³', 'hopper not preferred over a front bucket');
+$check(bl_dumper_capacity(['Hopper capacity' => '', 'Bucket capacity' => '0.8 m³']) === '0.8 m³', 'an empty hopper hid the legacy bucket figure');
+$check(bl_dumper_capacity(['Bucket capacity' => ' 0.8 m³ ']) === '0.8 m³' && bl_dumper_capacity(['Drum capacity' => '200 L']) === '', 'legacy name or no capacity');
+
 // A generated summary: a dumper's capacity is its hopper, a loader's its bucket.
 $dumper = ['name' => 'FY30 3 Ton Mini Dumper', 'model' => 'FY30', 'category' => 'mini-dumpers', 'specs' => ['Rated load' => '3,000 kg', 'Bucket capacity' => '1.5 m³', 'Engine power' => '37 kW']];
 $loader = ['name' => 'BL-T750-H', 'model' => 'BL-T750-H', 'category' => 'skid-steer-loaders', 'specs' => ['Rated load' => '410 kg', 'Bucket capacity' => '0.15 m³', 'Engine power' => '18.6 kW']];

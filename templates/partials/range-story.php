@@ -48,14 +48,14 @@ if ($storyCategory === 'skid-steer-loaders') {
     foreach ($storyProducts as $p) {
         if (!$p['load']) { if (!empty($p['specs']['Drum capacity'])) $mixers[] = $p; continue; }
         $tracked = stripos($p['specs']['Running gear'] ?? '', 'track') !== false;
-        // A dumper's capacity is its hopper; a record still using the older name for it reads as a bucket there.
-        $hopper = $p['specs']['Hopper capacity'] ?? '';
-        $rows[] = ['model' => $p['model'], 'url' => bl_product_url($p), 'value' => (int) $p['load'], 'sub' => 0, 'label' => number_format((int) $p['load']) . ' kg', 'note' => $hopper !== '' ? $hopper . ' hopper' : (!empty($p['specs']['Bucket capacity']) ? $p['specs']['Bucket capacity'] . ' bucket' : ($tracked ? 'Tracked' : '')), 'hit' => true];
+        // A dumper's capacity is its hopper, whichever name the record gives it.
+        $hopper = bl_dumper_capacity($p['specs']);
+        $rows[] = ['model' => $p['model'], 'url' => bl_product_url($p), 'value' => (int) $p['load'], 'sub' => 0, 'label' => number_format((int) $p['load']) . ' kg', 'note' => $hopper !== '' ? $hopper . ' hopper' : ($tracked ? 'Tracked' : ''), 'hit' => true];
     }
     usort($rows, static fn($a, $b) => [$a['value'], $a['model']] <=> [$b['value'], $b['model']]);
     $top = $rows ? (int) ceil(max(array_column($rows, 'value')) / 1000) * 1000 : 5000;
     $scale = ['from' => 0, 'to' => $top, 'step' => 1000, 'tick' => static fn(int $v): string => $v ? ($v / 1000) . ' t' : '0', 'unit' => '', 'marker' => null];
-    $buckets = array_filter(array_map(static fn($p) => $number($p['specs']['Hopper capacity'] ?? $p['specs']['Bucket capacity'] ?? ''), $storyProducts));
+    $buckets = array_filter(array_map(static fn($p) => $number(bl_dumper_capacity($p['specs'])), $storyProducts));
     $lightest = $rows[0] ?? null;
     $heaviest = end($rows) ?: null;
     $mixer = $mixers[0] ?? null;

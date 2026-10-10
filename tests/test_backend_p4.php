@@ -56,6 +56,7 @@ $check(bl_product_derived(['category' => 'mini-dumpers', 'specs' => $both])['cap
 $check(bl_product_derived(['category' => 'mini-dumpers', 'specs' => ['Bucket capacity' => '0.8 m³']])['capacity'] === '0.8', 'a dumper still using the older name lost its capacity');
 $check(bl_product_derived(['category' => 'mini-dumpers', 'specs' => ['Hopper capacity' => '1.2 m³']])['capacity'] === '1.2', 'a dumper with Hopper capacity has no capacity');
 $check(bl_product_derived(['category' => 'skid-steer-loaders', 'specs' => $both])['capacity'] === '0.3', 'a loader no longer takes its bucket first');
+$check(bl_product_derived(['category' => 'mini-dumpers', 'specs' => ['Hopper capacity' => '', 'Bucket capacity' => '0.8 m³']])['capacity'] === '0.8', 'an empty hopper hid the legacy bucket capacity');
 // British spelling: "Rubber tyres" passes the running-gear check and still files the loader under Wheeled.
 foreach (['Rubber tyres', 'Rubber-tyred wheels', 'Rubber tires', 'Rubber tracks'] as $gear) $check(bl_specs_error(['Running gear' => $gear]) === '', 'running gear refused: ' . $gear);
 $request = new WP_REST_Request(['id' => 1, 'meta' => ['_bl_record' => ['specs' => ['Running gear' => 'Rubber tyres']]]]);
