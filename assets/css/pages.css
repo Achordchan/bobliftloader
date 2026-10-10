@@ -366,6 +366,8 @@
 .bl-site .bl-compare-table thead span{font:600 var(--fs-h5)/1 var(--display)}
 .bl-site .bl-compare-table thead small{font-size:var(--fs-micro);color:var(--muted);font-weight:500}
 .bl-site .bl-compare-table td{font-weight:600;white-space:nowrap}
+/* Figures stay on one line; a longer entry (the gradeability note, the tipping options) wraps inside a column of bounded width, so one of them no longer stretches every column. */
+.bl-site .bl-compare-table td:not(.bl-compare-figure){white-space:normal;min-width:170px;max-width:230px;text-wrap:balance}
 .bl-site .bl-compare-table tbody tr:nth-child(odd) td{background:#f8f9f5}
 .bl-site .bl-compare-actions td{border-bottom:0}
 .bl-site .bl-compare-actions .bl-text-link{font-size:var(--fs-label);gap:10px}
