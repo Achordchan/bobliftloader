@@ -35,7 +35,7 @@ $check(($byName[$withFilm]['video'] ?? '') === $film, 'bl_attachments dropped th
 
 // Markup: the film loads nothing until the script plays it, and keeps the picture as its poster.
 $html = bl_attachment_media(['name' => 'Brush cutter', 'image' => '/img/brush.webp', 'video' => $film], 'Brush cutter attachment');
-foreach (['<video ', 'src="' . $film . '"', 'poster="/img/brush.webp"', 'preload="none"', ' muted ', ' loop ', ' playsinline ', 'data-bl-loop', 'aria-label="Brush cutter attachment, in use"'] as $needle) {
+foreach (['<div class="bl-attachment-film"><video ', '</video></div>', 'src="' . $film . '"', 'poster="/img/brush.webp"', 'preload="none"', ' muted ', ' loop ', ' playsinline ', 'data-bl-loop', 'aria-label="Brush cutter attachment, in use"'] as $needle) {
     $check(str_contains($html, $needle), "film markup lacks $needle");
 }
 $check(!str_contains($html, 'autoplay') && !str_contains($html, 'controls'), 'film plays or shows controls before the script runs');
