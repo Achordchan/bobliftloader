@@ -106,11 +106,30 @@ function bl_attachments(): array
 {
     $groups = [];
     foreach (bl_editable('loaders')['attachments']['items'] as $item) {
-        $row = ['name' => $item['name'], 'use' => $item['use'], 'image' => $item['image']];
+        $row = ['name' => $item['name'], 'use' => $item['use'], 'image' => $item['image'], 'video' => (string) ($item['video'] ?? '')];
         if (!empty($item['aliases'])) $row['aliases'] = $item['aliases'];
         $groups[$item['group']][] = $row;
     }
     return $groups;
+}
+
+/**
+ * The picture of an attachment card: a short silent film of the tool at work when one is set, with the card's picture as
+ * its poster, else the picture alone. The film is set to preload nothing; assets/js/attachment-loops.js plays it only
+ * while it is on screen, so a page of cards downloads nothing a visitor has not scrolled to. $alt describes the picture;
+ * empty marks the card's media decorative.
+ */
+function bl_attachment_media(array $item, string $alt = ''): string
+{
+    $image = (string) ($item['image'] ?? '');
+    $video = (string) ($item['video'] ?? '');
+    if ($video !== '') {
+        return '<video class="bl-attachment-loop" src="' . bl_escape($video) . '" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback width="480" height="360"'
+            . ($image !== '' ? ' poster="' . bl_escape($image) . '"' : '')
+            . ($alt !== '' ? ' aria-label="' . bl_escape($alt) . ', in use"' : ' aria-hidden="true"')
+            . ' data-bl-loop></video>';
+    }
+    return $image !== '' ? '<img src="' . bl_escape($image) . '" alt="' . bl_escape($alt) . '" width="480" height="360" loading="lazy">' : '';
 }
 
 /** Jobs a mini skid steer is bought for, shown above the attachments; each lists the tools it uses, by their names below. */

@@ -33,7 +33,7 @@ $loaderJobs = bl_loader_jobs();
       <h3 id="attachments-group-<?= $groupIndex ?>"><?= bl_escape($group) ?> <small><?= count($items) ?></small></h3>
       <ul aria-labelledby="attachments-group-<?= $groupIndex ?>" data-swipe-row>
         <?php foreach ($items as $item): ?>
-        <li><?php if ($item['image'] !== ''): ?><img src="<?= bl_escape($item['image']) ?>" alt="" width="480" height="360" loading="lazy"><?php endif; ?><strong><?= bl_escape($item['name']) ?></strong><span><?= bl_escape($item['use']) ?></span></li>
+        <li><?= bl_attachment_media($item) ?><strong><?= bl_escape($item['name']) ?></strong><span><?= bl_escape($item['use']) ?></span></li>
         <?php endforeach; ?>
       </ul>
     </div>
