@@ -55,7 +55,7 @@ function bl_rest_product_slugs($value, array $existing = []): array
  * everything else in a record (imported sections, dates…) keeps its stored value whatever a client sends.
  */
 const BL_REST_FIELDS = [
-    'bl_product' => ['model', 'category', 'source', 'spec_source', 'image', 'gallery', 'gallery_alt', 'specs', 'videos', 'seo_description', 'highlights', 'faq', 'attachments', 'photos'],
+    'bl_product' => ['model', 'category', 'source', 'spec_source', 'image', 'gallery', 'gallery_alt', 'specs', 'videos', 'seo_description', 'lead', 'highlights', 'faq', 'attachments', 'photos'],
     'bl_news' => ['category', 'line', 'caption', 'source', 'image', 'hide_cover', 'products', 'event', 'poster'],
     'bl_application' => ['hub', 'products', 'facts', 'source', 'image'],
 ];
@@ -113,6 +113,12 @@ function bl_rest_field(string $type, string $key, $value)
             return $alts;
         case 'seo_description':
             return mb_substr($text, 0, 200);
+        case 'lead':
+            // This product's own lead time ({"value": "10", "unit": "working days"}); an empty value drops it, and the site-wide one stands.
+            $input = is_array($value) ? $value : [];
+            $lead = mb_substr(sanitize_text_field(is_scalar($input['value'] ?? null) ? (string) $input['value'] : ''), 0, 24);
+            if ($lead === '') return [];
+            return ['value' => $lead, 'unit' => mb_substr(sanitize_text_field(is_scalar($input['unit'] ?? null) ? (string) $input['unit'] : ''), 0, 24)];
         case 'highlights':
             $items = [];
             foreach (array_values((array) $value) as $item) {

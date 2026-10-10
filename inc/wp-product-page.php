@@ -52,6 +52,9 @@ function bl_product_page_meta_box(WP_Post $post, string $kind = 'overview'): voi
         $description = (string) ($record['seo_description'] ?? '');
         bl_admin_field('搜索描述', 'bl-seo-description', '<textarea id="bl-seo-description" name="bl_page[seo_description]" rows="3" class="large-text" maxlength="200">' . esc_textarea($description) . '</textarea>', '谷歌搜索结果里显示的一段话，建议 140–155 个字符，写清机型、关键参数和适用场景。留空时用“卡片摘要”。');
 
+        $lead = is_array($record['lead'] ?? null) ? $record['lead'] : [];
+        bl_admin_field('交期', 'bl-lead-value', bl_admin_input('bl-lead-value', 'bl_page[lead][value]', (string) ($lead['value'] ?? ''), 'text', ' maxlength="24" class="small-text"') . ' ' . bl_admin_input('', 'bl_page[lead][unit]', (string) ($lead['unit'] ?? ''), 'text', ' maxlength="24" class="regular-text" placeholder="working days" aria-label="单位"'), '这台机器自己的交期，显示在产品页首屏和“Shipping”里，例如 10 和 working days。数字留空时用“采购与售后 → 采购条款”里的统一交期；单位留空时用统一的单位。');
+
         bl_admin_field('亮点', '', bl_product_page_rows('highlights', (array) ($record['highlights'] ?? []), BL_CONTENT_LIMITS['highlights'], '添加亮点'), '显示在概述旁，最多 3 条，写这台机器和同系列其他型号不同的地方。');
 
     }
@@ -78,6 +81,7 @@ add_action('save_post_bl_product', static function (int $postId): void {
     $result = bl_record_locked($postId, static function (array $record) use ($input): array {
         // The REST cleaner (inc/wp-rest.php) holds the rules, so a value saved here and one written through the API match.
         $record['seo_description'] = bl_rest_field('bl_product', 'seo_description', is_scalar($input['seo_description'] ?? null) ? (string) $input['seo_description'] : '');
+        $record['lead'] = bl_rest_field('bl_product', 'lead', is_array($input['lead'] ?? null) ? $input['lead'] : []);
         $record['highlights'] = bl_rest_field('bl_product', 'highlights', bl_admin_posted_rows($input['highlights'] ?? [], ['title', 'text']));
         $record['faq'] = bl_rest_field('bl_product', 'faq', bl_admin_posted_rows($input['faq'] ?? [], ['q', 'a', 'link_label', 'link_url']));
         $record['attachments'] = bl_rest_field('bl_product', 'attachments', (array) ($input['attachments'] ?? []));

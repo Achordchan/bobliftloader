@@ -12,6 +12,22 @@ function bl_support_terms(): array
     return bl_editable('support')['terms'];
 }
 
+/**
+ * The terms for one product: the site-wide terms, with the lead time the product sets for itself, if it sets one
+ * (a dumper that ships faster than the loaders, say). Without one the site-wide lead time stands.
+ */
+function bl_product_terms(array $product): array
+{
+    $terms = bl_support_terms();
+    $lead = is_array($product['lead'] ?? null) ? $product['lead'] : [];
+    $value = trim((string) ($lead['value'] ?? ''));
+    if ($value === '') return $terms;
+    $terms['lead']['value'] = $value;
+    $unit = trim((string) ($lead['unit'] ?? ''));
+    if ($unit !== '') $terms['lead']['unit'] = $unit;
+    return $terms;
+}
+
 /** From the first message to the machine leaving Xuzhou. A step's link is [url, label]. */
 function bl_buying_steps(): array
 {
