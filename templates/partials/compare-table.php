@@ -6,7 +6,7 @@
  */
 $compareSets = [
     'skid-steer-loaders' => ['label' => strtoupper(bl_family_label('loader')), 'rows' => ['Rated load', 'Lifting capacity', 'Bucket capacity', 'Engine power', 'Machine weight', 'Machine width', 'Overall height', 'Length with bucket', 'Gradeability', 'Travel speed', 'Running gear'], 'note' => 'Figures from the BOB-LIFT technical sheets. Engine brand and attachments are set per order, so confirm your configuration with our team.'],
-    'mini-dumpers' => ['label' => strtoupper(bl_family_label('dumper')), 'rows' => ['Rated load', 'Bucket capacity', 'Engine power', 'Machine weight', 'Standard dimensions', 'Drive', 'Max travel speed', 'Gradeability', 'Drum capacity', 'Running gear', 'Tipping', 'Dimensions with roof / cab', 'Operating voltage', 'Minimum ground clearance'], 'note' => bl_escape(bl_editable('dumpers')['compare']['note'])],
+    'mini-dumpers' => ['label' => strtoupper(bl_family_label('dumper')), 'rows' => ['Rated load', 'Hopper capacity', 'Engine power', 'Machine weight', 'Standard dimensions', 'Drive', 'Max travel speed', 'Gradeability', 'Drum capacity', 'Running gear', 'Tipping', 'Dimensions with roof / cab', 'Operating voltage', 'Minimum ground clearance'], 'note' => bl_escape(bl_editable('dumpers')['compare']['note'])],
 ];
 $compareSet = $compareSets[$compareCategory];
 $compareProducts = array_values(array_filter(bl_products(), static fn($p) => $p['category'] === $compareCategory && $p['specs']));

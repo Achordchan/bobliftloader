@@ -343,7 +343,7 @@ function bl_product_derived(array $record): array
     if (preg_match('/^([\d,. ]+)\s*kg$/i', (string) ($specs['Rated load'] ?? ''), $matches)) {
         $record['load'] = min(1000000, max(0, (int) str_replace([',', ' '], '', $matches[1])));
     }
-    $record['capacity'] = preg_match('/^([\d.]+)\s*m³$/u', (string) ($specs['Bucket capacity'] ?? ''), $matches) ? $matches[1] : '';
+    $record['capacity'] = preg_match('/^([\d.]+)\s*m³$/u', (string) (($specs['Bucket capacity'] ?? '') ?: ($specs['Hopper capacity'] ?? '')), $matches) ? $matches[1] : '';
     $record['power'] = preg_match('/^([\d.]+)\s*kW$/i', (string) ($specs['Engine power'] ?? ''), $matches) ? $matches[1] : '';
     return $record;
 }

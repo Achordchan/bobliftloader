@@ -23,9 +23,13 @@ $check(isset($groups['Build']['Travel control']), 'travel control not under Buil
 $check(array_keys($groups['Dimensions']) === ['Working height', 'Max dumping height', 'Height with arms raised', 'Overall height', 'Standard dimensions', 'Dimensions with footplate', 'Ground clearance'], 'dimension rows out of reading order');
 $check(array_keys($groups['Engine']) === ['Engine power', 'Fuel', 'Fuel tank'], 'fuel tank does not follow the fuel');
 
+// A dumper's hopper capacity is a performance figure, like the loader's bucket capacity.
+$hopper = bl_spec_groups(['Rated load' => '3,000 kg', 'Hopper capacity' => '1.5 m³', 'Engine power' => '37 kW']);
+$check(isset($hopper['Performance']['Hopper capacity']) && !isset($hopper['Details']), 'hopper capacity not under Performance');
+
 // Every label that has a group also has an edit-screen name in Chinese.
 $choices = bl_spec_choices();
-foreach (['Breakout force', 'Hydraulic pumps', 'Fuel tank', 'Max dumping height', 'Height with arms raised', 'Dimensions with footplate', 'Ground clearance', 'Travel control'] as $label) $check(!empty($choices[$label]), "$label has no edit-screen name");
+foreach (['Hopper capacity', 'Breakout force', 'Hydraulic pumps', 'Fuel tank', 'Max dumping height', 'Height with arms raised', 'Dimensions with footplate', 'Ground clearance', 'Travel control'] as $label) $check(!empty($choices[$label]), "$label has no edit-screen name");
 
 // A generated summary: a dumper's capacity is its hopper, a loader's its bucket.
 $dumper = ['name' => 'FY30 3 Ton Mini Dumper', 'model' => 'FY30', 'category' => 'mini-dumpers', 'specs' => ['Rated load' => '3,000 kg', 'Bucket capacity' => '1.5 m³', 'Engine power' => '37 kW']];

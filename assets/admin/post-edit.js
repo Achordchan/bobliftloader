@@ -55,7 +55,7 @@
       var key = select && select.value ? select.value : (custom ? custom.value.trim() : '');
       var rule = specRules[key];
       var untouched = value.value === value.defaultValue && (!select || select.value === (select.querySelector('option[selected]') || {}).value);
-      var ok = !rule || value.value.trim() === '' || untouched || new RegExp('^(?:' + rule.pattern + ')$', key === 'Bucket capacity' ? 'u' : 'iu').test(value.value.trim());
+      var ok = !rule || value.value.trim() === '' || untouched || new RegExp('^(?:' + rule.pattern + ')$', key === 'Bucket capacity' || key === 'Hopper capacity' ? 'u' : 'iu').test(value.value.trim());
       specError(row, ok ? '' : '这个值读不出来，前台筛选和图表会用不上。请写成：' + rule.example);
       if (!ok && !first) first = value;
     });
