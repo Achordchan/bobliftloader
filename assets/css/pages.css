@@ -413,7 +413,7 @@
    inside it (its width is stated, so the column still takes no room when there are no thumbnails). Rows and dots on
    narrower screens undo this in page-responsive.css and product.css. */
 .bl-site .bl-gallery-thumbs{display:flex;flex-direction:column;gap:clamp(8px,.6vw,14px);grid-column:1;grid-row:1;align-self:stretch;width:clamp(72px,5vw,120px);contain:size;overflow:hidden auto;scrollbar-width:thin;scrollbar-color:#9eafb9 transparent}
-.bl-site .bl-gallery-thumbs button{flex:none;width:100%;aspect-ratio:1;background:white;border:1px solid transparent;padding:6px;transition:border-color .2s}
+.bl-site .bl-gallery-thumbs button{position:relative;flex:none;width:100%;aspect-ratio:1;background:white;border:1px solid transparent;padding:6px;transition:border-color .2s}
 /* The column clips its own edges, so the focus ring sits inside the thumbnail. */
 .bl-site .bl-gallery-thumbs button:focus-visible{outline-offset:-3px}
 /* A set that runs past the panel fades at the edge where more is waiting (equipment.js sets the classes). */
@@ -422,7 +422,9 @@
 .bl-site .bl-gallery-thumbs.bl-more-above.bl-more-below{-webkit-mask-image:linear-gradient(#0000,#000 40px,#000 calc(100% - 40px),#0000);mask-image:linear-gradient(#0000,#000 40px,#000 calc(100% - 40px),#0000)}
 @media(hover:hover){.bl-site .bl-gallery-thumbs button:hover{border-color:#9eafb9}}
 .bl-site .bl-gallery-thumbs button[aria-pressed=true]{border-color:var(--blue)}
-.bl-site .bl-gallery-thumbs img{width:100%;height:100%;object-fit:contain}
+/* Every thumbnail is the same square whatever the photograph's shape: the picture fills it from the middle and takes no part in sizing
+   (a portrait photograph used to make its tile taller than the rest). */
+.bl-site .bl-gallery-thumbs img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);object-fit:cover}
 .bl-site .bl-product-intro{align-self:center;min-width:0}
 .bl-site .bl-product-intro h1{font:600 clamp(72px,6.2vw,160px)/.9 var(--display);margin:clamp(18px,1.4vw,32px) 0;letter-spacing:-.01em}
 .bl-site .bl-product-intro h1>span{display:block;font:500 var(--fs-h5)/1.25 var(--display);margin-top:14px;color:#546570;letter-spacing:0}
