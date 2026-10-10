@@ -140,6 +140,13 @@
 .bl-site .bl-attachments-group ul{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(10px,.8vw,20px)}
 .bl-site .bl-attachments-group li{display:flex;flex-direction:column;gap:4px}
 .bl-site .bl-attachments-group img{width:100%;aspect-ratio:4/3;object-fit:contain;background:#fff;margin-bottom:8px}
+.bl-site .bl-attachment-film{position:relative;margin-bottom:8px}
+.bl-site .bl-attachment-film video{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;background:#fff}
+/* The pause button every looping card carries, so motion that starts by itself can be stopped (assets/js/attachment-loops.js). */
+.bl-site .bl-loop-toggle{position:absolute;right:8px;bottom:8px;display:grid;place-items:center;width:36px;height:36px;padding:0;border:0;border-radius:50%;background:rgba(8,28,43,.78);color:#fff;cursor:pointer}
+.bl-site .bl-loop-toggle:hover{background:var(--ink)}
+.bl-site .bl-loop-toggle:focus-visible{outline-offset:2px}
+.bl-site .bl-loop-toggle svg{width:16px;height:16px;fill:currentColor}
 .bl-site .bl-attachments-group strong{font-size:var(--fs-small);line-height:1.3}
 .bl-site .bl-attachments-group span{font-size:var(--fs-micro);line-height:1.5;color:var(--muted)}
 .bl-site .bl-attachments-note{margin-top:clamp(20px,1.4vw,32px);padding-top:clamp(16px,1.2vw,26px);border-top:1px solid var(--line);font-size:var(--fs-small);color:var(--muted)}

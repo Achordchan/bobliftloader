@@ -1,3 +1,4 @@
+import { initializeAttachmentLoops } from './attachment-loops.js';
 import { initializeDialogs } from './dialogs.js';
 import { initializeEquipment, scrollBehavior } from './equipment.js';
 import { initializeHero } from './hero.js';
@@ -10,6 +11,7 @@ import { initializeSearch } from './search.js';
 import { initializeSectionNav } from './section-nav.js';
 import { initializeQuick } from './quick.js';
 
+initializeAttachmentLoops();
 initializeDialogs();
 initializeEquipment();
 initializeHero();
