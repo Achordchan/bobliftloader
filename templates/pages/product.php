@@ -62,7 +62,7 @@ $lightboxIndex = 0; ?>
   <ul class="bl-product-tools" aria-labelledby="works-with-title" data-swipe-row style="--tools:<?= count($attachmentsShown) ?>"><?php foreach ($attachmentsShown as $item): ?><li><?= bl_attachment_media($item, $item['name'] . ' attachment') ?><strong><?= bl_escape($item['name']) ?></strong><span><?= bl_escape($item['use']) ?></span></li><?php endforeach; ?></ul>
 </section>
 <?php elseif ($dumperJobs): ?>
-<section class="bl-product-works bl-shell" id="works-with" aria-labelledby="works-with-title">
+<section class="bl-product-works bl-product-works-jobs bl-shell" id="works-with" aria-labelledby="works-with-title">
   <div class="bl-product-section-head"><div><h2 class="bl-eyebrow" id="works-with-title"><?= $copy('jobs_label') ?></h2><p class="bl-product-display"><?= $copy('jobs_title') ?></p></div><div><p><?= $copy('jobs_intro') ?></p><a class="bl-text-link" href="<?= bl_escape($familyUrl . '#dumper-jobs') ?>"><?= $copy('jobs_link') ?> <?= bl_icon('arrow-up-right') ?></a></div></div>
   <ul class="bl-product-jobs"><?php foreach ($dumperJobs as $job): $others = array_values(array_filter($job['models'], static fn($m) => $m['slug'] !== $product['slug'])); ?><li><strong><?= bl_escape($job['title']) ?></strong><p><?= bl_escape($job['text']) ?></p><?php if ($others): ?><span><?= rtrim($copy('jobs_others')) ?> <?php foreach ($others as $i => $model): ?><?= $i ? ', ' : '' ?><a href="<?= bl_escape(bl_product_url($model)) ?>"><?= bl_escape($model['model']) ?></a><?php endforeach; ?></span><?php endif; ?></li><?php endforeach; ?></ul>
 </section>
