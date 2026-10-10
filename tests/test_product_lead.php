@@ -53,6 +53,12 @@ $check(str_contains($html, '<b>10</b> working days'), 'hero did not show the pro
 $check(str_contains($html, 'Ships in 10 working days from order'), 'Shipping did not show the product lead time');
 $check(!str_contains($html, $site['lead']['value'] . ' ' . $site['lead']['unit']) || $site['lead']['value'] === '10', 'the site-wide lead time still shows on a product with its own');
 
+// A saved loading note that uses the lead-time variables reads the product's own lead time, like the rest of the Shipping block.
+$GLOBALS['options']['bl_content_dumpers'] = ['product' => ['copy' => ['shipping_loading' => 'Loading follows a {lead_time_words} {lead_unit} build']]];
+$dumper = array_values(array_filter(bl_read_data('products'), static fn(array $p): bool => $p['slug'] === '500kg-tracked-mini-dumper'))[0];
+$html = $render($dumper + ['lead' => ['value' => '10', 'unit' => 'working days']]);
+$check(str_contains($html, 'Ships in 10 working days from order. Loading follows a 10 working days build'), 'the loading note kept the site-wide lead time on a product with its own');
+
 // The edit screen offers it, with what is saved.
 $GLOBALS['meta'][1]['_bl_record'] = ['lead' => ['value' => '30', 'unit' => 'working days']];
 ob_start(); bl_product_page_meta_box(new WP_Post(1, 'bl_product', 'machine')); $box = ob_get_clean();
