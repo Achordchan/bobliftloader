@@ -31,6 +31,8 @@ foreach (['Breakout force', 'Hydraulic pumps', 'Fuel tank', 'Max dumping height'
 $dumper = ['name' => 'FY30 3 Ton Mini Dumper', 'model' => 'FY30', 'category' => 'mini-dumpers', 'specs' => ['Rated load' => '3,000 kg', 'Bucket capacity' => '1.5 m³', 'Engine power' => '37 kW']];
 $loader = ['name' => 'BL-T750-H', 'model' => 'BL-T750-H', 'category' => 'skid-steer-loaders', 'specs' => ['Rated load' => '410 kg', 'Bucket capacity' => '0.15 m³', 'Engine power' => '18.6 kW']];
 $check(bl_spec_phrase($dumper) === 'a 3,000 kg rated load, a 1.5 m³ hopper and a 37 kW engine', 'dumper summary: ' . bl_spec_phrase($dumper));
+$both = $dumper; $both['specs']['Hopper capacity'] = '1.5 m³'; $both['specs']['Bucket capacity'] = '0.3 m³';
+$check(str_contains(bl_spec_phrase($both), 'a 0.3 m³ bucket') && str_contains(bl_spec_phrase($both), 'a 1.5 m³ hopper'), 'a record with both capacities lost its front bucket: ' . bl_spec_phrase($both));
 $check(bl_spec_phrase($loader) === 'a 410 kg rated load, a 0.15 m³ bucket and an 18.6 kW engine', 'loader summary: ' . bl_spec_phrase($loader));
 // The summary stored with the old wording is still recognised as generated, so it is rebuilt rather than shown.
 $check(bl_is_generated_product_excerpt('FY30 3 Ton Mini Dumper with a 3,000 kg rated load, a 1.5 m³ bucket and a 37 kW engine. Explore published specifications and discuss your application with BOB-LIFT.', ['FY30 3 Ton Mini Dumper']), 'old generated wording no longer recognised');

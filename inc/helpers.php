@@ -169,7 +169,8 @@ function bl_indefinite_article(string $figure): string
 function bl_spec_phrase(array $product): string
 {
     $parts = [];
-    $capacity = ($product['category'] ?? '') === 'mini-dumpers' ? 'hopper' : 'bucket'; // a dumper's capacity is its hopper; the FJZ30's bucket is the front one
+    // A dumper's single capacity is its hopper (the FJZ30's front bucket is not what it counts); a record that gives both keeps its bucket a bucket.
+    $capacity = ($product['category'] ?? '') === 'mini-dumpers' && empty($product['specs']['Hopper capacity']) ? 'hopper' : 'bucket';
     foreach (['Rated load' => 'rated load', 'Drum capacity' => 'mixing drum', 'Bucket capacity' => $capacity, 'Hopper capacity' => 'hopper', 'Engine power' => 'engine'] as $key => $noun) {
         if (!empty($product['specs'][$key])) $parts[] = bl_indefinite_article($product['specs'][$key]) . ' ' . $product['specs'][$key] . ' ' . $noun;
     }
