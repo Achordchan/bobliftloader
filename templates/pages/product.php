@@ -11,7 +11,6 @@ $customExcerpt = $product['excerpt'] !== bl_product_excerpt($product) ? $product
 $highlights = bl_product_highlights($product);
 $drawings = bl_product_photos($product, ['drawing']);
 $attachmentsShown = bl_product_attachments($product);
-$dumperJobs = bl_product_dumper_jobs($product);
 $applicationsShown = bl_product_applications($product);
 $casesShown = bl_product_cases($product);
 $photos = bl_product_photos($product, ['at-work', 'detail', 'factory', 'delivery']);
@@ -25,7 +24,7 @@ $familyUrl = bl_url('/products/' . $product['category'] . '/');
 $sections = array_filter([
     'overview' => $hasOverview ? $copy('nav_overview') : null,
     'specifications' => $product['specs'] ? $copy('nav_specifications') : $copy('nav_configuration'),
-    'works-with' => $attachmentsShown || $dumperJobs ? $copy('nav_works') : null,
+    'works-with' => $attachmentsShown ? $copy('nav_works') : null,
     'where-it-works' => $applicationsShown || $casesShown ? $copy('nav_applications') : null,
     'photos' => $photos ? $copy('nav_photos') : null,
     'built' => $factory ? $copy('nav_built') : null,
@@ -60,11 +59,6 @@ $lightboxIndex = 0; ?>
 <section class="bl-product-works bl-shell" id="works-with" aria-labelledby="works-with-title">
   <div class="bl-product-section-head"><div><h2 class="bl-eyebrow" id="works-with-title"><?= $copy('attachments_label') ?></h2><p class="bl-product-display"><?= $copy('attachments_title') ?></p></div><div><p><?= $copy('attachments_intro') ?></p><a class="bl-text-link" href="<?= bl_escape($familyUrl . '#attachments') ?>"><?= $copy('attachments_link', ['attachment_count' => array_sum(array_map('count', bl_attachments()))]) ?> <?= bl_icon('arrow-up-right') ?></a></div></div>
   <ul class="bl-product-tools" aria-labelledby="works-with-title" data-swipe-row style="--tools:<?= count($attachmentsShown) ?>"><?php foreach ($attachmentsShown as $item): ?><li><?= bl_attachment_media($item, $item['name'] . ' attachment') ?><strong><?= bl_escape($item['name']) ?></strong><span><?= bl_escape($item['use']) ?></span></li><?php endforeach; ?></ul>
-</section>
-<?php elseif ($dumperJobs): ?>
-<section class="bl-product-works bl-product-works-jobs bl-shell" id="works-with" aria-labelledby="works-with-title">
-  <div class="bl-product-section-head"><div><h2 class="bl-eyebrow" id="works-with-title"><?= $copy('jobs_label') ?></h2><p class="bl-product-display"><?= $copy('jobs_title') ?></p></div><div><p><?= $copy('jobs_intro') ?></p><a class="bl-text-link" href="<?= bl_escape($familyUrl . '#dumper-jobs') ?>"><?= $copy('jobs_link') ?> <?= bl_icon('arrow-up-right') ?></a></div></div>
-  <ul class="bl-product-jobs"><?php foreach ($dumperJobs as $job): $others = array_values(array_filter($job['models'], static fn($m) => $m['slug'] !== $product['slug'])); ?><li><strong><?= bl_escape($job['title']) ?></strong><p><?= bl_escape($job['text']) ?></p><?php if ($others): ?><span><?= rtrim($copy('jobs_others')) ?> <?php foreach ($others as $i => $model): ?><?= $i ? ', ' : '' ?><a href="<?= bl_escape(bl_product_url($model)) ?>"><?= bl_escape($model['model']) ?></a><?php endforeach; ?></span><?php endif; ?></li><?php endforeach; ?></ul>
 </section>
 <?php endif; ?>
 <?php if ($applicationsShown || $casesShown): ?>
@@ -111,5 +105,10 @@ $lightboxIndex = 0; ?>
 </section>
 <section class="bl-related bl-shell" id="related-products" aria-labelledby="related-title"><div class="bl-small-section-heading"><div><p class="bl-eyebrow"><?= $copy('related_label') ?></p><h2 id="related-title"><?= $copy('related_title') ?></h2></div><a class="bl-text-link" href="<?= bl_escape($familyUrl) ?>"><?= $copy('related_link') ?> <?= bl_icon('arrow-up-right') ?></a></div>
   <?php if ($compareRows): $compareCaption = $copy('related_caption'); // the region is named by the caption written in WordPress ?><div class="bl-product-compare" role="region" aria-label="<?= trim($compareCaption) !== '' ? $compareCaption : bl_escape($product['model']) ?>" tabindex="0"><table><caption><?= $compareCaption ?></caption><thead><tr><th scope="col"><span class="bl-visually-hidden">Specification</span></th><?php foreach ($neighbours as $model): ?><th scope="col"<?= $model['slug'] === $product['slug'] ? ' aria-current="true"' : '' ?>><?php if ($model['slug'] === $product['slug']): ?><?= bl_escape($model['model']) ?> <small><?= $copy('related_current') ?></small><?php else: ?><a href="<?= bl_escape(bl_product_url($model)) ?>"><?= bl_escape($model['model']) ?></a><?php endif; ?></th><?php endforeach; ?></tr></thead><tbody><?php foreach ($compareRows as $label => $values): ?><tr><th scope="row"><?= bl_escape($label) ?></th><?php foreach ($values as $i => $value): ?><td<?= $neighbours[$i]['slug'] === $product['slug'] ? ' aria-current="true"' : '' ?><?= preg_match('/^[\d.,]+(\s*[–-]\s*[\d.,]+)?\s*\S{0,5}$/u', $value) ? ' class="bl-compare-figure"' : '' ?>><?= bl_escape($value) ?></td><?php endforeach; ?></tr><?php endforeach; ?></tbody></table></div><?php endif; ?>
-  <div class="bl-product-grid" role="region" aria-labelledby="related-title" data-swipe-row><?php $currentSlug = $product['slug']; $currentCategory = $product['category']; $compared = array_column($neighbours, 'slug'); $others = array_values(array_filter(bl_products(), static fn($p) => $p['slug'] !== $currentSlug && $p['category'] === $currentCategory)); /* models already in the table above are not shown twice */ $related = array_slice([...array_filter($others, static fn($p) => !in_array($p['slug'], $compared, true)), ...array_filter($others, static fn($p) => in_array($p['slug'], $compared, true))], 0, 3); foreach ($related as $relatedProduct) bl_product_card($relatedProduct, '', 'h3'); ?></div></section>
+  <?php $currentSlug = $product['slug']; $currentCategory = $product['category']; $compared = array_column($neighbours, 'slug'); $others = array_values(array_filter(bl_products(), static fn($p) => $p['slug'] !== $currentSlug && $p['category'] === $currentCategory)); /* models already in the table above are not shown twice */ $related = array_slice([...array_filter($others, static fn($p) => !in_array($p['slug'], $compared, true)), ...array_filter($others, static fn($p) => in_array($p['slug'], $compared, true))], 0, 3);
+  // Under a comparison the cards are a second list of models, so they say so; alone, the section heading already does.
+  $relatedMore = $compareRows && $related ? trim($copy('related_more')) : ''; ?>
+  <?php if ($relatedMore !== ''): ?><p class="bl-related-more" id="related-more"><?= $relatedMore ?></p><?php endif; ?>
+  <div class="bl-product-grid" role="region" aria-labelledby="<?= $relatedMore !== '' ? 'related-more' : 'related-title' ?>" data-swipe-row><?php foreach ($related as $relatedProduct) bl_product_card($relatedProduct, '', 'h3'); ?></div>
+</section>
 <dialog class="bl-lightbox" id="product-lightbox" aria-label="<?= bl_escape(bl_family_copy_value($copyPage, 'product.copy.photos_label', ['model' => $product['model'], 'name' => $product['name']])) ?>"><figure><img alt=""><figcaption><span data-lightbox-caption></span><small data-lightbox-count></small></figcaption></figure><button class="bl-lightbox-close bl-circle-button" type="button" data-lightbox-close aria-label="Close"><?= bl_icon('x') ?></button><button class="bl-lightbox-step bl-lightbox-prev bl-circle-button" type="button" data-lightbox-step="-1" aria-label="Previous photograph"><?= bl_icon('arrow-left') ?></button><button class="bl-lightbox-step bl-lightbox-next bl-circle-button" type="button" data-lightbox-step="1" aria-label="Next photograph"><?= bl_icon('arrow-left') ?></button></dialog>

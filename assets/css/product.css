@@ -44,7 +44,7 @@
 @media(hover:hover){.bl-site .bl-spec-drawing button:hover{border-color:var(--ink)}}
 .bl-site .bl-spec-drawing figcaption{font-size:var(--fs-label);color:var(--muted)}
 
-/* Attachments (loaders) and jobs (dumpers). */
+/* Attachments (loaders). */
 /* The cards share the whole row however few there are (auto-fit drops the empty columns); a very short list stops growing at
    520px a card, so two or three attachments do not turn into poster-sized pictures. */
 .bl-site .bl-product-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:clamp(14px,1.2vw,28px);max-width:calc(var(--tools,8) * 520px)}
@@ -53,17 +53,6 @@
 .bl-site .bl-product-tools .bl-attachment-film{margin-bottom:10px}
 .bl-site .bl-product-tools strong{font-size:var(--fs-small);line-height:1.3}
 .bl-site .bl-product-tools span{font-size:var(--fs-label);line-height:1.5;color:var(--muted)}
-/* Jobs: a model fits one to three jobs, so the cards stack in the right column beside the heading (the same two columns as
-   the questions below) rather than sit in a fixed row of three with the empty columns showing. */
-.bl-site .bl-product-works-jobs{display:grid;grid-template-columns:1fr 1.1fr;column-gap:9%;align-items:start}
-.bl-site .bl-product-works-jobs .bl-product-section-head{grid-template-columns:1fr;gap:clamp(20px,1.6vw,32px);align-items:start;margin-bottom:0}
-.bl-site .bl-product-jobs{display:grid;grid-template-columns:minmax(0,1fr)}
-.bl-site .bl-product-jobs li{display:flex;flex-direction:column;gap:8px;padding:clamp(16px,1.2vw,28px) 0;border-top:1px solid var(--line)}
-.bl-site .bl-product-jobs strong{font:700 var(--fs-h4)/1.1 var(--display)}
-.bl-site .bl-product-jobs p{font-size:var(--fs-small);line-height:1.7;color:var(--muted)}
-.bl-site .bl-product-jobs span{margin-top:auto;font-size:var(--fs-label);font-weight:600;color:var(--muted)}
-.bl-site .bl-product-jobs span a{color:var(--blue);text-decoration:underline;text-underline-offset:3px}
-
 /* Applications and cases. */
 .bl-site .bl-product-apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:clamp(14px,1.2vw,28px)}
 .bl-site .bl-product-apps a{display:grid;grid-template-columns:clamp(96px,8vw,180px) minmax(0,1fr) auto;align-items:center;gap:clamp(14px,1.2vw,28px);padding:clamp(10px,.8vw,16px);background:#fff;border:1px solid var(--line);transition:border-color .2s}
@@ -162,6 +151,7 @@
 .bl-site .bl-product-enquiry-form{min-width:0;background:#fff;padding:clamp(24px,2vw,48px)}
 
 /* The comparison with the models either side, above the related cards. */
+.bl-site .bl-related-more{margin:0 0 clamp(20px,1.8vw,32px);padding:12px 0 0;border-top:1px solid var(--ink);font-size:var(--fs-label);color:var(--muted)}
 .bl-site .bl-product-compare{overflow-x:auto;margin-bottom:clamp(40px,3.2vw,72px);border-top:1px solid var(--ink)}
 .bl-site .bl-product-compare table{width:100%;min-width:560px;border-collapse:collapse;font-size:var(--fs-small);font-variant-numeric:tabular-nums}
 .bl-site .bl-product-compare caption{text-align:left;padding:12px 0;font-size:var(--fs-label);color:var(--muted)}
@@ -203,7 +193,7 @@
   /* One column: the picture would only lengthen the way to the form. */
   .bl-site .bl-product-enquiry-aside{grid-template-rows:none}
   .bl-site .bl-product-enquiry-model{display:none}
-  .bl-site .bl-product-faq,.bl-site .bl-product-works-jobs{grid-template-columns:1fr;row-gap:clamp(32px,6vw,48px)}
+  .bl-site .bl-product-faq{grid-template-columns:1fr;row-gap:clamp(32px,6vw,48px)}
   .bl-site .bl-product-faq .bl-product-section-head{position:static}
   .bl-site .bl-product-built-photos{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:78%;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 6px;scroll-padding-inline:var(--gutter);scroll-snap-type:x mandatory;scrollbar-width:none}
   .bl-site .bl-product-built-photos li{scroll-snap-align:start}
@@ -336,12 +326,10 @@
   .bl-site .bl-product-actions{margin-top:16px}
   .bl-site .bl-product-section-nav{position:static}
 }
-/* Round 4, phones in the hand. Wherever the contact bar runs along the foot: the model links under each job and the
-   WhatsApp / email lines beside the form keep their look, an invisible layer making each a 44px tall target; a field
+/* Round 4, phones in the hand. Wherever the contact bar runs along the foot: the WhatsApp / email lines beside the
+   form keep their look, an invisible layer making each a 44px tall target; a field
    the keyboard brings into view stops clear of the header above (its label too) and the contact bar below. */
 @media(max-width:800px),(max-width:1000px) and (max-height:500px){
-  .bl-site .bl-product-jobs span a{position:relative}
-  .bl-site .bl-product-jobs span a::before{content:'';position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%)}
   .bl-site .bl-product-enquiry-direct{gap:0}
   .bl-site .bl-product-enquiry-direct li{align-items:center;min-height:44px}
   .bl-site .bl-product-enquiry-direct a{position:relative}
@@ -363,7 +351,6 @@
 @media(hover:none){
   .bl-site :is(.bl-product-apps a,.bl-product-docs a,.bl-product-docs button,.bl-spec-drawing button):active{border-color:var(--ink);background:#f4f6f7}
   .bl-site .bl-product-photo-grid button:active img{opacity:.85}
-  .bl-site .bl-product-jobs span a:active{color:var(--ink)}
 }
 @media(prefers-reduced-motion:reduce){
   .bl-site .bl-product-photo-grid img,.bl-site .bl-product-apps .bl-icon{transition:none}

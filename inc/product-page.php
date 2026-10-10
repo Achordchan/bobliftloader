@@ -111,13 +111,6 @@ function bl_product_attachments(array $product): array
     return array_slice($chosen, 0, BL_CONTENT_LIMITS['attachments']);
 }
 
-/** The dumper jobs on the family page that name this model. */
-function bl_product_dumper_jobs(array $product): array
-{
-    if ($product['category'] !== 'mini-dumpers') return [];
-    return array_values(array_filter(bl_dumper_jobs(), static fn(array $job): bool => in_array($product['slug'], array_column($job['models'], 'slug'), true)));
-}
-
 /** The applications that recommend this model by name (网站内容 → 应用场景 → 推荐机型). */
 function bl_product_applications(array $product): array
 {
