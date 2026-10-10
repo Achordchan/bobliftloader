@@ -37,7 +37,7 @@ function bl_spec_choices(): array
         'Bucket width' => '铲斗宽度',
         'Overall height' => '整机高度',
         'Standard dimensions' => '标准尺寸',
-        'Length with footplate' => '含踏板长度',
+        'Dimensions with footplate' => '含踏板尺寸',
         'Dimensions with roof / cab' => '带顶棚或驾驶室尺寸',
         'Hopper size' => '料斗尺寸',
         'Drum length' => '搅拌筒长度',

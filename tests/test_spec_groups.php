@@ -10,22 +10,22 @@ $check = static function (bool $ok, string $message) use (&$failures): void { if
 $specs = [
     'Rated load' => '400 kg', 'Lifting capacity' => '450 kg', 'Breakout force' => '4.5 kN', 'Hydraulic pressure' => '18 MPa', 'Hydraulic pumps' => 'Two piston pumps and one gear pump',
     'Engine power' => '18.6 kW', 'Fuel' => 'Diesel', 'Fuel tank' => '20 L',
-    'Working height' => '2,140 mm', 'Max dumping height' => '1,700 mm', 'Height with arms raised' => '2,920 mm', 'Overall height' => '1,550 mm', 'Standard dimensions' => '1,570 × 880 × 1,300 mm', 'Length with footplate' => '2,050 mm', 'Ground clearance' => '240 mm',
+    'Working height' => '2,140 mm', 'Max dumping height' => '1,700 mm', 'Height with arms raised' => '2,920 mm', 'Overall height' => '1,550 mm', 'Standard dimensions' => '1,570 × 880 × 1,300 mm', 'Dimensions with footplate' => '2,050 mm', 'Ground clearance' => '240 mm',
     'Controls' => 'Joystick operation', 'Travel control' => 'Spring-return foot pedal',
 ];
 $groups = bl_spec_groups($specs);
 $check(!isset($groups['Details']), 'a row from the technical sheet fell under Details: ' . implode(', ', array_keys($groups['Details'] ?? [])));
 $check(isset($groups['Performance']['Breakout force'], $groups['Performance']['Hydraulic pumps']), 'breakout force or hydraulic pumps not under Performance');
 $check(isset($groups['Engine']['Fuel tank']), 'fuel tank not under Engine');
-foreach (['Max dumping height', 'Height with arms raised', 'Length with footplate', 'Ground clearance'] as $label) $check(isset($groups['Dimensions'][$label]), "$label not under Dimensions");
+foreach (['Max dumping height', 'Height with arms raised', 'Dimensions with footplate', 'Ground clearance'] as $label) $check(isset($groups['Dimensions'][$label]), "$label not under Dimensions");
 $check(isset($groups['Build']['Travel control']), 'travel control not under Build');
 // Reading order inside a group follows the sheet: the heights, then the lengths, the footprint, the clearance.
-$check(array_keys($groups['Dimensions']) === ['Working height', 'Max dumping height', 'Height with arms raised', 'Overall height', 'Standard dimensions', 'Length with footplate', 'Ground clearance'], 'dimension rows out of reading order');
+$check(array_keys($groups['Dimensions']) === ['Working height', 'Max dumping height', 'Height with arms raised', 'Overall height', 'Standard dimensions', 'Dimensions with footplate', 'Ground clearance'], 'dimension rows out of reading order');
 $check(array_keys($groups['Engine']) === ['Engine power', 'Fuel', 'Fuel tank'], 'fuel tank does not follow the fuel');
 
 // Every label that has a group also has an edit-screen name in Chinese.
 $choices = bl_spec_choices();
-foreach (['Breakout force', 'Hydraulic pumps', 'Fuel tank', 'Max dumping height', 'Height with arms raised', 'Length with footplate', 'Ground clearance', 'Travel control'] as $label) $check(!empty($choices[$label]), "$label has no edit-screen name");
+foreach (['Breakout force', 'Hydraulic pumps', 'Fuel tank', 'Max dumping height', 'Height with arms raised', 'Dimensions with footplate', 'Ground clearance', 'Travel control'] as $label) $check(!empty($choices[$label]), "$label has no edit-screen name");
 
 // A generated summary: a dumper's capacity is its hopper, a loader's its bucket.
 $dumper = ['name' => 'FY30 3 Ton Mini Dumper', 'model' => 'FY30', 'category' => 'mini-dumpers', 'specs' => ['Rated load' => '3,000 kg', 'Bucket capacity' => '1.5 m³', 'Engine power' => '37 kW']];

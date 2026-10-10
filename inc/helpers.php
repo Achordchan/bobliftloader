@@ -259,7 +259,7 @@ function bl_spec_groups(array $specs): array
     $groups = [
         'Performance' => ['Rated load', 'Lifting capacity', 'Breakout force', 'Bucket capacity', 'Drum capacity', 'Travel speed', 'Max travel speed', 'Hydraulic pressure', 'Hydraulic pumps', 'Gradeability', 'Tipping', 'Tipping angle', 'Machine weight'],
         'Engine' => ['Engine options', 'Engine model', 'Engine power', 'Engine type', 'Fuel', 'Fuel tank', 'Starting', 'Emission standard', 'Operating voltage'],
-        'Dimensions' => ['Working height', 'Max dumping height', 'Height with arms raised', 'Length with bucket', 'Length without bucket', 'Machine width', 'Bucket width', 'Overall height', 'Standard dimensions', 'Length with footplate', 'Dimensions with roof / cab', 'Hopper size', 'Drum length', 'Drum opening diameter', 'Loading bucket length', 'Loading bucket opening width', 'Wheelbase', 'Minimum ground clearance', 'Ground clearance'],
+        'Dimensions' => ['Working height', 'Max dumping height', 'Height with arms raised', 'Length with bucket', 'Length without bucket', 'Machine width', 'Bucket width', 'Overall height', 'Standard dimensions', 'Dimensions with footplate', 'Dimensions with roof / cab', 'Hopper size', 'Drum length', 'Drum opening diameter', 'Loading bucket length', 'Loading bucket opening width', 'Wheelbase', 'Minimum ground clearance', 'Ground clearance'],
         'Build' => ['Running gear', 'Drive', 'Brakes', 'Operator station', 'Controls', 'Travel control', 'Body material', 'Bucket material'],
     ];
     $result = [];
