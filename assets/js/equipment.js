@@ -44,6 +44,16 @@ export function initializeEquipment() {
   });
   // The thumbnails change the photograph on the stage; the films play in their own player beside the overview.
   const photo = document.querySelector('#product-photo');
+  // A long set scrolls inside its own column (a row on phones): bring the thumbnail into view there, never moving the page.
+  const revealThumbnail = (button) => {
+    const box = button.parentElement;
+    const inner = box.getBoundingClientRect();
+    const outer = button.getBoundingClientRect();
+    if (outer.top < inner.top) box.scrollTop += outer.top - inner.top;
+    else if (outer.bottom > inner.bottom) box.scrollTop += outer.bottom - inner.bottom;
+    if (outer.left < inner.left) box.scrollLeft += outer.left - inner.left;
+    else if (outer.right > inner.right) box.scrollLeft += outer.right - inner.right;
+  };
   document.querySelectorAll('[data-gallery-image]').forEach((button, _, buttons) => {
     button.addEventListener('click', () => {
       if (photo) {
@@ -53,8 +63,23 @@ export function initializeEquipment() {
       const zoom = document.querySelector('.bl-gallery-zoom');
       if (zoom) zoom.dataset.lightboxOpen = button.dataset.galleryIndex || '0';
       buttons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+      revealThumbnail(button);
     });
   });
+  const shown = document.querySelector('[data-gallery-image][aria-pressed="true"]');
+  if (shown) revealThumbnail(shown);
+  // The column fades where more thumbnails wait above or below (only the tall column; a row has no height to spare).
+  const thumbnails = document.querySelector('.bl-gallery-thumbs');
+  if (thumbnails) {
+    const markOverflow = () => {
+      const spare = thumbnails.scrollHeight - thumbnails.clientHeight;
+      thumbnails.classList.toggle('bl-more-above', spare > 1 && thumbnails.scrollTop > 1);
+      thumbnails.classList.toggle('bl-more-below', spare > 1 && thumbnails.scrollTop < spare - 1);
+    };
+    thumbnails.addEventListener('scroll', markOverflow, { passive: true });
+    if ('ResizeObserver' in window) new ResizeObserver(markOverflow).observe(thumbnails);
+    markOverflow();
+  }
   const video = document.querySelector('#product-video');
   const caption = document.querySelector('#product-video-caption');
   if (video) {

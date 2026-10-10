@@ -305,7 +305,7 @@
   .bl-site .bl-product-gallery{grid-template-columns:1fr}
   .bl-site .bl-product-main-image{grid-column:1;aspect-ratio:auto;height:calc(100svh - var(--header-height) - var(--bl-bar-height) - 60px);min-height:200px}
   .bl-site .bl-product-main-image>img{padding:12px 16px}
-  .bl-site .bl-gallery-thumbs{grid-column:1;grid-row:2;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .bl-site .bl-gallery-thumbs{grid-column:1;grid-row:2;flex-direction:row;flex-wrap:nowrap;align-self:auto;width:auto;contain:none;overflow-x:auto;scrollbar-width:none}
   .bl-site .bl-gallery-thumbs button{flex:0 0 56px;width:56px}
   .bl-site .bl-product-intro{align-self:start}
   .bl-site .bl-product-intro h1{font-size:var(--m-h1,clamp(48px,14vw,60px));margin:8px 0 14px}
