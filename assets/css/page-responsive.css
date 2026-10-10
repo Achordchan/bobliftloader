@@ -97,7 +97,7 @@
   .bl-site .bl-catalog .bl-product-grid,.bl-site .bl-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 20px}
   .bl-site .bl-product-gallery{grid-template-columns:1fr}
   .bl-site .bl-product-main-image{grid-column:1;aspect-ratio:1.15}
-  .bl-site .bl-gallery-thumbs{grid-column:1;grid-row:2;flex-direction:row;flex-wrap:wrap}
+  .bl-site .bl-gallery-thumbs{grid-column:1;grid-row:2;flex-direction:row;flex-wrap:wrap;align-self:auto;width:auto;contain:none;overflow:visible}
   .bl-site .bl-gallery-thumbs button{width:72px}
   .bl-site .bl-product-intro h1{font-size:84px}
   .bl-site .bl-product-section-nav{position:static}
