@@ -343,7 +343,9 @@ function bl_product_derived(array $record): array
     if (preg_match('/^([\d,. ]+)\s*kg$/i', (string) ($specs['Rated load'] ?? ''), $matches)) {
         $record['load'] = min(1000000, max(0, (int) str_replace([',', ' '], '', $matches[1])));
     }
-    $record['capacity'] = preg_match('/^([\d.]+)\s*m³$/u', (string) (($specs['Bucket capacity'] ?? '') ?: ($specs['Hopper capacity'] ?? '')), $matches) ? $matches[1] : '';
+    // A dumper's capacity is its hopper (a self-loading one may also list a different front bucket); a loader's is its bucket.
+    $names = ($record['category'] ?? '') === 'mini-dumpers' ? ['Hopper capacity', 'Bucket capacity'] : ['Bucket capacity', 'Hopper capacity'];
+    $record['capacity'] = preg_match('/^([\d.]+)\s*m³$/u', (string) (($specs[$names[0]] ?? '') ?: ($specs[$names[1]] ?? '')), $matches) ? $matches[1] : '';
     $record['power'] = preg_match('/^([\d.]+)\s*kW$/i', (string) ($specs['Engine power'] ?? ''), $matches) ? $matches[1] : '';
     return $record;
 }

@@ -50,6 +50,12 @@ $request = new WP_REST_Request(['id' => 1, 'meta' => ['_bl_record' => ['specs' =
 $check(!is_wp_error(run_filter('rest_pre_insert_bl_product', (object) [], $request)), 'valid REST specs refused');
 $record = $request->get_param('meta')['_bl_record'];
 $check($record['specs'] === $valid && $record['load'] === 1500 && $record['capacity'] === '0.8' && $record['power'] === '17.8', 'display strings or derived metrics changed');
+// A dumper's capacity is its hopper even when a self-loading one also lists a different front bucket; a loader's is its bucket, and the older name still counts.
+$both = ['Hopper capacity' => '1.5 m³', 'Bucket capacity' => '0.3 m³'];
+$check(bl_product_derived(['category' => 'mini-dumpers', 'specs' => $both])['capacity'] === '1.5', 'a dumper with both capacities took its front bucket');
+$check(bl_product_derived(['category' => 'mini-dumpers', 'specs' => ['Bucket capacity' => '0.8 m³']])['capacity'] === '0.8', 'a dumper still using the older name lost its capacity');
+$check(bl_product_derived(['category' => 'mini-dumpers', 'specs' => ['Hopper capacity' => '1.2 m³']])['capacity'] === '1.2', 'a dumper with Hopper capacity has no capacity');
+$check(bl_product_derived(['category' => 'skid-steer-loaders', 'specs' => $both])['capacity'] === '0.3', 'a loader no longer takes its bucket first');
 // British spelling: "Rubber tyres" passes the running-gear check and still files the loader under Wheeled.
 foreach (['Rubber tyres', 'Rubber-tyred wheels', 'Rubber tires', 'Rubber tracks'] as $gear) $check(bl_specs_error(['Running gear' => $gear]) === '', 'running gear refused: ' . $gear);
 $request = new WP_REST_Request(['id' => 1, 'meta' => ['_bl_record' => ['specs' => ['Running gear' => 'Rubber tyres']]]]);
