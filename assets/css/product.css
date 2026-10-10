@@ -137,7 +137,15 @@
 /* The enquiry, on the page itself. */
 .bl-site .bl-product-enquiry{background:#e4e9ef;padding-block:clamp(64px,calc(49.1px + 2.14vw),104px)}
 .bl-site .bl-product-enquiry-inner{display:grid;grid-template-columns:1fr 1.1fr;gap:9%}
-.bl-site .bl-product-enquiry-aside{display:grid;align-content:start;gap:clamp(16px,1.2vw,26px)}
+/* The form is the taller column, so the machine's picture and figures take whatever height the text leaves; the picture is
+   laid over its panel, so it never makes the column taller than the form. */
+.bl-site .bl-product-enquiry-aside{display:grid;grid-template-rows:repeat(4,auto) minmax(0,1fr);align-content:start;gap:clamp(16px,1.2vw,26px)}
+.bl-site .bl-product-enquiry-model{display:flex;flex-direction:column;margin:clamp(8px,1vw,24px) 0 0;background:#fff}
+.bl-site .bl-product-enquiry-model>div{position:relative;flex:1 1 0;min-height:clamp(160px,14vw,280px)}
+.bl-site .bl-product-enquiry-model img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:clamp(16px,1.6vw,40px)}
+.bl-site .bl-product-enquiry-model dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.2vw,28px);margin:0;padding:clamp(14px,1.2vw,26px) clamp(16px,1.6vw,40px);border-top:1px solid var(--line)}
+.bl-site .bl-product-enquiry-model dt{font-size:var(--fs-micro);color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.bl-site .bl-product-enquiry-model dd{font:600 clamp(22px,1.7vw,40px)/1 var(--display);margin:8px 0 0;white-space:nowrap}
 .bl-site .bl-product-enquiry-aside>p:not(.bl-product-display){max-width:520px;font-size:var(--fs-body);line-height:1.85;color:var(--muted)}
 .bl-site .bl-product-enquiry-direct{display:grid;gap:10px;margin-top:8px}
 .bl-site .bl-product-enquiry-direct li{display:flex;gap:16px;align-items:baseline;font-size:var(--fs-small)}
@@ -184,6 +192,9 @@
 }
 @media(max-width:800px){
   .bl-site .bl-product-section-head,.bl-site .bl-product-enquiry-inner{grid-template-columns:1fr;gap:20px}
+  /* One column: the picture would only lengthen the way to the form. */
+  .bl-site .bl-product-enquiry-aside{grid-template-rows:none}
+  .bl-site .bl-product-enquiry-model{display:none}
   .bl-site .bl-product-faq{grid-template-columns:1fr;row-gap:clamp(32px,6vw,48px)}
   .bl-site .bl-product-faq .bl-product-section-head{position:static}
   .bl-site .bl-product-built-photos{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:78%;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 6px;scroll-padding-inline:var(--gutter);scroll-snap-type:x mandatory;scrollbar-width:none}
