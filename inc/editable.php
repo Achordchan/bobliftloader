@@ -65,16 +65,16 @@ function bl_home_defaults(): array
             'assist_link' => 'Let’s find your fit',
         ],
         'applications' => [
-            'eyebrow' => '02 / IN YOUR ELEMENT',
+            'eyebrow' => '02 / MACHINES BY JOB',
             'title' => "MATCH THE MACHINE\n*TO THE JOB.*",
-            'description' => "Start with the job on your site. \nEach row shows the machines that fit it and the figure that matters most.",
+            'description' => "Start with the job on your site. \nEach row shows the machines that fit it and one key figure for that job.",
             'link' => 'See all applications',
         ],
         // Terms and the four doors into the Support page. The four terms are read from the Support page, not kept here.
         'support' => [
             'eyebrow' => '03 / BUYING & SUPPORT',
-            'title' => "BUY DIRECT.\n*STAY COVERED.*",
-            'description' => "Order straight from the factory that builds the machine,\nwith one team from the first quote to the last spare part.",
+            'title' => "BUY DIRECT.\n*STAY SUPPORTED.*",
+            'description' => "Order straight from the factory that builds the machine,\nwith one team from your first message to your last spare part.",
             'cards' => [
                 ['title' => 'How buying works', 'text' => 'Five steps from your first message to shipment.', 'url' => '/support/#buying'],
                 ['title' => 'Parts & service', 'text' => 'Send the model and serial number. We guide you remotely and ship the parts you need.', 'url' => '/support/#after-delivery'],
