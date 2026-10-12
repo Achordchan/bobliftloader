@@ -10,8 +10,8 @@
 .bl-site .bl-gallery-zoom .bl-icon{width:16px;height:16px}
 @media(hover:hover){.bl-site .bl-gallery-zoom:hover{background:#fff;border-color:var(--ink)}}
 .bl-site .bl-gallery-zoom[hidden]{display:none}
+.bl-site .bl-gallery-step{display:none}
 .bl-site .bl-product-main-image #product-photo{cursor:zoom-in}
-.bl-site .bl-product-main-image{touch-action:pan-y pinch-zoom}
 
 /* The on-page bar: pinned under the header, with the quote button at its end. */
 .bl-site .bl-product-section-nav{display:block;min-height:0;padding:0;gap:0}
@@ -230,6 +230,12 @@
   .bl-site .bl-product-main-image .bl-product-image-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px 24px;background:#e9edf0;font-size:13px;line-height:1.45}
   .bl-site .bl-product-main-image .bl-product-image-empty::before{content:'';flex:none;width:40px;height:30px;border:1.5px solid currentColor;border-radius:3px;background:radial-gradient(circle at 50% 55%,#0000 6px,currentColor 6px 7.5px,#0000 7.5px)}
   .bl-site .bl-gallery-zoom{justify-content:center;min-width:44px;min-height:44px;padding:0 12px}
+  /* Round white arrows on the photograph's edges (the photographs have pale margins, so the ring keeps them readable). */
+  .bl-site .bl-gallery-step:not([hidden]){position:absolute;top:calc(50% - 11px);z-index:2;display:grid;place-items:center;width:44px;height:44px;margin-top:-22px;padding:0;background:#ffffffeb;border:1px solid var(--line);border-radius:50%;box-shadow:0 2px 8px #0f1c2a26}
+  .bl-site .bl-gallery-prev{left:6px}
+  .bl-site .bl-gallery-next{right:6px}
+  .bl-site .bl-gallery-step .bl-icon{width:18px;height:18px}
+  .bl-site .bl-gallery-next .bl-icon{transform:rotate(180deg)}
   .bl-site .bl-gallery-thumbs{position:absolute;grid-area:1/1;left:4px;right:64px;bottom:-6px;z-index:1;display:flex;gap:0;margin:0;padding:0;overflow-x:auto;scroll-snap-type:none}
   .bl-site .bl-gallery-thumbs button{flex:0 0 32px;width:auto;min-width:32px;height:44px;aspect-ratio:auto;padding:0;background:none;border:0}
   .bl-site .bl-gallery-thumbs button::before{content:'';display:block;width:8px;height:8px;margin:auto;border-radius:4px;background:#b9c4c9;transition:width .2s,background .2s}
