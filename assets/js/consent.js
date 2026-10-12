@@ -12,16 +12,21 @@ const TOOL_COOKIES = {
   advertising: /^(_gcl|_fb[pc]$|_ttp|_tt_|_uet|_pin_|_rdt|_li_|li_)/,
 };
 
-function readChoice(categories) {
+function readSaved() {
   const match = document.cookie.split('; ').find((row) => row.startsWith(`${COOKIE}=`));
   if (!match) return null;
   try {
     const saved = JSON.parse(decodeURIComponent(match.slice(COOKIE.length + 1)));
-    // A category added since the visitor chose has no answer yet, so they are asked again.
-    return saved?.v === VERSION && categories.every((name) => typeof saved[name] === 'boolean') ? Object.fromEntries(categories.map((name) => [name, saved[name]])) : null;
+    return saved?.v === VERSION ? saved : null;
   } catch {
     return null;
   }
+}
+
+function readChoice(categories) {
+  const saved = readSaved();
+  // A category added since the visitor chose has no answer yet, so they are asked again.
+  return saved && categories.every((name) => typeof saved[name] === 'boolean') ? Object.fromEntries(categories.map((name) => [name, saved[name]])) : null;
 }
 
 function saveChoice(choice) {
@@ -45,9 +50,14 @@ function clearToolCookies(categories) {
 // Scripts run strictly one after another, across slots and categories: a plain external library is awaited (loaded or failed) before the inline code that needs it, which a plain insertion cannot guarantee; async and defer scripts are not waited for.
 let queue = Promise.resolve();
 
-// A saved snippet written for the page head may wait for DOMContentLoaded or load. Agreed to after the page has loaded,
-// those events are over, so while a snippet's script runs a listener for one that has already happened is called at once.
-function answerPastEvents() {
+// A saved snippet was written for the page head, where it ran while the page was still loading. Agreed to later, it is run
+// with three allowances while any of its scripts is still starting up: a wait for DOMContentLoaded or load (listener or
+// `window.onload =`) is answered at once because those events are over, and document.write is ignored because after
+// loading it would wipe the page. Shared by all running scripts and removed when the last one has started.
+let lateUsers = 0;
+let undoLate = () => {};
+
+function lateAllowances() {
   const past = { DOMContentLoaded: () => document.readyState !== 'loading', load: () => document.readyState === 'complete' };
   const restore = [document, window].map((target) => {
     const own = Object.prototype.hasOwnProperty.call(target, 'addEventListener') ? target.addEventListener : null;
@@ -58,7 +68,6 @@ function answerPastEvents() {
     };
     return () => { if (own) target.addEventListener = own; else delete target.addEventListener; };
   });
-  // `window.onload = …` is the same wait written as a property.
   let holder = window;
   while (holder && !Object.getOwnPropertyDescriptor(holder, 'onload')) holder = Object.getPrototypeOf(holder);
   const native = holder && Object.getOwnPropertyDescriptor(holder, 'onload');
@@ -75,7 +84,23 @@ function answerPastEvents() {
     });
     restore.push(() => { if (ownLoad) Object.defineProperty(window, 'onload', ownLoad); else delete window.onload; });
   }
+  ['write', 'writeln'].forEach((name) => {
+    const own = Object.prototype.hasOwnProperty.call(document, name) ? document[name] : null;
+    const original = document[name];
+    document[name] = function (...args) { if (document.readyState === 'loading') return original.apply(this, args); return undefined; };
+    restore.push(() => { if (own) document[name] = own; else delete document[name]; });
+  });
   return () => restore.forEach((undo) => undo());
+}
+
+function holdLateAllowances() {
+  if (lateUsers++ === 0) undoLate = lateAllowances();
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    if (--lateUsers === 0) undoLate();
+  };
 }
 
 function runScript(placeholder, old) {
@@ -86,14 +111,19 @@ function runScript(placeholder, old) {
     // A script its author marked async or defer is not waited for, as on the original page: the code after it never depended on it.
     const waits = Boolean(script.src) && !old.hasAttribute('async') && !old.hasAttribute('defer');
     if (!old.hasAttribute('async')) script.async = false;
-    const undo = answerPastEvents();
-    const finish = () => { undo(); resolve(); };
+    const release = holdLateAllowances();
+    // The allowances last until the script has executed: for a downloaded script that is its load, even when the queue does not wait for it.
+    if (script.src) {
+      script.addEventListener('load', release);
+      script.addEventListener('error', release);
+    }
     if (waits) {
-      script.addEventListener('load', finish);
-      script.addEventListener('error', finish);
+      script.addEventListener('load', resolve);
+      script.addEventListener('error', resolve);
     }
     placeholder.replaceWith(script);
-    if (!waits) finish();
+    if (!script.src) release();
+    if (!waits) resolve();
   });
 }
 
@@ -167,8 +197,16 @@ export function initializeConsent() {
     close();
   };
   const sync = () => {
-    const saved = readChoice(categories);
-    if (saved && JSON.stringify(saved) !== JSON.stringify(choice)) apply(saved);
+    const next = readChoice(categories);
+    if (next) {
+      if (JSON.stringify(next) !== JSON.stringify(choice)) apply(next);
+      return;
+    }
+    // The other tab knew other categories, so it left some unanswered here; what it refused is still refused.
+    const declined = categories.filter((name) => readSaved()?.[name] === false);
+    if (!declined.length) return;
+    clearToolCookies(declined);
+    if (declined.some((name) => active.has(name))) location.reload();
   };
 
   const decisions = {

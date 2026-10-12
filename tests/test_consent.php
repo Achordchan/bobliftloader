@@ -80,7 +80,7 @@ $check(str_contains(bl_content_value('privacy', 'body.ending'), 'only after you 
 // The script never starts a category the visitor has not agreed to, and clears the tools' cookies on withdrawal.
 $js = file_get_contents(__DIR__ . '/../assets/js/consent.js');
 $check(str_contains($js, 'clearToolCookies(declined)') && !str_contains($js, 'SCRIPT_WAIT') && str_contains($js, 'blStarted'), 'consent script lost its guards');
-$check(str_contains($js, 'answerPastEvents') && str_contains($js, "'onload'") && str_contains($js, "hasAttribute('async')") && str_contains($js, 'BroadcastChannel') && str_contains($js, 'visibilitychange'), 'consent script no longer syncs other tabs');
+$check(str_contains($js, 'lateAllowances') && str_contains($js, "'writeln'") && str_contains($js, 'readSaved()') && str_contains($js, "'onload'") && str_contains($js, "hasAttribute('async')") && str_contains($js, 'BroadcastChannel') && str_contains($js, 'visibilitychange'), 'consent script no longer syncs other tabs');
 $check(str_contains($js, "addEventListener('load'") && str_contains($js, 'queue.then'), 'consent script no longer waits for external scripts');
 
 echo "ok ($checks checks)\n";
