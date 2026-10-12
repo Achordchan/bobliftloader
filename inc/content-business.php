@@ -51,7 +51,18 @@ function bl_business_migrate(string $page, array $saved): array
         }
         return $value;
     };
-    return $walk($saved, $defaults);
+    $saved = $walk($saved, $defaults);
+    // The former people section carried the warranty months in a step; saved copies of it still follow the Support terms.
+    if ($page === 'home' && is_array($saved['approach']['steps'] ?? null) && array_is_list($saved['approach']['steps'])) $saved['approach']['steps'] = bl_business_migrate_list($saved['approach']['steps'], bl_home_former_steps(), $variables);
+    return $saved;
+}
+
+/** The three stock steps the home people section showed before it became The factory. */
+function bl_home_former_steps(): array
+{
+    return [
+        ['title' => 'Keep the conversation going.', 'text' => 'Contact the same team for equipment questions, <a href="' . bl_escape(bl_url('/support/') . '#after-delivery') . '">parts and service</a>, with a {warranty_months}-month warranty on the whole machine. Have a machine already? Include its model and serial number.'],
+    ];
 }
 
 /** Rows of a saved list whose fields still read as a stock row's former wording take that row's variable form. */

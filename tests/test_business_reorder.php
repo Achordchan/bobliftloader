@@ -22,4 +22,8 @@ $saved = []; $ref = &$saved; foreach ($found as $key) { $ref[$key] = []; $ref = 
 $migrated = bl_business_migrate('support', $saved);
 $out = $migrated; foreach ($found as $key) $out = $out[$key];
 if ($out !== array_reverse($list)) { fwrite(STDERR, "reordered stock rows were not migrated to variables\n"); exit(1); }
+// A saved copy of the former people-section step keeps following the warranty months.
+$former = strtr(bl_home_former_steps()[0]['text'], $variables);
+$legacyHome = bl_business_migrate('home', ['approach' => ['steps' => [['title' => 'Keep the conversation going.', 'text' => $former]]]]);
+if (($legacyHome['approach']['steps'][0]['text'] ?? '') !== bl_home_former_steps()[0]['text']) { fwrite(STDERR, "saved former home warranty step lost its variable\n"); exit(1); }
 echo "business reorder ok (" . implode('.', $found) . ")\n";
