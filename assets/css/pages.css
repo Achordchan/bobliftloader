@@ -475,13 +475,20 @@
 .bl-site .bl-model-key-joined::before{content:'-';position:absolute;right:100%;top:0;width:var(--key-gap);text-align:center;font:700 clamp(56px,5.2vw,132px)/.9 var(--display);color:#b9c1c4}
 .bl-site .bl-model-key-parts dd{margin:clamp(12px,1vw,20px) 0 0;font-size:var(--fs-small);line-height:1.6;color:var(--muted);white-space:nowrap}
 .bl-site .bl-model-key-parts dd strong{display:inline-block;min-width:1.1em;color:var(--ink)}
+/* Dumper range page: wheeled and tracked names are two keys, each part a code with a line of explanation. */
+.bl-site .bl-model-key-dumpers{grid-template-columns:1fr;align-items:start;gap:clamp(28px,3vw,72px)}
+.bl-site .bl-model-key-groups{display:grid;gap:clamp(28px,2.4vw,56px)}
+.bl-site .bl-model-key-group h3{margin:0 0 clamp(14px,1.2vw,24px);font-size:var(--fs-label);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--blue)}
+.bl-site .bl-model-key-dumpers .bl-model-key-parts{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:clamp(20px,2vw,44px) var(--key-gap);justify-content:stretch}
+.bl-site .bl-model-key-dumpers .bl-model-key-parts dt{font-size:clamp(44px,4vw,96px)}
+.bl-site .bl-model-key-dumpers .bl-model-key-parts dd{white-space:normal;max-width:17em}
 @media(max-width:1000px){.bl-site .bl-model-key{grid-template-columns:1fr;align-items:start}}
 @media(max-width:600px){
   .bl-site .bl-model-key-parts{grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 22px}
   .bl-site .bl-model-key-joined::before{display:none}
   .bl-site .bl-model-key{padding-block:var(--m-sec-tight,40px)}
   .bl-site .bl-model-key-head h2{font-size:var(--m-h2,clamp(38px,11vw,46px))}
-  .bl-site .bl-model-key-parts dt{font-size:48px}
+  .bl-site .bl-model-key-parts dt,.bl-site .bl-model-key-dumpers .bl-model-key-parts dt{font-size:44px}
   .bl-site .bl-model-key-parts dd{white-space:normal}
 }
 
@@ -687,7 +694,7 @@
   .bl-site .bl-model-key.bl-fold{gap:20px}
   .bl-site .bl-model-key.bl-fold .bl-fold-toggle{align-items:flex-end;min-height:0;padding:0}
   .bl-site .bl-model-key.bl-fold .bl-fold-toggle::after{margin-bottom:2px}
-  .bl-site .bl-model-key.bl-fold:not(.bl-fold-open) :is(.bl-model-key-intro,.bl-model-key-parts){display:none}
+  .bl-site .bl-model-key.bl-fold:not(.bl-fold-open) :is(.bl-model-key-intro,.bl-model-key-parts,.bl-model-key-groups){display:none}
 }
 
 /* Loader family page: how the loaders are made. Sticky step index beside a column of workshop photographs. */

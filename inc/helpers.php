@@ -237,6 +237,13 @@ function bl_product_page_title(array $product): string
 
 function bl_model_parts(string $model): ?array
 {
+    // Mini dumpers: FC / FY / FJZ then the rated load in hundreds of kilograms (and -2 / -4 on the FY20), or the two tracked names.
+    if (preg_match('/^(FC|FY|FJZ)-?(\d+)(?:-([24]))?$/', $model, $m)) {
+        $parts = [[$m[1], ['FC' => 'Front-tip', 'FY' => 'Hydraulic tipping', 'FJZ' => 'Self-loading'][$m[1]]], [$m[2], number_format((int) $m[2] * 100) . ' kg load']];
+        if (($m[3] ?? '') !== '') $parts[] = ['-' . $m[3], $m[3] === '2' ? 'Two-wheel drive' : 'Four-wheel drive'];
+        return $parts;
+    }
+    if (preg_match('/^BL-T(\d+)-(HD|HJ)$/', $model, $m)) return [['T', 'Tracked'], [$m[1], $m[2] === 'HD' ? 'Rated load, kg' : 'Drum, litres'], [$m[2], $m[2] === 'HD' ? 'Dumping' : 'Jiao · mixer']];
     if (!preg_match('/^BL-([TS])(\d+)-([HC])$/', $model, $m)) return null;
     return [
         [$m[1], $m[1] === 'T' ? 'Tracked' : 'Wheeled'],

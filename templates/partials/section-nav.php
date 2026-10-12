@@ -9,9 +9,9 @@ $sectionLinks = array_filter([
     'about-the-range' => 'About the range',
     'dumper-jobs' => !$loaderPage && bl_dumper_jobs() ? 'Where they work' : null,
     'attachments' => $loaderPage ? 'Attachments' : null,
-    'how-they-are-made' => $loaderPage ? 'How they’re made' : null,
+    'how-they-are-made' => bl_editable($loaderPage ? 'loaders' : 'dumpers')['making']['steps'] ? 'How they’re made' : null,
     'compare-' . $category => 'Compare',
-    'model-names' => $loaderPage ? 'Model names' : null,
+    'model-names' => $loaderPage || bl_dumper_name_groups() ? 'Model names' : null,
 ]);
 ?>
 <nav class="bl-section-nav" aria-label="On this page" data-section-nav>

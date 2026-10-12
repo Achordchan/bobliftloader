@@ -409,7 +409,7 @@ function initializePhoneSections() {
     button.className = 'bl-fold-toggle';
     while (title.firstChild) button.append(title.firstChild);
     title.append(button);
-    const parts = [head.querySelector('.bl-model-key-intro'), key.querySelector('.bl-model-key-parts')].filter(Boolean);
+    const parts = [head.querySelector('.bl-model-key-intro'), key.querySelector('.bl-model-key-groups, .bl-model-key-parts')].filter(Boolean);
     parts.forEach((part) => { if (!part.id) part.id = phoneId('bl-model-key-part'); });
     button.setAttribute('aria-controls', parts.map((part) => part.id).join(' '));
     const set = (open) => {

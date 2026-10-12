@@ -166,6 +166,16 @@ function bl_dumper_jobs(): array
     return $jobs;
 }
 
+/** The model-name groups the dumper page shows, wheeled first: a group with no parts is left out. */
+function bl_dumper_name_groups(): array
+{
+    $names = bl_editable('dumpers')['names'];
+    return array_values(array_filter([
+        ['label' => $names['wheeled_label'], 'parts' => $names['wheeled']],
+        ['label' => $names['tracked_label'], 'parts' => $names['tracked']],
+    ], static fn(array $group): bool => (bool) $group['parts']));
+}
+
 /**
  * Published mini dumpers by lower-case model name. A model renamed since (FY-30 is now FY30) is found under either name,
  * whichever one its record and the editor use; a model's own name always wins over another model's former name.

@@ -368,8 +368,36 @@ function bl_dumpers_defaults(): array
                 ['title' => 'Contractors and heavier loads', 'text' => 'Road, drainage and landscaping contractors moving four to five tonnes a trip on 4×4 site dumpers.', 'models' => 'FY40, FY50'],
             ],
         ],
+        // The steps carry photographs from the media library, so none ship with the theme; with no steps the section is left out.
+        'making' => [
+            'eyebrow' => 'HOW OUR DUMPERS ARE MADE',
+            'title' => "FROM STEEL\nTO *SHIPMENT.*",
+            'intro' => 'The main steps in making a tracked mini dumper, from steel parts to machines ready to load.',
+            'steps' => [],
+        ],
         'compare' => [
             'note' => 'Wheeled dumper figures from the BOB-LIFT mini dumper brochure; tracked models from the BOB-LIFT technical sheets. Confirm the final configuration with our team before ordering.',
+        ],
+        // The key under the comparison: how the wheeled and tracked model names are built (purchasing, 2026-10-09).
+        'names' => [
+            'eyebrow' => 'HOW TO READ A MODEL NAME',
+            'title' => "THE NAME\nTELLS YOU HOW.",
+            'intro' => 'A wheeled dumper’s name says how it tips and how much it carries. The two tracked models are named differently.',
+            'wheeled_label' => 'Wheeled site dumpers',
+            'wheeled' => [
+                ['code' => 'FC', 'text' => 'Basic front-tip dumper, tipping mechanically as standard'],
+                ['code' => 'FY', 'text' => 'Hydraulic tipping'],
+                ['code' => 'FJZ', 'text' => 'Articulated frame with a self-loading front bucket'],
+                ['code' => '30', 'text' => 'Rated load in hundreds of kilograms, so the FY30 carries 3,000 kg'],
+                ['code' => '-2 / -4', 'text' => 'On the FY20 only: -2 is two-wheel drive (4×2), -4 is four-wheel drive (4×4)'],
+            ],
+            'tracked_label' => 'Tracked dumpers',
+            'tracked' => [
+                ['code' => 'BL', 'text' => 'BOB-LIFT'],
+                ['code' => 'T', 'text' => 'Tracked'],
+                ['code' => '500 / 200', 'text' => 'The BL-T500-HD rated load in kilograms, and the BL-T200-HJ mixing drum in litres'],
+                ['code' => 'HD / HJ', 'text' => 'HD is Dumping, a tipping hopper; HJ is Jiao, which means mixer'],
+            ],
         ],
         'product' => bl_product_page_defaults('dumper'),
     ];
