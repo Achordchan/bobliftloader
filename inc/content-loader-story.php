@@ -34,6 +34,10 @@ function bl_loader_story_definition(): array
         'colour_text' => 'Tell us the colour you want. The loaders on our Xuzhou factory floor are painted for other customers’ orders.',
         'colour_image' => bl_asset('images/about/ready-900.webp'),
         'colour_alt' => 'Finished loaders in red, yellow, blue and green at the BOB-LIFT factory in Xuzhou, each painted to its customer’s order',
+        // The range film sits under the heading when its address is filled in; empty, nothing is shown.
+        'film_video' => '',
+        'film_poster' => '',
+        'film_caption' => '',
     ];
     $making = [
         'eyebrow' => 'HOW OUR LOADERS ARE MADE',
@@ -79,6 +83,9 @@ function bl_loader_story_definition(): array
             ['key' => 'range_story.colour_text', 'label' => '喷漆介绍', 'type' => 'textarea'],
             ['key' => 'range_story.colour_image', 'label' => '喷漆照片', 'type' => 'image'],
             ['key' => 'range_story.colour_alt', 'label' => '喷漆照片替代文字', 'type' => 'text'],
+            ['key' => 'range_story.film_video', 'label' => '系列宣传片：视频地址', 'type' => 'url', 'help' => '可选。显示在系列介绍标题下面的横版 16:9 视频（建议 960 px 宽、3 MB 以内的 MP4）；留空则不显示。'],
+            ['key' => 'range_story.film_poster', 'label' => '系列宣传片：封面图', 'type' => 'url', 'help' => '播放前显示的图片地址，建议用视频的首帧。'],
+            ['key' => 'range_story.film_caption', 'label' => '系列宣传片：说明文字', 'type' => 'text'],
         ]],
         ['title' => '制造流程', 'fields' => [
             ['key' => 'making.eyebrow', 'label' => '眉题', 'type' => 'text'],
