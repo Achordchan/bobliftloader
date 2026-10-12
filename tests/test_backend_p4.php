@@ -138,6 +138,7 @@ $check(bl_family_copy('loaders', 'product.copy.warranty_scope', ['model' => 'Tes
 $check(bl_family_copy('dumpers', 'product.copy.warranty_scope', ['model' => 'Dumper']) === 'Dumper: 24 months', 'dumper variable failed');
 $check(bl_family_copy('loaders', 'product.copy.faq_intro') === '', 'explicit empty rendered fallback');
 $check(bl_catalog_filters('skid-steer-loaders')['gear']['options']['tracked'] === 'Edited tracks', 'edited filters not consumed');
+$category = 'skid-steer-loaders';
 ob_start(); require __DIR__ . '/../templates/partials/making-story.php'; $makingHtml = ob_get_clean();
 $check(str_contains($makingHtml, 'src="https://media.example.test/custom.jpg"') && !str_contains($makingHtml, 'https://media.example.test/custom.jpg 900w'), 'custom manufacturing image got fabricated responsive variants');
 $check(!str_contains($makingHtml, 'src=""'), 'cleared manufacturing photo emitted an empty image URL');

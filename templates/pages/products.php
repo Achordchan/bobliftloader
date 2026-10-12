@@ -85,7 +85,8 @@ $film = $category ? ['src' => trim(bl_content_value($catalogPage, 'catalog.film_
 <?php if ($category) { $storyCategory = $category; require __DIR__ . '/../partials/range-story.php'; } // what the family is for, before the model-by-model comparison ?>
 <?php if ($category === 'mini-dumpers') require __DIR__ . '/../partials/dumper-jobs.php'; // the jobs each dumper suits, after the load chart ?>
 <?php if ($category === 'skid-steer-loaders') require __DIR__ . '/../partials/attachments.php'; // tools belong to the machine, so they sit with the range, not in a catalogue of their own ?>
-<?php if ($category === 'skid-steer-loaders') require __DIR__ . '/../partials/making-story.php'; // loader production photography only; none supplied for dumpers yet ?>
+<?php if ($category) require __DIR__ . '/../partials/making-story.php'; // how the machines are made; the dumper section appears once its photographs are saved ?>
 <?php if ($category) { $compareCategory = $category; require __DIR__ . '/../partials/compare-table.php'; } ?>
 <?php if ($category === 'skid-steer-loaders') require __DIR__ . '/../partials/model-key.php'; // after the comparison: the names are read once the models are known ?>
+<?php if ($category === 'mini-dumpers') require __DIR__ . '/../partials/dumper-names.php'; ?>
 <?php require __DIR__ . '/../partials/page-cta.php'; ?>

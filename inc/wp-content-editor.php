@@ -174,9 +174,36 @@ function bl_content_schema_fields(string $page, ?array $content = null): array
                 'models' => ['label' => '适合型号', 'type' => 'text', 'help' => '写产品的型号（如 FY30），英文逗号分隔；会链接到对应产品页。写错或已下架的型号不显示。'],
             ]],
         ]],
+        ['title' => '制造流程', 'note' => '栏目页的“怎么造的”（#how-they-are-made），在适用场景和参数对比之间。没有工序则不显示这一块；图片从媒体库选，3:2 横图。', 'fields' => [
+            ['key' => 'making.eyebrow', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'making.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
+            ['key' => 'making.intro', 'label' => '介绍', 'type' => 'textarea'],
+            ['key' => 'making.steps', 'label' => '工序（按展示顺序）', 'type' => 'list', 'add' => '添加工序', 'summary' => ['title'], 'fields' => [
+                'title' => ['label' => '工序名称', 'type' => 'text'],
+                'text' => ['label' => '说明', 'type' => 'textarea'],
+                'image' => ['label' => '图片', 'type' => 'image', 'help' => '3:2 横图。图里不要留人脸、车牌和别家的厂名字样。'],
+                'alt' => ['label' => '图片替代文字', 'type' => 'text', 'help' => $alt],
+            ]],
+        ]],
         ['title' => '参数对比', 'fields' => [
             ['key' => 'compare.note', 'label' => '对比表说明', 'type' => 'textarea', 'help' => '对比表标题旁的说明，写参数出处。'],
-        ]],        $productPage('dumper'),
+        ]],
+        ['title' => '型号命名', 'note' => '参数对比下面的“怎么读型号”（#model-names），产品页型号旁的“How model names work”链接到这里。两组都删空则不显示这一块。', 'fields' => [
+            ['key' => 'names.eyebrow', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'names.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
+            ['key' => 'names.intro', 'label' => '标题下介绍', 'type' => 'textarea', 'help' => $optional],
+            ['key' => 'names.wheeled_label', 'group' => '轮式翻斗车', 'label' => '组名', 'type' => 'text', 'help' => $optional],
+            ['key' => 'names.wheeled', 'group' => '轮式翻斗车', 'label' => '名称各部分', 'type' => 'list', 'add' => '添加一项', 'summary' => ['code'], 'fields' => [
+                'code' => ['label' => '字母或数字', 'type' => 'text', 'help' => '多个并列写法用“ / ”隔开（如 -2 / -4），斜杠显示为蓝色。'],
+                'text' => ['label' => '含义', 'type' => 'textarea'],
+            ]],
+            ['key' => 'names.tracked_label', 'group' => '履带翻斗车', 'label' => '组名', 'type' => 'text', 'help' => $optional],
+            ['key' => 'names.tracked', 'group' => '履带翻斗车', 'label' => '名称各部分', 'type' => 'list', 'add' => '添加一项', 'summary' => ['code'], 'fields' => [
+                'code' => ['label' => '字母或数字', 'type' => 'text', 'help' => '多个并列写法用“ / ”隔开，斜杠显示为蓝色。'],
+                'text' => ['label' => '含义', 'type' => 'textarea'],
+            ]],
+        ]],
+        $productPage('dumper'),
     ];
     if ($page === 'thanks') return [
         ['title' => '搜索结果显示', 'note' => '浏览器标签里的标题。这一页不让搜索引擎收录，也不在网站地图里。', 'fields' => [
