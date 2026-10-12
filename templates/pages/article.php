@@ -28,6 +28,16 @@ $posterFigure = static fn(array $poster): string => '<figure class="bl-story-pos
 // Text written in WordPress places the artwork as imported sections do: at the head of section 'after' (floated beside it
 // on wide screens), or after the text when that section does not exist. Sections start at each <h2>.
 $contentHtml = !empty($article['content_html']) ? wp_kses_post($article['content_html']) : '';
+// The contents list (side column on wide screens, a fold-out above the text on phones) takes the text's <h2> headings, from
+// WordPress text or from imported sections alike, and shows from three headings up.
+$contents = bl_story_contents($contentHtml !== '' ? $contentHtml : (!empty($article['_bl_body_managed']) ? '' : implode('', array_map(static fn(array $s): string => '<h2>' . bl_escape($s['heading']) . '</h2>', $article['sections'] ?? []))));
+if ($contentHtml !== '') $contentHtml = $contents['html'];
+$contentItems = count($contents['items']) >= 3 ? $contents['items'] : [];
+$contentsList = static function (array $items): string {
+    $list = '';
+    foreach ($items as [$id, $text]) $list .= '<li><a href="#' . bl_escape($id) . '">' . bl_escape($text) . '</a></li>';
+    return '<ol>' . $list . '</ol>';
+};
 if ($contentHtml !== '' && $poster) {
     $parts = preg_split('/(?=<h2[\s>])/i', $contentHtml); // [text before the first heading, section 1, section 2, …]
     $contentHtml = $posterAfter >= 1 && $posterAfter < count($parts)
@@ -53,11 +63,15 @@ if ($contentHtml !== '' && $poster) {
           <?php if (!empty($event['booth'])): ?><div><dt>Booth</dt><dd><strong><?= bl_escape($event['booth']) ?></strong></dd></div><?php endif; ?>
         </dl><?php endif; ?>
       </header>
+      <?php if ($contentItems): ?><details class="bl-story-contents-inline" data-story-contents>
+        <summary><span>In this article</span><small><?= count($contentItems) ?> sections</small></summary>
+        <?= $contentsList($contentItems) ?>
+      </details><?php endif; ?>
       <div class="bl-story-body">
         <?php if ($leadFigure): ?><figure class="bl-story-figure"><span class="bl-story-zoom-frame"><img src="<?= bl_escape($article['image']) ?>" alt="<?= bl_escape($article['caption']) ?>" width="1500" height="900" fetchpriority="high"><?= $zoom(0, $article['image'], $article['caption'], $article['caption']) ?></span><figcaption><?= bl_escape($article['caption']) ?></figcaption></figure><?php endif; ?>
         <div class="bl-story-text">
           <?php if ($contentHtml !== '' || !empty($article['_bl_body_managed'])): ?><?= $contentHtml === '' && $poster ? $posterFigure($poster) : '' ?><div class="bl-wp-article-content"><?= $contentHtml ?></div>
-          <?php else: foreach ($article['sections'] as $i => $section): ?><?= $poster && $i + 1 === $posterAfter ? $posterFigure($poster) : '' ?><h2><?= bl_escape($section['heading']) ?></h2><p><?= bl_escape($section['text']) ?></p><?php endforeach; ?><?= $poster && ($posterAfter < 1 || $posterAfter > count($article['sections'])) ? $posterFigure($poster) : '' ?><?php endif; ?>
+          <?php else: foreach ($article['sections'] as $i => $section): ?><?= $poster && $i + 1 === $posterAfter ? $posterFigure($poster) : '' ?><h2<?= isset($contents['items'][$i]) ? ' id="' . bl_escape($contents['items'][$i][0]) . '"' : '' ?>><?= bl_escape($section['heading']) ?></h2><p><?= bl_escape($section['text']) ?></p><?php endforeach; ?><?= $poster && ($posterAfter < 1 || $posterAfter > count($article['sections'])) ? $posterFigure($poster) : '' ?><?php endif; ?>
           <?php if ($status && $status['state'] !== 'past'): ?><p class="bl-story-visit">Planning to visit? <a href="<?= bl_escape(bl_url('/contact/') . '#enquiry') ?>">Tell us your dates</a> or <a href="<?= bl_escape(bl_company('sales_whatsapp_url')) ?>" target="_blank" rel="noopener">message us on WhatsApp</a>, so the compact equipment team can expect you.</p><?php endif; ?>
         </div>
       </div>
@@ -80,6 +94,12 @@ if ($contentHtml !== '' && $poster) {
 
       <?php /* Everything after the author follows the reader down the page on wide screens (news.css). */ ?>
       <div class="bl-story-follow">
+      <?php if ($contentItems): ?>
+      <nav class="bl-story-box bl-story-contents" aria-label="In this article" data-story-contents-nav>
+        <h2>In this article</h2>
+        <?= $contentsList($contentItems) ?>
+      </nav>
+      <?php endif; ?>
       <?php if ($status): ?>
       <section class="bl-story-box">
         <h2>Event details</h2>

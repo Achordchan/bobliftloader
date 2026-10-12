@@ -157,6 +157,35 @@ function bl_title_text(string $text): string
     return (string) preg_replace('/(?<![\p{L}\p{N}\p{M}\'’&#-])([AaI]) (?=\S)/u', '$1&nbsp;', bl_escape($text));
 }
 
+/**
+ * A story's contents list: every <h2> in the text gets an id (an id already there stays) and one entry in the list.
+ * Returns the text with the ids set and the entries as [id, heading text]; display only, the stored text is unchanged.
+ *
+ * @return array{html: string, items: list<array{0: string, 1: string}>}
+ */
+function bl_story_contents(string $html): array
+{
+    $items = [];
+    $used = [];
+    $html = (string) preg_replace_callback('~<h2\b([^>]*)>(.*?)</h2>~is', static function (array $m) use (&$items, &$used): string {
+        $text = trim((string) preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($m[2]), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+        if ($text === '') return $m[0];
+        $attributes = $m[1];
+        if (preg_match('~\sid\s*=\s*(["\'])([^"\']+)\1~i', $attributes, $existing)) {
+            $id = $existing[2];
+        } else {
+            $base = trim((string) preg_replace('/[^a-z0-9]+/', '-', strtolower($text)), '-') ?: 'section';
+            $id = $base;
+            for ($n = 2; isset($used[$id]); $n++) $id = $base . '-' . $n;
+            $attributes .= ' id="' . $id . '"';
+        }
+        $used[$id] = true;
+        $items[] = [$id, $text];
+        return '<h2' . $attributes . '>' . $m[2] . '</h2>';
+    }, $html);
+    return ['html' => $html, 'items' => $items];
+}
+
 function bl_icon(string $name, string $class = ''): string
 {
     return '<img class="bl-icon ' . bl_escape($class) . '" src="' . bl_escape(bl_asset('icons/' . $name . '.svg')) . '" alt="" width="24" height="24" aria-hidden="true">';
