@@ -67,7 +67,8 @@
 .bl-site .bl-wp-article-content figure img{width:100%;height:auto;background:#e7e9e3}
 .bl-site .bl-wp-article-content figcaption{padding-top:10px;font-size:var(--fs-label);line-height:1.6;color:var(--muted)}
 .bl-site .bl-wp-article-content .wp-block-table{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.bl-site .bl-wp-article-content table{width:100%;min-width:32rem;border-collapse:collapse;font-size:var(--fs-small);line-height:1.5;color:#3f4c57}
+.bl-site .bl-wp-article-content table{width:100%;border-collapse:collapse;font-size:var(--fs-small);line-height:1.5;color:#3f4c57}
+.bl-site .bl-wp-article-content .wp-block-table table{min-width:32rem}
 .bl-site .bl-wp-article-content :is(th,td){padding:10px 12px;border:0;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 .bl-site .bl-wp-article-content thead th{border-bottom:2px solid var(--ink);font-size:var(--fs-micro);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink)}
 .bl-site .bl-wp-article-content tbody th{font-weight:600;color:var(--ink)}
