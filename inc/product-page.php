@@ -139,7 +139,11 @@ function bl_product_factory(array $product): array
     $factory = bl_product_shared($product)['factory'] ?? [];
     if (!is_array($factory)) return [];
     $factory['images'] = array_slice(array_values(array_filter((array) ($factory['images'] ?? []), static fn($image): bool => is_array($image) && ($image['image'] ?? '') !== '')), 0, BL_CONTENT_LIMITS['factory']);
-    $factory['checks'] = array_values(array_filter((array) ($factory['checks'] ?? []), static fn($check): bool => is_array($check) && ($check['title'] ?? '') !== ''));
+    $valid = static fn($list): array => array_values(array_filter((array) $list, static fn($check): bool => is_array($check) && ($check['title'] ?? '') !== ''));
+    $factory['checks'] = $valid($factory['checks'] ?? []);
+    // The wheeled site dumpers are checked to a list of their own (tyres, lights, horn and gauges) once one is saved.
+    if ($product['category'] === 'mini-dumpers' && bl_product_facets($product, 'mini-dumpers')['gear'] === 'wheeled' && ($wheeled = $valid($factory['checks_wheeled'] ?? []))) $factory['checks'] = $wheeled;
+    unset($factory['checks_wheeled']);
     return ($factory['text'] ?? '') === '' && !$factory['checks'] ? [] : $factory;
 }
 
