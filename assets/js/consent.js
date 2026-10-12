@@ -77,6 +77,17 @@ function schedule(placeholder, old, at = jobs.length) {
 let lateUsers = 0;
 let undoLate = () => {};
 
+// Scripts started without being waited for (async, defer) that have not arrived yet: DOMContentLoaded would have waited for the
+// deferred ones and load for all of them, so a replayed callback waits too, and keeps the allowances until it has finished.
+const pending = { all: new Set(), deferred: new Set() };
+
+function replay(type, callback) {
+  const release = holdLateAllowances();
+  Promise.all([...(type === 'load' ? pending.all : pending.deferred)]).then(() => setTimeout(() => {
+    try { callback(); } finally { release(); }
+  }));
+}
+
 function lateAllowances() {
   const past = { DOMContentLoaded: () => document.readyState !== 'loading', load: () => document.readyState === 'complete' };
   const restore = [document, window].map((target) => {
@@ -84,7 +95,7 @@ function lateAllowances() {
     const original = target.addEventListener;
     target.addEventListener = function (type, listener, options) {
       if (!past[type]?.() || !listener) return original.call(this, type, listener, options);
-      setTimeout(() => { const event = new Event(type); if (typeof listener === 'function') listener.call(this, event); else listener.handleEvent(event); });
+      replay(type, () => { const event = new Event(type); if (typeof listener === 'function') listener.call(this, event); else listener.handleEvent(event); });
     };
     return () => { if (own) target.addEventListener = own; else delete target.addEventListener; };
   });
@@ -98,7 +109,7 @@ function lateAllowances() {
       enumerable: native.enumerable,
       get: () => native.get.call(window),
       set(handler) {
-        if (document.readyState === 'complete' && typeof handler === 'function') setTimeout(() => handler.call(window, new Event('load')));
+        if (document.readyState === 'complete' && typeof handler === 'function') replay('load', () => handler.call(window, new Event('load')));
         else native.set.call(window, handler);
       },
     });
@@ -167,6 +178,12 @@ function runScript(placeholder, old) {
     if (waits) {
       script.addEventListener('load', resolve);
       script.addEventListener('error', resolve);
+    }
+    if (external && !waits) {
+      const arrived = new Promise((done) => { script.addEventListener('load', done); script.addEventListener('error', done); });
+      pending.all.add(arrived);
+      if (old.hasAttribute('defer') && !old.hasAttribute('async')) pending.deferred.add(arrived);
+      arrived.then(() => { pending.all.delete(arrived); pending.deferred.delete(arrived); });
     }
     placeholder.replaceWith(script);
     if (!external) release();
@@ -280,6 +297,10 @@ export function initializeConsent() {
   channel?.addEventListener('message', sync);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); });
 
-  if (choice) categories.filter((name) => choice[name]).forEach(run);
-  else open(false);
+  // What was refused stays cleaned up: a cookie on a path this page could not reach when the choice was made is removed when it can.
+  if (choice) {
+    const declined = categories.filter((name) => !choice[name]);
+    if (declined.length) clearToolCookies(declined);
+    categories.filter((name) => choice[name]).forEach(run);
+  } else open(false);
 }
