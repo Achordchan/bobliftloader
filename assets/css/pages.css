@@ -928,3 +928,14 @@
 .bl-site .bl-film-stage{aspect-ratio:16/9;width:min(100%,calc((100svh - 150px) * 16 / 9));margin-inline:auto;background:#000}
 .bl-site .bl-film-stage video{display:block;width:100%;height:100%;object-fit:contain}
 .bl-site .bl-film-caption{padding:16px clamp(18px,2vw,32px) 20px;font-size:var(--fs-small,14px);line-height:1.6;color:#ffffffb8}
+
+/* Phones: the range heading is smaller, and the film and catalogue links become two full-width rows with the icon at the end. */
+@media(max-width:600px){
+  .bl-site .bl-catalog-hero .bl-page-heading{gap:16px;padding-top:12px}
+  .bl-site .bl-catalog-hero .bl-page-heading .bl-eyebrow{margin-bottom:12px}
+  .bl-site .bl-catalog-hero .bl-page-heading h1{font-size:clamp(38px,11.4vw,46px);line-height:.95;letter-spacing:-.4px}
+  .bl-site .bl-catalog-hero .bl-page-heading>p{font-size:15px;line-height:1.6}
+  .bl-site .bl-catalog-actions{flex-direction:column;align-items:stretch;gap:10px;margin-top:20px}
+  .bl-site .bl-catalog-actions .bl-text-link{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:10px 16px;background:#fff;border:1px solid var(--line)}
+  .bl-site .bl-catalog-actions .bl-text-link .bl-icon{flex:none}
+}

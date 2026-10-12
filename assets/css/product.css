@@ -220,12 +220,10 @@
   /* The photograph gives up height on short screens (3:2 at most) so the quote button clears the contact bar; its
      thumbnails become a row of dots along its foot. */
   .bl-site .bl-shell:has(+.bl-product-hero) .bl-breadcrumbs{padding-block:0}
-  .bl-site .bl-product-hero{gap:8px;padding-top:4px}
+  .bl-site .bl-product-hero{gap:18px;padding-top:4px}
   .bl-site .bl-product-gallery{position:relative;gap:6px}
-  .bl-site .bl-product-main-image{aspect-ratio:3/2;max-height:max(150px,calc(100svh - 494px - env(safe-area-inset-bottom,0px)))}
-  /* Without the name's key the photograph keeps more height, leaving room for a product name that runs to two lines. */
-  .bl-site .bl-product-hero:not(:has(.bl-model-decode)) .bl-product-main-image{max-height:max(150px,calc(100svh - 456px - env(safe-area-inset-bottom,0px)))}
-  .bl-site .bl-product-main-image>img{padding:8px 12px 22px}
+  .bl-site .bl-product-main-image{aspect-ratio:6/5;max-height:62svh}
+  .bl-site .bl-product-main-image>img{padding:4px 6px 20px}
   /* No photograph yet: a quiet panel with a frame drawn in, the line under it readable. */
   .bl-site .bl-product-main-image .bl-product-image-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px 24px;background:#e9edf0;font-size:13px;line-height:1.45}
   .bl-site .bl-product-main-image .bl-product-image-empty::before{content:'';flex:none;width:40px;height:30px;border:1.5px solid currentColor;border-radius:3px;background:radial-gradient(circle at 50% 55%,#0000 6px,currentColor 6px 7.5px,#0000 7.5px)}
@@ -236,27 +234,27 @@
   .bl-site .bl-gallery-next{right:6px}
   .bl-site .bl-gallery-step .bl-icon{width:18px;height:18px}
   .bl-site .bl-gallery-next .bl-icon{transform:rotate(180deg)}
-  .bl-site .bl-gallery-thumbs{position:absolute;grid-area:1/1;left:4px;right:64px;bottom:-6px;z-index:1;display:flex;gap:0;margin:0;padding:0;overflow-x:auto;scroll-snap-type:none}
-  .bl-site .bl-gallery-thumbs button{flex:0 0 32px;width:auto;min-width:32px;height:44px;aspect-ratio:auto;padding:0;background:none;border:0}
-  .bl-site .bl-gallery-thumbs button::before{content:'';display:block;width:8px;height:8px;margin:auto;border-radius:4px;background:#b9c4c9;transition:width .2s,background .2s}
-  .bl-site .bl-gallery-thumbs button[aria-pressed=true]::before{width:18px;background:var(--blue)}
+  .bl-site .bl-gallery-thumbs{position:absolute;grid-area:1/1;left:8px;right:64px;bottom:-10px;z-index:1;display:flex;gap:0;margin:0;padding:0;overflow-x:auto;scroll-snap-type:none}
+  .bl-site .bl-gallery-thumbs button{flex:0 0 26px;width:auto;min-width:26px;height:40px;aspect-ratio:auto;padding:0;background:none;border:0}
+  .bl-site .bl-gallery-thumbs button::before{content:'';display:block;width:6px;height:6px;margin:auto;border-radius:3px;background:#c7d0d4;transition:width .2s,background .2s}
+  .bl-site .bl-gallery-thumbs button[aria-pressed=true]::before{width:14px;background:var(--blue)}
   .bl-site .bl-gallery-thumbs button:focus-visible{outline-offset:-6px}
   .bl-site .bl-gallery-thumbs img{display:none}
-  .bl-site .bl-product-intro h1{font-size:var(--m-h1,clamp(48px,14vw,60px));margin:6px 0 8px}
-  .bl-site .bl-product-intro h1>span{margin-top:6px;font-size:20px;line-height:1.2}
+  .bl-site .bl-product-intro h1{font-size:var(--m-h1,clamp(48px,14vw,60px));margin:10px 0 12px}
+  .bl-site .bl-product-intro h1>span{margin-top:8px;font-size:20px;line-height:1.25}
   /* The name's key: three chips on one line under the name, each as wide as its words, the link to the key beneath them. */
-  .bl-site .bl-model-decode{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 8px;font-size:12px}
+  .bl-site .bl-model-decode{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;font-size:12px}
   .bl-site .bl-model-decode span{flex:1 1 auto;gap:4px;padding:2px 4px 2px 2px;line-height:1.15;letter-spacing:-.01em;white-space:nowrap}
   .bl-site .bl-model-decode b{flex:none;height:22px;padding:0 4px}
-  .bl-site .bl-model-decode a{flex-basis:100%;max-width:max-content;margin:2px 0 0;font-size:12px;line-height:1.3}
+  .bl-site .bl-model-decode a{flex-basis:100%;max-width:max-content;margin:6px 0 0;font-size:12px;line-height:1.3}
   .bl-site .bl-model-decode a,.bl-site .bl-product-compare thead a{position:relative}
   .bl-site .bl-model-decode a::after,.bl-site .bl-product-compare thead a::after{content:'';position:absolute;inset:-14px -6px}
   /* The three figures: labels may run to two lines, the figures still share one line along the foot. */
-  .bl-site .bl-product-key-specs{gap:12px;padding:8px 0;margin:0}
+  .bl-site .bl-product-key-specs{gap:14px;padding:16px 0;margin:4px 0 0}
   .bl-site .bl-product-key-specs>div{display:flex;flex-direction:column;justify-content:space-between;min-width:0}
   .bl-site .bl-product-key-specs dt{font-size:12px;line-height:1.3;letter-spacing:.04em}
-  .bl-site .bl-product-key-specs dd{margin-top:4px;font-size:23px}
-  .bl-site .bl-product-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 10px;margin-top:10px}
+  .bl-site .bl-product-key-specs dd{margin-top:8px;font-size:23px}
+  .bl-site .bl-product-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px 10px;margin-top:20px}
   .bl-site .bl-product-actions>.bl-text-link{grid-column:1/-1;justify-self:start}
   /* WhatsApp sits beside the quote button as a square of the same height; the line of contact links below it goes. */
   .bl-site .bl-product-wa{display:grid;place-items:center;align-self:stretch;width:54px;background:#fff;border:1px solid #b9c4c9;color:#1fb457;transition:transform .12s,background .2s}
