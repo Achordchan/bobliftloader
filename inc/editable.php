@@ -85,7 +85,7 @@ function bl_home_defaults(): array
         'approach' => [
             'eyebrow' => '04 / THE FACTORY',
             'title' => "WHERE OUR LOADERS\nARE *BUILT.*",
-            'text' => 'Our own team welds, paints and assembles our mini skid steer loaders at our factory in Xuzhou, China. Every loader is run and checked before it is packed for export.',
+            'text' => 'BOB-LIFT mini skid steer loaders are welded, painted and assembled at our factory in Xuzhou, China. Every loader is run and checked before it is packed for export.',
             'link' => 'About BOB-LIFT',
             'image' => '',
             'alt' => 'A BOB-LIFT technician assembling a tracked loader at the factory in Xuzhou',
@@ -96,9 +96,9 @@ function bl_home_defaults(): array
                 ['value' => '200+', 'unit' => '', 'label' => 'Countries and regions served'],
             ],
             'steps' => [
-                ['title' => 'Welded and painted for your order.', 'text' => 'Frames are cut and welded by hand. Each one is painted in the colour on your order. <a href="' . bl_escape(bl_url('/products/skid-steer-loaders/') . '#how-they-are-made') . '">See how loaders are made</a>'],
-                ['title' => 'Every loader is checked before packing.', 'text' => 'We start the engine, operate every movement, drive the machine and look for oil leaks.'],
-                ['title' => 'Visit before you order.', 'text' => 'Tell us your dates and we will arrange a visit to our factory in Xuzhou, Jiangsu. <a href="' . bl_escape(bl_url('/contact/') . '#enquiry') . '">Plan a visit</a>'],
+                ['title' => 'Welded by hand. Painted in your colour.', 'text' => 'Frames are cut and welded by hand. Each frame is painted in the colour on your order. <a href="' . bl_escape(bl_url('/products/skid-steer-loaders/') . '#how-they-are-made') . '">See how loaders are made</a>'],
+                ['title' => 'Checked before it ships.', 'text' => 'We check the tank and pipework, then run the engine. We operate every movement, drive the machine and look for oil leaks.'],
+                ['title' => 'Visit our factory.', 'text' => 'Send us your dates to visit our factory in Xuzhou, Jiangsu. <a href="' . bl_escape(bl_url('/contact/') . '#enquiry') . '">Plan a visit</a>'],
             ],
         ],
         'journal' => [
