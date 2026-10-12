@@ -15,15 +15,18 @@ export function initializeHero() {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let current = 0;
 
-  // Later slides' pictures wait (see templates/home.php) until the page has loaded, so they never compete with the first.
+  // Later slides' pictures wait (see templates/home.php) until a little after the page has loaded, so on a slow phone
+  // connection they never compete with the first screen; the first turn comes seconds later (--hero-interval), and a
+  // slide chosen sooner fetches its picture at once (show() below).
   const fetchLaterPictures = () => pictures.slice(1).forEach((picture) => picture.querySelectorAll('[data-srcset], [data-src]').forEach((element) => {
     if (element.dataset.srcset) element.srcset = element.dataset.srcset;
     if (element.dataset.src) element.src = element.dataset.src;
     element.removeAttribute('data-srcset');
     element.removeAttribute('data-src');
   }));
-  if (document.readyState === 'complete') fetchLaterPictures();
-  else window.addEventListener('load', fetchLaterPictures, { once: true });
+  const fetchSoon = () => window.setTimeout(fetchLaterPictures, 2500);
+  if (document.readyState === 'complete') fetchSoon();
+  else window.addEventListener('load', fetchSoon, { once: true });
 
   slides.forEach((slide, index) => {
     slide.hidden = false;
