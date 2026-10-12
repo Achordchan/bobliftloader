@@ -157,6 +157,69 @@ function bl_title_text(string $text): string
     return (string) preg_replace('/(?<![\p{L}\p{N}\p{M}\'’&#-])([AaI]) (?=\S)/u', '$1&nbsp;', bl_escape($text));
 }
 
+/**
+ * The id attribute among a tag's attributes, read attribute by attribute so that text inside another quoted value
+ * (title="a id='b'") is not taken for one. Returns its decoded value and where it sits in the string, or null.
+ *
+ * @return array{0: string, 1: int, 2: int}|null [value, offset, length]
+ */
+function bl_attribute_id(string $attributes): ?array
+{
+    if (!preg_match_all('~([^\s"\'<>/=]+)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'=<>`]+)))?~', $attributes, $found, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) return null;
+    foreach ($found as $attribute) {
+        if (strcasecmp($attribute[1][0], 'id') !== 0) continue;
+        $value = '';
+        foreach ([2, 3, 4] as $group) if (isset($attribute[$group]) && $attribute[$group][1] >= 0) $value = $attribute[$group][0];
+        return [html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8'), $attribute[0][1], strlen($attribute[0][0])];
+    }
+    return null;
+}
+
+/**
+ * A story's contents list: every <h2> in the text gets an id (an id already there stays, so shared links keep working)
+ * and one entry in the list. Returns the text with the ids set, the entries as [id, heading text], and each <h2>'s id in
+ * the order the headings come (null for one with no text, which has no entry); display only, the stored text is unchanged.
+ * Ids already used anywhere in the text, and the page's own, are kept free of generated ones; a heading repeating an
+ * earlier heading's id gets a new one, and headings inside HTML comments are ignored.
+ *
+ * @return array{html: string, items: list<array{0: string, 1: string}>, ids: list<?string>}
+ */
+function bl_story_contents(string $html): array
+{
+    $used = array_fill_keys(['top', 'main', 'main-navigation', 'story-title', 'story-lightbox', 'site-search', 'quick-enquiry', 'enquiry'], true); // the page's own
+    if (preg_match_all('~<[a-z][a-z0-9]*\b((?:"[^"]*"|\'[^\']*\'|[^>"\'])*)>~i', (string) preg_replace('~<!--.*?-->~s', '', $html), $tags)) {
+        foreach ($tags[1] as $attributes) {
+            if ($existing = bl_attribute_id($attributes)) $used[$existing[0]] = true;
+        }
+    }
+    $items = [];
+    $ids = [];
+    $seen = [];
+    // Markup inside an HTML comment is not on the page, so a heading there is passed over.
+    $html = (string) preg_replace_callback('~<!--.*?-->|<h2\b((?:"[^"]*"|\'[^\']*\'|[^>"\'])*)>(.*?)</h2>~is', static function (array $m) use (&$items, &$ids, &$used, &$seen): string {
+        if (str_starts_with($m[0], '<!--')) return $m[0];
+        $text = trim((string) preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($m[2]), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+        if ($text === '') { $ids[] = null; return $m[0]; }
+        $attributes = $m[1];
+        $existing = bl_attribute_id($attributes);
+        if ($existing && $existing[0] !== '' && !isset($seen[$existing[0]])) {
+            $id = $existing[0]; // kept as it is (the first heading to use it; a repeat gets an id of its own below)
+            $seen[$id] = true;
+        } else {
+            if ($existing) $attributes = substr($attributes, 0, $existing[1]) . substr($attributes, $existing[1] + $existing[2]); // an empty id="" is replaced, not joined by a second one
+            $base = trim((string) preg_replace('/[^a-z0-9]+/', '-', strtolower($text)), '-') ?: 'section';
+            $id = $base;
+            for ($n = 2; isset($used[$id]); $n++) $id = $base . '-' . $n;
+            $used[$id] = $seen[$id] = true;
+            $attributes .= ' id="' . $id . '"';
+        }
+        $items[] = [$id, $text];
+        $ids[] = $id;
+        return '<h2' . $attributes . '>' . $m[2] . '</h2>';
+    }, $html);
+    return ['html' => $html, 'items' => $items, 'ids' => $ids];
+}
+
 function bl_icon(string $name, string $class = ''): string
 {
     return '<img class="bl-icon ' . bl_escape($class) . '" src="' . bl_escape(bl_asset('icons/' . $name . '.svg')) . '" alt="" width="24" height="24" aria-hidden="true">';
