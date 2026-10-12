@@ -116,7 +116,7 @@
 
 ### 同日调整：栏目、侧栏模块、标题区
 
-- **栏目**：Product news（`product-news`）、Customer stories（`customer-stories`）、Industry news（`industry-news`），定义在 `BL_NEWS_CATEGORIES`。列表页标题下是二级导航（沿用产品页的 `.bl-category-nav`，每项带篇数），没有文章的栏目不显示。栏目页地址是 `?category=` 形式，设为 noindex，未知的栏目值当作“全部”处理。
+- **栏目**（2026-10-12 调整）：Product news（`product-news`）、Exhibition news（`exhibitions`）、Customer stories（`customer-stories`）、Guides（`industry-news`，旧名 Industry news，存储值不变），定义在 `BL_NEWS_CATEGORIES`；没有栏目的文章（集团新闻等）列在 Company news 标签下（`BL_NEWS_SECTIONS`），标签数加起来等于 All。第二排“Machine”只列 Skid steer loaders / Mini dumpers，没写产品的文章只出现在 All。列表页标题下是二级导航（沿用产品页的 `.bl-category-nav`，每项带篇数），没有文章的栏目不显示。栏目页地址是 `?category=` 形式，设为 noindex，未知的栏目值当作“全部”处理。
 - **集团新闻**：母公司的三篇起重机新闻按用户要求保留，不归入任何栏目（`category` 为空），只在 All 里出现，标签显示为 “BOB-LIFT group”。广交会一篇归入 Product news。旧的 `Company news`、`Exhibitions` 值一律视为“不归入栏目”。
 - **文章标题区**：面包屑 → 蓝色栏目链接（点击进入对应栏目页）→ 标题 → 导语 → 分隔线。
 - **正文列**：每篇开头都放主图。易拉宝作为正文插图靠右浮动，插在 `poster.after` 指定的段落处；手机上改为居中通栏。

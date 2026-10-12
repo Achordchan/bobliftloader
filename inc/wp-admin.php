@@ -201,7 +201,7 @@ function bl_news_section_box(WP_Post $post): void
     echo '<p><label><input type="checkbox" name="bl_record[pinned]" value="1"' . checked(!empty($record['pinned']), true, false) . '> 置顶：在新闻列表里排最前并显示 Pinned 标记</label></p>';
     bl_admin_field('置顶到期', 'bl-pinned-until', bl_admin_input('bl-pinned-until', 'bl_record[pinned_until]', (string) ($record['pinned_until'] ?? ''), 'date'), '选填。过了这一天（北京时间）自动取消置顶，适合展会、新品发布；留空则一直置顶。');
     echo '<div data-bl-news-category>';
-    bl_admin_field('栏目', 'bl-category', bl_admin_select('bl-category', 'bl_record[category]', ['' => '不归入栏目', 'product-news' => '产品新闻 Product news', 'customer-stories' => '客户故事 Customer stories', 'industry-news' => '行业新闻 Industry news'], (string) ($record['category'] ?? '')), '“不归入栏目”的文章只出现在“全部”里。');
+    bl_admin_field('栏目', 'bl-category', bl_admin_select('bl-category', 'bl_record[category]', ['' => '不归入栏目', 'product-news' => '产品新闻 Product news', 'exhibitions' => '展会新闻 Exhibition news', 'customer-stories' => '客户故事 Customer stories', 'industry-news' => '行业新闻 Industry news'], (string) ($record['category'] ?? '')), '“不归入栏目”的文章只出现在“全部”里。');
     echo '</div>';
     bl_admin_field('归属', 'bl-line', bl_admin_select('bl-line', 'bl_record[line]', ['compact' => '紧凑设备（本站新闻）', 'group' => 'BOB-LIFT 集团'], $record['line']), '集团新闻（起重机等）在列表中标注 BOB-LIFT group，并且不归入任何栏目。');
     bl_admin_field('原文网址', 'bl-source', bl_admin_input('bl-source', 'bl_record[source]', (string) ($record['source'] ?? ''), 'url', ' class="code"'), '转载时填写原文地址，文章页会显示原文链接；原创留空。');

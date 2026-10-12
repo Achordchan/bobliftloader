@@ -1,40 +1,41 @@
 <?php
 /**
  * News: one list, pinned stories first and then newest first, with a tab per section and a filter per product family.
- * A section tab appears once it has a story; stories from the wider BOB-LIFT group belong to no section and are listed
- * under All only. Each story is filed under the product families of the products it names (else company news). The
- * layout switch (list or grid) works in the browser (assets/js/news-view.js) and is remembered there.
+ * A section tab appears once it has a story; a story without a section is listed under Company news, so the tabs add up
+ * to All. The machine filter files each story under the product families of the products it names (a story naming none
+ * is in All only). The layout switch (list or grid) works in the browser (assets/js/news-view.js) and is remembered there.
  */
 $allArticles = bl_news_order(bl_articles());
 $currentProduct = isset(BL_NEWS_PRODUCT_FILTERS[bl_query('product')]) ? bl_query('product') : '';
 $inFamily = static fn(array $list, string $family): array => $family === '' ? $list : array_values(array_filter($list, static fn($a) => in_array($family, bl_news_families($a), true)));
 $pool = $inFamily($allArticles, $currentProduct);
-$counts = array_count_values(array_filter(array_map('bl_news_category', $pool)));
+$counts = array_count_values(array_filter(array_map('bl_news_section', $pool)));
 // A section the site has stories in stays chosen even when none of them is in the chosen product family (the list is then empty).
-$sections = array_count_values(array_filter(array_map('bl_news_category', $allArticles)));
+$sections = array_count_values(array_filter(array_map('bl_news_section', $allArticles)));
 $current = isset($sections[bl_query('category')]) ? bl_query('category') : '';
-$articles = $current ? array_values(array_filter($pool, static fn($a) => bl_news_category($a) === $current)) : $pool;
-// The product chips count the stories in the chosen section; a chip with none is left out, and the row is not shown when fewer than two chips have stories.
-$sectionStories = $current ? array_values(array_filter($allArticles, static fn($a) => bl_news_category($a) === $current)) : $allArticles;
+$articles = $current ? array_values(array_filter($pool, static fn($a) => bl_news_section($a) === $current)) : $pool;
+// The machine chips count the stories in the chosen section; a chip with none is left out, and the row is not shown when it would not narrow the list.
+$sectionStories = $current ? array_values(array_filter($allArticles, static fn($a) => bl_news_section($a) === $current)) : $allArticles;
 $familyCounts = [];
 foreach (array_keys(BL_NEWS_PRODUCT_FILTERS) as $family) $familyCounts[$family] = count($inFamily($sectionStories, $family));
-$showFamilies = count(array_filter($familyCounts)) >= 2 || $currentProduct !== '';
+// One machine chip is still worth showing when it narrows the list (some stories name no machine).
+$showFamilies = $currentProduct !== '' || count(array_filter($familyCounts)) >= 2 || (count(array_filter($familyCounts)) === 1 && max($familyCounts) < count($sectionStories));
 $newsUrl = static fn(string $category, string $product): string => bl_url('/news/') . ($category !== '' || $product !== '' ? '?' . http_build_query(array_filter(['category' => $category, 'product' => $product])) : '');
 ?>
 <section class="bl-news-head bl-shell" aria-labelledby="news-title">
-  <?php bl_breadcrumbs($current ? [['label' => 'News', 'url' => bl_url('/news/')], ['label' => BL_NEWS_CATEGORIES[$current]]] : [['label' => 'News']]); ?>
+  <?php bl_breadcrumbs($current ? [['label' => 'News', 'url' => bl_url('/news/')], ['label' => BL_NEWS_SECTIONS[$current]]] : [['label' => 'News']]); ?>
   <div class="bl-news-head-row">
-    <h1 id="news-title"><?= $current ? bl_escape(BL_NEWS_CATEGORIES[$current]) : bl_content_text('news', 'hero.title') ?></h1>
+    <h1 id="news-title"><?= $current ? bl_escape(BL_NEWS_SECTIONS[$current]) : bl_content_text('news', 'hero.title') ?></h1>
     <p><?= bl_content_text('news', 'hero.intro') ?></p>
   </div>
   <nav class="bl-category-nav bl-news-tabs" aria-label="News sections">
     <a href="<?= bl_escape($newsUrl('', $currentProduct)) ?>"<?= $current ? '' : ' aria-current="page"' ?>>All <small><?= count($pool) ?></small></a>
-    <?php foreach (BL_NEWS_CATEGORIES as $key => $label): if (empty($counts[$key]) && $current !== $key) continue; ?><a href="<?= bl_escape($newsUrl($key, $currentProduct)) ?>"<?= $current === $key ? ' aria-current="page"' : '' ?>><?= bl_escape($label) ?> <small><?= $counts[$key] ?? 0 ?></small></a><?php endforeach; ?>
+    <?php foreach (BL_NEWS_SECTIONS as $key => $label): if (empty($counts[$key]) && $current !== $key) continue; ?><a href="<?= bl_escape($newsUrl($key, $currentProduct)) ?>"<?= $current === $key ? ' aria-current="page"' : '' ?>><?= bl_escape($label) ?> <small><?= $counts[$key] ?? 0 ?></small></a><?php endforeach; ?>
   </nav>
   <div class="bl-news-tools">
     <?php if ($showFamilies): ?>
-    <nav class="bl-news-products" aria-label="Filter by product">
-      <span class="bl-news-tools-label">Product</span>
+    <nav class="bl-news-products" aria-label="Filter by machine">
+      <span class="bl-news-tools-label">Machine</span>
       <a href="<?= bl_escape($newsUrl($current, '')) ?>"<?= $currentProduct === '' ? ' aria-current="page"' : '' ?>>All</a>
       <?php foreach (BL_NEWS_PRODUCT_FILTERS as $family => $label): if (empty($familyCounts[$family]) && $currentProduct !== $family) continue; ?><a href="<?= bl_escape($newsUrl($current, $family)) ?>"<?= $currentProduct === $family ? ' aria-current="page"' : '' ?>><?= bl_escape($label) ?> <small><?= $familyCounts[$family] ?></small></a><?php endforeach; ?>
     </nav>
@@ -46,7 +47,7 @@ $newsUrl = static fn(string $category, string $product): string => bl_url('/news
   </div>
 </section>
 
-<section class="bl-news-list-section bl-shell" aria-label="<?= $current ? bl_escape(BL_NEWS_CATEGORIES[$current]) : 'All stories' ?>">
+<section class="bl-news-list-section bl-shell" aria-label="<?= $current ? bl_escape(BL_NEWS_SECTIONS[$current]) : 'All stories' ?>">
   <?php if ($articles): ?>
   <ol class="bl-news-list" data-view="grid">
     <?php foreach ($articles as $i => $article): $event = $article['event'] ?? []; $status = !empty($event['start']) ? bl_event_status($event) : null; ?>
