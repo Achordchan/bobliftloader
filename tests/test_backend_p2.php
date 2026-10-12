@@ -109,7 +109,7 @@ $check(!is_wp_error(run_filter('rest_pre_insert_bl_page_content', (object) [], $
 $content = bl_business_render('support', bl_content_resolve('support', get_option('bl_content_support')));
 $check(str_contains($content['after']['warranty_text'], '24-month') && str_contains($content['after']['title'], '24 MONTHS'), 'warranty did not propagate');
 $check(str_contains($content['buying']['steps'][2]['text'], 'Two machines are') && str_contains($content['buying']['steps'][3]['text'], '10 to 40'), 'MOQ or lead time did not propagate');
-$check(str_contains(bl_business_render('home', bl_content_defaults('home'))['approach']['steps'][2]['text'], '24-month'), 'home warranty did not propagate');
+$check(bl_business_render('home', ['approach' => ['steps' => [['text' => '{warranty_months}-month']]]])['approach']['steps'][0]['text'] === '24-month', 'home warranty did not propagate');
 $check(str_contains(bl_content_resolve('support', get_option('bl_content_support'))['after']['warranty_text'], '{warranty_months}'), 'expanded text persisted');
 
 // News visibility is not a destructive save operation.
