@@ -31,10 +31,11 @@ function bl_family_content_definition(bool $loader): array
     ] : [
         'load' => ['label' => 'Rated load', 'options' => ['light' => 'Up to 1 t', 'mid' => '1–2 t', 'heavy' => 'Over 2 t']],
         'gear' => $gear,
+        'drive' => ['label' => 'Drive', 'options' => ['4x2' => '4×2', '4x4' => '4×4']],
     ];
     $filterFields = [];
     foreach ($defaults['catalog_filters'] as $key => $filter) {
-        $label = ['gear' => '行走机构', 'operator' => '驾驶位置', 'load' => '额定载荷'][$key];
+        $label = ['gear' => '行走机构', 'operator' => '驾驶位置', 'load' => '额定载荷', 'drive' => '驱动方式'][$key];
         $filterFields[] = ['key' => 'catalog_filters.' . $key . '.label', 'label' => $label . '分组名称', 'type' => 'text'];
         foreach ($filter['options'] as $value => $text) $filterFields[] = ['key' => 'catalog_filters.' . $key . '.options.' . $value, 'label' => $label . '选项：' . $text, 'type' => 'text'];
     }

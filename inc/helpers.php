@@ -273,6 +273,8 @@ function bl_product_facets(array $product, string $category): array
         // Every tracked model says so; the wheeled site dumpers publish no running-gear row at all.
         'gear' => str_contains($gear, 'track') ? 'tracked' : (str_contains($gear, 'tyre') || str_contains($gear, 'tire') || str_contains($gear, 'wheel') || !$loader ? 'wheeled' : ''),
         'operator' => str_contains($station, 'stand') ? 'stand-on' : (str_contains($station, 'seat') ? 'seated' : ''),
+        // Wheeled dumpers publish "4×2" or "4×4"; the tracked models and the loaders publish none.
+        'drive' => preg_match('/\b4\s*[×x]\s*([24])\b/iu', (string) ($product['specs']['Drive'] ?? ''), $drive) ? '4x' . $drive[1] : '',
         'load' => !$load ? '' : ($load <= $bands[0] ? 'light' : ($load <= $bands[1] ? 'mid' : 'heavy')),
     ];
 }
