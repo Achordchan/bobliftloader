@@ -66,20 +66,20 @@ function bl_home_defaults(): array
         ],
         'applications' => [
             'eyebrow' => '02 / IN YOUR ELEMENT',
-            'title' => "WORK WITHOUT\n*LIMITS.*",
+            'title' => "MATCH THE MACHINE\n*TO THE JOB.*",
             'description' => "Every site has its own challenges. \nStart with yours.",
-            'link' => 'See every application',
+            'link' => 'See all applications',
         ],
         // Terms and the four doors into the Support page. The four terms are read from the Support page, not kept here.
         'support' => [
             'eyebrow' => '03 / BUYING & SUPPORT',
             'title' => "BUY DIRECT.\n*STAY COVERED.*",
-            'description' => "The terms to plan around, and the team \nthat answers for the machine after delivery.",
+            'description' => "Order straight from the factory that builds the machine,\nwith one team from the first quote to the last spare part.",
             'cards' => [
-                ['title' => 'How buying works', 'text' => 'Five steps from your first message to the container door.', 'url' => '/support/#buying'],
-                ['title' => 'Parts & service', 'text' => 'Send the model and serial number. We guide you remotely and ship the parts.', 'url' => '/support/#after-delivery'],
+                ['title' => 'How buying works', 'text' => 'Five steps from your first message to shipment.', 'url' => '/support/#buying'],
+                ['title' => 'Parts & service', 'text' => 'Send the model and serial number. We guide you remotely and ship the parts you need.', 'url' => '/support/#after-delivery'],
                 ['title' => 'Downloads', 'text' => 'Catalogues, specification sheets and machine videos.', 'url' => '/support/#downloads'],
-                ['title' => 'Questions', 'text' => 'Answers on choosing a machine, shipping and spare parts.', 'url' => '/support/#faq'],
+                ['title' => 'Questions', 'text' => 'Answers about choosing a machine, shipping and spare parts.', 'url' => '/support/#faq'],
             ],
         ],
         'approach' => [

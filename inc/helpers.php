@@ -662,7 +662,7 @@ function bl_application_focus(array $application): array
     $load = $loads ? [min($loads), max($loads)] : [0, 0];
     $noun = $application['product'] === 'dumper' ? 'dumpers' : 'loaders';
     return match ($application['focus']) {
-        'width' => ['value' => number_format($widths ? min($widths) : 0), 'unit' => 'mm', 'label' => $application['product'] === 'dumper' ? 'Narrowest dumper' : 'Narrowest loader, bucket fitted'],
+        'width' => ['value' => number_format($widths ? min($widths) : 0), 'unit' => 'mm', 'label' => $application['product'] === 'dumper' ? 'Narrowest dumper in the range' : 'Narrowest loader in the range, bucket fitted'],
         default => ['value' => str_replace(' kg', '', bl_load_range($load)), 'unit' => 'kg', 'label' => 'Rated load across ' . count($loads) . ' ' . $noun],
     };
 }
