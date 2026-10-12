@@ -8,7 +8,7 @@ function bl_structured_data(array $route): array
         '@type' => 'Organization', '@id' => bl_company('website') . '#organization',
         'name' => bl_company('name'), 'alternateName' => 'BOB-LIFT',
         'url' => bl_company('website'), 'email' => bl_company('email'), 'telephone' => bl_company('phone_seo'),
-        'sameAs' => ['https://www.bobliftcrane.com/'],
+        'sameAs' => ['https://www.boblift.com/', 'https://www.bobliftcrane.com/'],
         'logo' => bl_absolute_asset(bl_brand_logo()),
         'address' => ['@type' => 'PostalAddress', 'streetAddress' => bl_company('street'), 'addressLocality' => bl_company('city'), 'addressRegion' => bl_company('region'), 'addressCountry' => bl_company('country_code')],
     ];
@@ -81,7 +81,7 @@ function bl_render_seo(array $route): void
 {
     $title = $route['title'] . ' | BOB-LIFT';
     $canonical = bl_public_base() . $route['path'];
-    $filtered = (bool) array_filter(['q', 'load', 'gear', 'operator', 'opening', 'payload', 'category'], static fn($key) => bl_query($key) !== '');
+    $filtered = (bool) array_filter(['q', 's', 'load', 'gear', 'operator', 'opening', 'payload', 'category'], static fn($key) => bl_query($key) !== '');
     $robots = $route['status'] === 200 && bl_indexable() && !$filtered && empty($route['preview']) && $route['type'] !== 'thanks' ? 'index, follow, max-image-preview:large' : 'noindex, follow';
     $image = bl_absolute_asset(bl_share_image($route));
     echo '<title>' . bl_escape($title) . '</title>';

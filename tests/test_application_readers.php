@@ -31,6 +31,8 @@ foreach (['road-work' => 200, 'landscaping' => 404] as $slug => $status) {
     $check($route['status'] === $status && $GLOBALS['status'] === $status, 'native/virtual route status: ' . $slug);
 }
 $check(!in_array('/applications/landscaping/', bl_sitemap_paths(), true) && in_array('/applications/road-work/', bl_sitemap_paths(), true), 'sitemap visibility');
+$sitemap = bl_sitemap_xml();
+$check(str_starts_with($sitemap, '<?xml') && str_contains($sitemap, '<loc>https://example.test/applications/road-work/</loc>') && !str_contains($sitemap, '/applications/landscaping/'), 'sitemap xml');
 $llms = bl_llms_txt();
 $check(!str_contains($llms, '/applications/landscaping/') && str_contains($llms, '/applications/road-work/'), 'llms visibility');
 foreach (['pages/applications.php', 'partials/site-search.php', 'home.php', 'pages/contact.php'] as $template) {

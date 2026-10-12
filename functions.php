@@ -28,7 +28,7 @@ add_action('after_setup_theme', static function (): void {
 });
 // Our shared document renders one canonical, title and robots block for every route.
 remove_action('wp_head', 'rel_canonical');
-remove_action('wp_head', 'wp_robots');
+remove_action('wp_head', 'wp_robots', 1); // core adds it at priority 1; without the number nothing is removed and a second robots tag is printed
 // index.php renders one icon set; honor an administrator's site icon before theme defaults.
 remove_action('wp_head', 'wp_site_icon', 99);
 add_filter('get_site_icon_url', static fn($url, $size = 512) => get_option('site_icon') ? $url : bl_content_asset('global', 'brand.icon', (int) $size >= 180 ? 'images/icons/icon-192.png' : 'images/icons/icon-32.png'), 99, 2);
@@ -49,6 +49,17 @@ add_action('init', static function (): void {
     register_setting('bl_llms', BL_LLMS_TXT_INTRO_OPTION, ['type' => 'string', 'description' => 'llms.txt 开头的介绍（Markdown），留空用主题默认文字。', 'sanitize_callback' => 'sanitize_textarea_field', 'default' => '', 'show_in_rest' => true]);
 });
 add_action('parse_request', static fn(WP $wp) => bl_serve_llms_txt('/' . $wp->request), 1);
+// One sitemap, the theme's (inc/routes.php): the core one is off, its old addresses lead to ours, and robots.txt names it.
+add_filter('wp_sitemaps_enabled', '__return_false');
+add_action('parse_request', static function (WP $wp): void {
+    $path = '/' . $wp->request;
+    if (bl_indexable() && preg_match('~^/wp-sitemap[a-z0-9_-]*\.xml$~', $path)) {
+        wp_safe_redirect(bl_public_base() . '/sitemap.xml', 301);
+        exit;
+    }
+    bl_serve_sitemap($path);
+}, 1);
+add_filter('robots_txt', static fn(string $robots, $public = true) => $public && !preg_match('~^\s*sitemap\s*:~im', $robots) ? rtrim($robots) . "\n\nSitemap: " . bl_public_base() . "/sitemap.xml\n" : $robots, 100000, 2);
 // New URL rules (application cases) need one flush on sites that already run the theme; bump the number when the rules change.
 add_action('init', static function (): void {
     if (get_option('bl_rewrite_version') === '2') return;
