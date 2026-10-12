@@ -134,7 +134,7 @@ function bl_support_defaults(): array
                 ['title' => 'Quote & configuration', 'text' => 'We suggest a model and confirm its engine, running gear, colour and attachments, then quote on the trade terms you need.', 'link_label' => '', 'link_url' => ''],
                 ['title' => 'Place the order', 'text' => '{minimum_order_sentence} {minimum_order_noun} {minimum_order_verb} enough to order. Payment is by T/T bank transfer.', 'link_label' => '', 'link_url' => ''],
                 ['title' => 'Built to order', 'text' => 'Your machine is built at our Xuzhou factory, typically in {lead_time_words} working days. Quantity and configuration decide the date, which we confirm with your order.', 'link_label' => '', 'link_url' => ''],
-                ['title' => 'Shipping', 'text' => 'We quote EXW, FOB, CFR, CIF and the other common Incoterms, and ship by container.', 'link_label' => 'Machines per container', 'link_url' => '#containers'],
+                ['title' => 'Shipping', 'text' => 'We quote FOB, CIF, EXW, DDP, FCA and DAP, and ship by container.', 'link_label' => 'Machines per container', 'link_url' => '#containers'],
             ],
         ],
         'containers' => [
@@ -170,7 +170,7 @@ function bl_support_defaults(): array
             'parts_alt' => 'Hydraulic hose fittings at a loader’s lift arm pivot',
             'parts_eyebrow' => 'SPARE PARTS',
             'parts_title' => 'Original wear parts.',
-            'parts_text' => 'Each machine ships with a set of original wear parts. Order more from the same team at any time, with your model and serial number.',
+            'parts_text' => 'We keep a list of original wear parts you can choose from. Order from the same team at any time, with your model and serial number.',
             'button' => 'Parts & service request',
             'whatsapp_label' => 'Send us a video on WhatsApp',
             'whatsapp_number' => '8615852499415',
@@ -299,9 +299,9 @@ function bl_product_page_defaults(string $family): array
                 $photo('ready', 'Finished mini skid steer loaders in customer-ordered colours at the BOB-LIFT factory', 'Painted to order and ready to ship'),
             ],
             'checks' => [
-                ['title' => 'Run-in test', 'text' => 'The engine, travel, steering and the lift and tilt circuits are run and checked before the loader leaves the floor.'],
-                ['title' => 'Hydraulics under pressure', 'text' => 'Cylinders, hoses and fittings are checked for leaks at working pressure, and the auxiliary lines are tested.'],
-                ['title' => 'Final inspection', 'text' => 'Welds, paint, fasteners, track tension and decals are checked against the order before packing.'],
+                ['title' => 'Check before start-up', 'text' => 'All pipework on the machine and the fuel tank are checked before the engine is started.'],
+                ['title' => 'Run and travel test', 'text' => 'The engine is started and every movement of the machine is checked. It is then driven to check the travel system.'],
+                ['title' => 'Leaks and cooling', 'text' => 'The machine is checked for oil leaks, shut down, and checked for cooling, with a last check of the pipework.'],
             ],
         ],
         'faq' => [
@@ -319,9 +319,9 @@ function bl_product_page_defaults(string $family): array
             'link' => 'About BOB-LIFT',
             'images' => [],
             'checks' => [
-                ['title' => 'Run-in test', 'text' => 'The engine, drive, brakes and steering are run and checked before the dumper is packed.'],
-                ['title' => 'Tipping under load', 'text' => 'The hopper is raised and lowered on its hydraulics and the cylinders and hoses are checked for leaks.'],
-                ['title' => 'Final inspection', 'text' => 'Welds, paint, fasteners, lights and tyres or tracks are checked against the order before packing.'],
+                ['title' => 'Check before start-up', 'text' => 'All pipework on the machine and the fuel tank are checked before the engine is started.'],
+                ['title' => 'Run and travel test', 'text' => 'The engine is started and every movement of the machine is checked. It is then driven to check the travel system.'],
+                ['title' => 'Leaks and cooling', 'text' => 'The machine is checked for oil leaks, shut down, and checked for cooling, with a last check of the pipework.'],
             ],
         ],
         'faq' => [
