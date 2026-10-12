@@ -16,6 +16,25 @@
 .bl-site .bl-news-tabs small{margin-left:4px;font-size:.8em;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
 .bl-site .bl-news-tabs a[aria-current=page] small{color:var(--blue)}
 
+/* Product filter and layout switch: one row under the section tabs. */
+.bl-site .bl-news-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;padding:clamp(14px,1.2vw,22px) 0 0}
+.bl-site .bl-news-products{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.bl-site .bl-news-tools-label{margin-right:4px;font-size:var(--fs-micro);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.bl-site .bl-news-products>a{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border:1px solid var(--line);border-radius:999px;font-size:var(--fs-label);font-weight:600;color:var(--ink);background:transparent}
+.bl-site .bl-news-products>a small{margin-left:6px;font-size:.85em;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.bl-site .bl-news-products>a[aria-current=page]{border-color:var(--blue);background:var(--blue);color:#fff}
+.bl-site .bl-news-products>a[aria-current=page] small{color:inherit}
+@media(hover:hover){.bl-site .bl-news-products>a:not([aria-current=page]):hover{border-color:var(--blue);color:var(--blue)}}
+.bl-site .bl-news-view{display:inline-flex;margin-left:auto;border:1px solid var(--line)}
+.bl-site .bl-news-view[hidden]{display:none}
+.bl-site .bl-news-view button{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;border:0;background:transparent;font:600 var(--fs-label)/1 var(--sans);color:var(--muted);cursor:pointer}
+.bl-site .bl-news-view button+button{border-left:1px solid var(--line)}
+.bl-site .bl-news-view button[aria-pressed=true]{background:var(--ink);color:#fff}
+.bl-site .bl-news-view button:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+
+/* A pinned story carries a mark before its section. */
+.bl-site .bl-news-pin{display:inline-block;padding:3px 8px;background:var(--ink);font-weight:700;color:#fff}
+
 /* List. */
 .bl-site .bl-news-head-row{display:flex;align-items:flex-end;justify-content:space-between;gap:24px 60px;padding:clamp(24px,2vw,48px) 0 clamp(8px,.6vw,14px)}
 .bl-site .bl-news-list{border-top:1px solid var(--ink)}
@@ -130,6 +149,17 @@
 @media(hover:hover){.bl-site .bl-story-pager a:hover b{color:var(--blue)}}
 .bl-site .bl-story-pager-older{grid-column:2;align-items:flex-end;text-align:right}
 
+/* Grid: three to a row on wide screens, two on tablets. On a phone the list is already one picture-over-text column, so the switch is hidden there. */
+@media(min-width:701px){
+  .bl-site .bl-news-list[data-view=grid]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(28px,2.4vw,48px) clamp(20px,2vw,40px);padding-top:clamp(24px,2vw,40px)}
+  .bl-site .bl-news-list[data-view=grid]>li{border-bottom:0}
+  .bl-site .bl-news-list[data-view=grid] .bl-news-item{height:100%;grid-template-columns:1fr;align-content:start;align-items:start;gap:16px;padding:0}
+  .bl-site .bl-news-list[data-view=grid] .bl-news-item-title{font-size:var(--fs-h5)}
+}
+@media(min-width:1001px){
+  .bl-site .bl-news-list[data-view=grid]{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
 @media(max-width:1000px){
   .bl-site .bl-news-head-row{flex-direction:column;align-items:flex-start}
   .bl-site .bl-story-layout{grid-template-columns:minmax(0,1fr)}
@@ -137,6 +167,7 @@
 }
 @media(max-width:700px){
   .bl-site .bl-news-item{grid-template-columns:1fr;gap:16px}
+  .bl-site .bl-news-view{display:none}
   .bl-site .bl-story-pager{grid-template-columns:1fr}
   .bl-site .bl-story-pager-older{grid-column:auto;align-items:flex-start;text-align:left}
   /* A tall poster is shown whole within one screen, centred, at its own width. */

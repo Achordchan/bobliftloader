@@ -443,6 +443,29 @@ function bl_news_label(array $article): string
     return ($article['line'] ?? '') === 'group' ? 'BOB-LIFT group' : 'News';
 }
 
+/** The product filters on the news list: a story is listed under the family of each product it names, else under company news. */
+const BL_NEWS_PRODUCT_FILTERS = ['skid-steer-loaders' => 'Skid steer loaders', 'mini-dumpers' => 'Mini dumpers', 'company' => 'Company news'];
+
+/** Where a story is filed in the product filters: one entry per product family it names, or ['company'] when it names none. */
+function bl_news_families(array $article): array
+{
+    $index = bl_record_slug_index(bl_products());
+    $families = [];
+    foreach ((array) ($article['products'] ?? []) as $slug) {
+        $family = (string) ($index[(string) $slug]['category'] ?? '');
+        if (isset(BL_NEWS_PRODUCT_FILTERS[$family]) && $family !== 'company') $families[$family] = true;
+    }
+    return $families ? array_keys($families) : ['company'];
+}
+
+/** Pinned stories first, then the rest, each group keeping the order it came in (newest first). */
+function bl_news_order(array $articles): array
+{
+    $pinned = array_values(array_filter($articles, static fn($article) => !empty($article['pinned'])));
+    $rest = array_values(array_filter($articles, static fn($article) => empty($article['pinned'])));
+    return array_merge($pinned, $rest);
+}
+
 function bl_find_record(array $records, string $slug): ?array
 {
     return bl_record_slug_index($records)[$slug] ?? null;
