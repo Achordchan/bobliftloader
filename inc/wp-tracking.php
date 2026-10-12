@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 defined('ABSPATH') || exit;
+require_once __DIR__ . '/consent.php';
 
 function bl_can_manage_tracking(): bool
 {

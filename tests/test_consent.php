@@ -14,6 +14,10 @@ $banner = static fn(): string => $capture(static fn() => require __DIR__ . '/../
 $footer = static fn(): string => $capture(static fn() => require __DIR__ . '/../templates/footer.php');
 $save = static function (array $codes): void { $GLOBALS['options']['bl_content_tracking'] = $codes; };
 
+// The WordPress entrypoint (functions.php) never loads bootstrap.php, so wp-tracking.php must bring the slot list itself.
+$alone = shell_exec('php -r ' . escapeshellarg("require " . var_export(__DIR__ . '/fixtures/wp-memory.php', true) . "; require " . var_export(__DIR__ . '/../inc/wp-tracking.php', true) . "; echo count(BL_TRACKING_SLOTS);") . ' 2>&1');
+$check(trim((string) $alone) === '2', 'wp-tracking.php does not load the consent slots on its own: ' . $alone);
+
 // Nothing saved: no banner, no footer link, no template.
 $check(bl_consent_categories() === [], 'categories without any code');
 $check($banner() === '', 'banner printed with no tracking code');
@@ -66,5 +70,7 @@ $check(str_contains(bl_content_value('privacy', 'body.ending'), 'only after you 
 // The script never starts a category the visitor has not agreed to, and clears the tools' cookies on withdrawal.
 $js = file_get_contents(__DIR__ . '/../assets/js/consent.js');
 $check(str_contains($js, 'clearToolCookies') && str_contains($js, 'blStarted'), 'consent script lost its guards');
+$check(str_contains($js, 'BroadcastChannel') && str_contains($js, 'visibilitychange'), 'consent script no longer syncs other tabs');
+$check(str_contains($js, "addEventListener('load'") && str_contains($js, 'queue.then'), 'consent script no longer waits for external scripts');
 
 echo "ok ($checks checks)\n";

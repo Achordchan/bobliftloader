@@ -35,22 +35,43 @@ function clearToolCookies() {
   });
 }
 
+// Scripts run strictly one after another, across slots and categories: an external library is awaited (loaded, failed or
+// timed out) before the inline code that needs it, which a plain insertion cannot guarantee.
+let queue = Promise.resolve();
+const SCRIPT_WAIT = 10000;
+
+function runScript(placeholder, old) {
+  return new Promise((resolve) => {
+    const script = document.createElement('script');
+    [...old.attributes].forEach(({ name, value }) => script.setAttribute(name, value));
+    script.text = old.textContent;
+    script.async = false;
+    if (script.src) {
+      const timer = setTimeout(resolve, SCRIPT_WAIT);
+      const done = () => { clearTimeout(timer); resolve(); };
+      script.addEventListener('load', done);
+      script.addEventListener('error', done);
+    }
+    placeholder.replaceWith(script);
+    if (!script.src) resolve();
+  });
+}
+
 // Puts a category's saved code into the page where its template sits. Scripts parsed inside a template do not run, so each
-// is rebuilt (attributes and text copied) and kept in order; <noscript> is for visitors without scripts, who cannot agree.
+// is rebuilt (attributes and text copied) and run in order; <noscript> is for visitors without scripts, who cannot agree.
 function start(category) {
   document.querySelectorAll(`template[data-bl-consent="${category}"]`).forEach((template) => {
     if (template.dataset.blStarted) return;
     template.dataset.blStarted = 'true';
     const code = template.content.cloneNode(true);
     code.querySelectorAll('noscript').forEach((node) => node.remove());
-    code.querySelectorAll('script').forEach((old) => {
-      const script = document.createElement('script');
-      [...old.attributes].forEach(({ name, value }) => script.setAttribute(name, value));
-      script.text = old.textContent;
-      script.async = false;
-      old.replaceWith(script);
+    const scripts = [...code.querySelectorAll('script')].map((old) => {
+      const placeholder = document.createComment('');
+      old.replaceWith(placeholder);
+      return [placeholder, old];
     });
     template.after(code);
+    scripts.forEach(([placeholder, old]) => { queue = queue.then(() => runScript(placeholder, old)); });
   });
 }
 
@@ -64,6 +85,8 @@ export function initializeConsent() {
   const openers = [...document.querySelectorAll('[data-bl-consent-open]')];
   let choice = readChoice(categories);
   let opener = null;
+  const active = new Set();
+  const run = (name) => { active.add(name); start(name); };
 
   const showChoices = (on) => {
     choices.hidden = !on;
@@ -86,16 +109,25 @@ export function initializeConsent() {
     opener = null;
   };
   const decide = (next) => {
-    const withdrawn = categories.some((name) => choice?.[name] && !next[name]);
     saveChoice(next);
+    channel?.postMessage('changed');
+    apply(next);
+  };
+  // A choice made here or in another tab: categories already running that are no longer agreed to stop with a reload
+  // (their cookies are cleared first); anything newly agreed to starts, and a banner still open is no longer needed.
+  const apply = (next) => {
     choice = next;
-    categories.filter((name) => next[name]).forEach(start);
-    if (withdrawn) {
+    if ([...active].some((name) => !next[name])) {
       clearToolCookies();
       location.reload();
       return;
     }
+    categories.filter((name) => next[name]).forEach(run);
     close();
+  };
+  const sync = () => {
+    const saved = readChoice(categories);
+    if (saved && JSON.stringify(saved) !== JSON.stringify(choice)) apply(saved);
   };
 
   const decisions = {
@@ -117,6 +149,11 @@ export function initializeConsent() {
     button.addEventListener('click', () => open(categories.length > 1, button));
   });
 
-  if (choice) categories.filter((name) => choice[name]).forEach(start);
+  // Other tabs of this site learn of a change at once where BroadcastChannel exists, and on return to the tab otherwise.
+  const channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('bl-consent') : null;
+  channel?.addEventListener('message', sync);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); });
+
+  if (choice) categories.filter((name) => choice[name]).forEach(run);
   else open(false);
 }
