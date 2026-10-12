@@ -18,6 +18,9 @@ $list = bl_story_contents('<h2>Overview</h2><h2 id="overview">Details</h2><h2 id
 if (array_column($list['items'], 0) !== ['overview-2', 'overview', 'research&development', '100%-capacity', 'top-2']) $failures[] = 'reserved ids: ' . json_encode($list['items']);
 $list = bl_story_contents('<h2 id="">Overview</h2><h2 id=\'\'>Extra</h2>');
 if ($list['ids'] !== ['overview', 'extra'] || substr_count($list['html'], ' id=') !== 2) $failures[] = 'empty ids not replaced: ' . $list['html'];
+// an id-like text inside another attribute's value is not an id; a '>' inside a quoted value does not end the tag
+$list = bl_story_contents('<h2 title="Example id=\'capacity\'">Capacity</h2><h2 data-x="a>b" ID=\'Tail\'>Tail</h2><h2 class=big>Plain</h2>');
+if ($list['ids'] !== ['capacity', 'Tail', 'plain'] || !str_contains($list['html'], 'title="Example id=\'capacity\'" id="capacity"') || !str_contains($list['html'], '<h2 class=big id="plain">')) $failures[] = 'attribute parsing: ' . $list['html'];
 // ids stay aligned with the headings when one has no text
 $list = bl_story_contents('<h2>A</h2><h2> </h2><h2>C</h2><h2>D</h2>');
 if ($list['ids'] !== ['a', null, 'c', 'd']) $failures[] = 'ids misaligned: ' . json_encode($list['ids']);
