@@ -317,3 +317,9 @@
   .bl-site .bl-story{padding-bottom:0}
   .bl-site .bl-story+.bl-story-pager{margin-top:var(--m-sec-tight,40px)}
 }
+/* Phones: the lines of an article run to both edges of the column. Ragged text on a column this narrow leaves a visibly empty right
+   side, so paragraphs are justified, with hyphenation (and plain wrapping, which fills lines better than "pretty") to keep the gaps small. */
+@media(max-width:600px){
+  .bl-site .bl-story-text p{text-align:justify;text-wrap:wrap;hyphens:auto;hyphenate-limit-chars:6 3 3;overflow-wrap:break-word}
+  .bl-site .bl-story-text :is(li,figcaption),.bl-site .bl-story-lede{text-wrap:wrap;hyphens:auto;overflow-wrap:break-word}
+}
