@@ -170,7 +170,7 @@ function bl_support_defaults(): array
             'parts_alt' => 'Hydraulic hose fittings at a loader’s lift arm pivot',
             'parts_eyebrow' => 'SPARE PARTS',
             'parts_title' => 'Original wear parts.',
-            'parts_text' => 'We keep a list of original wear parts you can choose from. Order from the same team at any time, with your model and serial number.',
+            'parts_text' => 'We keep a list of original wear parts you can choose from. Order them from the same team at any time, with your model and serial number.',
             'button' => 'Parts & service request',
             'whatsapp_label' => 'Send us a video on WhatsApp',
             'whatsapp_number' => '8615852499415',
@@ -299,9 +299,9 @@ function bl_product_page_defaults(string $family): array
                 $photo('ready', 'Finished mini skid steer loaders in customer-ordered colours at the BOB-LIFT factory', 'Painted to order and ready to ship'),
             ],
             'checks' => [
-                ['title' => 'Check before start-up', 'text' => 'All pipework on the machine and the fuel tank are checked before the engine is started.'],
-                ['title' => 'Run and travel test', 'text' => 'The engine is started and every movement of the machine is checked. It is then driven to check the travel system.'],
-                ['title' => 'Leaks and cooling', 'text' => 'The machine is checked for oil leaks, shut down, and checked for cooling, with a last check of the pipework.'],
+                ['title' => 'Check before start-up', 'text' => 'Before the engine is started, we check all pipework on the machine and the fuel tank.'],
+                ['title' => 'Run and travel test', 'text' => 'We start the engine and check every movement of the machine, then drive it to check the travel system.'],
+                ['title' => 'Leaks and cooling', 'text' => 'We check the machine for oil leaks, shut it down and check its cooling, then make a final check of the pipework.'],
             ],
         ],
         'faq' => [
@@ -319,9 +319,9 @@ function bl_product_page_defaults(string $family): array
             'link' => 'About BOB-LIFT',
             'images' => [],
             'checks' => [
-                ['title' => 'Check before start-up', 'text' => 'All pipework on the machine and the fuel tank are checked before the engine is started.'],
-                ['title' => 'Run and travel test', 'text' => 'The engine is started and every movement of the machine is checked. It is then driven to check the travel system.'],
-                ['title' => 'Leaks and cooling', 'text' => 'The machine is checked for oil leaks, shut down, and checked for cooling, with a last check of the pipework.'],
+                ['title' => 'Check before start-up', 'text' => 'Before the engine is started, we check all pipework on the machine and the fuel tank.'],
+                ['title' => 'Run and travel test', 'text' => 'We start the engine and check every movement of the machine, then drive it to check the travel system.'],
+                ['title' => 'Leaks and cooling', 'text' => 'We check the machine for oil leaks, shut it down and check its cooling, then make a final check of the pipework.'],
             ],
         ],
         'faq' => [
