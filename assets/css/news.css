@@ -17,7 +17,7 @@
 .bl-site .bl-news-tabs a[aria-current=page] small{color:var(--blue)}
 
 /* Product filter and layout switch: one row under the section tabs. */
-.bl-site .bl-news-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;padding:clamp(14px,1.2vw,22px) 0 0}
+.bl-site .bl-news-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;padding:clamp(14px,1.2vw,22px) 0 clamp(16px,1.4vw,24px)}
 .bl-site .bl-news-products{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .bl-site .bl-news-tools-label{margin-right:4px;font-size:var(--fs-micro);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
 .bl-site .bl-news-products>a{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border:1px solid var(--line);border-radius:999px;font-size:var(--fs-label);font-weight:600;color:var(--ink);background:transparent}
