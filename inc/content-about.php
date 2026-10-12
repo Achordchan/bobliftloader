@@ -38,7 +38,7 @@ return [
             ],
             'website_domain' => 'boblift.com ',
             'guide_label' => 'One company, three websites: which one is for what',
-            'guide_url' => '/news/boblift-websites-explained/',
+            'guide_url' => '',
             'product_links' => [
                 ['family' => 'loader', 'label' => 'Mini skid steer loaders', 'url' => '/products/skid-steer-loaders/'],
                 ['family' => 'dumper', 'label' => 'Mini dumpers', 'url' => '/products/mini-dumpers/'],

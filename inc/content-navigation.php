@@ -10,8 +10,8 @@ return [
         ],
         'switcher' => [
             'label' => 'LOADER', 'title' => 'BOB-LIFT websites', 'current' => 'You are here',
-            // A line under the list that points to the article explaining which site is for what; an empty address hides it.
-            'guide' => ['label' => 'Which site is which?', 'url' => '/news/boblift-websites-explained/'],
+            // A line under the list that points to the article explaining which site is for what; the address is set in the back office once that article exists, and an empty address hides the line.
+            'guide' => ['label' => 'Which site is which?', 'url' => ''],
             // The notice shown before one of our other websites opens (assets/js/leave-site.js).
             'leave' => ['eyebrow' => 'You are leaving this website', 'verified' => 'Official BOB-LIFT website', 'text' => 'This is one of our own websites, run by BOB-LIFT. It opens in a new tab, so this page stays open for you.', 'go' => 'Continue to', 'stay' => 'Stay here'],
             'sites' => [
