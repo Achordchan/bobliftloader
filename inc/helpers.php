@@ -7,6 +7,12 @@ function bl_is_wordpress(): bool
     return defined('ABSPATH') && function_exists('home_url');
 }
 
+/** WordPress hands titles back as HTML (4x4 becomes 4&#215;4, quotes turn curly); the theme escapes them itself, so take plain text. */
+function bl_plain_title(string $title): string
+{
+    return html_entity_decode(strip_tags($title), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+}
+
 function bl_asset(string $path): string
 {
     $path = ltrim($path, '/');

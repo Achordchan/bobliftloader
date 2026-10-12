@@ -57,7 +57,7 @@ function bl_resolve_route(): array
     }
     if (bl_is_wordpress() && !is_404() && $route['type'] === '404' && is_singular(['page', 'post'])) {
         $post = get_queried_object();
-        $route = array_replace($route, ['type' => 'page', 'title' => get_the_title($post), 'description' => $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35), 'status' => 200]);
+        $route = array_replace($route, ['type' => 'page', 'title' => bl_plain_title(get_the_title($post)), 'description' => $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35), 'status' => 200]);
     }
     if (bl_is_wordpress() && is_404()) $route['status'] = 404;
     if ($route['status'] === 404) $route['type'] = '404';
