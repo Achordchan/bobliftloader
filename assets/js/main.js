@@ -37,7 +37,9 @@ const header = document.querySelector('.bl-header');
 // The equipment panel's two family pictures sit in the page unseen until the menu opens, so the browser would fetch them
 // with the first screen: their addresses wait in data-src until the page has loaded, or until the menu is reached first.
 const panelPictures = () => navigation.querySelectorAll('.bl-nav-panel img[data-src]').forEach((image) => {
+  if (image.dataset.srcset) image.srcset = image.dataset.srcset;
   image.src = image.dataset.src;
+  image.removeAttribute('data-srcset');
   image.removeAttribute('data-src');
 });
 if (document.readyState === 'complete') panelPictures();

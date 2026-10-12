@@ -123,6 +123,8 @@ function bl_attachment_media(array $item, string $alt = ''): string
 {
     $image = (string) ($item['image'] ?? '');
     $video = (string) ($item['video'] ?? '');
+    // A film's poster is fetched with the page, wherever the card sits, so it comes at the card's own size.
+    if ($video !== '') $image = bl_image_resized($image, 640);
     if ($video !== '') {
         return '<div class="bl-attachment-film"><video class="bl-attachment-loop" src="' . bl_escape($video) . '" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback width="480" height="360"'
             . ($image !== '' ? ' poster="' . bl_escape($image) . '"' : '')

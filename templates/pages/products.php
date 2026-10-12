@@ -33,7 +33,7 @@ $film = $category ? ['src' => trim(bl_content_value($catalogPage, 'catalog.film_
 <?php if ($film['src'] !== ''): ?>
 <dialog class="bl-dialog bl-film-dialog" id="film-dialog" aria-label="<?= bl_escape($catalogCopy('hero_film')) ?>">
   <button class="bl-dialog-close bl-circle-button" data-close-dialog aria-label="Close the film"><?= bl_icon('x') ?></button>
-  <div class="bl-film-stage"><video controls playsinline preload="none"<?= $film['poster'] !== '' ? ' poster="' . bl_escape(bl_product_media($film['poster'])) . '"' : '' ?> data-src="<?= bl_escape(bl_product_media($film['src'])) ?>"></video></div>
+  <div class="bl-film-stage"><video controls playsinline preload="none"<?= $film['poster'] !== '' ? ' data-poster="' . bl_escape(bl_product_media($film['poster'])) . '"' : '' ?> data-src="<?= bl_escape(bl_product_media($film['src'])) ?>"></video></div>
   <?php if ($film['caption'] !== ''): ?><p class="bl-film-caption"><?= bl_escape($film['caption']) ?></p><?php endif; ?>
 </dialog>
 <?php endif; ?>
@@ -50,7 +50,7 @@ $film = $category ? ['src' => trim(bl_content_value($catalogPage, 'catalog.film_
   <nav class="bl-family-switch" aria-label="Equipment range">
     <?php foreach ($families as $key => $family): ?>
     <a href="<?= bl_escape(bl_url('/products/' . $key . '/')) ?>"<?= $category === $key ? ' aria-current="page"' : '' ?>>
-      <img src="<?= bl_escape($family['image']) ?>" alt="" width="1374" height="1145">
+      <img<?= ($familySrcset = bl_image_srcset($family['image'], [240, 480])) !== '' ? ' srcset="' . bl_escape($familySrcset) . '" sizes="(max-width: 800px) 88px, 200px"' : '' ?> src="<?= bl_escape($family['image']) ?>" alt="" width="1374" height="1145">
       <span><small><?= $family['ranges']['count'] ?> <?= bl_family_copy($key === 'mini-dumpers' ? 'dumpers' : 'loaders', 'catalog.card_models') ?></small><b><?= bl_escape($family['label']) ?></b><span><?= bl_escape($family['line']($family['ranges'])) ?></span></span>
       <?= bl_icon('arrow-up-right') ?>
     </a>

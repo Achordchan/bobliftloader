@@ -65,7 +65,7 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
   <div class="bl-range-duo">
     <?php foreach ($equipment as $key => $item): $facts = $familyFacts[$key]; ?>
     <article class="bl-range-card bl-range-<?= $key ?>" aria-labelledby="range-<?= $key ?>-title">
-      <a class="bl-range-visual" href="<?= bl_escape($facts['url']) ?>" aria-label="Explore <?= bl_escape($item['label']) ?>"><img src="<?= bl_escape($item['image']) ?>" alt="<?= bl_escape($item['alt']) ?>" width="1374" height="1145" loading="lazy"><span class="bl-circle-button"><?= bl_icon('plus') ?></span></a>
+      <a class="bl-range-visual" href="<?= bl_escape($facts['url']) ?>" aria-label="Explore <?= bl_escape($item['label']) ?>"><img<?= ($rangeSrcset = bl_image_srcset($item['image'], [600, 900])) !== '' ? ' srcset="' . bl_escape($rangeSrcset) . '" sizes="(max-width: 800px) 100vw, 50vw"' : '' ?> src="<?= bl_escape($item['image']) ?>" alt="<?= bl_escape($item['alt']) ?>" width="1374" height="1145" loading="lazy"><span class="bl-circle-button"><?= bl_icon('plus') ?></span></a>
       <div class="bl-range-body">
         <p class="bl-eyebrow"><span><span class="bl-status-dot"></span> <?= bl_escape($item['label']) ?></span><span class="bl-range-index"><?= $item['index'] ?> / 02</span></p>
         <h3 id="range-<?= $key ?>-title"><?= bl_heading($item['title']) ?></h3>

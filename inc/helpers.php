@@ -37,6 +37,90 @@ function bl_asset_versioned(string $path): string
     return bl_asset($path) . (is_file($file) ? '?ver=' . filemtime($file) : '');
 }
 
+/*
+ * A site picture (a theme image or a media-library upload) resized to $width pixels wide by WordPress.com's image CDN,
+ * which also serves it as WebP or AVIF where the browser takes them. A card or thumbnail then downloads a picture its own
+ * size rather than the full photograph. The address is returned unchanged off WordPress, on a site served on its own
+ * port (the CDN cannot reach it), for a picture that is not a
+ * file on this site, one already no wider than $width, and one that carries Content Credentials (C2PA): the CDN signs
+ * every copy of those again, and the signature makes a 300-pixel copy weigh a megabyte.
+ */
+function bl_image_resized(string $url, int $width): string
+{
+    $facts = bl_image_facts($url);
+    if (!$facts || $facts['c2pa'] || $facts['width'] <= $width) return $url;
+    $parts = parse_url($url);
+    // ssl=1 has the CDN fetch the original over HTTPS; a picture served over plain HTTP (or a site address that is) is fetched that way.
+    $https = ($parts['scheme'] ?? parse_url(home_url(), PHP_URL_SCHEME)) === 'https';
+    return 'https://i0.wp.com/' . bl_image_cdn_host(home_url()) . $parts['path'] . '?' . (isset($parts['query']) ? $parts['query'] . '&' : '') . 'w=' . $width . ($https ? '&ssl=1' : '');
+}
+
+/*
+ * The site's host as the CDN addresses it; empty where the CDN cannot fetch from it: a site on its own port (the CDN
+ * addresses a host alone), and one on a local or private name (localhost, an IP address, .local, .test and the like).
+ * The bl_image_cdn filter turns the CDN off for a site that is not public, or on for a public host this misjudges.
+ */
+function bl_image_cdn_host(string $home): string
+{
+    $host = strtolower((string) parse_url($home, PHP_URL_HOST));
+    if ($host === '' || parse_url($home, PHP_URL_PORT)) return '';
+    $public = str_contains($host, '.') && !filter_var(trim($host, '[]'), FILTER_VALIDATE_IP)
+        && !preg_match('/\.(local|localhost|localdomain|test|example|invalid|internal|lan|home\.arpa)$/', $host);
+    if (function_exists('apply_filters')) $public = (bool) apply_filters('bl_image_cdn', $public, $host);
+    return $public ? $host : '';
+}
+
+/* srcset for a site picture at the given widths, its full size last; empty when it cannot be resized (see bl_image_resized). */
+function bl_image_srcset(string $url, array $widths): string
+{
+    $facts = bl_image_facts($url);
+    if (!$facts || $facts['c2pa']) return '';
+    $candidates = [];
+    foreach ($widths as $width) if ($width < $facts['width']) $candidates[] = bl_image_resized($url, $width) . ' ' . $width . 'w';
+    return $candidates ? implode(', ', [...$candidates, $url . ' ' . $facts['width'] . 'w']) : '';
+}
+
+/* The width and Content Credentials of a picture on this site, read from its file once and remembered while it is unchanged; null for anything else. */
+function bl_image_facts(string $url): ?array
+{
+    static $known = [];
+    if (!bl_is_wordpress() || $url === '' || !function_exists('wp_upload_dir') || !function_exists('get_transient')) return null;
+    if (bl_image_cdn_host(home_url()) === '') return null;
+    if (array_key_exists($url, $known)) return $known[$url];
+    $path = (string) parse_url($url, PHP_URL_PATH);
+    $host = parse_url($url, PHP_URL_HOST);
+    // Only the site's own host, as the CDN addresses it: no other host, port or credentials, which a CDN address would drop.
+    if (($host && strtolower($host) !== bl_image_cdn_host(home_url())) || parse_url($url, PHP_URL_PORT) || parse_url($url, PHP_URL_USER)) return $known[$url] = null;
+    $uploads = wp_upload_dir();
+    $roots = [(string) parse_url($uploads['baseurl'], PHP_URL_PATH) => $uploads['basedir'], (string) parse_url(get_template_directory_uri(), PHP_URL_PATH) => get_template_directory()];
+    $file = '';
+    foreach ($roots as $prefix => $dir) if ($prefix !== '' && str_starts_with($path, $prefix . '/')) $file = $dir . substr(rawurldecode($path), strlen($prefix));
+    if ($file === '' || str_contains($file, '..') || !is_file($file)) return $known[$url] = null;
+    $key = md5($file . '|' . filemtime($file) . '|' . filesize($file));
+    $facts = get_transient('bl_image_' . $key);
+    if (!is_array($facts)) {
+        $size = @getimagesize($file);
+        $facts = ['width' => (int) ($size[0] ?? 0), 'c2pa' => bl_image_has_c2pa($file)];
+        set_transient('bl_image_' . $key, $facts, MONTH_IN_SECONDS);
+    }
+    return $known[$url] = $facts['width'] ? $facts : null;
+}
+
+/* Whether a picture file carries Content Credentials: a C2PA chunk in a WebP, a JUMBF "c2pa" box elsewhere (JPEG, PNG). */
+function bl_image_has_c2pa(string $file): bool
+{
+    $bytes = (string) file_get_contents($file);
+    if (str_starts_with($bytes, 'RIFF') && substr($bytes, 8, 4) === 'WEBP') {
+        for ($at = 12; $at + 8 <= strlen($bytes);) {
+            if (substr($bytes, $at, 4) === 'C2PA') return true;
+            $length = unpack('V', substr($bytes, $at + 4, 4))[1];
+            $at += 8 + $length + ($length & 1);
+        }
+        return false;
+    }
+    return str_contains($bytes, 'c2pa');
+}
+
 /* Maps every module URL to its versioned URL, so modules main.js imports by relative path are refreshed with it. */
 function bl_script_import_map(): string
 {
