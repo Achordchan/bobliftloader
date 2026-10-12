@@ -11,6 +11,7 @@
 @media(hover:hover){.bl-site .bl-gallery-zoom:hover{background:#fff;border-color:var(--ink)}}
 .bl-site .bl-gallery-zoom[hidden]{display:none}
 .bl-site .bl-product-main-image #product-photo{cursor:zoom-in}
+.bl-site .bl-product-main-image{touch-action:pan-y pinch-zoom}
 
 /* The on-page bar: pinned under the header, with the quote button at its end. */
 .bl-site .bl-product-section-nav{display:block;min-height:0;padding:0;gap:0}
@@ -359,4 +360,16 @@
 @media print{
   .bl-site .bl-product-works,.bl-site .bl-product-where,.bl-site .bl-product-photos,.bl-site .bl-product-built,.bl-site .bl-product-buying,
   .bl-site .bl-product-faq,.bl-site .bl-product-enquiry,.bl-site .bl-product-compare,.bl-site .bl-gallery-zoom,.bl-site .bl-lightbox{display:none!important}
+}
+/* Portrait phones and tablets: the buying terms fill the width instead of leaving the right side empty. The three figures sit in
+   one row of tiles (the figure on its own line, its words beside it), the two links below as two equal buttons. */
+@media(max-width:800px) and (orientation:portrait){
+  .bl-site ul.bl-product-terms{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;align-items:stretch;font-size:13px;line-height:1.35}
+  .bl-site .bl-product-terms li:nth-child(-n+3){display:block;grid-column:span 2;padding:12px 10px 14px;background:#fff;border:1px solid var(--line)}
+  .bl-site .bl-product-terms li:nth-child(-n+3) b{display:block;margin:2px 0;font:600 24px/1.05 var(--display);letter-spacing:.2px;white-space:nowrap}
+  .bl-site .bl-product-terms li:nth-child(n+4){grid-column:span 3;min-width:0}
+  .bl-site .bl-product-terms li:nth-child(4):last-child{grid-column:1/-1}
+  .bl-site .bl-product-terms li:nth-child(n+4) a{position:relative;display:flex;flex-wrap:wrap;align-items:center;column-gap:8px;box-sizing:border-box;width:100%;min-height:48px;padding:8px 34px 8px 12px;background:#fff;border:1px solid var(--ink);color:var(--ink);font-size:13px;line-height:1.3}
+  .bl-site .bl-product-terms li:nth-child(n+4) a .bl-icon{position:absolute;right:11px;top:50%;margin:-7px 0 0}
+  .bl-site .bl-product-terms li:nth-child(n+4) a::before{display:none}
 }
