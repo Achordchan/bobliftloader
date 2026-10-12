@@ -12,5 +12,6 @@
       <?= $url ? '</a>' : '</span>' ?></li>
       <?php endforeach; ?>
     </ul>
+    <?php $guideUrl = bl_content_value('global', 'switcher.guide.url'); if ($guideUrl !== ''): ?><a class="bl-site-guide" href="<?= bl_escape(bl_application_link($guideUrl)) ?>"><?= bl_escape(bl_content_value('global', 'switcher.guide.label')) ?></a><?php endif; ?>
   </div>
 </details>

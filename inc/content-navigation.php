@@ -10,6 +10,8 @@ return [
         ],
         'switcher' => [
             'label' => 'LOADER', 'title' => 'BOB-LIFT websites', 'current' => 'You are here',
+            // A line under the list that points to the article explaining which site is for what; the address is set in the back office once that article exists, and an empty address hides the line.
+            'guide' => ['label' => 'Which site is which?', 'url' => ''],
             // The notice shown before one of our other websites opens (assets/js/leave-site.js).
             'leave' => ['eyebrow' => 'You are leaving this website', 'verified' => 'Official BOB-LIFT website', 'text' => 'This is one of our own websites, run by BOB-LIFT. It opens in a new tab, so this page stays open for you.', 'go' => 'Continue to', 'stay' => 'Stay here'],
             'sites' => [
@@ -35,6 +37,8 @@ return [
             ['key' => 'switcher.label', 'label' => '按钮名称', 'type' => 'text'],
             ['key' => 'switcher.title', 'label' => '面板标题', 'type' => 'text'],
             ['key' => 'switcher.current', 'label' => '当前站点提示', 'type' => 'text'],
+            ['key' => 'switcher.guide.label', 'label' => '说明文章 · 链接文字', 'type' => 'text', 'help' => '站点列表下面的一行小链接，指向解释三个网站关系的文章。'],
+            ['key' => 'switcher.guide.url', 'label' => '说明文章 · 地址', 'type' => 'url', 'help' => '留空则不显示这一行。'],
             ['key' => 'switcher.leave.eyebrow', 'label' => '跳出提示 · 小标题', 'type' => 'text', 'help' => '点其他站时先弹出确认窗口，确认后在新标签页打开。'],
             ['key' => 'switcher.leave.verified', 'label' => '跳出提示 · 认证标识文字', 'type' => 'text', 'help' => '显示在绿色对勾旁。'],
             ['key' => 'switcher.leave.text', 'label' => '跳出提示 · 说明', 'type' => 'textarea'],

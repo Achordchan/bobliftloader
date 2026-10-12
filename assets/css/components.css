@@ -180,6 +180,9 @@
 @media(hover:hover){.bl-site .bl-site-panel a:hover{background:#143248}}
 @media(hover:hover){.bl-site .bl-site-panel a:hover .bl-icon{opacity:1;transform:translate(2px,-2px)}}
 @media(hover:hover){.bl-site .bl-site-panel a:hover>i{border-color:#8fb0ff}}
+.bl-site .bl-site-panel .bl-site-guide{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px;border-top:1px solid #2b4456;font-size:var(--fs-label);font-weight:600;line-height:1.45;color:#dbe4ea;transition:background .2s}
+.bl-site .bl-site-panel .bl-site-guide::after{content:'→';opacity:.6;transition:opacity .2s,transform .2s}
+@media(hover:hover){.bl-site .bl-site-panel .bl-site-guide:hover::after{opacity:1;transform:translateX(3px)}}
 .bl-site .bl-site-current>i{background:var(--blue);border-color:var(--blue)!important;color:#fff!important}
 .bl-site .bl-site-current em{font-size:var(--fs-micro);font-style:normal;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#8fb0ff}
 @media(max-width:1150px){
