@@ -36,6 +36,16 @@ $check(bl_dumper_capacity(['Hopper capacity' => '1.5 m³', 'Bucket capacity' => 
 $check(bl_dumper_capacity(['Hopper capacity' => '', 'Bucket capacity' => '0.8 m³']) === '0.8 m³', 'an empty hopper hid the legacy bucket figure');
 $check(bl_dumper_capacity(['Bucket capacity' => ' 0.8 m³ ']) === '0.8 m³' && bl_dumper_capacity(['Drum capacity' => '200 L']) === '', 'legacy name or no capacity');
 
+// Comparison rows: legacy "Bucket capacity" on a dumper reads as its hopper; a record that lists both keeps its front bucket apart.
+$legacy = bl_normalize_dumper_capacity(['Rated load' => '1,000 kg', 'Bucket capacity' => '0.8 m³', 'Engine power' => '10 kW']);
+$check(array_keys($legacy) === ['Rated load', 'Hopper capacity', 'Engine power'] && $legacy['Hopper capacity'] === '0.8 m³', 'legacy bucket capacity not moved to Hopper capacity in place');
+$emptyHopper = bl_normalize_dumper_capacity(['Hopper capacity' => '', 'Bucket capacity' => '0.8 m³']);
+$check($emptyHopper === ['Hopper capacity' => '0.8 m³'], 'an empty hopper row blocked the legacy figure');
+$self = ['Hopper capacity' => '1.5 m³', 'Bucket capacity' => '0.3 m³'];
+$check(bl_normalize_dumper_capacity($self) === $self && bl_normalize_dumper_capacity(['Hopper capacity' => '1 m³']) === ['Hopper capacity' => '1 m³'], 'a record with both capacities was changed');
+$models = [['specs' => $legacy], ['specs' => ['Hopper capacity' => '1.2 m³']], ['specs' => $self]];
+$check(bl_spec_synonyms('Hopper capacity', $models) === ['Hopper capacity'] && bl_spec_value($models[2], 'Bucket capacity', $models) === '0.3 m³' && bl_spec_value($models[0], 'Bucket capacity', $models) === null, 'front bucket mixed into the hopper row: ' . json_encode(bl_spec_synonyms('Hopper capacity', $models)));
+
 // A generated summary: a dumper's capacity is its hopper, a loader's its bucket.
 $dumper = ['name' => 'FY30 3 Ton Mini Dumper', 'model' => 'FY30', 'category' => 'mini-dumpers', 'specs' => ['Rated load' => '3,000 kg', 'Bucket capacity' => '1.5 m³', 'Engine power' => '37 kW']];
 $loader = ['name' => 'BL-T750-H', 'model' => 'BL-T750-H', 'category' => 'skid-steer-loaders', 'specs' => ['Rated load' => '410 kg', 'Bucket capacity' => '0.15 m³', 'Engine power' => '18.6 kW']];

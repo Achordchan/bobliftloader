@@ -108,6 +108,21 @@ function bl_dumper_capacity(array $specs): string
     return '';
 }
 
+/**
+ * A dumper's single capacity is its hopper, whichever name the record gives it: the older "Bucket capacity" moves to
+ * "Hopper capacity" (same position) unless the record also lists a hopper, in which case it is a front bucket and stays.
+ */
+function bl_normalize_dumper_capacity(array $specs): array
+{
+    if (trim((string) ($specs['Bucket capacity'] ?? '')) === '' || trim((string) ($specs['Hopper capacity'] ?? '')) !== '') return $specs;
+    $normalized = [];
+    foreach ($specs as $key => $value) {
+        if ($key === 'Hopper capacity') continue; // an empty hopper row gives way to the figure that moves in
+        $normalized[$key === 'Bucket capacity' ? 'Hopper capacity' : $key] = $value;
+    }
+    return $normalized;
+}
+
 /** Up to three headline figures, in the order buyers compare them; short labels suit the catalogue cards. */
 function bl_key_specs(array $product, bool $short = false): array
 {

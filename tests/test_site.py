@@ -367,7 +367,7 @@ class WebsiteTests(unittest.TestCase):
         self.assertEqual(html.count('<li class="bl-ruler-'), len(loaded_dumpers))
         # The chart's sentence is edited in WordPress; loads in kilograms, the bucket range across every model that has one.
         self.assertIn('Nine rated models from 500 kg to 5,000 kg. Hopper capacity runs from 0.5 m³ to 2 m³. The ', html)
-        self.assertIn(' drum instead of a hopper, so it is not on this chart.', html)
+        self.assertIn(' drum instead of a hopper and has no rated load, so it is not on this chart.', html)
         self.assertNotIn('Painted to order.', html)
         # Where the dumpers work: between the introduction and the comparison, each job linking to real dumper pages.
         self.assertLess(html.index('id="about-the-range"'), html.index('id="dumper-jobs"'))

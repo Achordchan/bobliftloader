@@ -10,6 +10,8 @@ $compareSets = [
 ];
 $compareSet = $compareSets[$compareCategory];
 $compareProducts = array_values(array_filter(bl_products(), static fn($p) => $p['category'] === $compareCategory && $p['specs']));
+// One capacity row for the dumpers: records still on the older "Bucket capacity" name read as hoppers, so the figures line up.
+if ($compareCategory === 'mini-dumpers') $compareProducts = array_map(static fn(array $p): array => ['specs' => bl_normalize_dumper_capacity($p['specs'])] + $p, $compareProducts);
 usort($compareProducts, static fn($a, $b) => [!($a['load'] ?? 0), $a['load'] ?? 0, $a['model']] <=> [!($b['load'] ?? 0), $b['load'] ?? 0, $b['model']]);
 // A row only earns its place if at least one model publishes it; figures outside the listed rows follow in the order models publish them.
 // The first eight rows show on phones, so the listed rows lead with the figures that tell the models apart.
