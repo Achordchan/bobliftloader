@@ -418,16 +418,17 @@ add_action('save_post', static function (int $postId): void {
     if (is_wp_error($result)) wp_die(esc_html($result->get_error_message()), '', ['response' => 500, 'back_link' => true]);
 });
 
-// A job title for news authors (shown under their name on stories), kept on the user's own profile.
+// A job title and a short bio for news authors (shown on the author card of each story), kept on the user's own profile.
 $bl_title_field = static function (WP_User $user): void {
-    echo '<h2>BOB-LIFT 新闻署名</h2><table class="form-table" role="presentation"><tr><th><label for="bl-title">职位</label></th><td><input class="regular-text" type="text" id="bl-title" name="bl_title" value="' . esc_attr((string) get_user_meta($user->ID, 'bl_title', true)) . '"><p class="description">英文，显示在文章右侧作者姓名下方，例如 Content Editor。</p></td></tr></table>';
+    echo '<h2>BOB-LIFT 新闻署名</h2><table class="form-table" role="presentation"><tr><th><label for="bl-title">职位</label></th><td><input class="regular-text" type="text" id="bl-title" name="bl_title" value="' . esc_attr((string) get_user_meta($user->ID, 'bl_title', true)) . '"><p class="description">英文，显示在文章右侧作者姓名下方，例如 Content Editor。</p></td></tr><tr><th><label for="bl-bio">个人简介</label></th><td><textarea class="large-text" rows="4" id="bl-bio" name="bl_bio">' . esc_textarea((string) get_user_meta($user->ID, 'bl_bio', true)) . '</textarea><p class="description">英文，两三句话，显示在文章右侧作者卡里。留空则用 WordPress 自带的“个人说明”。</p></td></tr></table>';
 };
 add_action('show_user_profile', $bl_title_field);
 add_action('edit_user_profile', $bl_title_field);
 $bl_title_save = static function (int $userId): void {
     // The profile form's own nonce has been checked by WordPress before these hooks run.
-    if (!current_user_can('edit_user', $userId) || !isset($_POST['bl_title']) || !is_string($_POST['bl_title'])) return;
-    update_user_meta($userId, 'bl_title', sanitize_text_field(wp_unslash($_POST['bl_title'])));
+    if (!current_user_can('edit_user', $userId)) return;
+    if (isset($_POST['bl_title']) && is_string($_POST['bl_title'])) update_user_meta($userId, 'bl_title', sanitize_text_field(wp_unslash($_POST['bl_title'])));
+    if (isset($_POST['bl_bio']) && is_string($_POST['bl_bio'])) update_user_meta($userId, 'bl_bio', sanitize_textarea_field(wp_unslash($_POST['bl_bio'])));
 };
 add_action('personal_options_update', $bl_title_save);
 add_action('edit_user_profile_update', $bl_title_save);
