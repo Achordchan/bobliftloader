@@ -78,8 +78,8 @@ function bl_public_base(): string
 function bl_sitemap_paths(): array
 {
     $paths = ['/', '/about/', '/products/skid-steer-loaders/', '/products/mini-dumpers/', '/applications/', '/support/', '/news/', '/contact/', '/privacy/'];
-    global $applications;
-    foreach ($applications as $app) $paths[] = '/applications/' . bl_application_slug($app) . '/';
+    // Resolved here rather than read from the template's global: WordPress answers /sitemap.xml before any template runs.
+    foreach (bl_apply_application_content($GLOBALS['bl_application_base'] ?? []) as $app) $paths[] = '/applications/' . bl_application_slug($app) . '/';
     foreach (bl_products() as $product) $paths[] = '/product/' . $product['slug'] . '/';
     foreach (bl_application_cases() as $case) $paths[] = '/application/' . $case['slug'] . '/';
     foreach (bl_articles() as $article) $paths[] = '/news/' . $article['slug'] . '/';
@@ -95,13 +95,31 @@ function bl_serve_discovery(): void
         echo "User-agent: *\n" . (bl_indexable() ? "Allow: /\nSitemap: " . bl_public_base() . "/sitemap.xml\n" : "Disallow: /\n");
         exit;
     }
-    if ($path === '/sitemap.xml') {
-        header('Content-Type: application/xml; charset=utf-8');
-        echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-        foreach (bl_sitemap_paths() as $page) echo '<url><loc>' . bl_escape(bl_public_base() . $page) . '</loc></url>';
-        echo '</urlset>';
-        exit;
-    }
+    bl_serve_sitemap((string) $path);
+}
+
+/** The XML sitemap of every public page; the same list in local runs and in WordPress. */
+function bl_sitemap_xml(): string
+{
+    $xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+    foreach (bl_sitemap_paths() as $page) $xml .= '<url><loc>' . bl_escape(bl_public_base() . $page) . '</loc></url>';
+    return $xml . '</urlset>';
+}
+
+/**
+ * Answers /sitemap.xml and stops; any other path, or a site that is not public yet, is left to the normal routing. The platform's
+ * own sitemap (wp-sitemap.xml) only knows WordPress posts, not the theme's product, range and application addresses, so it is
+ * switched off in functions.php and its address points here.
+ */
+function bl_serve_sitemap(string $path): void
+{
+    if ($path !== '/sitemap.xml' || !bl_indexable()) return;
+    if (bl_is_wordpress()) status_header(200);
+    header('Content-Type: application/xml; charset=utf-8');
+    header('X-Robots-Tag: noindex');
+    header('Cache-Control: public, max-age=3600');
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') echo bl_sitemap_xml();
+    exit;
 }
 
 /** Resolve virtual scenario URLs before canonical redirects; no post or rewrite-rule writes are needed. */
