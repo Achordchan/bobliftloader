@@ -53,6 +53,15 @@ $_SERVER['REQUEST_URI'] = '/applications/road-work/';
 $route = bl_resolve_route();
 ob_start(); require __DIR__ . '/../templates/pages/application.php'; $html = ob_get_clean();
 $check(str_contains($html, 'Road work description') && !str_contains($html, '/applications/landscaping/'), 'new detail rendering');
+// The HTML sitemap answers /sitemap.html with 200 and lists the visible scenarios, not the hidden one.
+$_SERVER['REQUEST_URI'] = '/sitemap.html';
+$GLOBALS['wp'] = (object) ['request' => 'sitemap.html'];
+$GLOBALS['wp_query']->is_404 = true;
+bl_wp_sitemap_page();
+$route = bl_resolve_route();
+$check($route['type'] === 'sitemap' && $route['status'] === 200 && $route['path'] === '/sitemap.html' && $GLOBALS['status'] === 200, 'html sitemap route');
+ob_start(); require __DIR__ . '/../templates/pages/sitemap.php'; $html = ob_get_clean();
+$check(str_contains($html, '/applications/road-work/') && !str_contains($html, '/applications/landscaping/') && str_contains($html, '/privacy/'), 'html sitemap content');
 ob_start(); bl_content_screen('applications'); $admin = ob_get_clean();
 $check(str_contains($admin, 'jobs][road-work][title]') && str_contains($admin, 'jobs][landscaping][hidden]') && str_contains($admin, 'new_jobs][0][slug]'), 'admin cannot manage hidden/new scenarios');
 $check(bl_content_migrate('home', ['approach' => ['eyebrow' => '03 / PEOPLE BEHIND THE MACHINE']])['approach']['eyebrow'] === '04 / PEOPLE BEHIND THE MACHINE', 'home: saved stock people-section number follows the new order');

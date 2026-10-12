@@ -21,12 +21,15 @@ function bl_resolve_route(): array
         '/contact/' => ['contact', bl_editable('contact')['seo']['title'], bl_editable('contact')['seo']['description']],
         '/thank-you/' => ['thanks', bl_editable('thanks')['seo']['title'], bl_editable('thanks')['seo']['description']],
         '/privacy/' => ['privacy', bl_editable('privacy')['seo']['title'], bl_editable('privacy')['seo']['description']],
+        '/sitemap.html/' => ['sitemap', 'Sitemap', 'Every page of the BOB-LIFT skid steer loader and mini dumper website in one list: machines, applications, support, news and contact.'],
     ];
     $route = ['type' => '404', 'title' => 'Page not found', 'description' => 'The requested page could not be found.', 'path' => $path, 'status' => 404, 'category' => '', 'record' => null];
     if (isset($pages[$path])) {
         [$type, $title, $description] = $pages[$path];
         $route = array_replace($route, compact('type', 'title', 'description'), ['status' => 200]);
         if ($type === 'products' && $path !== '/products/') $route['category'] = explode('/', trim($path, '/'))[1];
+        // The one address with a file ending: no trailing slash in the canonical link or the structured data.
+        if ($type === 'sitemap') $route['path'] = '/sitemap.html';
     } elseif (preg_match('~^/product/([a-z0-9-]+)/$~', $path, $matches)) {
         $product = bl_find_record(bl_products(), $matches[1]);
         if ($product) $route = array_replace($route, ['type' => 'product', 'title' => bl_product_page_title($product), 'description' => bl_product_description($product), 'record' => $product, 'status' => 200]);
@@ -120,6 +123,16 @@ function bl_serve_sitemap(string $path): void
     header('Cache-Control: public, max-age=3600');
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') echo bl_sitemap_xml();
     exit;
+}
+
+/** /sitemap.html is not a WordPress post; WordPress calls it a 404, so keep it from guessing a redirect and answer 200 (index.php draws the page). */
+function bl_wp_sitemap_page(): void
+{
+    if (trim((string) ($GLOBALS['wp']->request ?? ''), '/') !== 'sitemap.html') return;
+    remove_action('template_redirect', 'redirect_canonical');
+    remove_action('template_redirect', 'wp_old_slug_redirect');
+    $GLOBALS['wp_query']->is_404 = false;
+    status_header(200);
 }
 
 /** Resolve virtual scenario URLs before canonical redirects; no post or rewrite-rule writes are needed. */

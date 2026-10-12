@@ -153,10 +153,10 @@
   .bl-site .bl-contact-visit-grid{grid-template-columns:1fr;gap:32px}
 }
 @media(max-width:600px){
-  /* The foot line keeps the link columns above: Privacy starts where the right column does, well clear of Top. */
-  .bl-site .bl-footer-bottom{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;padding-right:var(--gutter)}
-  .bl-site .bl-footer-bottom>a{justify-self:start}
-  .bl-site .bl-footer-bottom>span{text-wrap:balance}
+  /* The foot line: the copyright on its own row, then the links side by side from the left edge, clear of Top and the contact bar. */
+  .bl-site .bl-footer-bottom{padding-right:var(--gutter);column-gap:24px}
+  .bl-site .bl-footer-bottom>span:first-child{flex:0 0 100%;text-wrap:balance}
+  .bl-site .bl-footer-bottom>a{margin-left:0;padding-left:0}
   .bl-site .bl-contact-visit{padding-block:var(--m-sec,56px)}
   .bl-site .bl-contact-visit-actions{align-items:flex-start;flex-direction:column}
   .bl-site .bl-contact-visit-business{align-items:flex-start;flex-direction:column}
