@@ -14,6 +14,7 @@ foreach (['loader' => ['hero', '/products/skid-steer-loaders/'], 'dumper' => ['h
     $heroSlides[] = ['key' => $key, 'images' => $images, 'url' => bl_url($path)] + $content[$group];
 }
 $approach = $content['approach'];
+$supportBlock = $content['support'];
 $approachImage = bl_content_image($approach['image'], ['src' => bl_asset('images/about/people-1600.webp'), 'srcset' => bl_asset('images/about/people-900.webp') . ' 900w, ' . bl_asset('images/about/people-1600.webp') . ' 1600w, ' . bl_asset('images/about/people-2560.webp') . ' 2560w', 'width' => 2560, 'height' => 1707]);
 $familyFacts = [];
 foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key => $cat) {
@@ -81,11 +82,24 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
 
 <section class="bl-applications" id="applications" aria-labelledby="application-title">
   <div class="bl-section-top bl-shell bl-reveal"><div><p class="bl-eyebrow"><?= bl_escape($content['applications']['eyebrow']) ?></p><h2 class="bl-display" id="application-title"><?= bl_heading($content['applications']['title'], 'bl-outline-text') ?></h2></div><p class="bl-section-description"><?= bl_rich($content['applications']['description']) ?></p></div>
-  <div class="bl-application-strip bl-shell" role="region" aria-labelledby="application-title" data-swipe-row>
-    <?php foreach ($applications as $index => $app): ?>
-    <a class="bl-application-tile" href="<?= bl_escape(bl_url('/applications/' . bl_application_slug($app) . '/')) ?>"><span class="bl-photo-label">APPLICATION / 0<?= $index + 1 ?></span><img src="<?= bl_escape($app['image']) ?>" alt="<?= bl_escape($app['alt']) ?>" loading="lazy" width="1586" height="992"><div class="bl-application-tile-body"><div><span class="bl-eyebrow"><?= bl_escape($app['title']) ?></span><h3><?= $app['subtitle'] ?></h3><p><?= bl_escape($app['description']) ?></p></div><span class="bl-circle-button"><?= bl_icon('arrow-up-right') ?></span></div></a>
+  <?php /* A list to choose from, not a second gallery: the photographs and the write-ups live on the Applications page. */ ?>
+  <ol class="bl-job-list bl-shell">
+    <?php foreach ($applications as $index => $app): $focus = bl_application_focus($app); ?>
+    <li><a class="bl-job-row" href="<?= bl_escape(bl_url('/applications/' . bl_application_slug($app) . '/')) ?>">
+      <span class="bl-job-no">0<?= $index + 1 ?></span>
+      <span class="bl-job-main"><strong><?= bl_escape($app['title']) ?></strong><small><?= bl_escape($app['product'] === 'dumper' ? 'Mini dumpers' : 'Mini skid steer loaders') ?></small></span>
+      <span class="bl-job-figure"><b><?= bl_escape($focus['value']) ?><small><?= bl_escape($focus['unit']) ?></small></b><span><?= bl_escape($focus['label']) ?></span></span>
+      <span class="bl-circle-button"><?= bl_icon('arrow-up-right') ?></span>
+    </a></li>
     <?php endforeach; ?>
-  </div>
+  </ol>
+  <?php if ($content['applications']['link'] !== ''): ?><div class="bl-job-more bl-shell"><a class="bl-text-link" href="<?= bl_escape(bl_url('/applications/')) ?>"><?= bl_escape($content['applications']['link']) ?> <?= bl_icon('arrow-up-right') ?></a></div><?php endif; ?>
+</section>
+
+<section class="bl-home-support" id="support" aria-labelledby="home-support-title">
+  <div class="bl-section-top bl-shell bl-reveal"><div><p class="bl-eyebrow"><?= bl_escape($supportBlock['eyebrow']) ?></p><h2 class="bl-display" id="home-support-title"><?= bl_heading($supportBlock['title'], 'bl-blue-text') ?></h2></div><p class="bl-section-description"><?= bl_rich($supportBlock['description']) ?></p></div>
+  <dl class="bl-home-terms bl-shell" aria-label="Buying terms at a glance"><?php foreach (bl_support_terms() as $term): ?><div><dt><?= bl_escape($term['label']) ?></dt><dd><?= bl_escape($term['value']) ?><?php if ($term['unit']): ?><small><?= bl_escape($term['unit']) ?></small><?php endif; ?></dd></div><?php endforeach; ?></dl>
+  <ul class="bl-home-support-links bl-shell"><?php foreach ($supportBlock['cards'] as $card): if ($card['title'] === '' || $card['url'] === '') continue; ?><li><a href="<?= bl_escape(bl_application_link($card['url'])) ?>"><span><strong><?= bl_escape($card['title']) ?></strong><small><?= bl_escape($card['text']) ?></small></span><?= bl_icon('arrow-up-right') ?></a></li><?php endforeach; ?></ul>
 </section>
 
 <section class="bl-approach bl-shell" id="approach" aria-labelledby="approach-title">

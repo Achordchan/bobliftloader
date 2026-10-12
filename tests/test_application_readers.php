@@ -46,6 +46,7 @@ foreach (['pages/applications.php', 'partials/site-search.php', 'home.php', 'pag
         $check($applicationName === 'Renamed Site' && $selectedFamily === 'dumper', 'contact old name resolved by position');
     } else {
         $check(!str_contains($html, '/applications/landscaping/') && str_contains($html, '/applications/road-work/'), 'reader visibility: ' . $template);
+        if ($template === 'home.php') $check(str_contains($html, 'bl-job-row') && !str_contains($html, 'bl-application-tile') && str_contains($html, 'bl-home-support') && str_contains($html, '/support/#after-delivery') && str_contains($html, 'Minimum order'), 'home: job list and the buying and support block');
     }
 }
 $_SERVER['REQUEST_URI'] = '/applications/road-work/';

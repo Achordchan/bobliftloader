@@ -68,9 +68,22 @@ function bl_home_defaults(): array
             'eyebrow' => '02 / IN YOUR ELEMENT',
             'title' => "WORK WITHOUT\n*LIMITS.*",
             'description' => "Every site has its own challenges. \nStart with yours.",
+            'link' => 'See every application',
+        ],
+        // Terms and the four doors into the Support page. The four terms are read from the Support page, not kept here.
+        'support' => [
+            'eyebrow' => '03 / BUYING & SUPPORT',
+            'title' => "BUY DIRECT.\n*STAY COVERED.*",
+            'description' => "The terms to plan around, and the team \nthat answers for the machine after delivery.",
+            'cards' => [
+                ['title' => 'How buying works', 'text' => 'Five steps from your first message to the container door.', 'url' => '/support/#buying'],
+                ['title' => 'Parts & service', 'text' => 'Send the model and serial number. We guide you remotely and ship the parts.', 'url' => '/support/#after-delivery'],
+                ['title' => 'Downloads', 'text' => 'Catalogues, specification sheets and machine videos.', 'url' => '/support/#downloads'],
+                ['title' => 'Questions', 'text' => 'Answers on choosing a machine, shipping and spare parts.', 'url' => '/support/#faq'],
+            ],
         ],
         'approach' => [
-            'eyebrow' => '03 / PEOPLE BEHIND THE MACHINE',
+            'eyebrow' => '04 / PEOPLE BEHIND THE MACHINE',
             'title' => "BUILT BY PEOPLE\nYOU CAN *TALK TO.*",
             'text' => 'Our loaders are welded, painted and assembled by our own team at our factory in Xuzhou. Tell us about your work and talk it through with the people behind the machines.',
             'link' => 'Meet our company',
