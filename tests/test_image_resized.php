@@ -34,5 +34,8 @@ $theme = 'https://example.test/theme/assets/images/range-loader-studio.webp?ver=
 $check(bl_image_resized($theme, 480) === 'https://i0.wp.com/example.test/theme/assets/images/range-loader-studio.webp?ver=abc&w=480&ssl=1', 'a theme picture was not resized, or lost its version');
 foreach (['https://elsewhere.test/wp-content/uploads/2026/10/plain.webp', '/wp-content/uploads/2026/10/missing.webp', '/wp-content/uploads/../../etc/passwd', ''] as $other) $check(bl_image_resized($other, 400) === $other && bl_image_srcset($other, [400]) === '', "$other was resized");
 
+// The CDN reaches a site by its host only, so a site on its own port keeps its own addresses.
+$check(bl_image_cdn_host('https://example.test') === 'example.test' && bl_image_cdn_host('https://example.test:8443') === '', 'a site on its own port was given a CDN host');
+
 array_map('unlink', glob($uploadsDir . '/2026/10/*'));
 echo "image resizing ok ($checks checks)\n";

@@ -40,7 +40,8 @@ function bl_asset_versioned(string $path): string
 /*
  * A site picture (a theme image or a media-library upload) resized to $width pixels wide by WordPress.com's image CDN,
  * which also serves it as WebP or AVIF where the browser takes them. A card or thumbnail then downloads a picture its own
- * size rather than the full photograph. The address is returned unchanged off WordPress, for a picture that is not a
+ * size rather than the full photograph. The address is returned unchanged off WordPress, on a site served on its own
+ * port (the CDN cannot reach it), for a picture that is not a
  * file on this site, one already no wider than $width, and one that carries Content Credentials (C2PA): the CDN signs
  * every copy of those again, and the signature makes a 300-pixel copy weigh a megabyte.
  */
@@ -49,8 +50,13 @@ function bl_image_resized(string $url, int $width): string
     $facts = bl_image_facts($url);
     if (!$facts || $facts['c2pa'] || $facts['width'] <= $width) return $url;
     $parts = parse_url($url);
-    $host = parse_url(home_url(), PHP_URL_HOST);
-    return 'https://i0.wp.com/' . $host . $parts['path'] . '?' . (isset($parts['query']) ? $parts['query'] . '&' : '') . 'w=' . $width . '&ssl=1';
+    return 'https://i0.wp.com/' . bl_image_cdn_host(home_url()) . $parts['path'] . '?' . (isset($parts['query']) ? $parts['query'] . '&' : '') . 'w=' . $width . '&ssl=1';
+}
+
+/* The site's host as the CDN addresses it; empty for a site served on its own port, which the CDN cannot reach. */
+function bl_image_cdn_host(string $home): string
+{
+    return parse_url($home, PHP_URL_PORT) ? '' : (string) parse_url($home, PHP_URL_HOST);
 }
 
 /* srcset for a site picture at the given widths, its full size last; empty when it cannot be resized (see bl_image_resized). */
@@ -68,6 +74,7 @@ function bl_image_facts(string $url): ?array
 {
     static $known = [];
     if (!bl_is_wordpress() || $url === '' || !function_exists('wp_upload_dir') || !function_exists('get_transient')) return null;
+    if (bl_image_cdn_host(home_url()) === '') return null;
     if (array_key_exists($url, $known)) return $known[$url];
     $path = (string) parse_url($url, PHP_URL_PATH);
     $host = parse_url($url, PHP_URL_HOST);
