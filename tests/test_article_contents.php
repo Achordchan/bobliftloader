@@ -16,6 +16,8 @@ if (bl_story_contents('<p>no headings</p>')['items'] !== []) $failures[] = 'head
 // A generated id never takes one the text (or the page) already uses, whichever heading comes first; entities in a kept id are decoded.
 $list = bl_story_contents('<h2>Overview</h2><h2 id="overview">Details</h2><h2 id="research&amp;development">R</h2><h2 id="100%-capacity">C</h2><h2>Top</h2>');
 if (array_column($list['items'], 0) !== ['overview-2', 'overview', 'research&development', '100%-capacity', 'top-2']) $failures[] = 'reserved ids: ' . json_encode($list['items']);
+$list = bl_story_contents('<h2 id="">Overview</h2><h2 id=\'\'>Extra</h2>');
+if ($list['ids'] !== ['overview', 'extra'] || substr_count($list['html'], ' id=') !== 2) $failures[] = 'empty ids not replaced: ' . $list['html'];
 // ids stay aligned with the headings when one has no text
 $list = bl_story_contents('<h2>A</h2><h2> </h2><h2>C</h2><h2>D</h2>');
 if ($list['ids'] !== ['a', null, 'c', 'd']) $failures[] = 'ids misaligned: ' . json_encode($list['ids']);

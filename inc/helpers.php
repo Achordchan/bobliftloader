@@ -184,6 +184,7 @@ function bl_story_contents(string $html): array
         if (preg_match($idPattern, $attributes, $existing) && ($id = $decode(($existing[1] ?? '') . ($existing[2] ?? ''))) !== '') {
             // kept as it is
         } else {
+            $attributes = (string) preg_replace($idPattern, '', $attributes); // an empty id="" is replaced, not joined by a second one
             $base = trim((string) preg_replace('/[^a-z0-9]+/', '-', strtolower($text)), '-') ?: 'section';
             $id = $base;
             for ($n = 2; isset($used[$id]); $n++) $id = $base . '-' . $n;

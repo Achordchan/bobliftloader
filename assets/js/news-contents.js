@@ -39,6 +39,10 @@ export function initializeNewsContents() {
       event.preventDefault();
       fold.open = false;
       target.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+      // The link that had focus is gone with the closed list: focus moves to the heading (as a native jump would), so the
+      // next Tab continues from there.
+      if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+      target.focus({ preventScroll: true });
       history.replaceState(null, '', link.hash);
     });
   }
