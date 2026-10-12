@@ -56,7 +56,7 @@ function bl_rest_product_slugs($value, array $existing = []): array
  */
 const BL_REST_FIELDS = [
     'bl_product' => ['model', 'category', 'source', 'spec_source', 'image', 'gallery', 'gallery_alt', 'specs', 'videos', 'seo_description', 'lead', 'highlights', 'faq', 'attachments', 'photos'],
-    'bl_news' => ['category', 'line', 'pinned', 'caption', 'source', 'image', 'hide_cover', 'products', 'event', 'poster'],
+    'bl_news' => ['category', 'line', 'pinned', 'pinned_until', 'caption', 'source', 'image', 'hide_cover', 'products', 'event', 'poster'],
     'bl_application' => ['hub', 'products', 'facts', 'source', 'image'],
 ];
 
@@ -80,6 +80,8 @@ function bl_rest_field(string $type, string $key, $value)
         case 'hide_cover':
         case 'pinned':
             return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+        case 'pinned_until':
+            return bl_is_date($text) ? $text : '';
         case 'hub':
             return isset(bl_case_hubs()[$text]) ? $text : '';
         case 'products':
