@@ -12,7 +12,7 @@ $poster = !empty($article['poster']['image']) ? $article['poster'] : null;
 $posterAfter = $poster ? (int) ($poster['after'] ?? 0) : 0;
 $storyProducts = array_values(array_filter(array_map(static fn($slug) => bl_find_record(bl_products(), $slug), $article['products'] ?? [])));
 // Stories imported from the JSON data have no WordPress author: this site's are signed by the team, group stories by BOB-LIFT.
-$author = (!empty($article['author']['name']) ? $article['author'] : ['name' => 'BOB-LIFT', 'title' => $category ? 'BOB-LIFT Loader team' : '', 'avatar' => '']) + ['bio' => '', 'count' => 0];
+$author = (!empty($article['author']['name']) ? $article['author'] : ['name' => 'BOB-LIFT', 'title' => $category ? 'BOB-LIFT Loader team' : '', 'avatar' => '']) + ['bio' => ''];
 $all = bl_articles();
 $index = (int) array_search($article['slug'], array_column($all, 'slug'), true);
 $newer = $all[$index - 1] ?? null;
@@ -72,7 +72,6 @@ if ($contentHtml !== '' && $poster) {
         </div>
         <?php if ($author['bio'] !== ''): ?><p class="bl-story-author-bio"><?= nl2br(bl_escape($author['bio'])) ?></p><?php endif; ?>
         <dl>
-          <?php if ($author['count'] > 0): ?><div><dt>Stories</dt><dd><?= $author['count'] ?> on BOB-LIFT News</dd></div><?php endif; ?>
           <div><dt>Published</dt><dd><time datetime="<?= bl_escape($article['date']) ?>"><?= date('j F Y', strtotime($article['date'])) ?></time></dd></div>
           <?php if (!empty($article['updated'])): ?><div><dt>Updated</dt><dd><time datetime="<?= bl_escape($article['updated']) ?>"><?= date('j F Y', strtotime($article['updated'])) ?></time></dd></div><?php endif; ?>
         </dl>

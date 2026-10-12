@@ -64,6 +64,9 @@
 .bl-site .bl-story-layout{display:grid;grid-template-columns:minmax(0,1fr) clamp(280px,22vw,420px);gap:clamp(40px,5vw,120px);align-items:start;padding-top:clamp(28px,2.4vw,56px);border-top:1px solid var(--ink)}
 .bl-site .bl-story-layout-top{padding-top:0;border-top:0}
 .bl-site .bl-story-layout-top .bl-story-head{max-width:none;padding-top:clamp(28px,2.4vw,60px)}
+/* The headline and the lede run the full width of the text column, so nothing is left blank beside them. */
+.bl-site .bl-story-layout-top .bl-story-head h1{text-wrap:pretty}
+.bl-site .bl-story-layout-top .bl-story-lede{max-width:none}
 /* The side column starts level with the section label above the headline, not with the top of the head's padding. */
 @media(min-width:1001px){.bl-site .bl-story-layout-top .bl-story-aside{padding-top:clamp(28px,2.4vw,60px)}}
 .bl-site .bl-story-body{padding-top:clamp(28px,2.4vw,56px);border-top:1px solid var(--ink)}
