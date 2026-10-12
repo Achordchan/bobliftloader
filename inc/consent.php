@@ -12,6 +12,17 @@ const BL_TRACKING_SLOTS = [
 ];
 
 /**
+ * One saved code, as printed in the page: an inert <template> holding the code, then a few lines that write it into the page
+ * (while the page is still being read, so it behaves exactly as if it had been pasted there) only when the visitor's cookie
+ * has agreed to the category. Without agreement nothing in it runs. The cookie name and version are those of assets/js/consent.js.
+ */
+function bl_tracking_markup(string $category, string $code): string
+{
+    $gate = '(function(t,c){try{var m=document.cookie.match(/(?:^|; )bl_consent=([^;]*)/),v=m&&JSON.parse(decodeURIComponent(m[1]));if(v&&v.v===1&&v[c]===true)document.write(t.innerHTML)}catch(e){}})(document.currentScript.previousElementSibling,"' . $category . '")';
+    return '<template data-bl-consent="' . $category . '">' . $code . '</template><script>' . $gate . '</script>';
+}
+
+/**
  * The raw code saved for one slot key ('head', 'ads_footer' …); empty outside WordPress or when nothing is saved. Code in the
  * three original slots predates the two groups, and nothing says whether it is analytics or advertising: it is held back
  * (not printed at all) until the tracking screen has been saved once, which marks it as checked ('grouped').

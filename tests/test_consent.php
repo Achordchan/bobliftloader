@@ -38,9 +38,9 @@ $html = $banner();
 $check(str_contains($html, 'data-bl-consent-banner') && str_contains($html, 'data-categories="analytics"'), 'banner missing for analytics');
 $check(str_contains($html, 'name="analytics"') && !str_contains($html, 'name="advertising"'), 'wrong category checkboxes');
 $check(!str_contains($html, 'data-bl-consent="choose"'), 'a choose button for one category');
-$check($capture(static fn() => run_hook('wp_head')) === '<template data-bl-consent="analytics"><script>window.a = 1;</script></template>', 'head code not wrapped');
+$check($capture(static fn() => run_hook('wp_head')) === bl_tracking_markup('analytics', '<script>window.a = 1;</script>'), 'head code not wrapped');
 $check($capture(static fn() => run_hook('wp_body_open')) === '', 'empty body slot printed');
-$check($capture(static fn() => run_hook('wp_footer')) === '<template data-bl-consent="analytics"><script src="https://example.test/a.js"></script></template>', 'footer code not trimmed and wrapped');
+$check($capture(static fn() => run_hook('wp_footer')) === bl_tracking_markup('analytics', '<script src="https://example.test/a.js"></script>'), 'footer code not trimmed and wrapped');
 $check(str_contains($footer(), 'data-bl-consent-open'), 'footer link missing');
 
 // Both categories: advertising has its own three slots and is printed after analytics.
@@ -48,8 +48,13 @@ $save(['head' => '<script>a()</script>', 'ads_head' => '<script>fbq("init")</scr
 $check(bl_consent_categories() === ['analytics', 'advertising'], 'two categories not found');
 $html = $banner();
 $check(str_contains($html, 'data-categories="analytics,advertising"') && str_contains($html, 'data-bl-consent="choose"'), 'banner missing the choice');
-$check($capture(static fn() => run_hook('wp_head')) === '<template data-bl-consent="analytics"><script>a()</script></template><template data-bl-consent="advertising"><script>fbq("init")</script></template>', 'head order or wrapping wrong');
+$check($capture(static fn() => run_hook('wp_head')) === bl_tracking_markup('analytics', '<script>a()</script>') . bl_tracking_markup('advertising', '<script>fbq("init")</script>'), 'head order or wrapping wrong');
 $check(str_contains($capture(static fn() => run_hook('wp_body_open')), '<template data-bl-consent="advertising"><noscript>'), 'advertising body code missing');
+
+// The markup is inert (a template) followed by the gate: it writes the code only for a cookie that agrees to this category.
+$markup = bl_tracking_markup('advertising', '<script>x()</script>');
+$check(str_starts_with($markup, '<template data-bl-consent="advertising"><script>x()</script></template><script>'), 'code is not held in a template');
+$check(str_contains($markup, 'bl_consent=') && str_contains($markup, 'v.v===1') && str_contains($markup, 'v[c]===true') && str_contains($markup, 'document.write(t.innerHTML)') && str_ends_with($markup, ',"advertising")</script>'), 'consent gate changed');
 $check($capture(static fn() => run_hook('wp_footer')) === '', 'empty advertising footer printed');
 
 // Advertising only still gets a banner.
@@ -84,10 +89,11 @@ foreach (['title', 'text', 'privacy', 'reject', 'accept', 'choose', 'save', 'clo
 }
 $check(str_contains(bl_content_value('privacy', 'body.ending'), 'only after you agree'), 'privacy page does not mention consent');
 
-// The script never starts a category the visitor has not agreed to, and clears the tools' cookies on withdrawal.
+// The script keeps the choice in the cookie the gate reads, and reloads when the agreed categories change; it never runs tracking code itself.
 $js = file_get_contents(__DIR__ . '/../assets/js/consent.js');
-$check(str_contains($js, 'clearToolCookies(declined)') && !str_contains($js, 'SCRIPT_WAIT') && str_contains($js, 'blStarted'), 'consent script lost its guards');
-$check(str_contains($js, 'lateAllowances') && str_contains($js, 'pending.deferred') && str_contains($js, "'writeln'") && str_contains($js, 'readSaved()') && str_contains($js, "'onload'") && str_contains($js, "hasAttribute('async')") && str_contains($js, 'nomodule') && str_contains($js, 'writeSlot') && str_contains($js, 'BroadcastChannel') && str_contains($js, 'visibilitychange'), 'consent script no longer syncs other tabs');
-$check(str_contains($js, "addEventListener('load'") && str_contains($js, 'jobs.shift()'), 'consent script no longer waits for external scripts');
+$check(str_contains($js, "const COOKIE = 'bl_consent'") && str_contains($js, 'const VERSION = 1;'), 'cookie name or version no longer match the gate');
+$check(str_contains($js, 'clearToolCookies(declined)') && str_contains($js, 'location.reload()'), 'consent script lost its cleanup or reload');
+$check(str_contains($js, 'BroadcastChannel') && str_contains($js, 'visibilitychange') && str_contains($js, 'readSaved()'), 'consent script no longer syncs other tabs');
+$check(!str_contains($js, 'createElement(\'script\')') && !str_contains($js, 'document.write'), 'consent script runs tracking code itself');
 
 echo "ok ($checks checks)\n";

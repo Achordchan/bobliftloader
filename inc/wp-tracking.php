@@ -60,15 +60,15 @@ function bl_tracking_screen(): void
 }
 
 /**
- * Each slot's code sits in an inert <template> tagged with its consent category; assets/js/consent.js puts it into the
- * page only after the visitor agrees to that category.
+ * Each slot's code is printed with bl_tracking_markup(): inert until the visitor's cookie agrees to its consent category, and
+ * then written into the page as the page is read, exactly as if pasted there. Agreeing in the banner reloads the page.
  */
 function bl_render_tracking(string $position): void
 {
     if (!in_array($position, ['head', 'body_open', 'footer'], true)) return;
     foreach (BL_TRACKING_SLOTS as $category => $slots) {
         $code = bl_tracking_code($slots[$position]);
-        if ($code !== '') echo '<template data-bl-consent="' . $category . '">' . $code . '</template>'; // Authorized administrators intentionally supply executable markup.
+        if ($code !== '') echo bl_tracking_markup($category, $code); // Authorized administrators intentionally supply executable markup.
     }
 }
 

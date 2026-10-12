@@ -56,7 +56,7 @@ $result = bl_content_locked('tracking', static fn($previous) => bl_content_prepa
 $check($result === true, 'authorized raw save failed');
 $check(array_intersect_key(get_option('bl_content_tracking'), $snippets) === $snippets, 'tracking code was filtered');
 foreach (['head' => 'wp_head', 'body_open' => 'wp_body_open', 'footer' => 'wp_footer'] as $position => $hook) {
-    $check($capture(static fn() => run_hook($hook)) === '<template data-bl-consent="analytics">' . $snippets[$position] . '</template>', "$position snippet output mismatch");
+    $check($capture(static fn() => run_hook($hook)) === bl_tracking_markup('analytics', $snippets[$position]), "$position snippet output mismatch");
 }
 $check(isset($GLOBALS['hooks']['wp_head'][1], $GLOBALS['hooks']['wp_body_open'][1], $GLOBALS['hooks']['wp_footer'][99]), 'tracking hook priorities changed');
 $before = get_option('bl_content_tracking');
