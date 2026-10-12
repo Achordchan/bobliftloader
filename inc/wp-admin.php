@@ -198,6 +198,7 @@ function bl_news_section_box(WP_Post $post): void
     $record['line'] = bl_news_line($record, $post->post_name); // the same line the site shows, so saving keeps it
     wp_nonce_field('bl_save_record', 'bl_record_nonce');
     echo '<div class="bl-field-stack">';
+    echo '<p><label><input type="checkbox" name="bl_record[pinned]" value="1"' . checked(!empty($record['pinned']), true, false) . '> 置顶：在新闻列表里排最前并显示 Pinned 标记</label></p>';
     echo '<div data-bl-news-category>';
     bl_admin_field('栏目', 'bl-category', bl_admin_select('bl-category', 'bl_record[category]', ['' => '不归入栏目', 'product-news' => '产品新闻 Product news', 'customer-stories' => '客户故事 Customer stories', 'industry-news' => '行业新闻 Industry news'], (string) ($record['category'] ?? '')), '“不归入栏目”的文章只出现在“全部”里。');
     echo '</div>';
@@ -400,6 +401,7 @@ add_action('save_post', static function (int $postId): void {
             $record['line'] = $text('line') === 'group' ? 'group' : 'compact';
             $record['caption'] = $text('caption');
             $record['hide_cover'] = !empty($input['hide_cover']);
+            $record['pinned'] = !empty($input['pinned']);
             if (array_key_exists('poster', $input)) $record['poster'] = array_replace((array) ($record['poster'] ?? []), bl_rest_field('bl_news', 'poster', $input['poster']));
             $event = [];
             foreach (['name', 'venue', 'address', 'booth', 'booth_note', 'source_label'] as $key) $event[$key] = $text('event_' . $key);
