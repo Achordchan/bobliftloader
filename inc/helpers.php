@@ -506,7 +506,7 @@ function bl_event_status(array $event, ?string $today = null): array
 const BL_FORMER_MODELS = ['FC10' => ['FC10-L'], 'FY15' => ['FY15-L'], 'FY20-2' => ['FY20-2-L'], 'FY20-4' => ['FY-20'], 'FY30' => ['FY-30'], 'FY40' => ['FY-40'], 'FY50' => ['FY-50'], 'FJZ30' => ['FJZ-30'], 'BL-T500-HD' => ['500 Tracked'], 'BL-T200-HJ' => ['200 Mixer']];
 
 /** News sections of this site, keyed by the value stored with each story. Stories from the wider group carry none. */
-const BL_NEWS_CATEGORIES = ['product-news' => 'Product news', 'customer-stories' => 'Customer stories', 'industry-news' => 'Guides'];
+const BL_NEWS_CATEGORIES = ['product-news' => 'Product news', 'exhibitions' => 'Exhibition news', 'customer-stories' => 'Customer stories', 'industry-news' => 'Guides'];
 
 /** The tabs on the news list: the stored sections plus Company news, where every story without a section (the parent company's, or one saved without a choice) is listed, so the tabs add up to All. */
 const BL_NEWS_SECTIONS = BL_NEWS_CATEGORIES + ['company' => 'Company news'];
@@ -517,7 +517,7 @@ function bl_news_section(array $article): string
     return bl_news_category($article) ?: 'company';
 }
 
-/** A story's section key, or '' for a group story or any older value (Company news, Exhibitions) no longer used. */
+/** A story's section key, or '' for a group story or any older value no longer used. */
 function bl_news_category(array $article): string
 {
     if (($article['line'] ?? '') === 'group') return ''; // group stories sit under All only, whatever category they still carry

@@ -40,6 +40,10 @@ $check(bl_news_families(['products' => ['loader-a', 'dumper-a']]) === ['skid-ste
 $check(bl_news_families(['products' => []]) === [] && bl_news_families(['products' => ['unknown']]) === [], 'story with no known product is filed under a machine');
 $check(array_column(bl_news_order(bl_wp_articles()), 'slug') === ['pinned-old', 'loader-new', 'dumper-new', 'both', 'company-old'], 'pinned story not first, or the rest lost their order');
 
+// Exhibition news is a stored section of its own, ahead of Customer stories and Guides in the tabs.
+$check(bl_news_section(['category' => 'exhibitions']) === 'exhibitions' && bl_news_label(['category' => 'exhibitions']) === 'Exhibition news', 'exhibitions section missing');
+$check(array_keys(BL_NEWS_SECTIONS) === ['product-news', 'exhibitions', 'customer-stories', 'industry-news', 'company'], 'section order');
+
 $all = $render([]);
 $check($slugs($all) === ['pinned-old', 'loader-new', 'dumper-new', 'both', 'company-old'], 'All list order: ' . implode(',', $slugs($all)));
 $check(substr_count($all, 'class="bl-news-pin"') === 1, 'pinned mark missing or repeated');
