@@ -901,7 +901,8 @@
 .bl-site .bl-catalog-actions .bl-film-open .bl-icon{width:15px;height:15px}
 @media(hover:hover){.bl-site .bl-catalog-actions .bl-film-open:hover .bl-icon{transform:scale(1.15)}}
 /* The family film: a dark stage in a dialog, 16:9 at any width, with its caption underneath. */
-.bl-site .bl-film-dialog{width:min(1100px,calc(100% - 40px));background:var(--ink);color:#fff;overflow:hidden}
-.bl-site .bl-film-stage{aspect-ratio:16/9;background:#000}
+.bl-site .bl-film-dialog{width:min(1100px,calc(100% - 40px));background:var(--ink);color:#fff}
+/* The stage is as wide as the viewport height allows (dialog height minus the caption), so a landscape phone shows the whole film and its controls. */
+.bl-site .bl-film-stage{aspect-ratio:16/9;width:min(100%,calc((100svh - 150px) * 16 / 9));margin-inline:auto;background:#000}
 .bl-site .bl-film-stage video{display:block;width:100%;height:100%;object-fit:contain}
 .bl-site .bl-film-caption{padding:16px clamp(18px,2vw,32px) 20px;font-size:var(--fs-small,14px);line-height:1.6;color:#ffffffb8}

@@ -20,6 +20,14 @@ function bl_content_migrate(string $page, array $saved): array
             }
         }
     }
+    // The loader range film was first saved under range_story and now lives with the catalogue fields; saved addresses carry over unless the new fields already hold one.
+    if ($page === 'loaders' && is_array($saved['range_story'] ?? null)) {
+        foreach (['film_video', 'film_poster', 'film_caption'] as $key) {
+            if (!array_key_exists($key, $saved['range_story'])) continue;
+            if (trim((string) ($saved['catalog'][$key] ?? '')) === '' && is_scalar($saved['range_story'][$key])) $saved['catalog'][$key] = $saved['range_story'][$key];
+            unset($saved['range_story'][$key]);
+        }
+    }
     $saved = bl_business_migrate($page, $saved);
     $saved['_bl_schema_version'] = 1;
     return $saved;

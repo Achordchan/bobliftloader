@@ -29,6 +29,8 @@ $render = static function (string $category): string {
 // bl_editable keeps the first page content it reads, so each saved state is rendered in a process of its own.
 if (($argv[1] ?? '') === 'render') {
     $saved = ['catalog' => ['film_video' => $film, 'film_poster' => $poster, 'film_caption' => 'The range, <eight> models.']];
+    if ($argv[2] === 'legacy') $GLOBALS['options']['bl_content_loaders'] = ['range_story' => ['film_video' => $film, 'film_poster' => $poster, 'film_caption' => 'Saved before the move.']];
+    if ($argv[2] === 'both') $GLOBALS['options']['bl_content_loaders'] = ['range_story' => ['film_video' => 'https://old.example/film.mp4'], 'catalog' => ['film_video' => $film]];
     if ($argv[2] === 'saved') { $GLOBALS['options']['bl_content_loaders'] = $saved; $GLOBALS['options']['bl_content_dumpers'] = $saved; }
     echo $render($argv[3]);
     exit;
@@ -57,4 +59,12 @@ foreach (['skid-steer-loaders', 'mini-dumpers'] as $category) {
     $check(strpos($html, 'bl-catalog-actions') > strpos($html, 'bl-page-heading') && strpos($html, 'film-dialog') > strpos($html, 'bl-catalog-actions'), "$category: button is not in the hero");
     $check(!str_contains($html, 'bl-range-film'), "$category: the film still shows in the range story");
 }
+// A film saved under range_story before the fields moved still shows on the loader page; a film already saved in the new place wins, and the dumper page ignores the old place.
+$legacy = $inProcess('legacy', 'skid-steer-loaders');
+$check(str_contains($legacy, 'data-film-open="film-dialog"') && str_contains($legacy, 'data-src="' . $film . '"') && str_contains($legacy, 'poster="' . $poster . '"') && str_contains($legacy, 'Saved before the move.</p>'), 'a film saved under range_story was lost');
+$both = $inProcess('both', 'skid-steer-loaders');
+$check(str_contains($both, 'data-src="' . $film . '"') && !str_contains($both, 'old.example'), 'the old address overrode the new one');
+$migrated = bl_content_migrate('loaders', ['range_story' => ['film_video' => $film, 'film_caption' => 'x', 'intro' => 'kept']]);
+$check($migrated['catalog']['film_video'] === $film && $migrated['catalog']['film_caption'] === 'x' && !isset($migrated['range_story']['film_video']) && $migrated['range_story']['intro'] === 'kept', 'migration moved the wrong keys');
+$check(!isset(bl_content_migrate('dumpers', ['range_story' => ['film_video' => $film]])['catalog']), 'the dumper page picked up a loader film');
 echo "Range film: $checks checks passed\n";
