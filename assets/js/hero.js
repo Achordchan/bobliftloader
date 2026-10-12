@@ -15,6 +15,16 @@ export function initializeHero() {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let current = 0;
 
+  // Later slides' pictures wait (see templates/home.php) until the page has loaded, so they never compete with the first.
+  const fetchLaterPictures = () => pictures.slice(1).forEach((picture) => picture.querySelectorAll('[data-srcset], [data-src]').forEach((element) => {
+    if (element.dataset.srcset) element.srcset = element.dataset.srcset;
+    if (element.dataset.src) element.src = element.dataset.src;
+    element.removeAttribute('data-srcset');
+    element.removeAttribute('data-src');
+  }));
+  if (document.readyState === 'complete') fetchLaterPictures();
+  else window.addEventListener('load', fetchLaterPictures, { once: true });
+
   slides.forEach((slide, index) => {
     slide.hidden = false;
     slide.inert = index !== current;
@@ -27,17 +37,27 @@ export function initializeHero() {
   };
   const show = (next) => {
     if (next === current) return;
+    fetchLaterPictures(); // a slide chosen before the page finished loading still gets its picture
     current = next;
     slides.forEach((slide, index) => {
       const active = index === next;
       slide.classList.toggle('bl-active', active);
       slide.inert = !active;
     });
-    pictures.forEach((picture, index) => {
-      picture.classList.toggle('bl-active', index === next);
-      if (index === next) picture.removeAttribute('aria-hidden');
-      else picture.setAttribute('aria-hidden', 'true');
-    });
+    // The picture changes once it can be drawn, so a slide chosen while its picture is still loading keeps the current
+    // one in view until then, and keeps it if the new one fails to load.
+    const showPicture = () => {
+      if (current !== next) return;
+      pictures.forEach((picture, index) => {
+        picture.classList.toggle('bl-active', index === next);
+        if (index === next) picture.removeAttribute('aria-hidden');
+        else picture.setAttribute('aria-hidden', 'true');
+      });
+    };
+    const image = pictures[next]?.querySelector('img');
+    if (!image || (image.complete && image.naturalWidth)) showPicture();
+    // decode() also rejects when a turn of the phone swaps the picture's source mid-load; the swapped picture's load still shows it.
+    else image.decode().then(showPicture, () => image.addEventListener('load', showPicture, { once: true }));
     tabs.forEach((tab, index) => tab.setAttribute('aria-pressed', String(index === next)));
   };
 

@@ -32,6 +32,16 @@ const menuToggle = document.querySelector('.bl-menu-toggle');
 const navigation = document.querySelector('.bl-nav');
 const header = document.querySelector('.bl-header');
 
+// The equipment panel's two family pictures sit in the page unseen until the menu opens, so the browser would fetch them
+// with the first screen: their addresses wait in data-src until the page has loaded, or until the menu is reached first.
+const panelPictures = () => navigation.querySelectorAll('.bl-nav-panel img[data-src]').forEach((image) => {
+  image.src = image.dataset.src;
+  image.removeAttribute('data-src');
+});
+if (document.readyState === 'complete') panelPictures();
+else window.addEventListener('load', panelPictures, { once: true });
+['pointerenter', 'focusin'].forEach((type) => navigation.addEventListener(type, panelPictures, { once: true }));
+
 // The root carries the menu's state too, so the stylesheet can clear the contact bar without :has().
 function closeNavigation(returnFocus = false) {
   menuToggle.setAttribute('aria-expanded', 'false');
