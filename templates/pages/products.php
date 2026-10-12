@@ -89,4 +89,5 @@ $film = $category ? ['src' => trim(bl_content_value($catalogPage, 'catalog.film_
 <?php if ($category) { $compareCategory = $category; require __DIR__ . '/../partials/compare-table.php'; } ?>
 <?php if ($category === 'skid-steer-loaders') require __DIR__ . '/../partials/model-key.php'; // after the comparison: the names are read once the models are known ?>
 <?php if ($category === 'mini-dumpers') require __DIR__ . '/../partials/dumper-names.php'; ?>
+<?php if ($category) { $guides = bl_related_articles([], $category); $guideCopy = $catalogCopy; require __DIR__ . '/../partials/related-guides.php'; } ?>
 <?php require __DIR__ . '/../partials/page-cta.php'; ?>

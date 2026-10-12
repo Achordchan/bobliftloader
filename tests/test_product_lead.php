@@ -9,6 +9,7 @@ require __DIR__ . '/../inc/wp-content-editor.php';
 require __DIR__ . '/../inc/wp-rest.php';
 function selected($a, $b, $echo = true) { return $a === $b ? ' selected' : ''; }
 function bl_wp_application_cases() { return []; }
+function bl_wp_articles() { return []; }
 $failures = [];
 $check = static function (bool $ok, string $message) use (&$failures): void { if (!$ok) $failures[] = $message; };
 $GLOBALS['posts'] = [1 => new WP_Post(1, 'bl_product', 'machine')];

@@ -86,5 +86,8 @@ function bl_product_copy_fields(bool $loader): array
         'related_caption' => ['对比表说明', '{model} next to the models either side of it', '常见问题、询价与相关产品', 'text'],
         'related_more' => ['对比表下的型号卡片标题', 'More models in the range', '常见问题、询价与相关产品', 'text'],
         'related_current' => ['当前型号标签', 'This model', '常见问题、询价与相关产品', 'text'],
+        'guides_label' => ['相关文章眉题', 'GUIDES AND NEWS', '相关文章', 'text'],
+        'guides_title' => ['相关文章标题', 'READ BEFORE YOU BUY.', '相关文章', 'text'],
+        'guides_link' => ['新闻列表链接', 'All news and guides', '相关文章', 'text'],
     ];
 }

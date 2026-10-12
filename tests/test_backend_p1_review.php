@@ -42,6 +42,7 @@ $prepared = bl_content_prepare('global', ['company' => ['email' => 'sales@exampl
 $check($prepared['_bl_email_explicit'] === true, 'form selecting default did not record intent');
 $GLOBALS['options']['bl_content_global'] = ['company' => ['phone' => '+1 999', 'sales_whatsapp' => '44123456']];
 function bl_wp_application_cases() { return []; }
+function bl_wp_articles() { return []; }
 $route = ['record' => bl_read_data('products')[0]];
 $route['record']['excerpt'] = bl_product_excerpt($route['record']);
 ob_start(); (static function (array $route) { require __DIR__ . '/../templates/pages/product.php'; })($route); $html = ob_get_clean();

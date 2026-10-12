@@ -105,6 +105,7 @@
 .bl-site .bl-checklist{margin:22px 0!important}
 .bl-site .bl-checklist li{padding:15px 0;border-bottom:1px solid #b4c1c8;font-size:var(--fs-small)}
 .bl-site .bl-related{padding-block:clamp(60px,calc(46.1px + 2.01vw),98px)}
+.bl-site .bl-related-guides{padding-block:clamp(60px,calc(46.1px + 2.01vw),98px);border-top:1px solid var(--line)}
 .bl-site .bl-small-section-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:clamp(20px,calc(15.4px + 0.67vw),32px);margin-bottom:clamp(30px,calc(23.3px + 1.02vw),49px)}
 .bl-site .bl-small-section-heading h2{font:600 clamp(42px,calc(37.7px + 1.83vw),84px)/.95 var(--display);margin-top:20px}
 .bl-site .bl-news-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(28px,calc(21.5px + 0.94vw),46px)}
