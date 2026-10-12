@@ -23,6 +23,20 @@ function bl_tracking_markup(string $category, string $code): string
 }
 
 /**
+ * Whether a saved code loads an external script the browser must wait for (a <script src> with neither async nor defer, and not a
+ * module). Written into the page through document.write like everything here, Chrome may skip such a script on a very slow
+ * connection when it is not cached, so the tracking screen asks for async or defer on them (the tools' own current snippets have it).
+ */
+function bl_tracking_has_blocking_script(string $code): bool
+{
+    if (!preg_match_all('~<script\b([^>]*)>~i', $code, $tags)) return false;
+    foreach ($tags[1] as $attributes) {
+        if (preg_match('~(?:^|\s)src\s*=~i', $attributes) && !preg_match('~(?:^|\s)(?:async|defer)(?=[\s=/]|$)~i', $attributes) && !preg_match('~(?:^|\s)type\s*=\s*["\']?module~i', $attributes)) return true;
+    }
+    return false;
+}
+
+/**
  * The raw code saved for one slot key ('head', 'ads_footer' …); empty outside WordPress or when nothing is saved. Code in the
  * three original slots predates the two groups, and nothing says whether it is analytics or advertising: it is held back
  * (not printed at all) until the tracking screen has been saved once, which marks it as checked ('grouped').

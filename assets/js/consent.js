@@ -101,26 +101,28 @@ export function initializeConsent() {
     }
     close();
   };
+  // Code is running here for a category the saved choice no longer agrees to (withdrawn in another tab, or the cookie expired
+  // or was deleted): its cookies are cleared and the page reloads without it. True when it reloads.
+  const reconcile = () => {
+    const saved = readSaved();
+    const stale = [...active].filter((name) => saved?.[name] !== true);
+    if (!stale.length) return false;
+    choice = readChoice(categories);
+    clearToolCookies(stale);
+    location.reload();
+    return true;
+  };
   const sync = () => {
-    // Expired or deleted while this page stayed open: nothing is agreed any more, so what runs is stopped and the choice asked afresh.
-    if (!readSaved()) {
-      choice = null;
-      if (active.size) {
-        clearToolCookies([...active]);
-        location.reload();
-      }
-      return;
-    }
+    if (reconcile()) return;
     const next = readChoice(categories);
     if (next) {
       if (JSON.stringify(next) !== JSON.stringify(choice)) apply(next);
       return;
     }
+    choice = null;
     // The other tab knew other categories, so it left some unanswered here; what it refused is still refused.
     const declined = categories.filter((name) => readSaved()?.[name] === false);
-    if (!declined.length) return;
-    clearToolCookies(declined);
-    if (declined.some((name) => active.has(name))) location.reload();
+    if (declined.length) clearToolCookies(declined);
   };
 
   const decisions = {
@@ -147,6 +149,8 @@ export function initializeConsent() {
   channel?.addEventListener('message', sync);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); });
 
+  // The choice may have changed between the gates running (while the page was read) and this script: running code is checked against the cookie as it is now.
+  if (reconcile()) return;
   // What was refused stays cleaned up: a cookie on a path this page could not reach when the choice was made is removed when it can.
   if (choice) {
     const declined = categories.filter((name) => !choice[name]);
