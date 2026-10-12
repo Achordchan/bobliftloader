@@ -60,6 +60,16 @@ $defaults = bl_content_defaults('tracking');
 foreach ($keys as $key) $check(array_key_exists($key, $defaults), "tracking default missing: $key");
 $screen = $capture('bl_tracking_screen');
 foreach ($keys as $key) $check(str_contains($screen, 'name="bl_content[' . $key . ']"'), "admin screen missing textarea: $key");
+$check(str_contains($screen, 'name="bl_content[grouped]" value="1"'), 'admin screen does not carry the grouped mark');
+
+// Code saved before the groups existed asks for a check once; saving the six-field screen settles it, even with the advertising fields empty.
+$GLOBALS['caps'] = ['manage_options' => true, 'unfiltered_html' => true];
+$GLOBALS['options']['bl_content_tracking'] = ['head' => '<script>old()</script>'];
+$check(str_contains($capture('bl_tracking_screen'), '请先核对原有代码'), 'legacy code was not flagged on the tracking screen');
+$result = bl_content_locked('tracking', static fn($previous) => bl_content_prepare('tracking', $previous, ['head' => '<script>old()</script>', 'body_open' => '', 'footer' => '', 'ads_head' => '', 'ads_body_open' => '', 'ads_footer' => '', 'grouped' => '1'], true), bl_content_revision(['head' => '<script>old()</script>']));
+$check($result === true, 'saving the grouped screen failed');
+$check(!str_contains($capture('bl_tracking_screen'), '请先核对原有代码'), 'the legacy notice stayed after saving');
+$GLOBALS['caps'] = [];
 
 // The copy is editable and the privacy default no longer promises that the tools load without asking.
 foreach (['title', 'text', 'privacy', 'reject', 'accept', 'choose', 'save', 'close', 'analytics_title', 'analytics_text', 'advertising_title', 'advertising_text', 'note', 'settings'] as $key) {
@@ -70,7 +80,7 @@ $check(str_contains(bl_content_value('privacy', 'body.ending'), 'only after you 
 // The script never starts a category the visitor has not agreed to, and clears the tools' cookies on withdrawal.
 $js = file_get_contents(__DIR__ . '/../assets/js/consent.js');
 $check(str_contains($js, 'clearToolCookies(declined)') && !str_contains($js, 'SCRIPT_WAIT') && str_contains($js, 'blStarted'), 'consent script lost its guards');
-$check(str_contains($js, 'answerPastEvents') && str_contains($js, 'BroadcastChannel') && str_contains($js, 'visibilitychange'), 'consent script no longer syncs other tabs');
+$check(str_contains($js, 'answerPastEvents') && str_contains($js, "'onload'") && str_contains($js, "hasAttribute('async')") && str_contains($js, 'BroadcastChannel') && str_contains($js, 'visibilitychange'), 'consent script no longer syncs other tabs');
 $check(str_contains($js, "addEventListener('load'") && str_contains($js, 'queue.then'), 'consent script no longer waits for external scripts');
 
 echo "ok ($checks checks)\n";

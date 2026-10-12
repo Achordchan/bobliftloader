@@ -21,6 +21,11 @@ function bl_tracking_screen(): void
         $revision = $recovery['revision'];
         echo '<p role="alert"><span class="bl-chip">未保存</span> ' . esc_html($recovery['message']) . '</p>';
     }
+    // Code saved before the two groups existed sits in the three original places and now counts as analytics; saving this screen
+    // once (it then carries the 'grouped' mark) is the editor's confirmation that nothing advertising is left there.
+    if (($saved['grouped'] ?? '') !== '1' && array_filter(array_map('trim', array_intersect_key($saved, array_flip(['head', 'body_open', 'footer']))))) {
+        echo '<div class="notice notice-warning"><p><strong>请先核对原有代码。</strong>分组之前保存的代码都在“统计类”里，只有访客同意 Analytics 才会加载。其中如果有 Google Ads、Meta 像素等广告代码，请剪切到“广告类”，然后保存本页。</p></div>';
+    }
     // The privacy page promises no tracking; once a code is in, point the editor at the sentence to change.
     $privacy = (string) (bl_editable('privacy')['body']['ending'] ?? '');
     if (trim(implode('', array_map('strval', $values))) !== '' && stripos($privacy, 'does not use advertising or analytics tracking') !== false) {
@@ -47,7 +52,7 @@ function bl_tracking_screen(): void
         }
     }
     echo '<p class="bl-field-help">代码按原样输出到每个页面，请粘贴工具给出的完整代码；访客点同意之前它们都不会运行。填了任何代码，页面才会出现 Cookie 横幅和页脚的“Cookie settings”，横幅文字在“全站设置 → Cookie 同意横幅”。只有管理员能看到和保存这一页。留空的格子不会输出任何东西。</p>';
-    echo '</div></div><input type="hidden" name="bl_content_complete" value="1"><div class="bl-savebar">';
+    echo '</div></div><input type="hidden" name="bl_content[grouped]" value="1"><input type="hidden" name="bl_content_complete" value="1"><div class="bl-savebar">';
     submit_button('保存', 'primary', 'submit', false);
     echo '<span class="bl-savebar-status" role="status">没有未保存的修改</span></div></form>';
     bl_content_history_screen('tracking', $revision);

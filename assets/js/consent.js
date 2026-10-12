@@ -42,7 +42,7 @@ function clearToolCookies(categories) {
   });
 }
 
-// Scripts run strictly one after another, across slots and categories: an external library is awaited (loaded or failed) before the inline code that needs it, which a plain insertion cannot guarantee.
+// Scripts run strictly one after another, across slots and categories: a plain external library is awaited (loaded or failed) before the inline code that needs it, which a plain insertion cannot guarantee; async and defer scripts are not waited for.
 let queue = Promise.resolve();
 
 // A saved snippet written for the page head may wait for DOMContentLoaded or load. Agreed to after the page has loaded,
@@ -58,6 +58,23 @@ function answerPastEvents() {
     };
     return () => { if (own) target.addEventListener = own; else delete target.addEventListener; };
   });
+  // `window.onload = …` is the same wait written as a property.
+  let holder = window;
+  while (holder && !Object.getOwnPropertyDescriptor(holder, 'onload')) holder = Object.getPrototypeOf(holder);
+  const native = holder && Object.getOwnPropertyDescriptor(holder, 'onload');
+  const ownLoad = Object.getOwnPropertyDescriptor(window, 'onload');
+  if (native?.set && (!ownLoad || ownLoad.configurable)) {
+    Object.defineProperty(window, 'onload', {
+      configurable: true,
+      enumerable: native.enumerable,
+      get: () => native.get.call(window),
+      set(handler) {
+        if (document.readyState === 'complete' && typeof handler === 'function') setTimeout(() => handler.call(window, new Event('load')));
+        else native.set.call(window, handler);
+      },
+    });
+    restore.push(() => { if (ownLoad) Object.defineProperty(window, 'onload', ownLoad); else delete window.onload; });
+  }
   return () => restore.forEach((undo) => undo());
 }
 
@@ -66,15 +83,17 @@ function runScript(placeholder, old) {
     const script = document.createElement('script');
     [...old.attributes].forEach(({ name, value }) => script.setAttribute(name, value));
     script.text = old.textContent;
-    script.async = false;
+    // A script its author marked async or defer is not waited for, as on the original page: the code after it never depended on it.
+    const waits = Boolean(script.src) && !old.hasAttribute('async') && !old.hasAttribute('defer');
+    if (!old.hasAttribute('async')) script.async = false;
     const undo = answerPastEvents();
     const finish = () => { undo(); resolve(); };
-    if (script.src) {
+    if (waits) {
       script.addEventListener('load', finish);
       script.addEventListener('error', finish);
     }
     placeholder.replaceWith(script);
-    if (!script.src) finish();
+    if (!waits) finish();
   });
 }
 
