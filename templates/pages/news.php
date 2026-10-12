@@ -40,15 +40,15 @@ $newsUrl = static fn(string $category, string $product): string => bl_url('/news
     </nav>
     <?php endif; ?>
     <div class="bl-news-view" role="group" aria-label="Layout" data-bl-news-view hidden>
-      <button type="button" data-view="list" aria-pressed="true"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 5h4v4H3zm6 1h12v2H9zM3 10h4v4H3zm6 1h12v2H9zM3 15h4v4H3zm6 1h12v2H9z"/></svg><span>List</span></button>
-      <button type="button" data-view="grid" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></svg><span>Grid</span></button>
+      <button type="button" data-view="list" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 5h4v4H3zm6 1h12v2H9zM3 10h4v4H3zm6 1h12v2H9zM3 15h4v4H3zm6 1h12v2H9z"/></svg><span>List</span></button>
+      <button type="button" data-view="grid" aria-pressed="true"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></svg><span>Grid</span></button>
     </div>
   </div>
 </section>
 
 <section class="bl-news-list-section bl-shell" aria-label="<?= $current ? bl_escape(BL_NEWS_CATEGORIES[$current]) : 'All stories' ?>">
   <?php if ($articles): ?>
-  <ol class="bl-news-list" data-view="list">
+  <ol class="bl-news-list" data-view="grid">
     <?php foreach ($articles as $i => $article): $event = $article['event'] ?? []; $status = !empty($event['start']) ? bl_event_status($event) : null; ?>
     <li><a class="bl-news-item" href="<?= bl_escape(bl_article_url($article)) ?>">
       <?php // On phones a picture near 3:2 fills a frame of its own shape, so nothing is cropped; one far from it (a square

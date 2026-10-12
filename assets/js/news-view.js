@@ -1,13 +1,13 @@
-// The news list's layout switch: list (default) or grid. The choice is kept in the browser, so the list opens the way the visitor last left it.
+// The news list's layout switch: grid (default) or list. The choice is kept in the browser, so the list opens the way the visitor last left it.
 const STORAGE_KEY = 'bl-news-view';
 const VIEWS = ['list', 'grid'];
 
 function savedView() {
   try {
     const view = window.localStorage.getItem(STORAGE_KEY);
-    return VIEWS.includes(view) ? view : 'list';
+    return VIEWS.includes(view) ? view : 'grid';
   } catch {
-    return 'list';
+    return 'grid';
   }
 }
 

@@ -44,6 +44,7 @@ $all = $render([]);
 $check($slugs($all) === ['pinned-old', 'loader-new', 'dumper-new', 'both', 'company-old'], 'All list order: ' . implode(',', $slugs($all)));
 $check(substr_count($all, 'class="bl-news-pin"') === 1, 'pinned mark missing or repeated');
 $check(str_contains($all, 'data-bl-news-view') && str_contains($all, 'data-view="list"') && str_contains($all, 'data-view="grid"'), 'layout switch missing');
+$check(str_contains($all, '<ol class="bl-news-list" data-view="grid">'), 'news list should open as a grid');
 $check(str_contains($all, 'aria-label="Filter by product"'), 'product filter missing');
 
 $loaders = $render(['product' => 'skid-steer-loaders']);
