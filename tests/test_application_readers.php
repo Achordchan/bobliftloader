@@ -55,5 +55,7 @@ ob_start(); require __DIR__ . '/../templates/pages/application.php'; $html = ob_
 $check(str_contains($html, 'Road work description') && !str_contains($html, '/applications/landscaping/'), 'new detail rendering');
 ob_start(); bl_content_screen('applications'); $admin = ob_get_clean();
 $check(str_contains($admin, 'jobs][road-work][title]') && str_contains($admin, 'jobs][landscaping][hidden]') && str_contains($admin, 'new_jobs][0][slug]'), 'admin cannot manage hidden/new scenarios');
+$check(bl_content_migrate('home', ['approach' => ['eyebrow' => '03 / PEOPLE BEHIND THE MACHINE']])['approach']['eyebrow'] === '04 / PEOPLE BEHIND THE MACHINE', 'home: saved stock people-section number follows the new order');
+$check(bl_content_migrate('home', ['approach' => ['eyebrow' => '03 / OUR OWN WORDS']])['approach']['eyebrow'] === '03 / OUR OWN WORDS', 'home: custom people-section wording is kept');
 if ($failures) { fwrite(STDERR, implode("\n", $failures) . "\n"); exit(1); }
 echo "application readers regression ok\n";

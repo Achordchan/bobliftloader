@@ -38,6 +38,8 @@ function bl_content_migrate(string $page, array $saved): array
             }
         }
     }
+    // The people section moved from 03 to 04 when the Buying & Support block took 03; an untouched saved stock value follows it, custom wording stays.
+    if ($page === 'home' && ($saved['approach']['eyebrow'] ?? null) === '03 / PEOPLE BEHIND THE MACHINE') $saved['approach']['eyebrow'] = '04 / PEOPLE BEHIND THE MACHINE';
     if ($page === 'loaders') $saved = bl_migrate_loader_film($saved, false);
     $saved = bl_business_migrate($page, $saved);
     $saved['_bl_schema_version'] = 1;
