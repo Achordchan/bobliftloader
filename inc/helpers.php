@@ -555,12 +555,28 @@ function bl_news_families(array $article): array
     return array_keys($families);
 }
 
-/** Pinned stories first, then the rest, each group keeping the order it came in (newest first). */
-function bl_news_order(array $articles): array
+/** Whether a story is pinned today: a pin with an end date ("pinned_until") lapses after that day, China time. */
+function bl_news_pinned(array $article, ?string $today = null): bool
 {
-    $pinned = array_values(array_filter($articles, static fn($article) => !empty($article['pinned'])));
-    $rest = array_values(array_filter($articles, static fn($article) => empty($article['pinned'])));
-    return array_merge($pinned, $rest);
+    if (empty($article['pinned'])) return false;
+    $until = (string) ($article['pinned_until'] ?? '');
+    if (!bl_is_date($until)) return true;
+    return $until >= ($today ?? (new DateTimeImmutable('today', new DateTimeZone('Asia/Shanghai')))->format('Y-m-d'));
+}
+
+/**
+ * Pinned stories first, then the rest, each group keeping the order it came in (newest first). Among the pinned, a pin
+ * with an end date (a fair, a launch) comes before a standing one, since it only has those days at the top.
+ */
+function bl_news_order(array $articles, ?string $today = null): array
+{
+    $timed = $standing = $rest = [];
+    foreach ($articles as $article) {
+        if (!bl_news_pinned($article, $today)) $rest[] = $article;
+        elseif (bl_is_date((string) ($article['pinned_until'] ?? ''))) $timed[] = $article;
+        else $standing[] = $article;
+    }
+    return array_merge($timed, $standing, $rest);
 }
 
 function bl_find_record(array $records, string $slug): ?array
