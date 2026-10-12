@@ -85,6 +85,12 @@
 .bl-site .bl-wp-article-content figure{margin:clamp(24px,1.8vw,40px) 0}
 .bl-site .bl-wp-article-content figure img{width:100%;height:auto;background:#e7e9e3}
 .bl-site .bl-wp-article-content figcaption{padding-top:10px;font-size:var(--fs-label);line-height:1.6;color:var(--muted)}
+/* On a computer a tall chart drawn for phones would fill more than a screen at full column width, so pictures stop at
+   most of the window height and sit centred with their caption; phones keep them full width. */
+@media(min-width:701px){
+  .bl-site .bl-wp-article-content figure img{display:block;width:auto;max-width:100%;max-height:min(78vh,860px);margin-inline:auto}
+  .bl-site .bl-wp-article-content figcaption{text-align:center}
+}
 .bl-site .bl-wp-article-content .wp-block-table{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .bl-site .bl-wp-article-content table{width:100%;border-collapse:collapse;font-size:var(--fs-small);line-height:1.5;color:#3f4c57}
 .bl-site .bl-wp-article-content .wp-block-table table{min-width:32rem}
