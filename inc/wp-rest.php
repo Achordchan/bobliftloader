@@ -34,6 +34,12 @@ add_action('init', static function (): void {
         'sanitize_callback' => 'sanitize_text_field',
         'auth_callback' => static fn($allowed, $key, $userId): bool => current_user_can('edit_user', (int) $userId),
     ]);
+    register_meta('user', 'bl_bio', [
+        'type' => 'string', 'single' => true, 'show_in_rest' => true,
+        'description' => '新闻作者简介，显示在文章右侧作者卡里。',
+        'sanitize_callback' => 'sanitize_textarea_field',
+        'auth_callback' => static fn($allowed, $key, $userId): bool => current_user_can('edit_user', (int) $userId),
+    ]);
 });
 
 /** A theme path (images/…, videos/…) or an http(s) address, as the edit screens accept. */
