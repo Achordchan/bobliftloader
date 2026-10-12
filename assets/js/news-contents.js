@@ -6,7 +6,6 @@ import { scrollBehavior } from './equipment.js';
  * list closing shortens the page above the heading, so a plain jump would land short.
  */
 export function initializeNewsContents() {
-  keepFollowInView();
   const side = document.querySelector('[data-story-contents-nav]');
   const fold = document.querySelector('[data-story-contents]');
   if (!side && !fold) return;
@@ -15,6 +14,7 @@ export function initializeNewsContents() {
   };
 
   if (side) {
+    releaseTallContents(side);
     const links = [...side.querySelectorAll('a[href^="#"]')];
     const headings = links.map(targetOf);
     const header = document.querySelector('.bl-header');
@@ -50,24 +50,19 @@ export function initializeNewsContents() {
 }
 
 /**
- * Beside the text on wide screens the boxes after the author card stay in view while the story scrolls (news.css). When
- * they are taller than the window, the top that holds them under the header would hide their foot, so it is lowered until
- * the foot shows: the stack then scrolls up with the page to its foot and stays there.
+ * Beside the text on wide screens the contents list stays under the header while the story scrolls (news.css). When it is
+ * taller than the window it would hide its foot, so it is released instead and scrolls with the story.
  */
-function keepFollowInView() {
-  const follow = document.querySelector('.bl-story-follow');
-  if (!follow) return;
+function releaseTallContents(side) {
   const wide = window.matchMedia('(min-width: 1001px)');
-  const foot = 24; // space kept under the foot, in px
   const place = () => {
-    follow.style.removeProperty('--follow-top');
+    side.removeAttribute('data-free');
     if (!wide.matches) return;
-    const normal = parseFloat(getComputedStyle(follow).top) || 0;
-    const fits = normal + follow.offsetHeight + foot <= window.innerHeight;
-    if (!fits) follow.style.setProperty('--follow-top', `${Math.round(window.innerHeight - follow.offsetHeight - foot)}px`);
+    const top = parseFloat(getComputedStyle(side).top) || 0;
+    if (top + side.offsetHeight + 24 > window.innerHeight) side.setAttribute('data-free', '');
   };
   window.addEventListener('resize', place);
   window.addEventListener('load', place);
-  if ('ResizeObserver' in window) new ResizeObserver(place).observe(follow);
+  if ('ResizeObserver' in window) new ResizeObserver(place).observe(side);
   place();
 }
