@@ -64,5 +64,12 @@ $check($slugs($render(['product' => 'cranes'])) === $slugs($all), 'unknown produ
 $stories = $render(['category' => 'customer-stories']);
 $check(!str_contains($stories, 'product=skid-steer-loaders'), 'chip with no story shown');
 
+// A bookmarked section + product pair with no story left keeps both choices and shows the empty list, not every section.
+$none = $render(['product' => 'mini-dumpers', 'category' => 'industry-news']);
+$check($slugs($none) === [], 'empty combination listed stories: ' . implode(',', $slugs($none)));
+$check(str_contains($none, 'aria-current="page">Industry news'), 'section dropped when no story matches the product');
+$check(str_contains($none, 'category=industry-news&amp;product=mini-dumpers') && str_contains($none, '?product=mini-dumpers'), 'a choice dropped from the links');
+$check(str_contains($none, 'bl-empty'), 'empty combination shows no empty message');
+
 if ($failures) { fwrite(STDERR, "$failures failure(s)\n"); exit(1); }
 echo "news list ok\n";

@@ -10,7 +10,9 @@ $currentProduct = isset(BL_NEWS_PRODUCT_FILTERS[bl_query('product')]) ? bl_query
 $inFamily = static fn(array $list, string $family): array => $family === '' ? $list : array_values(array_filter($list, static fn($a) => in_array($family, bl_news_families($a), true)));
 $pool = $inFamily($allArticles, $currentProduct);
 $counts = array_count_values(array_filter(array_map('bl_news_category', $pool)));
-$current = isset($counts[bl_query('category')]) ? bl_query('category') : '';
+// A section the site has stories in stays chosen even when none of them is in the chosen product family (the list is then empty).
+$sections = array_count_values(array_filter(array_map('bl_news_category', $allArticles)));
+$current = isset($sections[bl_query('category')]) ? bl_query('category') : '';
 $articles = $current ? array_values(array_filter($pool, static fn($a) => bl_news_category($a) === $current)) : $pool;
 // The product chips count the stories in the chosen section; a chip with none is left out, and the row is not shown when fewer than two chips have stories.
 $sectionStories = $current ? array_values(array_filter($allArticles, static fn($a) => bl_news_category($a) === $current)) : $allArticles;
@@ -27,7 +29,7 @@ $newsUrl = static fn(string $category, string $product): string => bl_url('/news
   </div>
   <nav class="bl-category-nav bl-news-tabs" aria-label="News sections">
     <a href="<?= bl_escape($newsUrl('', $currentProduct)) ?>"<?= $current ? '' : ' aria-current="page"' ?>>All <small><?= count($pool) ?></small></a>
-    <?php foreach (BL_NEWS_CATEGORIES as $key => $label): if (empty($counts[$key])) continue; ?><a href="<?= bl_escape($newsUrl($key, $currentProduct)) ?>"<?= $current === $key ? ' aria-current="page"' : '' ?>><?= bl_escape($label) ?> <small><?= $counts[$key] ?></small></a><?php endforeach; ?>
+    <?php foreach (BL_NEWS_CATEGORIES as $key => $label): if (empty($counts[$key]) && $current !== $key) continue; ?><a href="<?= bl_escape($newsUrl($key, $currentProduct)) ?>"<?= $current === $key ? ' aria-current="page"' : '' ?>><?= bl_escape($label) ?> <small><?= $counts[$key] ?? 0 ?></small></a><?php endforeach; ?>
   </nav>
   <div class="bl-news-tools">
     <?php if ($showFamilies): ?>
