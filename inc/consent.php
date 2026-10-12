@@ -24,14 +24,24 @@ function bl_tracking_markup(string $category, string $code): string
 
 /**
  * Whether a saved code loads an external script the browser must wait for (a <script src> with neither async nor defer, and not a
- * module). Written into the page through document.write like everything here, Chrome may skip such a script on a very slow
- * connection when it is not cached, so the tracking screen asks for async or defer on them (the tools' own current snippets have it).
+ * module or nomodule). Written into the page through document.write, Chrome may skip such a script on a very slow connection when it is not
+ * cached, and its dependants would then fail; so code with one is not supported: bl_tracking_code() holds it back and the tracking
+ * screen says why (the tools' own current snippets are inline or async/defer).
  */
+/** A script tag's attributes that make it harmless here: a module (deferred by the browser), or a type the browser does not run. */
+function bl_tracking_script_is_deferred_or_inert(string $attributes): bool
+{
+    if (!preg_match('~(?:^|\s)type\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+))~i', $attributes, $type)) return false;
+    $value = strtolower(trim($type[1] . ($type[2] ?? '') . ($type[3] ?? '')));
+    return $value === 'module' || ($value !== '' && !str_contains($value, 'javascript') && !str_contains($value, 'ecmascript'));
+}
+
 function bl_tracking_has_blocking_script(string $code): bool
 {
-    if (!preg_match_all('~<script\b([^>]*)>~i', $code, $tags)) return false;
+    // Only the opening tags count: text inside a script that merely spells out "<script src" is not one.
+    if (!preg_match_all('~<script\b([^>]*)>(?:.*?</script\s*>|.*$)~is', $code, $tags)) return false;
     foreach ($tags[1] as $attributes) {
-        if (preg_match('~(?:^|\s)src\s*=~i', $attributes) && !preg_match('~(?:^|\s)(?:async|defer)(?=[\s=/]|$)~i', $attributes) && !preg_match('~(?:^|\s)type\s*=\s*["\']?module~i', $attributes)) return true;
+        if (preg_match('~(?:^|\s)src\s*=~i', $attributes) && !preg_match('~(?:^|\s)(?:async|defer|nomodule)(?=[\s=/]|$)~i', $attributes) && !bl_tracking_script_is_deferred_or_inert($attributes)) return true;
     }
     return false;
 }
@@ -47,7 +57,8 @@ function bl_tracking_code(string $key): string
     $saved = get_option('bl_content_tracking', []);
     if (!is_array($saved)) return '';
     if (in_array($key, BL_TRACKING_SLOTS['analytics'], true) && ($saved['grouped'] ?? '') !== '1') return '';
-    return trim((string) ($saved[$key] ?? ''));
+    $code = trim((string) ($saved[$key] ?? ''));
+    return bl_tracking_has_blocking_script($code) ? '' : $code;
 }
 
 /** The categories that have any code saved, in banner order; the banner and the footer link exist only for these. */

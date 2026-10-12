@@ -32,7 +32,7 @@ $GLOBALS['options']['bl_content_tracking'] = ['head' => '<script>legacy()</scrip
 $check(bl_consent_categories() === [] && $banner() === '', 'unchecked legacy code produced a banner');
 
 // Analytics only (the three original slots).
-$save(['head' => '<script>window.a = 1;</script>', 'body_open' => '', 'footer' => "  <script src=\"https://example.test/a.js\"></script>\n"]);
+$save(['head' => '<script>window.a = 1;</script>', 'body_open' => '', 'footer' => "  <script async src=\"https://example.test/a.js\"></script>\n"]);
 $check(bl_consent_categories() === ['analytics'], 'analytics not the only category');
 $html = $banner();
 $check(str_contains($html, 'data-bl-consent-banner') && str_contains($html, 'data-categories="analytics"'), 'banner missing for analytics');
@@ -40,7 +40,7 @@ $check(str_contains($html, 'name="analytics"') && !str_contains($html, 'name="ad
 $check(!str_contains($html, 'data-bl-consent="choose"'), 'a choose button for one category');
 $check($capture(static fn() => run_hook('wp_head')) === bl_tracking_markup('analytics', '<script>window.a = 1;</script>'), 'head code not wrapped');
 $check($capture(static fn() => run_hook('wp_body_open')) === '', 'empty body slot printed');
-$check($capture(static fn() => run_hook('wp_footer')) === bl_tracking_markup('analytics', '<script src="https://example.test/a.js"></script>'), 'footer code not trimmed and wrapped');
+$check($capture(static fn() => run_hook('wp_footer')) === bl_tracking_markup('analytics', '<script async src="https://example.test/a.js"></script>'), 'footer code not trimmed and wrapped');
 $check(str_contains($footer(), 'data-bl-consent-open'), 'footer link missing');
 
 // Both categories: advertising has its own three slots and is printed after analytics.
@@ -82,13 +82,15 @@ $result = bl_content_locked('tracking', static fn($previous) => bl_content_prepa
 $check($result === true, 'saving the grouped screen failed');
 $check(!str_contains($capture('bl_tracking_screen'), '原有代码已暂停加载'), 'the legacy notice stayed after saving');
 // An external script with neither async nor defer is flagged on the screen (Chrome may skip it when written into the page on a slow connection); async, defer, modules and inline code are not.
-foreach (['<script src="https://t.example/a.js"></script>' => true, '<script async src="https://t.example/a.js"></script>' => false, '<script defer src=x></script>' => false, '<script type="module" src="/m.js"></script>' => false, '<script>inline()</script>' => false, '<SCRIPT SRC="/a.js" data-async="1"></SCRIPT>' => true] as $code => $flagged) {
+foreach (['<script src="https://t.example/a.js"></script>' => true, '<script async src="https://t.example/a.js"></script>' => false, '<script defer src=x></script>' => false, '<script type="module" src="/m.js"></script>' => false, '<script type="text/plain" src="/n.js"></script>' => false, '<script type="text/javascript" src="/n.js"></script>' => true, '<script>inline()</script>' => false, '<SCRIPT SRC="/a.js" data-async="1"></SCRIPT>' => true, '<script nomodule src="/old.js"></script>' => false, '<script>document.write("<script src=\\"/w.js\\"></scr"+"ipt>")</script>' => false, '<script>a()</script><script src="/b.js"></script>' => true] as $code => $flagged) {
     $check(bl_tracking_has_blocking_script($code) === $flagged, 'blocking-script check wrong for ' . $code);
 }
 $GLOBALS['options']['bl_content_tracking'] = ['head' => '<script src="https://t.example/a.js"></script>', 'grouped' => '1'];
-$check(str_contains($capture('bl_tracking_screen'), '有外部脚本没有写 async 或 defer'), 'a blocking external script was not flagged on the tracking screen');
+$check(str_contains($capture('bl_tracking_screen'), '有代码已暂停加载：外部脚本没有写 async 或 defer'), 'a blocking external script was not flagged on the tracking screen');
+$check(bl_tracking_code('head') === '' && bl_consent_categories() === [], 'code with a blocking external script was printed or counted as a category');
 $GLOBALS['options']['bl_content_tracking'] = ['head' => '<script async src="https://t.example/a.js"></script>', 'grouped' => '1'];
-$check(!str_contains($capture('bl_tracking_screen'), '有外部脚本没有写 async 或 defer'), 'an async script was flagged');
+$check(bl_tracking_code('head') !== '' && bl_consent_categories() === ['analytics'], 'async code was held back');
+$check(!str_contains($capture('bl_tracking_screen'), '有代码已暂停加载：外部脚本没有写 async 或 defer'), 'an async script was flagged');
 $GLOBALS['caps'] = [];
 
 // The copy is editable and the privacy default no longer promises that the tools load without asking.

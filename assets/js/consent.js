@@ -49,6 +49,16 @@ function clearToolCookies(categories) {
   });
 }
 
+function reloadedJustNow() {
+  try {
+    const last = Number(sessionStorage.getItem('bl_consent_reload') || 0);
+    sessionStorage.setItem('bl_consent_reload', String(Date.now()));
+    return Date.now() - last < 10000;
+  } catch {
+    return false;
+  }
+}
+
 export function initializeConsent() {
   const banner = document.querySelector('[data-bl-consent-banner]');
   if (!banner) return;
@@ -101,14 +111,19 @@ export function initializeConsent() {
     }
     close();
   };
-  // Code is running here for a category the saved choice no longer agrees to (withdrawn in another tab, or the cookie expired
-  // or was deleted): its cookies are cleared and the page reloads without it. True when it reloads.
+  // The page's running code and the cookie must agree, in both directions: a category running here that the cookie no longer
+  // agrees to (withdrawn in another tab, cookie expired or deleted) is stopped, its cookies cleared, by reloading without it;
+  // a category agreed in another tab after this page's gates ran (the broadcast may have come before this script) is started
+  // by reloading, where the gates now write it. True when it reloads.
   const reconcile = () => {
     const saved = readSaved();
     const stale = [...active].filter((name) => saved?.[name] !== true);
-    if (!stale.length) return false;
+    const missing = categories.filter((name) => saved?.[name] === true && !active.has(name));
+    if (!stale.length && !missing.length) return false;
+    // A gate that did not run for an agreed category (a script that failed) must not reload the page in a loop.
+    if (!stale.length && reloadedJustNow()) return false;
     choice = readChoice(categories);
-    clearToolCookies(stale);
+    if (stale.length) clearToolCookies(stale);
     location.reload();
     return true;
   };

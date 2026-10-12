@@ -27,11 +27,11 @@ function bl_tracking_screen(): void
     if (($saved['grouped'] ?? '') !== '1' && array_filter(array_map('trim', array_intersect_key($saved, array_flip(['head', 'body_open', 'footer']))))) {
         echo '<div class="notice notice-warning"><p><strong>原有代码已暂停加载，请先核对。</strong>分组之前保存的代码无法判断是统计还是广告，所以在你核对之前网站不会输出它们。请把 Google Ads、Meta 像素等广告代码剪切到“广告类”，其余留在“统计类”，然后保存本页，保存后才恢复（统计类要访客同意 Analytics 才加载）。</p></div>';
     }
-    // Code is written into the page as it is read (bl_tracking_markup); a plain external <script src> can then be skipped by Chrome on very slow connections.
+    // Code is written into the page as it is read (bl_tracking_markup); a plain external <script src> can then be skipped by Chrome on very slow connections, so such code is held back (bl_tracking_code).
     $blocking = [];
     foreach (BL_TRACKING_SLOTS as $slots) foreach ($slots as $key) if (bl_tracking_has_blocking_script((string) ($values[$key] ?? ''))) $blocking[] = $key;
     if ($blocking) {
-        echo '<div class="notice notice-warning"><p><strong>有外部脚本没有写 async 或 defer。</strong>' . esc_html(implode('、', $blocking)) . ' 里的 &lt;script src="…"&gt; 请改成 &lt;script async src="…"&gt;。访客同意后代码是随页面读取写入的，没有 async/defer 的外部脚本在网速很慢、浏览器没缓存时可能被 Chrome 直接跳过，统计就丢了。GA4、Google Ads、Meta 官方给的代码本来就是 async 的。</p></div>';
+        echo '<div class="notice notice-warning"><p><strong>有代码已暂停加载：外部脚本没有写 async 或 defer。</strong>' . esc_html(implode('、', $blocking)) . ' 里的 &lt;script src="…"&gt; 请改成 &lt;script async src="…"&gt;（或 defer），再保存。访客同意后代码是随页面读取写入的，没有 async/defer 的外部脚本在网速很慢、浏览器没缓存时会被 Chrome 直接跳过，后面依赖它的代码也会出错，所以这样的代码目前不输出。GA4、Google Ads、Meta、Clarity、Yandex 官方给的代码本来就是内联或 async 的。</p></div>';
     }
     // The privacy page promises no tracking; once a code is in, point the editor at the sentence to change.
     $privacy = (string) (bl_editable('privacy')['body']['ending'] ?? '');
