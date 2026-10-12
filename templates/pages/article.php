@@ -107,22 +107,17 @@ if ($contentHtml !== '' && $poster) {
         </ul>
       </section>
       <?php endif; ?>
-
-      <section class="bl-story-box bl-story-ask">
-        <h2>Contact us</h2>
-        <p>Tell us where the machine will work and what it needs to do. We reply with a quotation, the configuration we suggest and the shipping plan.</p>
-        <a class="bl-button bl-button-blue" href="<?= bl_escape(bl_contact_url($storyProducts[0] ?? null)) ?>">Start an enquiry <?= bl_icon('arrow-up-right') ?></a>
-        <a class="bl-story-box-link" href="<?= bl_escape(bl_company('sales_whatsapp_url')) ?>" target="_blank" rel="noopener">Message us on WhatsApp <?= bl_icon('arrow-up-right') ?></a>
-      </section>
       </div>
     </aside>
   </div>
 </article>
 
 <nav class="bl-story-pager bl-shell" aria-label="More stories">
-  <?php if ($newer): ?><a href="<?= bl_escape(bl_article_url($newer)) ?>"><span><?= bl_icon('arrow-left') ?> Newer</span><b><?= bl_title_text($newer['title']) ?></b></a><?php else: ?><a class="bl-story-pager-list" href="<?= bl_escape(bl_url('/news/')) ?>"><span><?= bl_icon('arrow-left') ?> All news</span><b>Back to the list</b></a><?php endif; ?>
-  <?php if ($older): ?><a class="bl-story-pager-older" href="<?= bl_escape(bl_article_url($older)) ?>"><span>Older <?= bl_icon('arrow-up-right') ?></span><b><?= bl_title_text($older['title']) ?></b></a><?php endif; ?>
-  <?php /* Phones always offer the way back to the list (news.css); wider screens show it only in place of Newer. */ if ($newer): ?><a class="bl-story-pager-list bl-story-pager-extra" href="<?= bl_escape(bl_url('/news/')) ?>"><span><?= bl_icon('arrow-left') ?> All news</span><b>Back to the list</b></a><?php endif; ?>
+  <?php if ($newer || $older): ?><div class="bl-story-pager-pair">
+    <?php if ($newer): ?><a class="bl-story-pager-card bl-story-pager-newer" href="<?= bl_escape(bl_article_url($newer)) ?>"><span><?= bl_icon('arrow-left') ?> Newer</span><b><?= bl_title_text($newer['title']) ?></b></a><?php endif; ?>
+    <?php if ($older): ?><a class="bl-story-pager-card bl-story-pager-older" href="<?= bl_escape(bl_article_url($older)) ?>"><span>Older <?= bl_icon('arrow-up-right') ?></span><b><?= bl_title_text($older['title']) ?></b></a><?php endif; ?>
+  </div><?php endif; ?>
+  <a class="bl-story-pager-all" href="<?= bl_escape(bl_url('/news/')) ?>"><?= bl_icon('arrow-left') ?> All news</a>
 </nav>
 <?php if ($leadFigure || $poster): ?><dialog class="bl-lightbox" id="story-lightbox" aria-label="<?= bl_escape($article['title']) ?>"><figure><img alt=""><figcaption><span data-lightbox-caption></span><small data-lightbox-count></small></figcaption></figure><button class="bl-lightbox-close bl-circle-button" type="button" data-lightbox-close aria-label="Close"><?= bl_icon('x') ?></button><button class="bl-lightbox-step bl-lightbox-prev bl-circle-button" type="button" data-lightbox-step="-1" aria-label="Previous photograph"><?= bl_icon('arrow-left') ?></button><button class="bl-lightbox-step bl-lightbox-next bl-circle-button" type="button" data-lightbox-step="1" aria-label="Next photograph"><?= bl_icon('arrow-left') ?></button></dialog><?php endif; ?>
 <?php require __DIR__ . '/../partials/page-cta.php'; ?>

@@ -867,7 +867,7 @@
 .bl-site .bl-quick-form .bl-form-bottom{display:flex;flex-direction:column-reverse;align-items:stretch;gap:12px}
 .bl-site .bl-quick-form .bl-form-bottom p{font-size:var(--fs-micro);line-height:1.5;color:var(--muted)}
 .bl-site .bl-quick-form .bl-form-bottom p br{display:none}
-.bl-site .bl-quick-form form.bl-inquiry-form input.wpcf7-submit{width:100%;min-height:52px}
+.bl-site .bl-quick-form form.bl-inquiry-form input.wpcf7-submit{width:100%;min-height:52px;padding:14px 56px 14px 22px}
 .bl-site .bl-quick-fallback{display:grid;gap:16px;justify-items:start}
 .bl-site .bl-quick-wa svg{display:none}
 /* Wherever the contact rail is a bottom bar (page-responsive.css, quick.js) the panel is a sheet above it. */
