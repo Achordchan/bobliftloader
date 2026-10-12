@@ -506,7 +506,16 @@ function bl_event_status(array $event, ?string $today = null): array
 const BL_FORMER_MODELS = ['FC10' => ['FC10-L'], 'FY15' => ['FY15-L'], 'FY20-2' => ['FY20-2-L'], 'FY20-4' => ['FY-20'], 'FY30' => ['FY-30'], 'FY40' => ['FY-40'], 'FY50' => ['FY-50'], 'FJZ30' => ['FJZ-30'], 'BL-T500-HD' => ['500 Tracked'], 'BL-T200-HJ' => ['200 Mixer']];
 
 /** News sections of this site, keyed by the value stored with each story. Stories from the wider group carry none. */
-const BL_NEWS_CATEGORIES = ['product-news' => 'Product news', 'customer-stories' => 'Customer stories', 'industry-news' => 'Industry news'];
+const BL_NEWS_CATEGORIES = ['product-news' => 'Product news', 'customer-stories' => 'Customer stories', 'industry-news' => 'Guides'];
+
+/** The tabs on the news list: the stored sections plus Company news, where every story without a section (the parent company's, or one saved without a choice) is listed, so the tabs add up to All. */
+const BL_NEWS_SECTIONS = BL_NEWS_CATEGORIES + ['company' => 'Company news'];
+
+/** The tab a story is listed under: its section, or 'company'. */
+function bl_news_section(array $article): string
+{
+    return bl_news_category($article) ?: 'company';
+}
 
 /** A story's section key, or '' for a group story or any older value (Company news, Exhibitions) no longer used. */
 function bl_news_category(array $article): string
@@ -525,27 +534,25 @@ function bl_news_line(array $record, string $slug): string
     return $line === 'group' ? 'group' : 'compact';
 }
 
-/** What the list and the story show above the title: the section, or "BOB-LIFT group" for the parent company's stories. */
+/** What the list and the story show above the title: the tab the story is listed under. */
 function bl_news_label(array $article): string
 {
-    $category = bl_news_category($article);
-    if ($category) return BL_NEWS_CATEGORIES[$category];
-    return ($article['line'] ?? '') === 'group' ? 'BOB-LIFT group' : 'News';
+    return BL_NEWS_SECTIONS[bl_news_section($article)];
 }
 
-/** The product filters on the news list: a story is listed under the family of each product it names, else under company news. */
-const BL_NEWS_PRODUCT_FILTERS = ['skid-steer-loaders' => 'Skid steer loaders', 'mini-dumpers' => 'Mini dumpers', 'company' => 'Company news'];
+/** The machine filters on the news list: a story is listed under the family of each product it names; one that names none is listed under All only. */
+const BL_NEWS_PRODUCT_FILTERS = ['skid-steer-loaders' => 'Skid steer loaders', 'mini-dumpers' => 'Mini dumpers'];
 
-/** Where a story is filed in the product filters: one entry per product family it names, or ['company'] when it names none. */
+/** Where a story is filed in the machine filters: one entry per product family it names, none when it names no product. */
 function bl_news_families(array $article): array
 {
     $index = bl_record_slug_index(bl_products());
     $families = [];
     foreach ((array) ($article['products'] ?? []) as $slug) {
         $family = (string) ($index[(string) $slug]['category'] ?? '');
-        if (isset(BL_NEWS_PRODUCT_FILTERS[$family]) && $family !== 'company') $families[$family] = true;
+        if (isset(BL_NEWS_PRODUCT_FILTERS[$family])) $families[$family] = true;
     }
-    return $families ? array_keys($families) : ['company'];
+    return array_keys($families);
 }
 
 /** Pinned stories first, then the rest, each group keeping the order it came in (newest first). */

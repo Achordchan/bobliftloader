@@ -37,7 +37,7 @@ $slugs = static fn(string $html): array => array_map(static fn($m) => $m, preg_m
 
 $check(bl_news_families(['products' => ['loader-a']]) === ['skid-steer-loaders'], 'loader story not filed under loaders');
 $check(bl_news_families(['products' => ['loader-a', 'dumper-a']]) === ['skid-steer-loaders', 'mini-dumpers'], 'story naming both families not filed under both');
-$check(bl_news_families(['products' => []]) === ['company'] && bl_news_families(['products' => ['unknown']]) === ['company'], 'story with no known product is not company news');
+$check(bl_news_families(['products' => []]) === [] && bl_news_families(['products' => ['unknown']]) === [], 'story with no known product is filed under a machine');
 $check(array_column(bl_news_order(bl_wp_articles()), 'slug') === ['pinned-old', 'loader-new', 'dumper-new', 'both', 'company-old'], 'pinned story not first, or the rest lost their order');
 
 $all = $render([]);
@@ -45,14 +45,18 @@ $check($slugs($all) === ['pinned-old', 'loader-new', 'dumper-new', 'both', 'comp
 $check(substr_count($all, 'class="bl-news-pin"') === 1, 'pinned mark missing or repeated');
 $check(str_contains($all, 'data-bl-news-view') && str_contains($all, 'data-view="list"') && str_contains($all, 'data-view="grid"'), 'layout switch missing');
 $check(str_contains($all, '<ol class="bl-news-list" data-view="grid">'), 'news list should open as a grid');
-$check(str_contains($all, 'aria-label="Filter by product"'), 'product filter missing');
+$check(str_contains($all, 'aria-label="Filter by machine"'), 'product filter missing');
 
 $loaders = $render(['product' => 'skid-steer-loaders']);
 $check($slugs($loaders) === ['loader-new', 'both'], 'loaders filter: ' . implode(',', $slugs($loaders)));
 $dumpers = $render(['product' => 'mini-dumpers']);
 $check($slugs($dumpers) === ['dumper-new', 'both'], 'dumpers filter: ' . implode(',', $slugs($dumpers)));
-$company = $render(['product' => 'company']);
-$check($slugs($company) === ['pinned-old', 'company-old'], 'company filter: ' . implode(',', $slugs($company)));
+// Company news is a tab (every story without a section), not a machine; the old product=company link falls back to everything.
+$company = $render(['category' => 'company']);
+$check($slugs($company) === ['company-old'], 'company tab: ' . implode(',', $slugs($company)));
+$check($slugs($render(['product' => 'company'])) === $slugs($all), 'product=company is not ignored');
+$tabCounts = array_sum(array_map('intval', preg_match_all('~class="bl-category-nav bl-news-tabs".*?</nav>~s', $all, $nav) ? (preg_match_all('~<a [^>]*>(?!All)[^<]*<small>(\d+)</small>~', $nav[0][0], $n) ? $n[1] : []) : []));
+$check($tabCounts === count($slugs($all)), 'section tabs add up to ' . count($slugs($all)) . ', got ' . $tabCounts);
 
 // The two filters combine, and each link keeps the other's choice.
 $both = $render(['product' => 'skid-steer-loaders', 'category' => 'product-news']);
@@ -68,7 +72,7 @@ $check(!str_contains($stories, 'product=skid-steer-loaders'), 'chip with no stor
 // A bookmarked section + product pair with no story left keeps both choices and shows the empty list, not every section.
 $none = $render(['product' => 'mini-dumpers', 'category' => 'industry-news']);
 $check($slugs($none) === [], 'empty combination listed stories: ' . implode(',', $slugs($none)));
-$check(str_contains($none, 'aria-current="page">Industry news'), 'section dropped when no story matches the product');
+$check(str_contains($none, 'aria-current="page">Guides'), 'section dropped when no story matches the product');
 $check(str_contains($none, 'category=industry-news&amp;product=mini-dumpers') && str_contains($none, '?product=mini-dumpers'), 'a choice dropped from the links');
 $check(str_contains($none, 'bl-empty'), 'empty combination shows no empty message');
 
