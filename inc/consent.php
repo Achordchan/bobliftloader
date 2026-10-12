@@ -14,11 +14,11 @@ const BL_TRACKING_SLOTS = [
 /**
  * One saved code, as printed in the page: an inert <template> holding the code, then a few lines that write it into the page
  * (while the page is still being read, so it behaves exactly as if it had been pasted there) only when the visitor's cookie
- * has agreed to the category. Without agreement nothing in it runs. The cookie name and version are those of assets/js/consent.js.
+ * has agreed to the category (and noting in window.blConsentRan that the category's code is running on this page). Without agreement nothing in it runs. The cookie name and version are those of assets/js/consent.js.
  */
 function bl_tracking_markup(string $category, string $code): string
 {
-    $gate = '(function(t,c){try{var m=document.cookie.match(/(?:^|; )bl_consent=([^;]*)/),v=m&&JSON.parse(decodeURIComponent(m[1]));if(v&&v.v===1&&v[c]===true)document.write(t.innerHTML)}catch(e){}})(document.currentScript.previousElementSibling,"' . $category . '")';
+    $gate = '(function(t,c){try{var m=document.cookie.match(/(?:^|; )bl_consent=([^;]*)/),v=m&&JSON.parse(decodeURIComponent(m[1]));if(v&&v.v===1&&v[c]===true){(window.blConsentRan=window.blConsentRan||{})[c]=true;document.write(t.innerHTML)}}catch(e){}})(document.currentScript.previousElementSibling,"' . $category . '")';
     return '<template data-bl-consent="' . $category . '">' . $code . '</template><script>' . $gate . '</script>';
 }
 

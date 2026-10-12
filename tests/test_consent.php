@@ -54,7 +54,7 @@ $check(str_contains($capture(static fn() => run_hook('wp_body_open')), '<templat
 // The markup is inert (a template) followed by the gate: it writes the code only for a cookie that agrees to this category.
 $markup = bl_tracking_markup('advertising', '<script>x()</script>');
 $check(str_starts_with($markup, '<template data-bl-consent="advertising"><script>x()</script></template><script>'), 'code is not held in a template');
-$check(str_contains($markup, 'bl_consent=') && str_contains($markup, 'v.v===1') && str_contains($markup, 'v[c]===true') && str_contains($markup, 'document.write(t.innerHTML)') && str_ends_with($markup, ',"advertising")</script>'), 'consent gate changed');
+$check(str_contains($markup, 'bl_consent=') && str_contains($markup, 'v.v===1') && str_contains($markup, 'v[c]===true') && str_contains($markup, 'document.write(t.innerHTML)') && str_contains($markup, 'window.blConsentRan') && str_ends_with($markup, ',"advertising")</script>'), 'consent gate changed');
 $check($capture(static fn() => run_hook('wp_footer')) === '', 'empty advertising footer printed');
 
 // Advertising only still gets a banner.

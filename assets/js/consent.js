@@ -59,8 +59,10 @@ export function initializeConsent() {
   const openers = [...document.querySelectorAll('[data-bl-consent-open]')];
   let choice = readChoice(categories);
   let opener = null;
-  // The categories whose code this page was served with.
-  const active = new Set(categories.filter((name) => choice?.[name]));
+  // The categories whose code is running on this page: those the gates beside the saved code actually started, which can
+  // differ from what the cookie says now (a category added since the visitor chose leaves the choice incomplete while the
+  // answered categories' code already runs).
+  const active = new Set(categories.filter((name) => window.blConsentRan?.[name] === true));
 
   const showChoices = (on) => {
     choices.hidden = !on;
@@ -100,6 +102,15 @@ export function initializeConsent() {
     close();
   };
   const sync = () => {
+    // Expired or deleted while this page stayed open: nothing is agreed any more, so what runs is stopped and the choice asked afresh.
+    if (!readSaved()) {
+      choice = null;
+      if (active.size) {
+        clearToolCookies([...active]);
+        location.reload();
+      }
+      return;
+    }
     const next = readChoice(categories);
     if (next) {
       if (JSON.stringify(next) !== JSON.stringify(choice)) apply(next);
