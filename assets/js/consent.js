@@ -5,8 +5,12 @@
 const COOKIE = 'bl_consent';
 const VERSION = 1;
 const YEAR = 365 * 24 * 60 * 60;
-// Cookies the usual tools leave on this site's own domain; withdrawing a category removes them.
-const TOOL_COOKIES = /^(_ga|_gid|_gat|_gcl|_dc_gtm|_fb[pc]$|_ym|_ttp|_tt_|_clck|_clsk|_uet|_hj|_pin_|_rdt|_li_|li_)/;
+// Cookies the usual tools leave on this site's own domain, by category; declining a category removes them, so cookies
+// set before the banner existed (or by an earlier choice) do not outlive a refusal.
+const TOOL_COOKIES = {
+  analytics: /^(_ga|_gid|_gat|_dc_gtm|_ym|_clck|_clsk|_hj)/,
+  advertising: /^(_gcl|_fb[pc]$|_ttp|_tt_|_uet|_pin_|_rdt|_li_|li_)/,
+};
 
 function readChoice(categories) {
   const match = document.cookie.split('; ').find((row) => row.startsWith(`${COOKIE}=`));
@@ -25,20 +29,18 @@ function saveChoice(choice) {
   document.cookie = `${COOKIE}=${encodeURIComponent(JSON.stringify({ v: VERSION, ...choice }))}; Max-Age=${YEAR}; Path=/; SameSite=Lax${secure}`;
 }
 
-function clearToolCookies() {
+function clearToolCookies(categories) {
   const labels = location.hostname.split('.');
   const domains = ['', ...labels.map((_, index) => labels.slice(index).join('.')).filter((name) => name.includes('.')).flatMap((name) => [name, `.${name}`])];
-  document.cookie.split('; ').map((row) => row.split('=')[0]).filter((name) => TOOL_COOKIES.test(name)).forEach((name) => {
+  document.cookie.split('; ').map((row) => row.split('=')[0]).filter((name) => categories.some((category) => TOOL_COOKIES[category]?.test(name))).forEach((name) => {
     domains.forEach((domain) => {
       document.cookie = `${name}=; Max-Age=0; Path=/${domain ? `; Domain=${domain}` : ''}`;
     });
   });
 }
 
-// Scripts run strictly one after another, across slots and categories: an external library is awaited (loaded, failed or
-// timed out) before the inline code that needs it, which a plain insertion cannot guarantee.
+// Scripts run strictly one after another, across slots and categories: an external library is awaited (loaded or failed) before the inline code that needs it, which a plain insertion cannot guarantee.
 let queue = Promise.resolve();
-const SCRIPT_WAIT = 10000;
 
 function runScript(placeholder, old) {
   return new Promise((resolve) => {
@@ -47,10 +49,8 @@ function runScript(placeholder, old) {
     script.text = old.textContent;
     script.async = false;
     if (script.src) {
-      const timer = setTimeout(resolve, SCRIPT_WAIT);
-      const done = () => { clearTimeout(timer); resolve(); };
-      script.addEventListener('load', done);
-      script.addEventListener('error', done);
+      script.addEventListener('load', resolve);
+      script.addEventListener('error', resolve);
     }
     placeholder.replaceWith(script);
     if (!script.src) resolve();
@@ -117,8 +117,9 @@ export function initializeConsent() {
   // (their cookies are cleared first); anything newly agreed to starts, and a banner still open is no longer needed.
   const apply = (next) => {
     choice = next;
-    if ([...active].some((name) => !next[name])) {
-      clearToolCookies();
+    const declined = categories.filter((name) => !next[name]);
+    if (declined.length) clearToolCookies(declined);
+    if (declined.some((name) => active.has(name))) {
       location.reload();
       return;
     }
