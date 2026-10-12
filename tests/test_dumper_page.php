@@ -9,6 +9,7 @@ require __DIR__ . '/../inc/bootstrap.php';
 require __DIR__ . '/../inc/wp-admin.php';
 require __DIR__ . '/../inc/wp-content-editor.php';
 $GLOBALS['posts'] = [];
+function bl_wp_application_cases() { return []; }
 
 $failures = 0;
 $check = static function (bool $ok, string $message) use (&$failures): void { if (!$ok) { $failures++; fwrite(STDERR, "FAIL: $message\n"); } };
@@ -43,6 +44,14 @@ if ($scenario === 'steps') {
     $category = 'mini-dumpers';
     ob_start(); $scope = []; require __DIR__ . '/../templates/partials/section-nav.php'; $nav = ob_get_clean();
     $check(!str_contains($nav, 'href="#model-names"') && !str_contains($nav, 'href="#how-they-are-made"'), 'navigation links to sections that are not shown');
+    // A dumper page keeps decoding the name but no longer links to the key that is gone; a loader page still links to its own.
+    $page = static function (string $model, string $category): string {
+        $product = ['model' => $model, 'name' => $model . ' test', 'category' => $category, 'slug' => strtolower($model), 'specs' => [], 'image' => '', 'gallery' => [], 'excerpt' => '', 'load' => 0];
+        ob_start(); (static function ($route) { require __DIR__ . '/../templates/pages/product.php'; })(['record' => $product]); return ob_get_clean();
+    };
+    $dumperPage = @$page('FY30', 'mini-dumpers');
+    $check(str_contains($dumperPage, '<b>FY</b>Hydraulic tipping') && !str_contains($dumperPage, '/mini-dumpers/#model-names'), 'a dumper page links to a key that is not shown');
+    $check(str_contains(@$page('BL-T360-H', 'skid-steer-loaders'), '/skid-steer-loaders/#model-names'), 'a loader page lost its model-name link');
 } elseif ($scenario === '') {
     foreach (['steps', 'one', 'none'] as $name) {
         exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__FILE__) . ' ' . $name . ' 2>&1', $out, $code);
