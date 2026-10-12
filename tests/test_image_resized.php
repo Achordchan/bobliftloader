@@ -35,6 +35,7 @@ $signed = 'https://example.test/wp-content/uploads/2026/10/signed.webp';
 $check(bl_image_resized($signed, 400) === $signed && bl_image_srcset($signed, [400]) === '', 'a picture with Content Credentials went through the CDN');
 $theme = 'https://example.test/theme/assets/images/range-loader-studio.webp?ver=abc';
 $check(bl_image_resized($theme, 480) === 'https://i0.wp.com/example.test/theme/assets/images/range-loader-studio.webp?ver=abc&w=480&ssl=1', 'a theme picture was not resized, or lost its version');
+$check(bl_image_resized('http://example.test/wp-content/uploads/2026/10/plain.webp', 400) === 'https://i0.wp.com/example.test/wp-content/uploads/2026/10/plain.webp?w=400', 'a picture served over HTTP was fetched by the CDN over HTTPS');
 foreach (['https://elsewhere.test/wp-content/uploads/2026/10/plain.webp', '/wp-content/uploads/2026/10/missing.webp', '/wp-content/uploads/../../etc/passwd', ''] as $other) $check(bl_image_resized($other, 400) === $other && bl_image_srcset($other, [400]) === '', "$other was resized");
 
 // The CDN reaches a site by its host only, so a site on its own port, or on a local or private name, keeps its own addresses.

@@ -50,7 +50,9 @@ function bl_image_resized(string $url, int $width): string
     $facts = bl_image_facts($url);
     if (!$facts || $facts['c2pa'] || $facts['width'] <= $width) return $url;
     $parts = parse_url($url);
-    return 'https://i0.wp.com/' . bl_image_cdn_host(home_url()) . $parts['path'] . '?' . (isset($parts['query']) ? $parts['query'] . '&' : '') . 'w=' . $width . '&ssl=1';
+    // ssl=1 has the CDN fetch the original over HTTPS; a picture served over plain HTTP (or a site address that is) is fetched that way.
+    $https = ($parts['scheme'] ?? parse_url(home_url(), PHP_URL_SCHEME)) === 'https';
+    return 'https://i0.wp.com/' . bl_image_cdn_host(home_url()) . $parts['path'] . '?' . (isset($parts['query']) ? $parts['query'] . '&' : '') . 'w=' . $width . ($https ? '&ssl=1' : '');
 }
 
 /*
