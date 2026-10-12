@@ -12,7 +12,7 @@ $poster = !empty($article['poster']['image']) ? $article['poster'] : null;
 $posterAfter = $poster ? (int) ($poster['after'] ?? 0) : 0;
 $storyProducts = array_values(array_filter(array_map(static fn($slug) => bl_find_record(bl_products(), $slug), $article['products'] ?? [])));
 // Stories imported from the JSON data have no WordPress author: this site's are signed by the team, group stories by BOB-LIFT.
-$author = !empty($article['author']['name']) ? $article['author'] : ['name' => 'BOB-LIFT', 'title' => $category ? 'BOB-LIFT Loader team' : '', 'avatar' => ''];
+$author = (!empty($article['author']['name']) ? $article['author'] : ['name' => 'BOB-LIFT', 'title' => $category ? 'BOB-LIFT Loader team' : '', 'avatar' => '']) + ['bio' => '', 'count' => 0];
 $all = bl_articles();
 $index = (int) array_search($article['slug'], array_column($all, 'slug'), true);
 $newer = $all[$index - 1] ?? null;
@@ -37,26 +37,29 @@ if ($contentHtml !== '' && $poster) {
 ?>
 <article class="bl-story bl-shell" aria-labelledby="story-title">
   <?php bl_breadcrumbs([['label' => 'News', 'url' => bl_url('/news/')], ['label' => $article['title']]]); ?>
-  <header class="bl-story-head">
-    <?php if ($category): ?><a class="bl-story-category" href="<?= bl_escape(bl_url('/news/') . '?category=' . $category) ?>"><?= bl_escape(BL_NEWS_CATEGORIES[$category]) ?></a><?php else: ?><span class="bl-story-category bl-story-category-group"><?= bl_escape(bl_news_label($article)) ?></span><?php endif; ?>
-    <h1 id="story-title"><?= bl_title_text($article['title']) ?></h1>
-    <p class="bl-story-lede"><?= bl_escape($article['excerpt']) ?></p>
-    <?php /* Phones only (news.css): who wrote it and when, and the event's dates and booth, which the side column shows
-       only after the whole story there. */ ?>
-    <p class="bl-story-byline"><span><?= bl_escape($author['name']) ?></span><time datetime="<?= bl_escape($article['date']) ?>"><?= date('j F Y', strtotime($article['date'])) ?></time></p>
-    <?php if ($status): ?><dl class="bl-story-when">
-      <div><dt>Dates</dt><dd><?php if ($status['state'] !== 'past'): ?><?= bl_escape(bl_event_dates($event)) ?> <?php endif; ?><span class="bl-news-when bl-news-when-<?= $status['state'] ?>"><?= bl_escape($status['label']) ?></span></dd></div>
-      <?php if (!empty($event['booth'])): ?><div><dt>Booth</dt><dd><strong><?= bl_escape($event['booth']) ?></strong></dd></div><?php endif; ?>
-    </dl><?php endif; ?>
-  </header>
 
-  <div class="bl-story-layout">
+  <?php /* The headline sits in the text column, so the side column starts level with it instead of leaving the top right empty. */ ?>
+  <div class="bl-story-layout bl-story-layout-top">
     <div class="bl-story-main">
-      <?php if ($leadFigure): ?><figure class="bl-story-figure"><span class="bl-story-zoom-frame"><img src="<?= bl_escape($article['image']) ?>" alt="<?= bl_escape($article['caption']) ?>" width="1500" height="900" fetchpriority="high"><?= $zoom(0, $article['image'], $article['caption'], $article['caption']) ?></span><figcaption><?= bl_escape($article['caption']) ?></figcaption></figure><?php endif; ?>
-      <div class="bl-story-text">
-        <?php if ($contentHtml !== '' || !empty($article['_bl_body_managed'])): ?><?= $contentHtml === '' && $poster ? $posterFigure($poster) : '' ?><div class="bl-wp-article-content"><?= $contentHtml ?></div>
-        <?php else: foreach ($article['sections'] as $i => $section): ?><?= $poster && $i + 1 === $posterAfter ? $posterFigure($poster) : '' ?><h2><?= bl_escape($section['heading']) ?></h2><p><?= bl_escape($section['text']) ?></p><?php endforeach; ?><?= $poster && ($posterAfter < 1 || $posterAfter > count($article['sections'])) ? $posterFigure($poster) : '' ?><?php endif; ?>
-        <?php if ($status && $status['state'] !== 'past'): ?><p class="bl-story-visit">Planning to visit? <a href="<?= bl_escape(bl_url('/contact/') . '#enquiry') ?>">Tell us your dates</a> or <a href="<?= bl_escape(bl_company('sales_whatsapp_url')) ?>" target="_blank" rel="noopener">message us on WhatsApp</a>, so the compact equipment team can expect you.</p><?php endif; ?>
+      <header class="bl-story-head">
+        <?php if ($category): ?><a class="bl-story-category" href="<?= bl_escape(bl_url('/news/') . '?category=' . $category) ?>"><?= bl_escape(BL_NEWS_CATEGORIES[$category]) ?></a><?php else: ?><span class="bl-story-category bl-story-category-group"><?= bl_escape(bl_news_label($article)) ?></span><?php endif; ?>
+        <h1 id="story-title"><?= bl_title_text($article['title']) ?></h1>
+        <p class="bl-story-lede"><?= bl_escape($article['excerpt']) ?></p>
+        <?php /* Phones only (news.css): who wrote it and when, and the event's dates and booth, which the side column shows
+           only after the whole story there. */ ?>
+        <p class="bl-story-byline"><span><?= bl_escape($author['name']) ?></span><time datetime="<?= bl_escape($article['date']) ?>"><?= date('j F Y', strtotime($article['date'])) ?></time></p>
+        <?php if ($status): ?><dl class="bl-story-when">
+          <div><dt>Dates</dt><dd><?php if ($status['state'] !== 'past'): ?><?= bl_escape(bl_event_dates($event)) ?> <?php endif; ?><span class="bl-news-when bl-news-when-<?= $status['state'] ?>"><?= bl_escape($status['label']) ?></span></dd></div>
+          <?php if (!empty($event['booth'])): ?><div><dt>Booth</dt><dd><strong><?= bl_escape($event['booth']) ?></strong></dd></div><?php endif; ?>
+        </dl><?php endif; ?>
+      </header>
+      <div class="bl-story-body">
+        <?php if ($leadFigure): ?><figure class="bl-story-figure"><span class="bl-story-zoom-frame"><img src="<?= bl_escape($article['image']) ?>" alt="<?= bl_escape($article['caption']) ?>" width="1500" height="900" fetchpriority="high"><?= $zoom(0, $article['image'], $article['caption'], $article['caption']) ?></span><figcaption><?= bl_escape($article['caption']) ?></figcaption></figure><?php endif; ?>
+        <div class="bl-story-text">
+          <?php if ($contentHtml !== '' || !empty($article['_bl_body_managed'])): ?><?= $contentHtml === '' && $poster ? $posterFigure($poster) : '' ?><div class="bl-wp-article-content"><?= $contentHtml ?></div>
+          <?php else: foreach ($article['sections'] as $i => $section): ?><?= $poster && $i + 1 === $posterAfter ? $posterFigure($poster) : '' ?><h2><?= bl_escape($section['heading']) ?></h2><p><?= bl_escape($section['text']) ?></p><?php endforeach; ?><?= $poster && ($posterAfter < 1 || $posterAfter > count($article['sections'])) ? $posterFigure($poster) : '' ?><?php endif; ?>
+          <?php if ($status && $status['state'] !== 'past'): ?><p class="bl-story-visit">Planning to visit? <a href="<?= bl_escape(bl_url('/contact/') . '#enquiry') ?>">Tell us your dates</a> or <a href="<?= bl_escape(bl_company('sales_whatsapp_url')) ?>" target="_blank" rel="noopener">message us on WhatsApp</a>, so the compact equipment team can expect you.</p><?php endif; ?>
+        </div>
       </div>
     </div>
 
@@ -67,13 +70,17 @@ if ($contentHtml !== '' && $poster) {
           <?php if ($author['avatar']): ?><img src="<?= bl_escape($author['avatar']) ?>" alt="" width="64" height="64"><?php else: ?><span class="bl-story-avatar" aria-hidden="true"><?= bl_escape(mb_substr($author['name'], 0, 1)) ?></span><?php endif; ?>
           <span><b><?= bl_escape($author['name']) ?></b><?php if ($author['title']): ?><small><?= bl_escape($author['title']) ?></small><?php endif; ?></span>
         </div>
+        <?php if ($author['bio'] !== ''): ?><p class="bl-story-author-bio"><?= nl2br(bl_escape($author['bio'])) ?></p><?php endif; ?>
         <dl>
+          <?php if ($author['count'] > 0): ?><div><dt>Stories</dt><dd><?= $author['count'] ?> on BOB-LIFT News</dd></div><?php endif; ?>
           <div><dt>Published</dt><dd><time datetime="<?= bl_escape($article['date']) ?>"><?= date('j F Y', strtotime($article['date'])) ?></time></dd></div>
           <?php if (!empty($article['updated'])): ?><div><dt>Updated</dt><dd><time datetime="<?= bl_escape($article['updated']) ?>"><?= date('j F Y', strtotime($article['updated'])) ?></time></dd></div><?php endif; ?>
         </dl>
         <?php if ($article['source']): ?><a class="bl-story-box-link" href="<?= bl_escape($article['source']) ?>" target="_blank" rel="noopener">Original announcement on boblift.com <?= bl_icon('arrow-up-right') ?></a><?php endif; ?>
       </section>
 
+      <?php /* Everything after the author follows the reader down the page on wide screens (news.css). */ ?>
+      <div class="bl-story-follow">
       <?php if ($status): ?>
       <section class="bl-story-box">
         <h2>Event details</h2>
@@ -100,6 +107,14 @@ if ($contentHtml !== '' && $poster) {
         </ul>
       </section>
       <?php endif; ?>
+
+      <section class="bl-story-box bl-story-ask">
+        <h2>Contact us</h2>
+        <p>Tell us where the machine will work and what it needs to do. We reply with a quotation, the configuration we suggest and the shipping plan.</p>
+        <a class="bl-button bl-button-blue" href="<?= bl_escape(bl_contact_url($storyProducts[0] ?? null)) ?>">Start an enquiry <?= bl_icon('arrow-up-right') ?></a>
+        <a class="bl-story-box-link" href="<?= bl_escape(bl_company('sales_whatsapp_url')) ?>" target="_blank" rel="noopener">Message us on WhatsApp <?= bl_icon('arrow-up-right') ?></a>
+      </section>
+      </div>
     </aside>
   </div>
 </article>
