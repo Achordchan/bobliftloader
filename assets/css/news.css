@@ -63,6 +63,9 @@
 .bl-site .bl-story-head h1{margin:clamp(18px,1.4vw,30px) 0 clamp(14px,1.1vw,24px);font:700 clamp(40px,3.2vw,84px)/1 var(--display);letter-spacing:-.01em;text-wrap:balance}
 .bl-site .bl-story-lede{max-width:42em;font-size:var(--fs-lead);line-height:1.7;color:var(--muted);text-wrap:pretty}
 .bl-site .bl-story-layout{display:grid;grid-template-columns:minmax(0,1fr) clamp(280px,22vw,420px);gap:clamp(40px,5vw,120px);align-items:start;padding-top:clamp(28px,2.4vw,56px);border-top:1px solid var(--ink)}
+.bl-site .bl-story-layout-top{padding-top:0;border-top:0}
+.bl-site .bl-story-layout-top .bl-story-head{max-width:none;padding-top:clamp(28px,2.4vw,60px)}
+.bl-site .bl-story-body{padding-top:clamp(28px,2.4vw,56px);border-top:1px solid var(--ink)}
 .bl-site .bl-story-figure{margin:0 0 clamp(28px,2.2vw,48px)}
 .bl-site .bl-story-figure img{width:100%;max-height:min(70vh,760px);object-fit:contain;background:#e7e9e3}
 .bl-site .bl-story-figure figcaption,.bl-site .bl-story-poster figcaption{padding-top:10px;font-size:var(--fs-label);color:var(--muted)}
@@ -100,6 +103,12 @@
 .bl-site .bl-wp-article-content strong{color:var(--ink)}
 
 .bl-site .bl-story-aside{display:flex;flex-direction:column;gap:clamp(20px,1.6vw,32px)}
+.bl-site .bl-story-follow{display:flex;flex-direction:column;gap:clamp(20px,1.6vw,32px)}
+/* Wide screens: the author box scrolls away with the story, the boxes after it stay in view beside the text. */
+@media(min-width:1001px){
+  .bl-site .bl-story-layout{align-items:stretch}
+  .bl-site .bl-story-follow{position:sticky;top:calc(var(--header-height) + 24px);max-height:calc(100vh - var(--header-height) - 48px);overflow-y:auto;scrollbar-width:thin}
+}
 .bl-site .bl-story-box{padding:clamp(18px,1.4vw,28px);background:#fff;border:1px solid var(--line)}
 .bl-site .bl-story-box h2{margin-bottom:12px;font-size:var(--fs-micro);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
 .bl-site .bl-story-box p{font-size:var(--fs-small);line-height:1.7;color:#3f4c57}
@@ -134,6 +143,11 @@
 .bl-site .bl-story-avatar{display:grid;place-items:center;background:var(--ink);color:#fff;font:700 22px/1 var(--display)}
 .bl-site .bl-story-author-name b{display:block;font-size:var(--fs-small);font-weight:700}
 .bl-site .bl-story-author-name small{display:block;margin-top:2px;font-size:var(--fs-label);color:var(--muted)}
+
+.bl-site .bl-story-author-bio{margin:0 0 14px;font-size:var(--fs-small);line-height:1.7;color:#3f4c57}
+/* Contact us: the same box as the "similar job" box on the application pages. */
+.bl-site .bl-story-ask p{margin:0 0 18px;font-size:var(--fs-small);line-height:1.8;color:var(--muted)}
+.bl-site .bl-story-ask .bl-button{display:inline-flex}
 
 /* Related products: a compact list into the catalogue. */
 .bl-site .bl-story-product-list{margin:0;padding:0;list-style:none}
@@ -170,6 +184,7 @@
   .bl-site .bl-news-head-row{flex-direction:column;align-items:flex-start}
   .bl-site .bl-story-layout{grid-template-columns:minmax(0,1fr)}
   .bl-site .bl-story-aside{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));align-items:start}
+  .bl-site .bl-story-follow{display:contents}
 }
 @media(max-width:700px){
   .bl-site .bl-news-item{grid-template-columns:1fr;gap:16px}
@@ -244,8 +259,6 @@
 @media(max-width:1000px) and (max-height:500px){
   /* Three boxes in two columns: the event box runs down the right beside the other two, so none sits alone by an empty gap.
      Where only one column fits, the boxes stack in order as before. */
-  .bl-site .bl-story-aside:has(>.bl-story-box:nth-child(3):last-child){grid-template-rows:auto 1fr}
-  .bl-site .bl-story-aside>.bl-story-box:nth-child(2):nth-last-child(2){grid-column:-2;grid-row:span 2}
   .bl-site .bl-lightbox{padding:12px 76px}
   .bl-site .bl-lightbox figure{gap:8px}
   .bl-site .bl-lightbox figure img{max-height:calc(100dvh - 88px)}
