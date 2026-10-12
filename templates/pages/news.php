@@ -14,11 +14,12 @@ $counts = array_count_values(array_filter(array_map('bl_news_section', $pool)));
 $sections = array_count_values(array_filter(array_map('bl_news_section', $allArticles)));
 $current = isset($sections[bl_query('category')]) ? bl_query('category') : '';
 $articles = $current ? array_values(array_filter($pool, static fn($a) => bl_news_section($a) === $current)) : $pool;
-// The product chips count the stories in the chosen section; a chip with none is left out, and the row is not shown when fewer than two chips have stories.
+// The machine chips count the stories in the chosen section; a chip with none is left out, and the row is not shown when it would not narrow the list.
 $sectionStories = $current ? array_values(array_filter($allArticles, static fn($a) => bl_news_section($a) === $current)) : $allArticles;
 $familyCounts = [];
 foreach (array_keys(BL_NEWS_PRODUCT_FILTERS) as $family) $familyCounts[$family] = count($inFamily($sectionStories, $family));
-$showFamilies = count(array_filter($familyCounts)) >= 2 || $currentProduct !== '';
+// One machine chip is still worth showing when it narrows the list (some stories name no machine).
+$showFamilies = $currentProduct !== '' || count(array_filter($familyCounts)) >= 2 || (count(array_filter($familyCounts)) === 1 && max($familyCounts) < count($sectionStories));
 $newsUrl = static fn(string $category, string $product): string => bl_url('/news/') . ($category !== '' || $product !== '' ? '?' . http_build_query(array_filter(['category' => $category, 'product' => $product])) : '');
 ?>
 <section class="bl-news-head bl-shell" aria-labelledby="news-title">

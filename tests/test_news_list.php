@@ -15,13 +15,15 @@ function bl_wp_products() {
 }
 function bl_wp_articles() {
     $story = static fn(string $slug, string $date, string $category, array $products, array $extra = []) => $extra + ['slug' => $slug, 'title' => 'Story ' . $slug, 'url' => '/news/' . $slug . '/', 'date' => $date, 'excerpt' => 'Excerpt ' . $slug, 'image' => '/img/' . $slug . '.jpg', 'category' => $category, 'line' => 'compact', 'products' => $products, 'event' => []];
-    return [
+    $stories = [
         $story('loader-new', '2026-10-10', 'product-news', ['loader-a']),
         $story('dumper-new', '2026-10-09', 'customer-stories', ['dumper-a']),
         $story('both', '2026-10-08', 'product-news', ['loader-a', 'dumper-a']),
         $story('company-old', '2026-10-01', '', [], ['line' => 'group']),
         $story('pinned-old', '2026-09-01', 'industry-news', [], ['pinned' => true]),
     ];
+    // With no dumper story left, only the loaders chip could narrow the list.
+    return empty($GLOBALS['bl_test_no_dumpers']) ? $stories : array_values(array_filter($stories, static fn($a) => !in_array('dumper-a', $a['products'], true)));
 }
 function get_permalink($post) { return '/'; }
 
@@ -79,6 +81,12 @@ $check($slugs($none) === [], 'empty combination listed stories: ' . implode(',',
 $check(str_contains($none, 'aria-current="page">Guides'), 'section dropped when no story matches the product');
 $check(str_contains($none, 'category=industry-news&amp;product=mini-dumpers') && str_contains($none, '?product=mini-dumpers'), 'a choice dropped from the links');
 $check(str_contains($none, 'bl-empty'), 'empty combination shows no empty message');
+
+// One machine chip still shows when it narrows the list (the loaders story beside stories naming no machine).
+$GLOBALS['bl_test_no_dumpers'] = true;
+$single = $render([]);
+$check(str_contains($single, 'aria-label="Filter by machine"') && !str_contains($single, 'product=mini-dumpers'), 'single machine chip hidden although it narrows the list');
+$GLOBALS['bl_test_no_dumpers'] = false;
 
 if ($failures) { fwrite(STDERR, "$failures failure(s)\n"); exit(1); }
 echo "news list ok\n";
