@@ -27,8 +27,10 @@
 .bl-site .bl-footer-links .bl-icon{filter:invert(1);width:15px;height:15px;margin-left:10px}
 .bl-site .bl-footer-domain{border-left:1px solid #435662;padding-left:32px}
 .bl-site .bl-footer-domain>span:last-child{font-size:var(--fs-micro);color:#8399aa}
-.bl-site .bl-footer-bottom{display:flex;justify-content:space-between;gap:20px;align-items:center;padding-top:20px;padding-bottom:20px;border-top:1px solid #425360;color:#8fa0ad;font-size:var(--fs-micro)}
-.bl-site .bl-footer-bottom>span:nth-child(2){font-size:var(--fs-micro);letter-spacing:1px}
+.bl-site .bl-footer-bottom{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:6px 28px;align-items:center;padding-top:20px;padding-bottom:20px;border-top:1px solid #425360;color:#8fa0ad;font-size:var(--fs-micro)}
+.bl-site .bl-footer-bottom>span:last-child{font-size:var(--fs-micro);letter-spacing:1px}
+/* The Quote or question? button floats over the right end of this line from tablet width up; the text keeps to the left of it. */
+@media(min-width:801px){.bl-site .bl-footer-bottom{padding-right:max(var(--gutter,30px),clamp(220px,16vw,320px))}}
 .bl-site .bl-footer-bottom>button{border-bottom:1px solid transparent}
 @media(hover:hover){.bl-site .bl-footer-bottom>button:hover{border-color:currentColor}}
 .bl-site .bl-dialog{border:0;padding:0;background:var(--paper);color:var(--ink);max-width:calc(100% - 40px);max-height:calc(100svh - 40px);overflow:auto;overscroll-behavior:contain;width:1050px}
@@ -263,6 +265,5 @@
 @media(max-width:800px){.bl-site .bl-footer-bottom>button{display:inline-flex;align-items:center;min-height:44px}}
 @media(max-width:600px){
   .bl-site .bl-consent{left:0;right:0;bottom:0;width:auto;max-height:82svh;padding:20px var(--gutter) calc(20px + env(safe-area-inset-bottom,0px));border-inline:0;border-bottom:0}
-  .bl-site .bl-footer-bottom>button{justify-self:start}
 }
 @media print{.bl-site .bl-consent{display:none}}
