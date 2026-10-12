@@ -35,7 +35,7 @@ $check(($byName[$withFilm]['video'] ?? '') === $film, 'bl_attachments dropped th
 
 // Markup: the film loads nothing until the script plays it, and keeps the picture as its poster.
 $html = bl_attachment_media(['name' => 'Brush cutter', 'image' => '/img/brush.webp', 'video' => $film], 'Brush cutter attachment');
-foreach (['<div class="bl-attachment-film"><video ', '</video></div>', 'src="' . $film . '"', 'poster="/img/brush.webp"', 'preload="none"', ' muted ', ' loop ', ' playsinline ', 'data-bl-loop', 'aria-label="Brush cutter attachment, in use"'] as $needle) {
+foreach (['<div class="bl-attachment-film"><video ', '</video><img class="bl-attachment-still" src="/img/brush.webp" alt="" aria-hidden="true"', '</div>', 'src="' . $film . '"', 'poster="/img/brush.webp"', 'preload="none"', ' muted ', ' loop ', ' playsinline ', 'data-bl-loop', 'aria-label="Brush cutter attachment, in use"'] as $needle) {
     $check(str_contains($html, $needle), "film markup lacks $needle");
 }
 $check(!str_contains($html, 'autoplay') && !str_contains($html, 'controls'), 'film plays or shows controls before the script runs');
@@ -48,6 +48,6 @@ $picture = bl_attachment_media(['image' => '/img/forks.webp', 'video' => ''], 'P
 $check($picture === '<img src="/img/forks.webp" alt="Pallet forks attachment" width="480" height="360" loading="lazy">', 'the picture card changed');
 $check(bl_attachment_media(['image' => '', 'video' => '']) === '', 'a card with no media should print nothing');
 $poster = bl_attachment_media(['image' => '', 'video' => $film], 'Auger attachment');
-$check(!str_contains($poster, 'poster='), 'a film with no picture printed an empty poster');
+$check(!str_contains($poster, 'poster=') && !str_contains($poster, 'bl-attachment-still'), 'a film with no picture printed an empty poster or still');
 
 echo "attachment videos ok ($checks checks)\n";

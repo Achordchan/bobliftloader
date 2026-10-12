@@ -117,7 +117,7 @@ function bl_attachments(): array
  * The picture of an attachment card: a short silent film of the tool at work when one is set, with the card's picture as
  * its poster, else the picture alone. The film is set to preload nothing; assets/js/attachment-loops.js plays it only
  * while it is on screen, so a page of cards downloads nothing a visitor has not scrolled to, and adds the pause button
- * to the .bl-attachment-film box it sits in. $alt describes the picture; empty marks the card's media decorative.
+ * to the .bl-attachment-film box it sits in; while a visitor holds the film paused, the card shows its picture instead of a frozen frame. $alt describes the picture; empty marks the card's media decorative.
  */
 function bl_attachment_media(array $item, string $alt = ''): string
 {
@@ -127,7 +127,10 @@ function bl_attachment_media(array $item, string $alt = ''): string
         return '<div class="bl-attachment-film"><video class="bl-attachment-loop" src="' . bl_escape($video) . '" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback width="480" height="360"'
             . ($image !== '' ? ' poster="' . bl_escape($image) . '"' : '')
             . ($alt !== '' ? ' aria-label="' . bl_escape($alt) . ', in use"' : ' aria-hidden="true"')
-            . ' data-bl-loop></video></div>';
+            . ' data-bl-loop></video>'
+            // The card's picture again, shown over the film while a visitor holds it paused (the script toggles .is-still). It is the poster the film already fetched, so it costs nothing until then.
+            . ($image !== '' ? '<img class="bl-attachment-still" src="' . bl_escape($image) . '" alt="" aria-hidden="true" width="480" height="360" loading="lazy">' : '')
+            . '</div>';
     }
     return $image !== '' ? '<img src="' . bl_escape($image) . '" alt="' . bl_escape($alt) . '" width="480" height="360" loading="lazy">' : '';
 }

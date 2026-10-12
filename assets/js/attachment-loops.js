@@ -3,7 +3,8 @@
 // and paused when it leaves, so a page of them costs nothing until a visitor scrolls to them. Motion that starts by itself
 // carries a pause button, and a pause the visitor chose holds when the card scrolls back into view. Visitors who ask for
 // less motion or less data get the poster and the browser's own controls instead; so does a film the browser will not
-// start by itself, and a browser without IntersectionObserver. A film with controls is no longer decoration, so it is named.
+// start by itself, and a browser without IntersectionObserver. A pause the visitor chooses shows the card's own picture in
+// place of the film until they play it again. A film with controls is no longer decoration, so it is named.
 const SHOWN = 0.5;
 const PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
 const PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 4v16l13-8z"/></svg>';
@@ -27,15 +28,20 @@ function addToggle(film, held) {
     button.setAttribute('aria-label', `${film.paused ? 'Play' : 'Pause'} the ${filmName(film)} film`);
     button.innerHTML = film.paused ? PLAY : PAUSE;
   };
+  // A pause the visitor chose shows the card's own picture again; playing again brings the film back.
+  const still = (on) => film.parentElement?.classList.toggle('is-still', on);
   button.addEventListener('click', () => {
     if (film.paused) {
       held.delete(film);
+      still(false);
       film.play().catch(() => {});
     } else {
       held.add(film);
       film.pause();
+      still(true);
     }
   });
+  film.addEventListener('play', () => still(false));
   film.addEventListener('play', sync);
   film.addEventListener('pause', sync);
   sync();
