@@ -158,32 +158,43 @@ function bl_title_text(string $text): string
 }
 
 /**
- * A story's contents list: every <h2> in the text gets an id (an id already there stays) and one entry in the list.
- * Returns the text with the ids set and the entries as [id, heading text]; display only, the stored text is unchanged.
+ * A story's contents list: every <h2> in the text gets an id (an id already there stays, so shared links keep working)
+ * and one entry in the list. Returns the text with the ids set, the entries as [id, heading text], and each <h2>'s id in
+ * the order the headings come (null for one with no text, which has no entry); display only, the stored text is unchanged.
+ * Ids already used anywhere in the text, and the page's own, are kept free of generated ones.
  *
- * @return array{html: string, items: list<array{0: string, 1: string}>}
+ * @return array{html: string, items: list<array{0: string, 1: string}>, ids: list<?string>}
  */
 function bl_story_contents(string $html): array
 {
+    $decode = static fn(string $value): string => html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $idPattern = '~\sid\s*=\s*(?:"([^"]*)"|\'([^\']*)\')~i';
+    $used = array_fill_keys(['top', 'main', 'main-navigation', 'story-title', 'story-lightbox', 'site-search', 'quick-enquiry', 'enquiry'], true); // the page's own
+    if (preg_match_all('~<[a-z][a-z0-9]*\b[^>]*>~i', $html, $tags)) {
+        foreach ($tags[0] as $tag) {
+            if (preg_match($idPattern, $tag, $existing)) $used[$decode(($existing[1] ?? '') . ($existing[2] ?? ''))] = true;
+        }
+    }
     $items = [];
-    $used = [];
-    $html = (string) preg_replace_callback('~<h2\b([^>]*)>(.*?)</h2>~is', static function (array $m) use (&$items, &$used): string {
-        $text = trim((string) preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($m[2]), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
-        if ($text === '') return $m[0];
+    $ids = [];
+    $html = (string) preg_replace_callback('~<h2\b([^>]*)>(.*?)</h2>~is', static function (array $m) use (&$items, &$ids, &$used, $decode, $idPattern): string {
+        $text = trim((string) preg_replace('/\s+/u', ' ', $decode(strip_tags($m[2]))));
+        if ($text === '') { $ids[] = null; return $m[0]; }
         $attributes = $m[1];
-        if (preg_match('~\sid\s*=\s*(["\'])([^"\']+)\1~i', $attributes, $existing)) {
-            $id = $existing[2];
+        if (preg_match($idPattern, $attributes, $existing) && ($id = $decode(($existing[1] ?? '') . ($existing[2] ?? ''))) !== '') {
+            // kept as it is
         } else {
             $base = trim((string) preg_replace('/[^a-z0-9]+/', '-', strtolower($text)), '-') ?: 'section';
             $id = $base;
             for ($n = 2; isset($used[$id]); $n++) $id = $base . '-' . $n;
+            $used[$id] = true;
             $attributes .= ' id="' . $id . '"';
         }
-        $used[$id] = true;
         $items[] = [$id, $text];
+        $ids[] = $id;
         return '<h2' . $attributes . '>' . $m[2] . '</h2>';
     }, $html);
-    return ['html' => $html, 'items' => $items];
+    return ['html' => $html, 'items' => $items, 'ids' => $ids];
 }
 
 function bl_icon(string $name, string $class = ''): string

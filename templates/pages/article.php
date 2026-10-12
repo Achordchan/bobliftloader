@@ -35,7 +35,7 @@ if ($contentHtml !== '') $contentHtml = $contents['html'];
 $contentItems = count($contents['items']) >= 3 ? $contents['items'] : [];
 $contentsList = static function (array $items): string {
     $list = '';
-    foreach ($items as [$id, $text]) $list .= '<li><a href="#' . bl_escape($id) . '">' . bl_escape($text) . '</a></li>';
+    foreach ($items as [$id, $text]) $list .= '<li><a href="#' . bl_escape(rawurlencode($id)) . '">' . bl_escape($text) . '</a></li>';
     return '<ol>' . $list . '</ol>';
 };
 if ($contentHtml !== '' && $poster) {
@@ -71,7 +71,7 @@ if ($contentHtml !== '' && $poster) {
         <?php if ($leadFigure): ?><figure class="bl-story-figure"><span class="bl-story-zoom-frame"><img src="<?= bl_escape($article['image']) ?>" alt="<?= bl_escape($article['caption']) ?>" width="1500" height="900" fetchpriority="high"><?= $zoom(0, $article['image'], $article['caption'], $article['caption']) ?></span><figcaption><?= bl_escape($article['caption']) ?></figcaption></figure><?php endif; ?>
         <div class="bl-story-text">
           <?php if ($contentHtml !== '' || !empty($article['_bl_body_managed'])): ?><?= $contentHtml === '' && $poster ? $posterFigure($poster) : '' ?><div class="bl-wp-article-content"><?= $contentHtml ?></div>
-          <?php else: foreach ($article['sections'] as $i => $section): ?><?= $poster && $i + 1 === $posterAfter ? $posterFigure($poster) : '' ?><h2<?= isset($contents['items'][$i]) ? ' id="' . bl_escape($contents['items'][$i][0]) . '"' : '' ?>><?= bl_escape($section['heading']) ?></h2><p><?= bl_escape($section['text']) ?></p><?php endforeach; ?><?= $poster && ($posterAfter < 1 || $posterAfter > count($article['sections'])) ? $posterFigure($poster) : '' ?><?php endif; ?>
+          <?php else: foreach ($article['sections'] as $i => $section): ?><?= $poster && $i + 1 === $posterAfter ? $posterFigure($poster) : '' ?><h2<?= isset($contents['ids'][$i]) ? ' id="' . bl_escape($contents['ids'][$i]) . '"' : '' ?>><?= bl_escape($section['heading']) ?></h2><p><?= bl_escape($section['text']) ?></p><?php endforeach; ?><?= $poster && ($posterAfter < 1 || $posterAfter > count($article['sections'])) ? $posterFigure($poster) : '' ?><?php endif; ?>
           <?php if ($status && $status['state'] !== 'past'): ?><p class="bl-story-visit">Planning to visit? <a href="<?= bl_escape(bl_url('/contact/') . '#enquiry') ?>">Tell us your dates</a> or <a href="<?= bl_escape(bl_company('sales_whatsapp_url')) ?>" target="_blank" rel="noopener">message us on WhatsApp</a>, so the compact equipment team can expect you.</p><?php endif; ?>
         </div>
       </div>

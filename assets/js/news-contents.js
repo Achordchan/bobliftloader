@@ -9,7 +9,9 @@ export function initializeNewsContents() {
   const side = document.querySelector('[data-story-contents-nav]');
   const fold = document.querySelector('[data-story-contents]');
   if (!side && !fold) return;
-  const targetOf = (link) => document.getElementById(decodeURIComponent(link.hash.slice(1)));
+  const targetOf = (link) => {
+    try { return document.getElementById(decodeURIComponent(link.hash.slice(1))); } catch { return null; }
+  };
 
   if (side) {
     const links = [...side.querySelectorAll('a[href^="#"]')];
