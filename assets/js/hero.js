@@ -44,11 +44,19 @@ export function initializeHero() {
       slide.classList.toggle('bl-active', active);
       slide.inert = !active;
     });
-    pictures.forEach((picture, index) => {
-      picture.classList.toggle('bl-active', index === next);
-      if (index === next) picture.removeAttribute('aria-hidden');
-      else picture.setAttribute('aria-hidden', 'true');
-    });
+    // The picture changes once it can be drawn, so a slide chosen while its picture is still loading keeps the current
+    // one in view until then, and keeps it if the new one fails to load.
+    const showPicture = () => {
+      if (current !== next) return;
+      pictures.forEach((picture, index) => {
+        picture.classList.toggle('bl-active', index === next);
+        if (index === next) picture.removeAttribute('aria-hidden');
+        else picture.setAttribute('aria-hidden', 'true');
+      });
+    };
+    const image = pictures[next]?.querySelector('img');
+    if (!image || (image.complete && image.naturalWidth)) showPicture();
+    else image.decode().then(showPicture, () => {});
     tabs.forEach((tab, index) => tab.setAttribute('aria-pressed', String(index === next)));
   };
 
