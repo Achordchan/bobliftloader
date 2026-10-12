@@ -92,27 +92,8 @@ if ($contentHtml !== '' && $poster) {
         <?php if ($article['source']): ?><a class="bl-story-box-link" href="<?= bl_escape($article['source']) ?>" target="_blank" rel="noopener">Original announcement on boblift.com <?= bl_icon('arrow-up-right') ?></a><?php endif; ?>
       </section>
 
-      <?php /* Everything after the author follows the reader down the page on wide screens (news.css). */ ?>
-      <div class="bl-story-follow">
-      <?php if ($contentItems): ?>
-      <nav class="bl-story-box bl-story-contents" aria-label="In this article" data-story-contents-nav>
-        <h2>In this article</h2>
-        <?= $contentsList($contentItems) ?>
-      </nav>
-      <?php endif; ?>
-      <?php if ($status): ?>
-      <section class="bl-story-box">
-        <h2>Event details</h2>
-        <dl>
-          <div><dt>Event</dt><dd><?= bl_escape($event['name']) ?></dd></div>
-          <div><dt>Dates</dt><dd><?= bl_escape(bl_event_dates($event)) ?> <span class="bl-news-when bl-news-when-<?= $status['state'] ?>"><?= bl_escape($status['label']) ?></span></dd></div>
-          <?php if (!empty($event['venue'])): ?><div><dt>Venue</dt><dd><?= bl_escape($event['venue']) ?><?php if (!empty($event['address'])): ?><small><?= bl_escape($event['address']) ?></small><?php endif; ?></dd></div><?php endif; ?>
-          <?php if (!empty($event['booth'])): ?><div><dt>Booth</dt><dd><strong><?= bl_escape($event['booth']) ?></strong><?php if (!empty($event['booth_note'])): ?><small><?= bl_escape($event['booth_note']) ?></small><?php endif; ?></dd></div><?php endif; ?>
-        </dl>
-        <?php if (!empty($event['source'])): ?><a class="bl-story-box-link" href="<?= bl_escape($event['source']) ?>" target="_blank" rel="noopener"><?= bl_escape($event['source_label'] ?: 'Event source') ?> <?= bl_icon('arrow-up-right') ?></a><?php endif; ?>
-      </section>
-      <?php endif; ?>
-
+      <?php /* After the author: related products and event details scroll with the page; the contents list comes last, and it alone
+         follows the reader down the page on wide screens (it scrolls with the story instead when it is too long for the window, news.css). */ ?>
       <?php if ($storyProducts): ?>
       <section class="bl-story-box">
         <h2>Related products</h2>
@@ -126,7 +107,26 @@ if ($contentHtml !== '' && $poster) {
         </ul>
       </section>
       <?php endif; ?>
-      </div>
+
+      <?php if ($status): ?>
+      <section class="bl-story-box">
+        <h2>Event details</h2>
+        <dl>
+          <div><dt>Event</dt><dd><?= bl_escape($event['name']) ?></dd></div>
+          <div><dt>Dates</dt><dd><?= bl_escape(bl_event_dates($event)) ?> <span class="bl-news-when bl-news-when-<?= $status['state'] ?>"><?= bl_escape($status['label']) ?></span></dd></div>
+          <?php if (!empty($event['venue'])): ?><div><dt>Venue</dt><dd><?= bl_escape($event['venue']) ?><?php if (!empty($event['address'])): ?><small><?= bl_escape($event['address']) ?></small><?php endif; ?></dd></div><?php endif; ?>
+          <?php if (!empty($event['booth'])): ?><div><dt>Booth</dt><dd><strong><?= bl_escape($event['booth']) ?></strong><?php if (!empty($event['booth_note'])): ?><small><?= bl_escape($event['booth_note']) ?></small><?php endif; ?></dd></div><?php endif; ?>
+        </dl>
+        <?php if (!empty($event['source'])): ?><a class="bl-story-box-link" href="<?= bl_escape($event['source']) ?>" target="_blank" rel="noopener"><?= bl_escape($event['source_label'] ?: 'Event source') ?> <?= bl_icon('arrow-up-right') ?></a><?php endif; ?>
+      </section>
+      <?php endif; ?>
+
+      <?php if ($contentItems): ?>
+      <nav class="bl-story-box bl-story-contents" aria-label="In this article" data-story-contents-nav>
+        <h2>In this article</h2>
+        <?= $contentsList($contentItems) ?>
+      </nav>
+      <?php endif; ?>
     </aside>
   </div>
 </article>
