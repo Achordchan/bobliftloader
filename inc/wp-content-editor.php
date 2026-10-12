@@ -37,7 +37,7 @@ function bl_content_schema(string $page, ?array $content = null): array
 function bl_content_schema_fields(string $page, ?array $content = null): array
 {
     $extra = bl_site_content_definition($page)['sections'] ?? [];
-    if ($page === 'tracking') return [['title' => '统计与跟踪代码', 'fields' => array_map(static fn($key) => ['key' => $key, 'type' => 'raw', 'label' => $key], ['head', 'body_open', 'footer'])]];
+    if ($page === 'tracking') return [['title' => '统计与跟踪代码', 'fields' => array_map(static fn($key) => ['key' => $key, 'type' => 'raw', 'label' => $key], ['head', 'body_open', 'footer', 'ads_head', 'ads_body_open', 'ads_footer'])]];
     if ($extra && !in_array($page, ['loaders', 'dumpers'], true)) return $extra;
     $heading = '换行即分行；用 *星号* 包住的文字显示为强调色。';
     $rich = '换行即分行；可以用 &lt;a href="…"&gt;链接&lt;/a&gt;、&lt;strong&gt;加粗&lt;/strong&gt;。';

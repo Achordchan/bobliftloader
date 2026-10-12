@@ -29,26 +29,40 @@ function bl_tracking_screen(): void
     wp_nonce_field('bl_save_content_tracking');
     echo bl_content_revision_input($revision);
     echo '<div class="bl-panel" id="bl-tracking"><div class="bl-panel-body">';
-    $slots = [
-        'head' => ['放进 &lt;head&gt;', 'GA4 的整段代码，或 GTM 的第一段（&lt;script&gt; 开头的那段）。大多数统计工具只需要这一格。'],
-        'body_open' => ['紧跟 &lt;body&gt; 开头', 'GTM 的第二段（&lt;noscript&gt; 开头的那段）。'],
+    $positions = [
+        'head' => ['放进 &lt;head&gt;', 'GA4 的整段代码，或 GTM 的第一段（&lt;script&gt; 开头的那段）。大多数工具只需要这一格。'],
+        'body_open' => ['紧跟 &lt;body&gt; 开头', 'GTM 的第二段（&lt;noscript&gt; 开头的那段）。访客同意后才由脚本加载，&lt;noscript&gt; 部分不会生效，可以不填。'],
         'footer' => ['放在页面最底部', '只有工具明确要求“放在 &lt;/body&gt; 之前”时才用。'],
     ];
-    foreach ($slots as $key => [$label, $help]) {
-        echo '<div class="bl-field bl-ce-wide"><div class="bl-field-label"><label for="bl-tracking-' . $key . '">' . $label . '</label></div><div class="bl-field-control"><textarea class="large-text code" rows="6" spellcheck="false" id="bl-tracking-' . $key . '" name="bl_content[' . $key . ']">' . esc_textarea($values[$key]) . '</textarea><p class="bl-field-help">' . $help . '</p></div></div>';
+    $categories = [
+        'analytics' => ['统计类代码', 'Google Analytics（GA4）、Microsoft Clarity、Yandex Metrica、热力图等只用来统计访问的工具。访客在 Cookie 横幅里同意“Analytics”后才加载。'],
+        'advertising' => ['广告类代码', 'Google Ads 转化、Meta 像素、TikTok、LinkedIn、Yandex 广告等用于投放和再营销的工具。访客同意“Advertising”后才加载。'],
+    ];
+    foreach ($categories as $category => [$title, $note]) {
+        echo '<h2 class="bl-ce-heading">' . esc_html($title) . '</h2><p class="bl-field-help">' . esc_html($note) . '</p>';
+        foreach ($positions as $position => [$label, $help]) {
+            $key = BL_TRACKING_SLOTS[$category][$position];
+            echo '<div class="bl-field bl-ce-wide"><div class="bl-field-label"><label for="bl-tracking-' . $key . '">' . $label . '</label></div><div class="bl-field-control"><textarea class="large-text code" rows="6" spellcheck="false" id="bl-tracking-' . $key . '" name="bl_content[' . $key . ']">' . esc_textarea($values[$key]) . '</textarea><p class="bl-field-help">' . $help . '</p></div></div>';
+        }
     }
-    echo '<p class="bl-field-help">代码按原样输出到每个页面，请粘贴工具给出的完整代码。只有管理员能看到和保存这一页。留空的格子不会输出任何东西。</p>';
+    echo '<p class="bl-field-help">代码按原样输出到每个页面，请粘贴工具给出的完整代码；访客点同意之前它们都不会运行。填了任何代码，页面才会出现 Cookie 横幅和页脚的“Cookie settings”，横幅文字在“全站设置 → Cookie 同意横幅”。只有管理员能看到和保存这一页。留空的格子不会输出任何东西。</p>';
     echo '</div></div><input type="hidden" name="bl_content_complete" value="1"><div class="bl-savebar">';
     submit_button('保存', 'primary', 'submit', false);
     echo '<span class="bl-savebar-status" role="status">没有未保存的修改</span></div></form>';
     bl_content_history_screen('tracking', $revision);
 }
 
+/**
+ * Each slot's code sits in an inert <template> tagged with its consent category; assets/js/consent.js puts it into the
+ * page only after the visitor agrees to that category.
+ */
 function bl_render_tracking(string $position): void
 {
     if (!in_array($position, ['head', 'body_open', 'footer'], true)) return;
-    $saved = get_option('bl_content_tracking', []);
-    echo bl_content_resolve('tracking', is_array($saved) ? $saved : [])[$position]; // Authorized administrators intentionally supply executable markup.
+    foreach (BL_TRACKING_SLOTS as $category => $slots) {
+        $code = bl_tracking_code($slots[$position]);
+        if ($code !== '') echo '<template data-bl-consent="' . $category . '">' . $code . '</template>'; // Authorized administrators intentionally supply executable markup.
+    }
 }
 
 add_action('wp_head', static fn() => bl_render_tracking('head'), 1);
