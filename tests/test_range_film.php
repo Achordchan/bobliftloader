@@ -54,14 +54,14 @@ foreach (['skid-steer-loaders', 'mini-dumpers'] as $category) {
     // Saved through the content API, the button sits in the hero beside the catalogue download and the film loads only on play.
     $html = $inProcess('saved', $category);
     $check(str_contains($html, 'data-film-open="film-dialog"') && str_contains($html, 'Watch the range film'), "$category: film button missing");
-    $check(str_contains($html, '<video controls playsinline preload="none" poster="' . $poster . '" data-src="' . $film . '"></video>') && !str_contains($html, ' src="' . $film . '"'), "$category: film is not held back until played");
+    $check(str_contains($html, '<video controls playsinline preload="none" data-poster="' . $poster . '" data-src="' . $film . '"></video>') && !str_contains($html, ' src="' . $film . '"'), "$category: film is not held back until played");
     $check(str_contains($html, 'The range, &lt;eight&gt; models.</p>'), "$category: caption missing or not escaped");
     $check(strpos($html, 'bl-catalog-actions') > strpos($html, 'bl-page-heading') && strpos($html, 'film-dialog') > strpos($html, 'bl-catalog-actions'), "$category: button is not in the hero");
     $check(!str_contains($html, 'bl-range-film'), "$category: the film still shows in the range story");
 }
 // A film saved under range_story before the fields moved still shows on the loader page; a film already saved in the new place wins, and the dumper page ignores the old place.
 $legacy = $inProcess('legacy', 'skid-steer-loaders');
-$check(str_contains($legacy, 'data-film-open="film-dialog"') && str_contains($legacy, 'data-src="' . $film . '"') && str_contains($legacy, 'poster="' . $poster . '"') && str_contains($legacy, 'Saved before the move.</p>'), 'a film saved under range_story was lost');
+$check(str_contains($legacy, 'data-film-open="film-dialog"') && str_contains($legacy, 'data-src="' . $film . '"') && str_contains($legacy, 'data-poster="' . $poster . '"') && str_contains($legacy, 'Saved before the move.</p>'), 'a film saved under range_story was lost');
 $both = $inProcess('both', 'skid-steer-loaders');
 $check(str_contains($both, 'data-src="' . $film . '"') && !str_contains($both, 'old.example'), 'the old address overrode the new one');
 $migrated = bl_content_migrate('loaders', ['range_story' => ['film_video' => $film, 'film_caption' => 'x', 'intro' => 'kept']]);

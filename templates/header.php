@@ -10,7 +10,7 @@
     <?php if ($id === 'equipment'): /* Equipment opens on the loaders; this panel names both families (hover or keyboard focus; a sub-list in the phone menu). */ ?>
     <div class="bl-nav-panel">
       <?php foreach (['skid-steer-loaders' => 'loader', 'mini-dumpers' => 'dumper'] as $key => $family): $label = $labels['products'][$family]; $ranges = bl_family_ranges($family); ?>
-      <a href="<?= bl_escape(bl_url('/products/' . $key . '/')) ?>"><img data-src="<?= bl_escape(bl_family_image($family)) ?>" alt="" width="1374" height="1145" decoding="async"><span><b><?= bl_escape($label) ?></b><small><?= $ranges['count'] ?> models · rated <?= bl_escape(bl_load_range($ranges['load'])) ?></small></span></a>
+      <a href="<?= bl_escape(bl_url('/products/' . $key . '/')) ?>"><img<?= ($panelSrcset = bl_image_srcset(bl_family_image($family), [160, 240])) !== '' ? ' data-srcset="' . bl_escape($panelSrcset) . '" sizes="76px"' : '' ?> data-src="<?= bl_escape(bl_family_image($family)) ?>" alt="" width="1374" height="1145" decoding="async"><span><b><?= bl_escape($label) ?></b><small><?= $ranges['count'] ?> models · rated <?= bl_escape(bl_load_range($ranges['load'])) ?></small></span></a>
       <?php endforeach; ?>
     </div>
     <?php endif; ?>
