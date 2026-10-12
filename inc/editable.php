@@ -493,7 +493,7 @@ function bl_thanks_defaults(): array
 function bl_content_defaults(string $page): array
 {
     $extra = bl_site_content_definition($page)['defaults'] ?? [];
-    if ($page === 'tracking') return ['head' => '', 'body_open' => '', 'footer' => ''];
+    if ($page === 'tracking') return ['head' => '', 'body_open' => '', 'footer' => '', 'ads_head' => '', 'ads_body_open' => '', 'ads_footer' => '', 'grouped' => ''];
     if ($extra && !in_array($page, ['loaders', 'dumpers'], true)) return $extra;
     return array_replace_recursive(match ($page) {
         'support' => bl_support_defaults(),

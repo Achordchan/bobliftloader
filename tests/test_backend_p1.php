@@ -50,13 +50,13 @@ $check(!isset($globalRead['tracking'], $globalRead['head']), 'raw tracking expos
 
 // Empty hooks emit no markup; authorized raw writes retain scripts, noscript, quotes and line endings.
 foreach (['wp_head', 'wp_body_open', 'wp_footer'] as $hook) $check($capture(static fn() => run_hook($hook)) === '', "empty $hook emitted markup");
-$snippets = ['head' => "<script>window.track = '<&>';\r\n</script>", 'body_open' => '<noscript><iframe src="https://example.test/tag"></iframe></noscript>', 'footer' => '<script src="https://example.test/analytics.js"></script>'];
+$snippets = ['head' => "<script>window.track = '<&>';\r\n</script>", 'body_open' => '<noscript><iframe src="https://example.test/tag"></iframe></noscript>', 'footer' => '<script async src="https://example.test/analytics.js"></script>'];
 $expected = bl_content_revision([]);
-$result = bl_content_locked('tracking', static fn($previous) => bl_content_prepare('tracking', $previous, $snippets, true), $expected);
+$result = bl_content_locked('tracking', static fn($previous) => bl_content_prepare('tracking', $previous, $snippets + ['grouped' => '1'], true), $expected);
 $check($result === true, 'authorized raw save failed');
 $check(array_intersect_key(get_option('bl_content_tracking'), $snippets) === $snippets, 'tracking code was filtered');
 foreach (['head' => 'wp_head', 'body_open' => 'wp_body_open', 'footer' => 'wp_footer'] as $position => $hook) {
-    $check($capture(static fn() => run_hook($hook)) === $snippets[$position], "$position snippet output mismatch");
+    $check($capture(static fn() => run_hook($hook)) === bl_tracking_markup('analytics', $snippets[$position]), "$position snippet output mismatch");
 }
 $check(isset($GLOBALS['hooks']['wp_head'][1], $GLOBALS['hooks']['wp_body_open'][1], $GLOBALS['hooks']['wp_footer'][99]), 'tracking hook priorities changed');
 $before = get_option('bl_content_tracking');

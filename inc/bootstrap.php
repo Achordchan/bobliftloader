@@ -4,6 +4,7 @@ require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/languages.php';
 require_once __DIR__ . '/content.php';
 require_once __DIR__ . '/editable.php';
+require_once __DIR__ . '/consent.php';
 $applications = bl_apply_application_content($applications);
 require_once __DIR__ . '/support.php';
 require_once __DIR__ . '/product-page.php';
