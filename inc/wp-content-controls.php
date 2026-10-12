@@ -101,7 +101,7 @@ function bl_content_visual_fields(string $page, array $sections): array
         ],
         'about' => [
             'hero.breadcrumb hero.eyebrow hero.line1 hero.line2 hero.line3 hero.text hero.link_label hero.link_url hero.image_small hero.image hero.image_alt hero.caption group.facts',
-            'group.eyebrow group.line1 group.line2 group.image factory.image_alt_2 group.company_label group.company_brand group.website_label group.website_domain group.cranes_label group.cranes_title group.cranes_text group.loader_label group.current_label group.loader_title group.loader_text group.product_links',
+            'group.eyebrow group.line1 group.line2 group.image factory.image_alt_2 group.company_label group.company_brand group.website_label group.website_domain group.guide_label group.guide_url group.cranes_label group.cranes_title group.cranes_text group.loader_label group.current_label group.loader_title group.loader_text group.product_links',
             'promises.company_title promises.company_text promises.order_title promises.order_text promises.team_title promises.team_text promises.service_label promises.service_url promises.team_suffix',
             'factory.eyebrow factory.line1 factory.line2 factory.text factory.link_label factory.link_url factory.assembly_small factory.assembly factory.image_alt_3 factory.welding factory.image_alt_4 factory.painting factory.image_alt_5',
         ],

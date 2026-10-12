@@ -82,6 +82,9 @@
 .bl-site.bl-motion .bl-about-tree.bl-visible .bl-tree-branches::after{transform:none}
 .bl-site.bl-motion .bl-about-tree.bl-visible .bl-tree-branch{opacity:1;transform:none}
 
+.bl-site .bl-about-group-guide{margin:clamp(28px,2.4vw,56px) 0 0}
+.bl-site .bl-about-group-guide .bl-text-link{color:#fff}
+.bl-site .bl-about-group-guide .bl-text-link::after{content:'→';margin-left:.6em}
 .bl-site .bl-about-promises{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(28px,3vw,80px);margin:clamp(64px,5vw,128px) 0 0;padding:0;list-style:none}
 .bl-site .bl-about-promises li{padding-top:clamp(20px,1.4vw,32px);border-top:1px solid #476070}
 .bl-site .bl-about-promises span{font-size:var(--fs-small);font-weight:700;color:var(--night-blue)}

@@ -51,6 +51,7 @@ foreach (bl_editable('about')['group']['product_links'] as $item) {
         </ul>
       </li>
     </ul>
+    <?php $guideUrl = bl_content_value('about', 'group.guide_url'); if ($guideUrl !== ''): ?><p class="bl-about-group-guide bl-reveal"><a class="bl-text-link" href="<?= bl_escape(bl_application_link($guideUrl)) ?>"><?= bl_content_text('about', 'group.guide_label') ?></a></p><?php endif; ?>
     <ol class="bl-about-promises">
       <li class="bl-reveal"><span>01</span><h3><?= bl_content_text('about', 'promises.company_title') ?></h3><p><?= bl_company_text('about', 'promises.company_text') ?></p></li>
       <li class="bl-reveal"><span>02</span><h3><?= bl_content_text('about', 'promises.order_title') ?></h3><p><?= bl_content_text('about', 'promises.order_text') ?></p></li>

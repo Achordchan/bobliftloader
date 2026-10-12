@@ -37,6 +37,8 @@ return [
                 ['label' => 'Countries & regions served', 'value' => '200+', 'unit' => ''],
             ],
             'website_domain' => 'boblift.com ',
+            'guide_label' => 'One company, three websites: which one is for what',
+            'guide_url' => '/news/boblift-websites-explained/',
             'product_links' => [
                 ['family' => 'loader', 'label' => 'Mini skid steer loaders', 'url' => '/products/skid-steer-loaders/'],
                 ['family' => 'dumper', 'label' => 'Mini dumpers', 'url' => '/products/mini-dumpers/'],
@@ -118,6 +120,8 @@ return [
                         'unit' => ['label' => '单位', 'type' => 'text'],
                     ],
                 ],
+                ['key' => 'group.guide_label', 'label' => '三站说明文章链接文字', 'type' => 'verbatim'],
+                ['key' => 'group.guide_url', 'label' => '三站说明文章地址', 'type' => 'url', 'help' => '显示在三个业务卡片下面；留空则不显示。'],
                 ['key' => 'group.website_domain', 'label' => '官网显示域名', 'type' => 'verbatim'],
                 [
                     'key' => 'group.product_links',
