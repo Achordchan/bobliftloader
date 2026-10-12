@@ -32,15 +32,34 @@ function saveChoice(choice) {
 function clearToolCookies(categories) {
   const labels = location.hostname.split('.');
   const domains = ['', ...labels.map((_, index) => labels.slice(index).join('.')).filter((name) => name.includes('.')).flatMap((name) => [name, `.${name}`])];
+  // A tool may have been told to keep its cookie on a deeper path (GA's cookie_path), so every ancestor of this page's path is tried as well as the root.
+  const parts = location.pathname.split('/').filter(Boolean);
+  const paths = ['/', ...parts.flatMap((_, index) => { const path = `/${parts.slice(0, index + 1).join('/')}`; return [path, `${path}/`]; })];
   document.cookie.split('; ').map((row) => row.split('=')[0]).filter((name) => categories.some((category) => TOOL_COOKIES[category]?.test(name))).forEach((name) => {
-    domains.forEach((domain) => {
-      document.cookie = `${name}=; Max-Age=0; Path=/${domain ? `; Domain=${domain}` : ''}`;
-    });
+    domains.forEach((domain) => paths.forEach((path) => {
+      document.cookie = `${name}=; Max-Age=0; Path=${path}${domain ? `; Domain=${domain}` : ''}`;
+    }));
   });
 }
 
 // Scripts run strictly one after another, across slots and categories: an external library is awaited (loaded or failed) before the inline code that needs it, which a plain insertion cannot guarantee.
 let queue = Promise.resolve();
+
+// A saved snippet written for the page head may wait for DOMContentLoaded or load. Agreed to after the page has loaded,
+// those events are over, so while a snippet's script runs a listener for one that has already happened is called at once.
+function answerPastEvents() {
+  const past = { DOMContentLoaded: () => document.readyState !== 'loading', load: () => document.readyState === 'complete' };
+  const restore = [document, window].map((target) => {
+    const own = Object.prototype.hasOwnProperty.call(target, 'addEventListener') ? target.addEventListener : null;
+    const original = target.addEventListener;
+    target.addEventListener = function (type, listener, options) {
+      if (!past[type]?.() || !listener) return original.call(this, type, listener, options);
+      setTimeout(() => { const event = new Event(type); if (typeof listener === 'function') listener.call(this, event); else listener.handleEvent(event); });
+    };
+    return () => { if (own) target.addEventListener = own; else delete target.addEventListener; };
+  });
+  return () => restore.forEach((undo) => undo());
+}
 
 function runScript(placeholder, old) {
   return new Promise((resolve) => {
@@ -48,12 +67,14 @@ function runScript(placeholder, old) {
     [...old.attributes].forEach(({ name, value }) => script.setAttribute(name, value));
     script.text = old.textContent;
     script.async = false;
+    const undo = answerPastEvents();
+    const finish = () => { undo(); resolve(); };
     if (script.src) {
-      script.addEventListener('load', resolve);
-      script.addEventListener('error', resolve);
+      script.addEventListener('load', finish);
+      script.addEventListener('error', finish);
     }
     placeholder.replaceWith(script);
-    if (!script.src) resolve();
+    if (!script.src) finish();
   });
 }
 
