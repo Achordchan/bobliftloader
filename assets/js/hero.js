@@ -56,7 +56,8 @@ export function initializeHero() {
     };
     const image = pictures[next]?.querySelector('img');
     if (!image || (image.complete && image.naturalWidth)) showPicture();
-    else image.decode().then(showPicture, () => {});
+    // decode() also rejects when a turn of the phone swaps the picture's source mid-load; the swapped picture's load still shows it.
+    else image.decode().then(showPicture, () => image.addEventListener('load', showPicture, { once: true }));
     tabs.forEach((tab, index) => tab.setAttribute('aria-pressed', String(index === next)));
   };
 
