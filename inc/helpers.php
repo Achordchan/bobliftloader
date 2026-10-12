@@ -99,6 +99,30 @@ function bl_products(): array
     return $products;
 }
 
+/** A dumper's capacity figure: its hopper, or the older "Bucket capacity" name where a record still uses that. Empty values do not count. */
+function bl_dumper_capacity(array $specs): string
+{
+    foreach (['Hopper capacity', 'Bucket capacity'] as $key) {
+        if (trim((string) ($specs[$key] ?? '')) !== '') return trim((string) $specs[$key]);
+    }
+    return '';
+}
+
+/**
+ * A dumper's single capacity is its hopper, whichever name the record gives it: the older "Bucket capacity" moves to
+ * "Hopper capacity" (same position) unless the record also lists a hopper, in which case it is a front bucket and stays.
+ */
+function bl_normalize_dumper_capacity(array $specs): array
+{
+    if (trim((string) ($specs['Bucket capacity'] ?? '')) === '' || trim((string) ($specs['Hopper capacity'] ?? '')) !== '') return $specs;
+    $normalized = [];
+    foreach ($specs as $key => $value) {
+        if ($key === 'Hopper capacity') continue; // an empty hopper row gives way to the figure that moves in
+        $normalized[$key === 'Bucket capacity' ? 'Hopper capacity' : $key] = $value;
+    }
+    return $normalized;
+}
+
 /** Up to three headline figures, in the order buyers compare them; short labels suit the catalogue cards. */
 function bl_key_specs(array $product, bool $short = false): array
 {
@@ -257,7 +281,7 @@ function bl_spec_groups(array $specs): array
 {
     $specs = array_slice($specs, 0, BL_CONTENT_LIMITS['specs'], true);
     $groups = [
-        'Performance' => ['Rated load', 'Lifting capacity', 'Breakout force', 'Bucket capacity', 'Drum capacity', 'Travel speed', 'Max travel speed', 'Hydraulic pressure', 'Hydraulic pumps', 'Gradeability', 'Tipping', 'Tipping angle', 'Machine weight'],
+        'Performance' => ['Rated load', 'Lifting capacity', 'Breakout force', 'Bucket capacity', 'Hopper capacity', 'Drum capacity', 'Travel speed', 'Max travel speed', 'Hydraulic pressure', 'Hydraulic pumps', 'Gradeability', 'Tipping', 'Tipping angle', 'Machine weight'],
         'Engine' => ['Engine options', 'Engine model', 'Engine power', 'Engine type', 'Fuel', 'Fuel tank', 'Starting', 'Emission standard', 'Operating voltage'],
         'Dimensions' => ['Working height', 'Max dumping height', 'Height with arms raised', 'Length with bucket', 'Length without bucket', 'Machine width', 'Bucket width', 'Overall height', 'Standard dimensions', 'Dimensions with footplate', 'Dimensions with roof / cab', 'Hopper size', 'Drum length', 'Drum opening diameter', 'Loading bucket length', 'Loading bucket opening width', 'Wheelbase', 'Minimum ground clearance', 'Ground clearance'],
         'Build' => ['Running gear', 'Drive', 'Brakes', 'Operator station', 'Controls', 'Travel control', 'Body material', 'Bucket material'],

@@ -6,10 +6,12 @@
  */
 $compareSets = [
     'skid-steer-loaders' => ['label' => strtoupper(bl_family_label('loader')), 'rows' => ['Rated load', 'Lifting capacity', 'Bucket capacity', 'Engine power', 'Machine weight', 'Machine width', 'Overall height', 'Length with bucket', 'Gradeability', 'Travel speed', 'Running gear'], 'note' => 'Figures from the BOB-LIFT technical sheets. Engine brand and attachments are set per order, so confirm your configuration with our team.'],
-    'mini-dumpers' => ['label' => strtoupper(bl_family_label('dumper')), 'rows' => ['Rated load', 'Bucket capacity', 'Engine power', 'Machine weight', 'Standard dimensions', 'Drive', 'Max travel speed', 'Gradeability', 'Drum capacity', 'Running gear', 'Tipping', 'Dimensions with roof / cab', 'Operating voltage', 'Minimum ground clearance'], 'note' => bl_escape(bl_editable('dumpers')['compare']['note'])],
+    'mini-dumpers' => ['label' => strtoupper(bl_family_label('dumper')), 'rows' => ['Rated load', 'Hopper capacity', 'Engine power', 'Machine weight', 'Standard dimensions', 'Drive', 'Max travel speed', 'Gradeability', 'Drum capacity', 'Running gear', 'Tipping', 'Dimensions with roof / cab', 'Operating voltage', 'Minimum ground clearance'], 'note' => bl_escape(bl_editable('dumpers')['compare']['note'])],
 ];
 $compareSet = $compareSets[$compareCategory];
 $compareProducts = array_values(array_filter(bl_products(), static fn($p) => $p['category'] === $compareCategory && $p['specs']));
+// One capacity row for the dumpers: records still on the older "Bucket capacity" name read as hoppers, so the figures line up.
+if ($compareCategory === 'mini-dumpers') $compareProducts = array_map(static fn(array $p): array => ['specs' => bl_normalize_dumper_capacity($p['specs'])] + $p, $compareProducts);
 usort($compareProducts, static fn($a, $b) => [!($a['load'] ?? 0), $a['load'] ?? 0, $a['model']] <=> [!($b['load'] ?? 0), $b['load'] ?? 0, $b['model']]);
 // A row only earns its place if at least one model publishes it; figures outside the listed rows follow in the order models publish them.
 // The first eight rows show on phones, so the listed rows lead with the figures that tell the models apart.

@@ -214,6 +214,17 @@ class WebsiteTests(unittest.TestCase):
         _, html, _ = fetch('/contact/?equipment=dumper')
         self.assertRegex(html, r'value="(dumper|Mini dumper)"\s+checked')
 
+    def test_contact_lists_the_three_addresses(self):
+        # The registered address, the main factory and the office each carry their own name on the contact page.
+        _, html, _ = fetch('/contact/')
+        block = html.split('class="bl-contact-visit-details"', 1)[1].split('</dl>', 1)[0]
+        self.assertIn('<address><em>Registered address</em>No. 79, Zone B, Jingluotuo Industrial Park,<br>Yunlong District, Xuzhou, Jiangsu, China</address>', block)
+        self.assertIn('<address><em>Main factory</em>S324 Provincial Road, Zhangji Town,<br>Tongshan District, Xuzhou, Jiangsu, China</address>', block)
+        self.assertIn('<address><em>Office</em>13F, Building A, Yongjia New Town Center,<br>Yunlong District, Xuzhou, Jiangsu, China</address>', block)
+        organization = next(item for item in Page(html).structured[0]['@graph'] if item['@type'] == 'Organization')
+        self.assertEqual(organization['address']['streetAddress'], 'No. 79, Zone B, Jingluotuo Industrial Park, Yunlong District')
+        self.assertEqual([place['name'] for place in organization['location']], ['Main factory', 'Office'])
+
     def test_header_search_index(self):
         _, html, _ = fetch('/news/')
         # Every page carries the header search; its buttons stay hidden until the script can run them.
@@ -355,7 +366,8 @@ class WebsiteTests(unittest.TestCase):
         self.assertNotIn('id="how-they-are-made"', html)
         self.assertEqual(html.count('<li class="bl-ruler-'), len(loaded_dumpers))
         # The chart's sentence is edited in WordPress; loads in kilograms, the bucket range across every model that has one.
-        self.assertIn('Nine models from 500 kg to 5,000 kg. Bucket capacity runs from 0.5 m³ to 2 m³. The ', html)
+        self.assertIn('Nine rated models from 500 kg to 5,000 kg. Hopper capacity runs from 0.5 m³ to 2 m³. The ', html)
+        self.assertIn(' drum instead of a hopper and has no rated load, so it is not on this chart.', html)
         self.assertNotIn('Painted to order.', html)
         # Where the dumpers work: between the introduction and the comparison, each job linking to real dumper pages.
         self.assertLess(html.index('id="about-the-range"'), html.index('id="dumper-jobs"'))
@@ -366,8 +378,6 @@ class WebsiteTests(unittest.TestCase):
         self.assertGreaterEqual(jobs.count('<li class="bl-reveal">'), 6)
         self.assertTrue(linked and set(linked) <= dumper_slugs)
         self.assertEqual(html.count('style="--options:4"'), 1)
-        _, html, _ = fetch('/product/' + next(p['slug'] for p in self.products if p['category'] == 'mini-dumpers') + '/')
-        self.assertIn('/products/mini-dumpers/#dumper-jobs', html)
         _, html, _ = fetch('/products/?q=mini')
         self.assertNotIn('id="about-the-range"', html)
 

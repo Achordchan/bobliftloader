@@ -60,6 +60,11 @@ function bl_llms_txt(): string
             bl_llms_txt_link('Contact', '/contact/', 'Enquiry form for quotations and specifications'),
             '- Email: ' . bl_company('email'),
             ...(bl_company('phone') === bl_company('sales_whatsapp_label') ? ['- Phone and WhatsApp: ' . bl_company('phone')] : ['- Phone: ' . bl_company('phone'), '- WhatsApp: ' . bl_company('sales_whatsapp_label')]),
+            ...array_filter([
+                bl_company('street') === '' ? '' : '- Registered address: ' . bl_company_full_address('street'),
+                bl_company('factory_street') === '' ? '' : '- Main factory: ' . bl_company_full_address('factory_street'),
+                bl_company('office_street') === '' ? '' : '- Office: ' . bl_company_full_address('office_street'),
+            ]),
             '- Parent company website: https://www.boblift.com/',
         ],
     ];

@@ -66,7 +66,7 @@ if ($selectedFamily === 'service') $prefillMessage = "Model:\nSerial number:\nWh
       <h3><?= bl_content_text('contact', 'visit.plan_line1') ?><br><?= bl_content_text('contact', 'visit.plan_line2') ?></h3>
       <p class="bl-contact-visit-lede"><?= bl_content_text('contact', 'visit.text') ?></p>
       <dl class="bl-contact-visit-details">
-        <div><dt><?= bl_content_text('contact', 'visit.address_label') ?></dt><dd><strong><?= bl_escape(bl_company('name')) ?></strong><address><?= bl_company_address_part(0) ?><br><?= bl_company_address_part(1) ?></address></dd></div>
+        <div><dt><?= bl_content_text('contact', 'visit.address_label') ?></dt><dd><strong><?= bl_escape(bl_company('name')) ?></strong><?php foreach (['street' => 'registered_label', 'factory_street' => 'factory_label', 'office_street' => 'office_label'] as $addressKey => $labelKey): if (bl_company($addressKey) === '') continue; ?><address><em><?= bl_content_text('contact', 'visit.' . $labelKey) ?></em><?= bl_company_address_part(0, $addressKey) ?><br><?= bl_company_address_part(1, $addressKey) ?></address><?php endforeach; ?></dd></div>
         <div><dt><?= bl_content_text('contact', 'visit.hours_label') ?></dt><dd><?= bl_escape(bl_company('hours')) ?><span><?= bl_escape(bl_company('timezone')) ?></span></dd></div>
       </dl>
       <div class="bl-contact-visit-actions">

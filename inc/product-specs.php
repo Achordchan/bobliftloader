@@ -91,6 +91,7 @@ function bl_spec_rules(): array
     return [
         'Rated load' => [$integer . '\s*kg', '1,000 kg（整数，单位 kg）'],
         'Bucket capacity' => [$decimal . '\s*m³', '0.5 m³（数值，单位 m³）'],
+        'Hopper capacity' => [$decimal . '\s*m³', '0.5 m³（数值，单位 m³）'],
         'Engine power' => [$decimal . '\s*kW', '12.1 kW（数值，单位 kW）'],
         'Machine width' => [$integer . '\s*mm', '960 mm（整数，单位 mm）'],
         'Bucket width' => [$integer . '\s*mm', '1,050 mm（整数，单位 mm）'],
@@ -124,9 +125,9 @@ function bl_specs_error(array $specs, array $stored = []): string
         }
         if (!isset($rules[$key])) continue;
         [$pattern, $example] = $rules[$key];
-        if (!preg_match('~^' . $pattern . '$~' . ($key === 'Bucket capacity' ? 'uD' : 'iuD'), $value)
+        if (!preg_match('~^' . $pattern . '$~' . (in_array($key, ['Bucket capacity', 'Hopper capacity'], true) ? 'uD' : 'iuD'), $value)
             || ($key === 'Rated load' && (int) str_replace(',', '', $value) > 1000000)
-            || (in_array($key, ['Bucket capacity', 'Engine power'], true) && (float) $value <= 0)) {
+            || (in_array($key, ['Bucket capacity', 'Hopper capacity', 'Engine power'], true) && (float) $value <= 0)) {
             return (bl_spec_choices()[$key] ?? $key) . '（' . $key . '）无法识别，请填写 ' . $example . '。本次修改未保存，输入已保留。';
         }
     }

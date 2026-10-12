@@ -12,6 +12,13 @@ function bl_structured_data(array $route): array
         'logo' => bl_absolute_asset(bl_brand_logo()),
         'address' => ['@type' => 'PostalAddress', 'streetAddress' => bl_company('street'), 'addressLocality' => bl_company('city'), 'addressRegion' => bl_company('region'), 'addressCountry' => bl_company('country_code')],
     ];
+    // The registered address stays the organisation's address; the factory and the office are places of the same organisation.
+    $places = [];
+    foreach (['Main factory' => 'factory_street', 'Office' => 'office_street'] as $placeName => $placeKey) {
+        if (bl_company($placeKey) === '') continue;
+        $places[] = ['@type' => 'Place', 'name' => $placeName, 'address' => ['@type' => 'PostalAddress', 'streetAddress' => bl_company($placeKey), 'addressLocality' => bl_company('city'), 'addressRegion' => bl_company('region'), 'addressCountry' => bl_company('country_code')]];
+    }
+    if ($places) $organization['location'] = $places;
     $graph = [$organization,
         ['@type' => 'WebSite', '@id' => $base . '/#website', 'url' => $base . '/', 'name' => 'BOB-LIFT Loader', 'description' => 'The loader equipment business website of ' . bl_company('name'), 'publisher' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
         ['@type' => $route['type'] === 'about' ? 'AboutPage' : ($route['type'] === 'contact' ? 'ContactPage' : 'WebPage'), '@id' => $base . $route['path'] . '#webpage', 'url' => $base . $route['path'], 'name' => $route['title'], 'description' => $route['description'], 'isPartOf' => ['@id' => $base . '/#website'], 'about' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],

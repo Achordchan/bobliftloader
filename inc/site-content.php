@@ -95,13 +95,19 @@ function bl_company_url(string $key): string
     return preg_match('~^(?:https?://|mailto:|tel:)~i', $url) ? bl_escape($url) : '';
 }
 
-/** Preserve the original two-line address while deriving both lines from the shared address. */
-function bl_company_address_part(int $line): string
+/** Preserve the original two-line address while deriving both lines from the shared address; $key names the street field. */
+function bl_company_address_part(int $line, string $key = 'street'): string
 {
-    $street = bl_company('street');
+    $street = bl_company($key);
     $position = strrpos($street, ', ');
     $parts = $position === false ? [$street, ''] : [substr($street, 0, $position + 1), substr($street, $position + 2)];
     return bl_escape($line === 0 ? $parts[0] : implode(', ', array_filter([$parts[1], bl_company('city'), bl_company('region'), bl_company('country')])));
+}
+
+/** One full address on one line (street, city, region, country), or '' when that street field is empty. */
+function bl_company_full_address(string $key): string
+{
+    return bl_company($key) === '' ? '' : implode(', ', array_filter([bl_company($key), bl_company('city'), bl_company('region'), bl_company('country')]));
 }
 
 function bl_company_phone_hours(): string

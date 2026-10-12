@@ -345,9 +345,9 @@ function bl_dumpers_defaults(): array
             'title' => "FROM THE GARDEN\nPATH TO THE SITE.",
             'intro' => 'Mini dumpers carry soil, gravel, concrete and site waste over ground a truck can’t reach. The range runs from compact tracked dumpers that fit narrow paths to wheeled site dumpers for heavier loads.',
             // Beside the rated-load chart; the variables are worked out from the published specifications.
-            'chart_text' => '{model_count} models from {lightest_load} to {heaviest_load}.',
-            'chart_bucket' => 'Bucket capacity runs from {bucket_min} m³ to {bucket_max} m³.',
-            'chart_mixer' => 'The {mixer_model} carries a {drum_capacity} drum instead of a hopper.',
+            'chart_text' => '{model_count} rated models from {lightest_load} to {heaviest_load}.',
+            'chart_bucket' => 'Hopper capacity runs from {bucket_min} m³ to {bucket_max} m³.',
+            'chart_mixer' => 'The {mixer_model} is a mixer with a {drum_capacity} drum instead of a hopper and has no rated load, so it is not on this chart.',
             'options' => [
                 ['big' => 'WHEELS / TRACKS', 'title' => 'Running gear.', 'text' => 'Wheeled site dumpers for firm ground and heavier loads; tracked models for soft ground and narrow access.'],
                 ['big' => '4×2 / 4×4', 'title' => 'Drive.', 'text' => 'The FC10, FY15 and FY20-2 drive two wheels; the FY20-4, FY30, FY40, FY50 and FJZ30 drive all four. Each spec sheet lists its drive.'],
