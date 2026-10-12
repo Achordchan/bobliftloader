@@ -44,7 +44,7 @@ function bl_wp_product_record(WP_Post $post): array
     $oldSlugs = get_post_meta($post->ID, '_wp_old_slug', false);
     if ($oldSlugs) $record['_wp_old_slug'] = $oldSlugs;
     $record['slug'] = $post->post_name;
-    $record['name'] = get_the_title($post);
+    $record['name'] = bl_plain_title(get_the_title($post));
     $record['url'] = get_permalink($post);
     // The import kept the original name in the record, so a summary generated before a rename is still recognised.
     if (bl_is_generated_product_excerpt($post->post_excerpt, [$post->post_title, $record['name'], $data['name'] ?? ''])) $record['excerpt'] = bl_product_excerpt($record);
@@ -79,7 +79,7 @@ function bl_wp_article_record(WP_Post $post): array
         $record['hide_cover'] = !empty($seed['hide_cover']) && ($meta['image'] ?? '') === ($seed['image'] ?? null);
     }
     $record['slug'] = $post->post_name;
-    $record['title'] = get_the_title($post);
+    $record['title'] = bl_plain_title(get_the_title($post));
     $record['url'] = get_permalink($post);
     $record['date'] = get_the_date('Y-m-d', $post);
     $record['excerpt'] = $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35);
@@ -110,7 +110,7 @@ function bl_wp_application_record(WP_Post $post): array
     $record['hub'] = $hub ? bl_application_slug($hub) : '';
     $record['id'] = $post->ID;
     $record['slug'] = $post->post_name;
-    $record['title'] = get_the_title($post);
+    $record['title'] = bl_plain_title(get_the_title($post));
     $record['url'] = get_permalink($post);
     $record['date'] = get_the_date('Y-m-d', $post);
     // The list carries no rendered body (every page reads it for cards and search); the case page renders its own.
