@@ -52,7 +52,7 @@ let queue = Promise.resolve();
 
 // A saved snippet was written for the page head, where it ran while the page was still loading. Agreed to later, it is run
 // with three allowances while any of its scripts is still starting up: a wait for DOMContentLoaded or load (listener or
-// `window.onload =`) is answered at once because those events are over, and document.write is ignored because after
+// `window.onload =`) is answered at once because those events are over, and document.write is redirected because after
 // loading it would wipe the page. Shared by all running scripts and removed when the last one has started.
 let lateUsers = 0;
 let undoLate = () => {};
@@ -87,7 +87,14 @@ function lateAllowances() {
   ['write', 'writeln'].forEach((name) => {
     const own = Object.prototype.hasOwnProperty.call(document, name) ? document[name] : null;
     const original = document[name];
-    document[name] = function (...args) { if (document.readyState === 'loading') return original.apply(this, args); return undefined; };
+    // After loading, document.write would replace the page; what the snippet writes is put in after the writing script instead.
+    document[name] = function (...args) {
+      if (document.readyState === 'loading') return original.apply(this, args);
+      const markup = args.join('') + (name === 'writeln' ? '\n' : '');
+      const where = document.currentScript || document.body.lastElementChild || document.body;
+      where.after(document.createRange().createContextualFragment(markup));
+      return undefined;
+    };
     restore.push(() => { if (own) document[name] = own; else delete document[name]; });
   });
   return () => restore.forEach((undo) => undo());
@@ -103,17 +110,24 @@ function holdLateAllowances() {
   };
 }
 
+const JAVASCRIPT = /^(?:(?:application|text)\/(?:x-)?(?:java|ecma|live|j)script|module)(?:;.*)?$/i;
+
 function runScript(placeholder, old) {
   return new Promise((resolve) => {
     const script = document.createElement('script');
     [...old.attributes].forEach(({ name, value }) => script.setAttribute(name, value));
     script.text = old.textContent;
+    // A browser skips a nomodule script when it understands modules, and a script of another type (a JSON block) is never fetched or run;
+    // neither fires load or error, so neither may be waited for.
+    const type = (old.getAttribute('type') || '').trim();
+    const runs = (!type || JAVASCRIPT.test(type)) && !(old.hasAttribute('nomodule') && 'noModule' in HTMLScriptElement.prototype);
+    const external = runs && Boolean(script.src);
     // A script its author marked async or defer is not waited for, as on the original page: the code after it never depended on it.
-    const waits = Boolean(script.src) && !old.hasAttribute('async') && !old.hasAttribute('defer');
+    const waits = external && !old.hasAttribute('async') && !old.hasAttribute('defer');
     if (!old.hasAttribute('async')) script.async = false;
     const release = holdLateAllowances();
     // The allowances last until the script has executed: for a downloaded script that is its load, even when the queue does not wait for it.
-    if (script.src) {
+    if (external) {
       script.addEventListener('load', release);
       script.addEventListener('error', release);
     }
@@ -122,7 +136,7 @@ function runScript(placeholder, old) {
       script.addEventListener('error', resolve);
     }
     placeholder.replaceWith(script);
-    if (!script.src) release();
+    if (!external) release();
     if (!waits) resolve();
   });
 }

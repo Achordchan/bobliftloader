@@ -22,9 +22,10 @@ function bl_tracking_screen(): void
         echo '<p role="alert"><span class="bl-chip">未保存</span> ' . esc_html($recovery['message']) . '</p>';
     }
     // Code saved before the two groups existed sits in the three original places and now counts as analytics; saving this screen
-    // once (it then carries the 'grouped' mark) is the editor's confirmation that nothing advertising is left there.
+    // once (it then carries the 'grouped' mark) is the editor's confirmation that nothing advertising is left there; until then
+    // bl_tracking_code() prints none of it.
     if (($saved['grouped'] ?? '') !== '1' && array_filter(array_map('trim', array_intersect_key($saved, array_flip(['head', 'body_open', 'footer']))))) {
-        echo '<div class="notice notice-warning"><p><strong>请先核对原有代码。</strong>分组之前保存的代码都在“统计类”里，只有访客同意 Analytics 才会加载。其中如果有 Google Ads、Meta 像素等广告代码，请剪切到“广告类”，然后保存本页。</p></div>';
+        echo '<div class="notice notice-warning"><p><strong>原有代码已暂停加载，请先核对。</strong>分组之前保存的代码无法判断是统计还是广告，所以在你核对之前网站不会输出它们。请把 Google Ads、Meta 像素等广告代码剪切到“广告类”，其余留在“统计类”，然后保存本页，保存后才恢复（统计类要访客同意 Analytics 才加载）。</p></div>';
     }
     // The privacy page promises no tracking; once a code is in, point the editor at the sentence to change.
     $privacy = (string) (bl_editable('privacy')['body']['ending'] ?? '');

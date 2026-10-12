@@ -52,7 +52,7 @@ $check(!isset($globalRead['tracking'], $globalRead['head']), 'raw tracking expos
 foreach (['wp_head', 'wp_body_open', 'wp_footer'] as $hook) $check($capture(static fn() => run_hook($hook)) === '', "empty $hook emitted markup");
 $snippets = ['head' => "<script>window.track = '<&>';\r\n</script>", 'body_open' => '<noscript><iframe src="https://example.test/tag"></iframe></noscript>', 'footer' => '<script src="https://example.test/analytics.js"></script>'];
 $expected = bl_content_revision([]);
-$result = bl_content_locked('tracking', static fn($previous) => bl_content_prepare('tracking', $previous, $snippets, true), $expected);
+$result = bl_content_locked('tracking', static fn($previous) => bl_content_prepare('tracking', $previous, $snippets + ['grouped' => '1'], true), $expected);
 $check($result === true, 'authorized raw save failed');
 $check(array_intersect_key(get_option('bl_content_tracking'), $snippets) === $snippets, 'tracking code was filtered');
 foreach (['head' => 'wp_head', 'body_open' => 'wp_body_open', 'footer' => 'wp_footer'] as $position => $hook) {

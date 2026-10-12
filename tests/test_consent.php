@@ -12,7 +12,7 @@ $check = static function (bool $ok, string $message) use (&$checks): void { $che
 $capture = static function (callable $render): string { ob_start(); $render(); return ob_get_clean(); };
 $banner = static fn(): string => $capture(static fn() => require __DIR__ . '/../templates/partials/consent.php');
 $footer = static fn(): string => $capture(static fn() => require __DIR__ . '/../templates/footer.php');
-$save = static function (array $codes): void { $GLOBALS['options']['bl_content_tracking'] = $codes; };
+$save = static function (array $codes): void { $GLOBALS['options']['bl_content_tracking'] = $codes + ['grouped' => '1']; };
 
 // The WordPress entrypoint (functions.php) never loads bootstrap.php, so wp-tracking.php must bring the slot list itself.
 $alone = shell_exec('php -r ' . escapeshellarg("require " . var_export(__DIR__ . '/fixtures/wp-memory.php', true) . "; require " . var_export(__DIR__ . '/../inc/wp-tracking.php', true) . "; echo count(BL_TRACKING_SLOTS);") . ' 2>&1');
@@ -23,6 +23,13 @@ $check(bl_consent_categories() === [], 'categories without any code');
 $check($banner() === '', 'banner printed with no tracking code');
 $check(!str_contains($footer(), 'data-bl-consent-open'), 'footer link printed with no tracking code');
 foreach (['wp_head', 'wp_body_open', 'wp_footer'] as $hook) $check($capture(static fn() => run_hook($hook)) === '', "empty $hook printed markup");
+
+// Code saved before the groups existed is held back, not printed, until the tracking screen has been saved once.
+$GLOBALS['options']['bl_content_tracking'] = ['head' => '<script>legacy()</script>', 'ads_footer' => '<script>x()</script>'];
+$check(bl_consent_categories() === ['advertising'], 'legacy code counted as a category before it was checked');
+$check($capture(static fn() => run_hook('wp_head')) === '', 'unchecked legacy code was printed');
+$GLOBALS['options']['bl_content_tracking'] = ['head' => '<script>legacy()</script>'];
+$check(bl_consent_categories() === [] && $banner() === '', 'unchecked legacy code produced a banner');
 
 // Analytics only (the three original slots).
 $save(['head' => '<script>window.a = 1;</script>', 'body_open' => '', 'footer' => "  <script src=\"https://example.test/a.js\"></script>\n"]);
@@ -65,10 +72,10 @@ $check(str_contains($screen, 'name="bl_content[grouped]" value="1"'), 'admin scr
 // Code saved before the groups existed asks for a check once; saving the six-field screen settles it, even with the advertising fields empty.
 $GLOBALS['caps'] = ['manage_options' => true, 'unfiltered_html' => true];
 $GLOBALS['options']['bl_content_tracking'] = ['head' => '<script>old()</script>'];
-$check(str_contains($capture('bl_tracking_screen'), '请先核对原有代码'), 'legacy code was not flagged on the tracking screen');
+$check(str_contains($capture('bl_tracking_screen'), '原有代码已暂停加载'), 'legacy code was not flagged on the tracking screen');
 $result = bl_content_locked('tracking', static fn($previous) => bl_content_prepare('tracking', $previous, ['head' => '<script>old()</script>', 'body_open' => '', 'footer' => '', 'ads_head' => '', 'ads_body_open' => '', 'ads_footer' => '', 'grouped' => '1'], true), bl_content_revision(['head' => '<script>old()</script>']));
 $check($result === true, 'saving the grouped screen failed');
-$check(!str_contains($capture('bl_tracking_screen'), '请先核对原有代码'), 'the legacy notice stayed after saving');
+$check(!str_contains($capture('bl_tracking_screen'), '原有代码已暂停加载'), 'the legacy notice stayed after saving');
 $GLOBALS['caps'] = [];
 
 // The copy is editable and the privacy default no longer promises that the tools load without asking.
@@ -80,7 +87,7 @@ $check(str_contains(bl_content_value('privacy', 'body.ending'), 'only after you 
 // The script never starts a category the visitor has not agreed to, and clears the tools' cookies on withdrawal.
 $js = file_get_contents(__DIR__ . '/../assets/js/consent.js');
 $check(str_contains($js, 'clearToolCookies(declined)') && !str_contains($js, 'SCRIPT_WAIT') && str_contains($js, 'blStarted'), 'consent script lost its guards');
-$check(str_contains($js, 'lateAllowances') && str_contains($js, "'writeln'") && str_contains($js, 'readSaved()') && str_contains($js, "'onload'") && str_contains($js, "hasAttribute('async')") && str_contains($js, 'BroadcastChannel') && str_contains($js, 'visibilitychange'), 'consent script no longer syncs other tabs');
+$check(str_contains($js, 'lateAllowances') && str_contains($js, "'writeln'") && str_contains($js, 'readSaved()') && str_contains($js, "'onload'") && str_contains($js, "hasAttribute('async')") && str_contains($js, 'nomodule') && str_contains($js, 'createContextualFragment') && str_contains($js, 'BroadcastChannel') && str_contains($js, 'visibilitychange'), 'consent script no longer syncs other tabs');
 $check(str_contains($js, "addEventListener('load'") && str_contains($js, 'queue.then'), 'consent script no longer waits for external scripts');
 
 echo "ok ($checks checks)\n";
