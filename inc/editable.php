@@ -91,7 +91,7 @@ function bl_home_defaults(): array
             'alt' => 'A BOB-LIFT technician assembling a tracked loader at the factory in Xuzhou',
             'caption' => 'Loader assembly · BOB-LIFT factory, Xuzhou',
             'facts' => [
-                ['value' => 'Xuzhou, China', 'unit' => '', 'label' => 'Factory location'],
+                ['value' => 'Xuzhou', 'unit' => 'China', 'label' => 'Factory location'],
                 ['value' => '37,000', 'unit' => 'm²', 'label' => 'Factory area'],
                 ['value' => '200+', 'unit' => '', 'label' => 'Countries and regions served'],
             ],
