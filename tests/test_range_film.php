@@ -67,4 +67,14 @@ $check(str_contains($both, 'data-src="' . $film . '"') && !str_contains($both, '
 $migrated = bl_content_migrate('loaders', ['range_story' => ['film_video' => $film, 'film_caption' => 'x', 'intro' => 'kept']]);
 $check($migrated['catalog']['film_video'] === $film && $migrated['catalog']['film_caption'] === 'x' && !isset($migrated['range_story']['film_video']) && $migrated['range_story']['intro'] === 'kept', 'migration moved the wrong keys');
 $check(!isset(bl_content_migrate('dumpers', ['range_story' => ['film_video' => $film]])['catalog']), 'the dumper page picked up a loader film');
+// A client still writing the old names is not ignored: the old names land in the new fields, the new names win, and a clear stays a clear.
+$prepare = static fn(array $previous, array $input) => bl_content_prepare('loaders', $previous, $input);
+$old = $prepare([], ['range_story' => ['film_video' => $film, 'film_poster' => $poster, 'film_caption' => 'Old names']]);
+$check(is_array($old) && $old['catalog']['film_video'] === $film && $old['catalog']['film_poster'] === $poster && $old['catalog']['film_caption'] === 'Old names' && !isset($old['range_story']['film_video']), 'a write under the old names was ignored');
+$mixed = $prepare([], ['range_story' => ['film_video' => 'https://old.example/film.mp4'], 'catalog' => ['film_video' => $film]]);
+$check(is_array($mixed) && $mixed['catalog']['film_video'] === $film, 'the old name overrode the new one in a write');
+$cleared = $prepare(['catalog' => ['film_video' => $film, 'film_poster' => $poster]], ['range_story' => ['film_video' => '', 'film_poster' => '']]);
+$check(is_array($cleared) && bl_content_resolve('loaders', $cleared)['catalog']['film_video'] === '' && bl_content_resolve('loaders', $cleared)['catalog']['film_poster'] === '', 'a clear under the old names was ignored');
+$stored = $prepare(['range_story' => ['film_video' => $film]], ['range_story' => ['intro' => 'Other change']]);
+$check(is_array($stored) && $stored['catalog']['film_video'] === $film && $stored['range_story']['intro'] === 'Other change', 'saving another field lost the stored film');
 echo "Range film: $checks checks passed\n";
