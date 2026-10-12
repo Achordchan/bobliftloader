@@ -134,7 +134,7 @@ function bl_support_defaults(): array
                 ['title' => 'Quote & configuration', 'text' => 'We suggest a model and confirm its engine, running gear, colour and attachments, then quote on the trade terms you need.', 'link_label' => '', 'link_url' => ''],
                 ['title' => 'Place the order', 'text' => '{minimum_order_sentence} {minimum_order_noun} {minimum_order_verb} enough to order. Payment is by T/T bank transfer.', 'link_label' => '', 'link_url' => ''],
                 ['title' => 'Built to order', 'text' => 'Your machine is built at our Xuzhou factory, typically in {lead_time_words} working days. Quantity and configuration decide the date, which we confirm with your order.', 'link_label' => '', 'link_url' => ''],
-                ['title' => 'Shipping', 'text' => 'We quote FOB, CIF, EXW, DDP, FCA and DAP, and ship by container.', 'link_label' => 'Machines per container', 'link_url' => '#containers'],
+                ['title' => 'Shipping', 'text' => 'We quote FOB, CIF, EXW, DDP, FCA or DAP, and ship by container.', 'link_label' => 'Machines per container', 'link_url' => '#containers'],
             ],
         ],
         'containers' => [
@@ -170,7 +170,7 @@ function bl_support_defaults(): array
             'parts_alt' => 'Hydraulic hose fittings at a loader’s lift arm pivot',
             'parts_eyebrow' => 'SPARE PARTS',
             'parts_title' => 'Original wear parts.',
-            'parts_text' => 'We keep a list of original wear parts you can choose from. Order them from us at any time, quoting your model and serial number.',
+            'parts_text' => 'We keep a list of original wear parts you can choose from. Order any of these parts from us at any time, quoting your model and serial number.',
             'button' => 'Parts & service request',
             'whatsapp_label' => 'Send us a video on WhatsApp',
             'whatsapp_number' => '8615852499415',
@@ -299,9 +299,9 @@ function bl_product_page_defaults(string $family): array
                 $photo('ready', 'Finished mini skid steer loaders in customer-ordered colours at the BOB-LIFT factory', 'Painted to order and ready to ship'),
             ],
             'checks' => [
-                ['title' => 'Check before start-up', 'text' => 'Before we start the engine, we check the fuel tank and all pipework on the machine.'],
-                ['title' => 'Run and travel test', 'text' => 'We start the engine and check every movement of the machine, then drive it to check the travel system.'],
-                ['title' => 'Leaks, cooling and final check', 'text' => 'We check the machine for oil leaks, shut it down and check its cooling, then make a final check of the pipework.'],
+                ['title' => 'Check before start-up', 'text' => 'Before starting the engine, we inspect the fuel tank and all pipework.'],
+                ['title' => 'Run and travel test', 'text' => 'We run the engine and operate every movement, then drive the machine to test the travel system.'],
+                ['title' => 'Leaks, cooling and final check', 'text' => 'We look for oil leaks, shut the machine down, inspect the cooling and finish with a last pipework check.'],
             ],
         ],
         'faq' => [
@@ -319,9 +319,9 @@ function bl_product_page_defaults(string $family): array
             'link' => 'About BOB-LIFT',
             'images' => [],
             'checks' => [
-                ['title' => 'Check before start-up', 'text' => 'Before we start the engine, we check the fuel tank and all pipework on the machine.'],
-                ['title' => 'Run and travel test', 'text' => 'We start the engine and check every movement of the machine, then drive it to check the travel system.'],
-                ['title' => 'Leaks, cooling and final check', 'text' => 'We check the machine for oil leaks, shut it down and check its cooling, then make a final check of the pipework.'],
+                ['title' => 'Check before start-up', 'text' => 'Before starting the engine, we inspect the fuel tank and all pipework.'],
+                ['title' => 'Run and travel test', 'text' => 'We run the engine and operate every movement, then drive the machine to test the travel system.'],
+                ['title' => 'Leaks, cooling and final check', 'text' => 'We look for oil leaks, shut the machine down, inspect the cooling and finish with a last pipework check.'],
             ],
         ],
         'faq' => [
