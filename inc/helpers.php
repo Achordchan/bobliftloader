@@ -629,8 +629,25 @@ function bl_case_card(array $case, string $heading = 'h2'): void
     require __DIR__ . '/../templates/partials/case-card.php';
 }
 
-function bl_news_card(array $article): void
+/**
+ * Stories to offer beside a product or a range: those that name one of the given products first, then any other story
+ * filed under the family, newest first within each, never a group story. Built from the products each story names, so a
+ * new guide shows up on its products' pages without anyone editing them.
+ */
+function bl_related_articles(array $productSlugs, string $family, int $limit = 3): array
 {
+    $named = $inFamily = [];
+    foreach (bl_articles() as $article) {
+        if (($article['line'] ?? '') === 'group') continue;
+        if (array_intersect($productSlugs, (array) ($article['products'] ?? []))) $named[] = $article;
+        elseif (in_array($family, bl_news_families($article), true)) $inFamily[] = $article;
+    }
+    return array_slice(array_merge($named, $inFamily), 0, $limit);
+}
+
+function bl_news_card(array $article, string $heading = 'h2'): void
+{
+    $heading = in_array($heading, ['h2', 'h3'], true) ? $heading : 'h2';
     require __DIR__ . '/../templates/partials/news-card.php';
 }
 

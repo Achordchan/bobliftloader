@@ -10,6 +10,7 @@ require __DIR__ . '/../inc/wp-admin.php';
 require __DIR__ . '/../inc/wp-content-editor.php';
 $GLOBALS['posts'] = [];
 function bl_wp_application_cases() { return []; }
+function bl_wp_articles() { return []; }
 
 $failures = 0;
 $check = static function (bool $ok, string $message) use (&$failures): void { if (!$ok) { $failures++; fwrite(STDERR, "FAIL: $message\n"); } };

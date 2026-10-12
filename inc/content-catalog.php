@@ -23,5 +23,8 @@ function bl_catalog_copy_fields(bool $loader): array
         'empty_title' => ['空状态标题', 'No matching equipment.', '筛选与空状态', 'text'],
         'empty_intro' => ['空状态说明', 'Try another model name, or remove a filter.', '筛选与空状态', 'text'],
         'empty_clear' => ['空状态清空按钮', 'Clear filters', '筛选与空状态', 'text'],
+        'guides_label' => ['相关文章眉题', 'GUIDES AND NEWS', '相关文章', 'text'],
+        'guides_title' => ['相关文章标题', 'READ BEFORE YOU BUY.', '相关文章', 'text'],
+        'guides_link' => ['新闻列表链接', 'All news and guides', '相关文章', 'text'],
     ];
 }
