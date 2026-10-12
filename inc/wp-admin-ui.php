@@ -62,7 +62,7 @@ unset($bl_type, $bl_noun);
 add_filter('disable_months_dropdown', static fn(bool $disable, string $postType): bool => $disable || in_array($postType, ['bl_product', 'bl_application'], true), 10, 2);
 
 const BL_LIST_PRODUCT_CATEGORIES = ['skid-steer-loaders' => '滑移装载机', 'mini-dumpers' => '迷你翻斗车'];
-const BL_LIST_NEWS_CATEGORIES = ['product-news' => '产品新闻', 'customer-stories' => '客户故事', 'industry-news' => '行业新闻'];
+const BL_LIST_NEWS_CATEGORIES = ['product-news' => '产品新闻', 'exhibitions' => '展会新闻', 'customer-stories' => '客户故事', 'industry-news' => '行业新闻'];
 
 add_filter('manage_bl_product_posts_columns', static fn(array $columns): array => ['cb' => $columns['cb'], 'bl_thumb' => '<span class="screen-reader-text">图片</span>', 'title' => '产品名称', 'bl_model' => '型号', 'bl_category' => '栏目', 'bl_load' => '额定载荷', 'menu_order' => '排序']);
 add_filter('manage_edit-bl_product_sortable_columns', static fn(array $columns): array => $columns + ['menu_order' => 'menu_order']);

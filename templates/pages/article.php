@@ -42,7 +42,7 @@ if ($contentHtml !== '' && $poster) {
   <div class="bl-story-layout bl-story-layout-top">
     <div class="bl-story-main">
       <header class="bl-story-head">
-        <?php if ($category): ?><a class="bl-story-category" href="<?= bl_escape(bl_url('/news/') . '?category=' . $category) ?>"><?= bl_escape(BL_NEWS_CATEGORIES[$category]) ?></a><?php else: ?><span class="bl-story-category bl-story-category-group"><?= bl_escape(bl_news_label($article)) ?></span><?php endif; ?>
+        <a class="bl-story-category" href="<?= bl_escape(bl_url('/news/') . '?category=' . bl_news_section($article)) ?>"><?= bl_escape(bl_news_label($article)) ?></a>
         <h1 id="story-title"><?= bl_title_text($article['title']) ?></h1>
         <p class="bl-story-lede"><?= bl_escape($article['excerpt']) ?></p>
         <?php /* Phones only (news.css): who wrote it and when, and the event's dates and booth, which the side column shows
