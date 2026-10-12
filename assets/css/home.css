@@ -77,27 +77,46 @@
 .bl-site .bl-range-assist{padding-top:clamp(22px,1.6vw,36px);padding-bottom:clamp(22px,1.6vw,36px);display:flex;justify-content:space-between;align-items:center;font-size:var(--fs-small);color:var(--muted);border-bottom:1px solid var(--line)}
 .bl-site .bl-range-assist .bl-text-link{font-size:var(--fs-small);border:0;padding:0;color:var(--ink)}
 
-/* ---------- Applications: three full-width photo tiles ---------- */
+/* ---------- Applications: a list of jobs to choose from (the photographs live on the Applications page) ---------- */
 .bl-site .bl-applications{background:var(--ink);color:var(--paper);padding-top:var(--sp-section);padding-bottom:var(--sp-section)}
 .bl-site .bl-applications .bl-section-top{align-items:flex-end;margin-bottom:var(--sp-block)}
 .bl-site .bl-applications .bl-display{font-size:var(--fs-display);line-height:.9}
 .bl-site .bl-applications .bl-section-description{color:#b6c4ce;padding-bottom:8px}
 .bl-site .bl-outline-text{-webkit-text-stroke:1px #dbe1e5;color:transparent}
-.bl-site .bl-application-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1vw,24px)}
-.bl-site .bl-application-tile{position:relative;display:block;aspect-ratio:4/5;overflow:hidden;background:#0f2537;color:white;min-width:0}
-.bl-site .bl-application-tile>img{width:100%;height:100%;object-fit:cover;transition:transform 1s cubic-bezier(.2,.7,.3,1)}
-@media(hover:hover){.bl-site .bl-application-tile:hover>img{transform:scale(1.04)}}
-.bl-site .bl-application-tile::after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,#03111ce6 0%,#03111c66 38%,#03111c00 65%);transition:background .3s}
-.bl-site .bl-application-tile-body{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:clamp(22px,1.8vw,44px);display:grid;grid-template-columns:1fr auto;gap:clamp(16px,1.2vw,28px);align-items:end}
-.bl-site .bl-application-tile-body .bl-eyebrow{font-size:var(--fs-label);color:#9fc0ff;margin-bottom:clamp(10px,.8vw,18px)}
-.bl-site .bl-application-tile-body h3{font-family:var(--display);font-size:var(--fs-h3);font-weight:600;line-height:.98;letter-spacing:-.3px}
-.bl-site .bl-application-tile-body p{font-size:var(--fs-small);line-height:1.75;color:#c9d5de;margin-top:clamp(10px,.8vw,18px);max-width:520px;max-height:0;opacity:0;overflow:hidden;transition:max-height .4s,opacity .4s,margin .4s}
-.bl-site .bl-application-tile:focus-visible p{max-height:8em;opacity:1}
-@media(hover:hover){.bl-site .bl-application-tile:hover p{max-height:8em;opacity:1}}
-.bl-site .bl-application-tile-body .bl-circle-button{color:white}
-.bl-site .bl-application-tile-body .bl-circle-button .bl-icon{filter:invert(1)}
-@media(hover:hover){.bl-site .bl-application-tile:hover .bl-circle-button{background:var(--blue);border-color:var(--blue)}}
-.bl-site .bl-application-tile-body .bl-tile-model{position:absolute;top:0;left:0;transform:translateY(-100%)}
+.bl-site .bl-job-list{list-style:none;margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:clamp(32px,4vw,104px);border-top:1px solid #ffffff38}
+.bl-site .bl-job-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:clamp(14px,1.4vw,32px);padding:clamp(22px,1.7vw,40px) 0;border-bottom:1px solid #ffffff38;color:var(--paper)}
+.bl-site .bl-job-no{min-width:1.6em;font-family:var(--display);font-size:var(--fs-h5);font-weight:600;color:#9fc0ff;letter-spacing:.5px}
+.bl-site .bl-job-main strong{display:block;font-family:var(--display);font-size:var(--fs-h4);font-weight:600;line-height:1;letter-spacing:-.2px}
+.bl-site .bl-job-main small{display:block;margin-top:8px;font-size:var(--fs-micro);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#9fb1bf}
+.bl-site .bl-job-figure{text-align:right}
+.bl-site .bl-job-figure b{display:block;font-family:var(--display);font-size:var(--fs-h4);font-weight:600;line-height:1}
+.bl-site .bl-job-figure b small{font-size:.5em;margin-left:5px;color:#9fb1bf;font-weight:600}
+.bl-site .bl-job-figure>span{display:block;margin-top:6px;max-width:15em;margin-left:auto;font-size:var(--fs-micro);color:#9fb1bf;line-height:1.4}
+.bl-site .bl-job-row .bl-circle-button{color:var(--paper)}
+.bl-site .bl-job-row .bl-circle-button .bl-icon{filter:invert(1)}
+@media(hover:hover){.bl-site .bl-job-row:hover .bl-circle-button{background:var(--blue);border-color:var(--blue)}.bl-site .bl-job-row:hover .bl-job-main strong{color:#9fc0ff}}
+.bl-site .bl-job-more{padding-top:clamp(24px,2vw,44px)}
+.bl-site .bl-job-more .bl-text-link{color:var(--paper);border-color:#ffffff66}
+.bl-site .bl-job-more .bl-text-link .bl-icon{filter:invert(1)}
+
+/* ---------- Buying & support: the four terms, then four doors into the Support page ---------- */
+.bl-site .bl-home-support{padding-top:var(--sp-section);padding-bottom:var(--sp-section);background:#e6e8e2}
+.bl-site .bl-home-support .bl-section-top{padding-bottom:var(--sp-block)}
+.bl-site .bl-home-support .bl-display{font-size:var(--fs-display);line-height:.9}
+.bl-site .bl-home-support .bl-section-description{color:var(--muted);padding-bottom:8px}
+.bl-site .bl-home-terms{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:0;margin-bottom:clamp(20px,1.6vw,36px);padding-top:0;padding-bottom:0}
+.bl-site .bl-home-terms>div{background:var(--ink);color:var(--paper);padding:clamp(20px,1.6vw,40px)}
+.bl-site .bl-home-terms>div+div{border-left:1px solid #ffffff26}
+.bl-site .bl-home-terms>div:last-child{background:var(--blue)}
+.bl-site .bl-home-terms dt{font-size:var(--fs-micro);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#b6c4ce}
+.bl-site .bl-home-terms dd{margin:12px 0 0;font-family:var(--display);font-size:var(--fs-h2);font-weight:600;line-height:.95}
+.bl-site .bl-home-terms dd small{font-size:var(--fs-h5);margin-left:8px;font-weight:600;color:#b6c4ce}
+.bl-site .bl-home-support-links{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,1vw,24px);margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0}
+.bl-site .bl-home-support-links a{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;height:100%;padding:clamp(20px,1.5vw,36px);border:1px solid var(--line);background:var(--paper);color:var(--ink)}
+.bl-site .bl-home-support-links strong{display:block;font-family:var(--display);font-size:var(--fs-h4);font-weight:600;line-height:1}
+.bl-site .bl-home-support-links small{display:block;margin-top:10px;font-size:var(--fs-small);line-height:1.6;color:var(--muted)}
+.bl-site .bl-home-support-links .bl-icon{flex:none;width:22px;height:22px;margin-top:4px}
+@media(hover:hover){.bl-site .bl-home-support-links a:hover{border-color:var(--ink)}.bl-site .bl-home-support-links a:hover .bl-icon{color:var(--blue)}}
 .bl-site .bl-photo-label{position:absolute;left:clamp(18px,1.4vw,32px);top:clamp(18px,1.4vw,32px);z-index:1;background:var(--paper);color:var(--ink);padding:8px 12px;font-size:var(--fs-micro);font-weight:700;letter-spacing:.1em}
 
 /* People behind the machine: heading and intro, a fixed landscape photograph, then the three ways we work with you. */

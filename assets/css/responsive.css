@@ -172,7 +172,6 @@
 /* ---- Hero / range / applications responsive composition ---- */
 @media(max-width:1150px){
   .bl-site .bl-hero .bl-hero-title{max-width:72%}
-  .bl-site .bl-application-tile{aspect-ratio:3/4}
 }
 @media(max-width:800px){
   .bl-site .bl-hero{height:auto;min-height:0;max-height:none}
@@ -186,9 +185,6 @@
   .bl-site .bl-range-card,.bl-site .bl-range-body{display:flex;grid-row:auto}
   .bl-site .bl-range-body h3{font-size:clamp(36px,7vw,56px)}
   .bl-site .bl-range-visual{aspect-ratio:1.35}
-  .bl-site .bl-application-strip{grid-template-columns:1fr;gap:12px}
-  .bl-site .bl-application-tile{aspect-ratio:16/10}
-  .bl-site .bl-application-tile-body p{max-height:8em;opacity:1}
 }
 @media(max-width:600px){
   /* The photograph keeps at least the height it had before the switch moved in (528px). */
@@ -209,19 +205,10 @@
   .bl-site .bl-range-facts>div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-block:12px;border-bottom:1px solid var(--line)}
   .bl-site .bl-range-facts dd{margin:0;font-size:20px}
   /* Six jobs side by side in one row that swipes, like the other card rows: about one card and a sixth of the next. */
-  .bl-site .bl-application-strip{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:84%;gap:12px;overflow-x:auto;padding:0 var(--gutter) 4px;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gutter);overscroll-behavior-x:contain;scrollbar-width:none}
-  .bl-site .bl-application-strip::-webkit-scrollbar{display:none}
-  .bl-site .bl-application-tile{aspect-ratio:3/4;scroll-snap-align:start}
   /* The narrower card keeps every line of its text: no cut-off line at the foot. */
-  .bl-site .bl-application-tile-body p{max-height:none;line-height:1.6}
   /* The text takes the card's full width; the round arrow stands just above it at the right. */
-  .bl-site .bl-application-tile-body{grid-template-columns:minmax(0,1fr)}
-  .bl-site .bl-application-tile-body .bl-circle-button{position:absolute;right:22px;top:-44px;width:44px;height:44px}
-  .bl-site .bl-application-tile::after{background:linear-gradient(0deg,#03111cf5 0%,#03111cd9 34%,#03111c73 60%,#03111c00 80%)}
-  .bl-site .bl-application-tile-body .bl-eyebrow{color:#e3ebf7;font-size:12px;text-shadow:0 1px 12px #03111c}
   .bl-site .bl-photo-label{font-size:12px}
   .bl-site .bl-range-body h3{font-size:var(--m-h3,28px)}
-  .bl-site .bl-application-tile-body h3{font-size:var(--m-h3,28px)}
 }
 
 /* Range: two narrow cards side by side, the widest spec (1,000–5,000 kg) steps down to keep one line. */
@@ -286,17 +273,36 @@
 /* Touch screens from tablet width down: the application tiles keep the phone treatment (white label, deeper shade), and
    in the three narrow columns (801-1000px) the titles step down so they hold two lines or so. */
 @media (min-width:601px) and (max-width:1000px) and (hover:none){
-  .bl-site .bl-application-tile::after{background:linear-gradient(0deg,#03111cf5 0%,#03111cd9 34%,#03111c73 60%,#03111c00 80%)}
-  .bl-site .bl-application-tile-body .bl-eyebrow{color:#e3ebf7;font-size:12px;letter-spacing:.08em;text-shadow:0 1px 12px #03111c}
 }
 @media (min-width:801px) and (max-width:1000px) and (hover:none){
-  .bl-site .bl-application-tile-body h3{font-size:clamp(24px,3.4vw,30px)}
   /* The label and title get the column's full width; the round arrow stands just above them, as on phones. */
-  .bl-site .bl-application-tile-body{grid-template-columns:minmax(0,1fr)}
-  .bl-site .bl-application-tile-body .bl-circle-button{position:absolute;right:22px;top:-44px;width:44px;height:44px}
 }
 /* Header site switch, 601-1150px: only the caret shows; an invisible layer makes it a 44px target without moving anything. */
 @media (min-width:601px) and (max-width:1150px){
   .bl-site .bl-header .bl-site-switch>summary{position:relative}
   .bl-site .bl-header .bl-site-switch>summary::before{content:'';position:absolute;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}
+}
+
+@media(max-width:1150px){
+  .bl-site .bl-job-list{grid-template-columns:1fr}
+  .bl-site .bl-home-terms,.bl-site .bl-home-support-links{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bl-site .bl-home-terms>div:nth-child(3){border-left:0}
+  .bl-site .bl-home-terms>div:nth-child(n+3){border-top:1px solid #ffffff26}
+}
+@media(max-width:600px){
+  .bl-site .bl-home-support{padding-block:var(--m-sec,56px)}
+  .bl-site .bl-home-support .bl-section-top{flex-direction:column;align-items:flex-start;gap:24px;padding-bottom:22px}
+  .bl-site .bl-home-support .bl-display{font-size:var(--m-h2,clamp(38px,11vw,46px));letter-spacing:-.5px}
+  .bl-site .bl-home-support .bl-section-description{max-width:100%;font-size:14px}
+  .bl-site .bl-home-support .bl-section-description br{display:none}
+  .bl-site .bl-job-row{grid-template-columns:auto minmax(0,1fr) auto;gap:14px;padding:18px 0}
+  .bl-site .bl-job-row .bl-circle-button{display:none}
+  .bl-site .bl-job-figure b{font-size:24px}
+  .bl-site .bl-job-figure>span{display:none}
+  .bl-site .bl-job-main strong{font-size:26px}
+  .bl-site .bl-home-terms dd{font-size:34px}
+  .bl-site .bl-home-terms dd small{font-size:14px}
+  .bl-site .bl-home-terms>div{padding:18px}
+  .bl-site .bl-home-support-links{grid-template-columns:1fr}
+  .bl-site .bl-home-support-links strong{font-size:26px}
 }

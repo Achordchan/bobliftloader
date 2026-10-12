@@ -351,8 +351,19 @@ function bl_content_schema_fields(string $page, ?array $content = null): array
             ['key' => 'applications.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'applications.title', 'label' => '标题', 'type' => 'heading', 'help' => '换行即分行；*星号* 里的文字显示为描边字。'],
             ['key' => 'applications.description', 'label' => '标题旁说明', 'type' => 'rich', 'help' => $rich],
+            ['key' => 'applications.link', 'label' => '列表下方链接文字', 'type' => 'text', 'help' => '链接去应用场景总页。'],
         ]],
-        ['title' => '03 团队与服务', 'fields' => [
+        ['title' => '03 买卖与服务', 'note' => '四项条款（起订量、付款、交期、质保）取自<a href="' . esc_url(admin_url('admin.php?page=bl-content-support')) . '">Support</a>页，这里不重复填写；只改标题和下面四张入口卡。', 'fields' => [
+            ['key' => 'support.eyebrow', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'support.title', 'label' => '标题', 'type' => 'heading', 'help' => '换行即分行；*星号* 里的文字显示为蓝色。'],
+            ['key' => 'support.description', 'label' => '标题旁说明', 'type' => 'rich', 'help' => $rich],
+            ['key' => 'support.cards', 'group' => '入口卡', 'type' => 'list', 'add' => '添加一张', 'summary' => ['title'], 'fields' => [
+                'title' => ['label' => '标题', 'type' => 'text'],
+                'text' => ['label' => '一句话', 'type' => 'text'],
+                'url' => ['label' => '链接', 'type' => 'url', 'help' => '站内路径，如 /support/#buying。'],
+            ]],
+        ]],
+        ['title' => '04 团队与服务', 'fields' => [
             ['key' => 'approach.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'approach.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
             ['key' => 'approach.text', 'label' => '介绍', 'type' => 'textarea'],
