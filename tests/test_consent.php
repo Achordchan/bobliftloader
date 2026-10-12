@@ -82,15 +82,15 @@ $result = bl_content_locked('tracking', static fn($previous) => bl_content_prepa
 $check($result === true, 'saving the grouped screen failed');
 $check(!str_contains($capture('bl_tracking_screen'), '原有代码已暂停加载'), 'the legacy notice stayed after saving');
 // An external script with neither async nor defer is flagged on the screen (Chrome may skip it when written into the page on a slow connection); async, defer, modules and inline code are not.
-foreach (['<script src="https://t.example/a.js"></script>' => true, '<script async src="https://t.example/a.js"></script>' => false, '<script defer src=x></script>' => false, '<script type="module" src="/m.js"></script>' => false, '<script type="text/plain" src="/n.js"></script>' => false, '<script type="text/javascript" src="/n.js"></script>' => true, '<script>inline()</script>' => false, '<SCRIPT SRC="/a.js" data-async="1"></SCRIPT>' => true, '<script nomodule src="/old.js"></script>' => false, '<script>document.write("<script src=\\"/w.js\\"></scr"+"ipt>")</script>' => false, '<script>a()</script><script src="/b.js"></script>' => true] as $code => $flagged) {
+foreach (['<script src="https://t.example/a.js"></script>' => true, '<script async src="https://t.example/a.js"></script>' => false, '<script defer src=x></script>' => false, '<script type="module" src="/m.js"></script>' => false, '<script type="text/plain" src="/n.js"></script>' => false, '<script type="text/javascript" src="/n.js"></script>' => true, '<script>inline()</script>' => false, '<SCRIPT SRC="/a.js" data-async="1"></SCRIPT>' => true, '<script nomodule src="/old.js"></script>' => false, '<script>document.write("<script src=\\"/w.js\\"></scr"+"ipt>")</script>' => false, '<script>a()</script><script src="/b.js"></script>' => true, '<!-- <script src="/old.js"></script> --><script async src="/new.js"></script>' => false] as $code => $flagged) {
     $check(bl_tracking_has_blocking_script($code) === $flagged, 'blocking-script check wrong for ' . $code);
 }
 $GLOBALS['options']['bl_content_tracking'] = ['head' => '<script src="https://t.example/a.js"></script>', 'grouped' => '1'];
-$check(str_contains($capture('bl_tracking_screen'), '有代码已暂停加载：外部脚本没有写 async 或 defer'), 'a blocking external script was not flagged on the tracking screen');
-$check(bl_tracking_code('head') === '' && bl_consent_categories() === [], 'code with a blocking external script was printed or counted as a category');
+$check(str_contains($capture('bl_tracking_screen'), '有外部脚本没有写 async 或 defer'), 'a blocking external script was not flagged on the tracking screen');
+$check(bl_tracking_code('head') === '<script src="https://t.example/a.js"></script>' && bl_consent_categories() === ['analytics'], 'code with a plain external script was changed or held back');
 $GLOBALS['options']['bl_content_tracking'] = ['head' => '<script async src="https://t.example/a.js"></script>', 'grouped' => '1'];
 $check(bl_tracking_code('head') !== '' && bl_consent_categories() === ['analytics'], 'async code was held back');
-$check(!str_contains($capture('bl_tracking_screen'), '有代码已暂停加载：外部脚本没有写 async 或 defer'), 'an async script was flagged');
+$check(!str_contains($capture('bl_tracking_screen'), '有外部脚本没有写 async 或 defer'), 'an async script was flagged');
 $GLOBALS['caps'] = [];
 
 // The copy is editable and the privacy default no longer promises that the tools load without asking.

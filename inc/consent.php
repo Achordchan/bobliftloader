@@ -25,8 +25,8 @@ function bl_tracking_markup(string $category, string $code): string
 /**
  * Whether a saved code loads an external script the browser must wait for (a <script src> with neither async nor defer, and not a
  * module or nomodule). Written into the page through document.write, Chrome may skip such a script on a very slow connection when it is not
- * cached, and its dependants would then fail; so code with one is not supported: bl_tracking_code() holds it back and the tracking
- * screen says why (the tools' own current snippets are inline or async/defer).
+ * cached, and its dependants would then fail. Nothing is changed for it (it runs in order, as pasted, on every ordinary connection);
+ * the tracking screen only tells the editor which slot has one, so a tool that offers an async/defer form can use that.
  */
 /** A script tag's attributes that make it harmless here: a module (deferred by the browser), or a type the browser does not run. */
 function bl_tracking_script_is_deferred_or_inert(string $attributes): bool
@@ -38,7 +38,8 @@ function bl_tracking_script_is_deferred_or_inert(string $attributes): bool
 
 function bl_tracking_has_blocking_script(string $code): bool
 {
-    // Only the opening tags count: text inside a script that merely spells out "<script src" is not one.
+    // Only real script elements count: a commented-out tag, or text inside a script that merely spells out "<script src", is not one.
+    $code = preg_replace('~<!--.*?(?:-->|$)~s', '', $code);
     if (!preg_match_all('~<script\b([^>]*)>(?:.*?</script\s*>|.*$)~is', $code, $tags)) return false;
     foreach ($tags[1] as $attributes) {
         if (preg_match('~(?:^|\s)src\s*=~i', $attributes) && !preg_match('~(?:^|\s)(?:async|defer|nomodule)(?=[\s=/]|$)~i', $attributes) && !bl_tracking_script_is_deferred_or_inert($attributes)) return true;
@@ -57,8 +58,7 @@ function bl_tracking_code(string $key): string
     $saved = get_option('bl_content_tracking', []);
     if (!is_array($saved)) return '';
     if (in_array($key, BL_TRACKING_SLOTS['analytics'], true) && ($saved['grouped'] ?? '') !== '1') return '';
-    $code = trim((string) ($saved[$key] ?? ''));
-    return bl_tracking_has_blocking_script($code) ? '' : $code;
+    return trim((string) ($saved[$key] ?? ''));
 }
 
 /** The categories that have any code saved, in banner order; the banner and the footer link exist only for these. */

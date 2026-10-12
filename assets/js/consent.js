@@ -9,9 +9,10 @@ const VERSION = 1;
 const YEAR = 365 * 24 * 60 * 60;
 // Cookies the usual tools leave on this site's own domain, by category; declining a category removes them, so cookies
 // set before the banner existed (or by an earlier choice) do not outlive a refusal.
+// Yandex's Metrica cookies (_ym…) serve both: analytics, and the audiences used for its advertising, so withdrawing either clears them (the one still agreed sets its own again on the reload that follows).
 const TOOL_COOKIES = {
   analytics: /^(_ga|_gid|_gat|_dc_gtm|_ym|_clck|_clsk|_hj)/,
-  advertising: /^(_gcl|_fb[pc]$|_ttp|_tt_|_uet|_pin_|_rdt|_li_|li_)/,
+  advertising: /^(_gcl|_fb[pc]$|_ttp|_tt_|_uet|_pin_|_rdt|_li_|li_|_ym|ymex$|yandexuid$|yabs-sid$)/,
 };
 
 function readSaved() {
