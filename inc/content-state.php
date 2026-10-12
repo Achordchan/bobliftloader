@@ -8,6 +8,24 @@ function bl_content_dynamic_paths(string $page): array
     return match ($page) { 'support' => ['containers.loading'], 'applications' => ['jobs'], default => [] };
 }
 
+/**
+ * The loader range film was first saved under range_story and now lives with the catalogue fields. In stored content the saved
+ * addresses carry over unless the new fields already hold one; in submitted content (a REST client still using the old names) the
+ * old names are accepted, a field submitted under the new name wins, and an explicit clear stays a clear.
+ */
+function bl_migrate_loader_film(array $data, bool $submitted): array
+{
+    if (!is_array($data['range_story'] ?? null)) return $data;
+    foreach (['film_video', 'film_poster', 'film_caption'] as $key) {
+        if (!array_key_exists($key, $data['range_story'])) continue;
+        $old = $data['range_story'][$key];
+        unset($data['range_story'][$key]);
+        $taken = $submitted ? array_key_exists($key, $data['catalog'] ?? []) : trim((string) ($data['catalog'][$key] ?? '')) !== '';
+        if (!$taken && is_scalar($old)) $data['catalog'][$key] = $old;
+    }
+    return $data;
+}
+
 /** Version 1 preserves legacy empty-field fallback; subsequent explicit empty edits are authoritative. */
 function bl_content_migrate(string $page, array $saved): array
 {
@@ -20,6 +38,7 @@ function bl_content_migrate(string $page, array $saved): array
             }
         }
     }
+    if ($page === 'loaders') $saved = bl_migrate_loader_film($saved, false);
     $saved = bl_business_migrate($page, $saved);
     $saved['_bl_schema_version'] = 1;
     return $saved;

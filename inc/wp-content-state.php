@@ -9,6 +9,7 @@ function bl_content_prepare(string $page, array $previous, array $input, bool $f
     if ($page === 'tracking' && !bl_can_manage_tracking()) throw new RuntimeException('没有保存统计代码的权限。');
     $previous = bl_content_migrate($page, $previous);
     if ($page === 'home') $input = bl_migrate_home_facts($input);
+    if ($page === 'loaders') $input = bl_migrate_loader_film($input, true);
     if ($page === 'applications') {
         $input = bl_application_prepare_input($previous, $input);
         if (is_wp_error($input)) return $input;

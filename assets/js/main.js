@@ -1,6 +1,7 @@
 import { initializeAttachmentLoops } from './attachment-loops.js';
 import { initializeConsent } from './consent.js';
 import { initializeDialogs } from './dialogs.js';
+import { initializeFilm } from './film.js';
 import { initializeEquipment, scrollBehavior } from './equipment.js';
 import { initializeHero } from './hero.js';
 import { initializeInquiry } from './inquiry.js';
@@ -15,6 +16,7 @@ import { initializeQuick } from './quick.js';
 initializeAttachmentLoops();
 initializeConsent();
 initializeDialogs();
+initializeFilm();
 initializeEquipment();
 initializeHero();
 initializeInquiry();
