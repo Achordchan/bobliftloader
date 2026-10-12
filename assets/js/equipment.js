@@ -59,7 +59,7 @@ export function initializeEquipment() {
     if (photo) {
       photo.src = button.dataset.galleryImage;
       photo.alt = button.dataset.galleryAlt || photo.alt;
-      // A swipe slides the new photograph in from the side the finger came from; a thumbnail just swaps it.
+      // An arrow slides the new photograph in from the side it comes from; a thumbnail just swaps it.
       if (direction && !window.matchMedia('(prefers-reduced-motion: reduce)').matches && photo.animate) {
         photo.animate([{ transform: `translateX(${direction * 14}%)`, opacity: 0.2 }, { transform: 'none', opacity: 1 }], { duration: 240, easing: 'ease-out' });
       }
@@ -68,35 +68,20 @@ export function initializeEquipment() {
     if (zoom) zoom.dataset.lightboxOpen = button.dataset.galleryIndex || '0';
     galleryButtons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
     revealThumbnail(button);
-    // The neighbours load while the visitor looks at this one, so the next swipe shows its photograph at once.
+    // The neighbours load while the visitor looks at this one, so the next arrow shows its photograph at once.
     const at = galleryButtons.indexOf(button);
     [galleryButtons[at - 1], galleryButtons[at + 1]].forEach((neighbour) => { if (neighbour) new Image().src = neighbour.dataset.galleryImage; });
   };
   galleryButtons.forEach((button) => button.addEventListener('click', () => showPhoto(button)));
-  // On a touch screen the main photograph swipes: left for the next photograph, right for the one before (the dots follow).
-  const stage = document.querySelector('.bl-product-main-image');
-  if (stage && photo && galleryButtons.length > 1) {
-    let start = null;
-    let swiped = false;
-    stage.addEventListener('touchstart', (event) => {
-      start = event.touches.length === 1 ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
-    }, { passive: true });
-    stage.addEventListener('touchend', (event) => {
-      if (!start) return;
-      const dx = event.changedTouches[0].clientX - start.x;
-      const dy = event.changedTouches[0].clientY - start.y;
-      start = null;
-      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+  // Phones step through the photographs with the arrows on the stage (the photographs have pale margins, so a swipe would be a guess); they wrap round, and the dots follow.
+  document.querySelectorAll('[data-gallery-step]').forEach((arrow) => {
+    arrow.hidden = false;
+    arrow.addEventListener('click', () => {
+      const step = Number(arrow.dataset.galleryStep);
       const at = galleryButtons.findIndex((item) => item.getAttribute('aria-pressed') === 'true');
-      const target = galleryButtons[at + (dx < 0 ? 1 : -1)];
-      if (!target) return;
-      swiped = true;
-      setTimeout(() => { swiped = false; }, 400);
-      showPhoto(target, dx < 0 ? 1 : -1);
-    }, { passive: true });
-    // A swipe is not a tap on the photograph: it must not open the lightbox.
-    stage.addEventListener('click', (event) => { if (swiped) { event.stopImmediatePropagation(); event.preventDefault(); } }, true);
-  }
+      showPhoto(galleryButtons[(at + step + galleryButtons.length) % galleryButtons.length], step);
+    });
+  });
   const shown = document.querySelector('[data-gallery-image][aria-pressed="true"]');
   if (shown) revealThumbnail(shown);
   // The column fades where more thumbnails wait above or below (only the tall column; a row has no height to spare).
