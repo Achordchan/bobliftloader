@@ -10,6 +10,8 @@ return [
         ],
         'switcher' => [
             'label' => 'LOADER', 'title' => 'BOB-LIFT websites', 'current' => 'You are here',
+            // The notice shown before one of our other websites opens (assets/js/leave-site.js).
+            'leave' => ['eyebrow' => 'You are leaving this website', 'verified' => 'Official BOB-LIFT website', 'text' => 'This is one of our own websites, run by BOB-LIFT. It opens in a new tab, so this page stays open for you.', 'go' => 'Continue to', 'stay' => 'Stay here'],
             'sites' => [
                 ['url' => 'https://www.boblift.com/', 'domain' => 'boblift.com', 'name' => 'BOB-LIFT', 'text' => 'The company, its factory and the full range', 'mark' => 'B'],
                 ['url' => 'https://www.bobliftcrane.com/', 'domain' => 'bobliftcrane.com', 'name' => 'Cranes', 'text' => 'Truck-mounted, marine and pickup cranes', 'mark' => 'C'],
@@ -33,6 +35,11 @@ return [
             ['key' => 'switcher.label', 'label' => '按钮名称', 'type' => 'text'],
             ['key' => 'switcher.title', 'label' => '面板标题', 'type' => 'text'],
             ['key' => 'switcher.current', 'label' => '当前站点提示', 'type' => 'text'],
+            ['key' => 'switcher.leave.eyebrow', 'label' => '跳出提示 · 小标题', 'type' => 'text', 'help' => '点其他站时先弹出确认窗口，确认后在新标签页打开。'],
+            ['key' => 'switcher.leave.verified', 'label' => '跳出提示 · 认证标识文字', 'type' => 'text', 'help' => '显示在绿色对勾旁。'],
+            ['key' => 'switcher.leave.text', 'label' => '跳出提示 · 说明', 'type' => 'textarea'],
+            ['key' => 'switcher.leave.go', 'label' => '跳出提示 · 继续按钮文字', 'type' => 'text', 'help' => '后面会自动接上网站域名，例如“Continue to boblift.com”。'],
+            ['key' => 'switcher.leave.stay', 'label' => '跳出提示 · 留下按钮文字', 'type' => 'text'],
             ['key' => 'switcher.sites', 'label' => '站点列表', 'type' => 'list', 'add' => '添加站点', 'summary' => ['name', 'domain'], 'fields' => [
                 'name' => ['label' => '名称', 'type' => 'text'], 'text' => ['label' => '介绍', 'type' => 'textarea'],
                 'url' => ['label' => '地址', 'type' => 'url', 'help' => '留空表示当前站点。'],

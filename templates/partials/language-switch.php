@@ -1,6 +1,7 @@
 <?php /* The language switch in the header (inc/languages.php). English is the site itself; other languages appear as their folders go live. */
+$barSwitch = !empty($barSwitch); // the copy in the phone bar (the one in the navigation steps aside from 600px down)
 $languages = bl_languages(); $current = $languages[0]; $available = count(array_filter($languages, static fn($language) => $language['url'] !== '')); ?>
-<details class="bl-lang-switch<?= $available < 2 ? ' bl-lang-switch-single' : '' ?>">
+<details class="bl-lang-switch<?= $available < 2 ? ' bl-lang-switch-single' : '' ?><?= $barSwitch ? ' bl-lang-switch-bar' : '' ?>">
   <summary aria-label="Language: <?= bl_escape($current['name']) ?>. Choose another language"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><path fill="none" stroke="currentColor" stroke-width="1.5" d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"/></svg><span><?= bl_escape(strtoupper($current['code'])) ?></span><i aria-hidden="true"></i></summary>
   <div class="bl-lang-panel">
     <p>Language</p>
