@@ -60,6 +60,18 @@
 .bl-site .bl-story-text a{color:var(--blue);border-bottom:1px solid #215bdb66}
 @media(hover:hover){.bl-site .bl-story-text a:hover{border-bottom-color:var(--blue)}}
 .bl-site .bl-story-text .bl-story-visit{margin-top:clamp(28px,2.2vw,48px);padding-top:clamp(16px,1.2vw,24px);border-top:1px solid var(--line)}
+/* Long guides written in WordPress: sub-headings, pictures with captions and specification tables. Wide tables scroll
+   sideways inside their own frame on phones rather than widening the page. */
+.bl-site .bl-wp-article-content h3{margin:clamp(22px,1.6vw,34px) 0 8px;font:700 var(--fs-lead)/1.35 var(--sans);color:var(--ink)}
+.bl-site .bl-wp-article-content figure{margin:clamp(24px,1.8vw,40px) 0}
+.bl-site .bl-wp-article-content figure img{width:100%;height:auto;background:#e7e9e3}
+.bl-site .bl-wp-article-content figcaption{padding-top:10px;font-size:var(--fs-label);line-height:1.6;color:var(--muted)}
+.bl-site .bl-wp-article-content .wp-block-table{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.bl-site .bl-wp-article-content table{width:100%;min-width:32rem;border-collapse:collapse;font-size:var(--fs-small);line-height:1.5;color:#3f4c57}
+.bl-site .bl-wp-article-content :is(th,td){padding:10px 12px;border:0;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.bl-site .bl-wp-article-content thead th{border-bottom:2px solid var(--ink);font-size:var(--fs-micro);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink)}
+.bl-site .bl-wp-article-content tbody th{font-weight:600;color:var(--ink)}
+.bl-site .bl-wp-article-content strong{color:var(--ink)}
 
 .bl-site .bl-story-aside{display:flex;flex-direction:column;gap:clamp(20px,1.6vw,32px)}
 .bl-site .bl-story-box{padding:clamp(18px,1.4vw,28px);background:#fff;border:1px solid var(--line)}
@@ -119,7 +131,7 @@
 
 @media(max-width:1000px){
   .bl-site .bl-news-head-row{flex-direction:column;align-items:flex-start}
-  .bl-site .bl-story-layout{grid-template-columns:1fr}
+  .bl-site .bl-story-layout{grid-template-columns:minmax(0,1fr)}
   .bl-site .bl-story-aside{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));align-items:start}
 }
 @media(max-width:700px){
