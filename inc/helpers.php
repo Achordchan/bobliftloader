@@ -53,10 +53,19 @@ function bl_image_resized(string $url, int $width): string
     return 'https://i0.wp.com/' . bl_image_cdn_host(home_url()) . $parts['path'] . '?' . (isset($parts['query']) ? $parts['query'] . '&' : '') . 'w=' . $width . '&ssl=1';
 }
 
-/* The site's host as the CDN addresses it; empty for a site served on its own port, which the CDN cannot reach. */
+/*
+ * The site's host as the CDN addresses it; empty where the CDN cannot fetch from it: a site on its own port (the CDN
+ * addresses a host alone), and one on a local or private name (localhost, an IP address, .local, .test and the like).
+ * The bl_image_cdn filter turns the CDN off for a site that is not public, or on for a public host this misjudges.
+ */
 function bl_image_cdn_host(string $home): string
 {
-    return parse_url($home, PHP_URL_PORT) ? '' : (string) parse_url($home, PHP_URL_HOST);
+    $host = strtolower((string) parse_url($home, PHP_URL_HOST));
+    if ($host === '' || parse_url($home, PHP_URL_PORT)) return '';
+    $public = str_contains($host, '.') && !filter_var(trim($host, '[]'), FILTER_VALIDATE_IP)
+        && !preg_match('/\.(local|localhost|localdomain|test|example|invalid|internal|lan|home\.arpa)$/', $host);
+    if (function_exists('apply_filters')) $public = (bool) apply_filters('bl_image_cdn', $public, $host);
+    return $public ? $host : '';
 }
 
 /* srcset for a site picture at the given widths, its full size last; empty when it cannot be resized (see bl_image_resized). */
