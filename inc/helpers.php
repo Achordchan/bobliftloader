@@ -179,33 +179,38 @@ function bl_attribute_id(string $attributes): ?array
  * A story's contents list: every <h2> in the text gets an id (an id already there stays, so shared links keep working)
  * and one entry in the list. Returns the text with the ids set, the entries as [id, heading text], and each <h2>'s id in
  * the order the headings come (null for one with no text, which has no entry); display only, the stored text is unchanged.
- * Ids already used anywhere in the text, and the page's own, are kept free of generated ones.
+ * Ids already used anywhere in the text, and the page's own, are kept free of generated ones; a heading repeating an
+ * earlier heading's id gets a new one, and headings inside HTML comments are ignored.
  *
  * @return array{html: string, items: list<array{0: string, 1: string}>, ids: list<?string>}
  */
 function bl_story_contents(string $html): array
 {
     $used = array_fill_keys(['top', 'main', 'main-navigation', 'story-title', 'story-lightbox', 'site-search', 'quick-enquiry', 'enquiry'], true); // the page's own
-    if (preg_match_all('~<[a-z][a-z0-9]*\b((?:"[^"]*"|\'[^\']*\'|[^>"\'])*)>~i', $html, $tags)) {
+    if (preg_match_all('~<[a-z][a-z0-9]*\b((?:"[^"]*"|\'[^\']*\'|[^>"\'])*)>~i', (string) preg_replace('~<!--.*?-->~s', '', $html), $tags)) {
         foreach ($tags[1] as $attributes) {
             if ($existing = bl_attribute_id($attributes)) $used[$existing[0]] = true;
         }
     }
     $items = [];
     $ids = [];
-    $html = (string) preg_replace_callback('~<h2\b((?:"[^"]*"|\'[^\']*\'|[^>"\'])*)>(.*?)</h2>~is', static function (array $m) use (&$items, &$ids, &$used): string {
+    $seen = [];
+    // Markup inside an HTML comment is not on the page, so a heading there is passed over.
+    $html = (string) preg_replace_callback('~<!--.*?-->|<h2\b((?:"[^"]*"|\'[^\']*\'|[^>"\'])*)>(.*?)</h2>~is', static function (array $m) use (&$items, &$ids, &$used, &$seen): string {
+        if (str_starts_with($m[0], '<!--')) return $m[0];
         $text = trim((string) preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($m[2]), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
         if ($text === '') { $ids[] = null; return $m[0]; }
         $attributes = $m[1];
         $existing = bl_attribute_id($attributes);
-        if ($existing && $existing[0] !== '') {
-            $id = $existing[0]; // kept as it is
+        if ($existing && $existing[0] !== '' && !isset($seen[$existing[0]])) {
+            $id = $existing[0]; // kept as it is (the first heading to use it; a repeat gets an id of its own below)
+            $seen[$id] = true;
         } else {
             if ($existing) $attributes = substr($attributes, 0, $existing[1]) . substr($attributes, $existing[1] + $existing[2]); // an empty id="" is replaced, not joined by a second one
             $base = trim((string) preg_replace('/[^a-z0-9]+/', '-', strtolower($text)), '-') ?: 'section';
             $id = $base;
             for ($n = 2; isset($used[$id]); $n++) $id = $base . '-' . $n;
-            $used[$id] = true;
+            $used[$id] = $seen[$id] = true;
             $attributes .= ' id="' . $id . '"';
         }
         $items[] = [$id, $text];

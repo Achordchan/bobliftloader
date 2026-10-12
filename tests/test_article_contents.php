@@ -21,6 +21,9 @@ if ($list['ids'] !== ['overview', 'extra'] || substr_count($list['html'], ' id='
 // an id-like text inside another attribute's value is not an id; a '>' inside a quoted value does not end the tag
 $list = bl_story_contents('<h2 title="Example id=\'capacity\'">Capacity</h2><h2 data-x="a>b" ID=\'Tail\'>Tail</h2><h2 class=big>Plain</h2>');
 if ($list['ids'] !== ['capacity', 'Tail', 'plain'] || !str_contains($list['html'], 'title="Example id=\'capacity\'" id="capacity"') || !str_contains($list['html'], '<h2 class=big id="plain">')) $failures[] = 'attribute parsing: ' . $list['html'];
+// a heading in an HTML comment is not a heading; a repeated explicit id goes to the first heading only
+$list = bl_story_contents('<!-- <h2>Old details</h2> --><h2>Live</h2><h2 id="dup">One</h2><h2 id="dup">Two</h2>');
+if (array_column($list['items'], 1) !== ['Live', 'One', 'Two'] || array_column($list['items'], 0) !== ['live', 'dup', 'two'] || !str_contains($list['html'], '<!-- <h2>Old details</h2> -->')) $failures[] = 'comments / repeated ids: ' . json_encode($list['items']);
 // ids stay aligned with the headings when one has no text
 $list = bl_story_contents('<h2>A</h2><h2> </h2><h2>C</h2><h2>D</h2>');
 if ($list['ids'] !== ['a', null, 'c', 'd']) $failures[] = 'ids misaligned: ' . json_encode($list['ids']);
