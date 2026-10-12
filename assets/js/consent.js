@@ -48,7 +48,27 @@ function clearToolCookies(categories) {
 }
 
 // Scripts run strictly one after another, across slots and categories: a plain external library is awaited (loaded or failed) before the inline code that needs it, which a plain insertion cannot guarantee; async and defer scripts are not waited for.
-let queue = Promise.resolve();
+const jobs = [];
+let pumping = false;
+let writeSlot = 0; // where the next job written by the running script goes, so writes keep their order and run before the rest
+let cursor = null; // the node the running script's markup goes after
+
+async function pump() {
+  if (pumping) return;
+  pumping = true;
+  while (jobs.length) {
+    const job = jobs.shift();
+    writeSlot = 0;
+    cursor = null;
+    await job();
+  }
+  pumping = false;
+}
+
+function schedule(placeholder, old, at = jobs.length) {
+  jobs.splice(at, 0, () => runScript(placeholder, old));
+  pump();
+}
 
 // A saved snippet was written for the page head, where it ran while the page was still loading. Agreed to later, it is run
 // with three allowances while any of its scripts is still starting up: a wait for DOMContentLoaded or load (listener or
@@ -90,9 +110,22 @@ function lateAllowances() {
     // After loading, document.write would replace the page; what the snippet writes is put in after the writing script instead.
     document[name] = function (...args) {
       if (document.readyState === 'loading') return original.apply(this, args);
-      const markup = args.join('') + (name === 'writeln' ? '\n' : '');
-      const where = document.currentScript || document.body.lastElementChild || document.body;
-      where.after(document.createRange().createContextualFragment(markup));
+      const holder = document.createElement('template');
+      holder.innerHTML = args.join('') + (name === 'writeln' ? '\n' : '');
+      cursor = cursor || document.currentScript || document.body.lastElementChild || document.body;
+      // Markup goes in after the writing script, in order; a script in it joins the ordered queue right behind the writer, so it runs (and is awaited) before the code that followed.
+      [...holder.content.childNodes].forEach((node) => {
+        if (node.nodeName === 'SCRIPT') {
+          const placeholder = document.createComment('');
+          cursor.after(placeholder);
+          cursor = placeholder;
+          if (pumping) schedule(placeholder, node, writeSlot++);
+          else schedule(placeholder, node);
+        } else {
+          cursor.after(node);
+          cursor = node;
+        }
+      });
       return undefined;
     };
     restore.push(() => { if (own) document[name] = own; else delete document[name]; });
@@ -155,7 +188,7 @@ function start(category) {
       return [placeholder, old];
     });
     template.after(code);
-    scripts.forEach(([placeholder, old]) => { queue = queue.then(() => runScript(placeholder, old)); });
+    scripts.forEach(([placeholder, old]) => schedule(placeholder, old));
   });
 }
 
