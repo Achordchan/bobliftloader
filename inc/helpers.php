@@ -89,7 +89,8 @@ function bl_image_facts(string $url): ?array
     if (array_key_exists($url, $known)) return $known[$url];
     $path = (string) parse_url($url, PHP_URL_PATH);
     $host = parse_url($url, PHP_URL_HOST);
-    if ($host && $host !== parse_url(home_url(), PHP_URL_HOST)) return $known[$url] = null;
+    // Only the site's own host, as the CDN addresses it: no other host, port or credentials, which a CDN address would drop.
+    if (($host && strtolower($host) !== bl_image_cdn_host(home_url())) || parse_url($url, PHP_URL_PORT) || parse_url($url, PHP_URL_USER)) return $known[$url] = null;
     $uploads = wp_upload_dir();
     $roots = [(string) parse_url($uploads['baseurl'], PHP_URL_PATH) => $uploads['basedir'], (string) parse_url(get_template_directory_uri(), PHP_URL_PATH) => get_template_directory()];
     $file = '';
