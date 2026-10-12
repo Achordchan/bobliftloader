@@ -9,13 +9,15 @@ function bl_family_content_definition(bool $loader): array
 {
     $defaults = []; $sections = []; $productFields = [];
     foreach (['catalog' => bl_catalog_copy_fields($loader), 'product.copy' => bl_product_copy_fields($loader)] as $prefix => $definitions) {
-        foreach ($definitions as $key => [$label, $value, $group, $type]) {
+        foreach ($definitions as $key => $definition) {
+            [$label, $value, $group, $type] = $definition;
             $path = $prefix . '.' . $key;
             $parts = explode('.', $path); $ref = &$defaults;
             foreach ($parts as $part) $ref = &$ref[$part];
             $ref = $value; unset($ref);
             $field = ['key' => $path, 'label' => $label, 'type' => $type === 'text' && strlen($value) > 100 ? 'textarea' : $type];
             if (str_contains($value, '{')) $field['help'] = '保留花括号变量：{model} 型号、{name} 产品名称、{warranty_months} 质保月数、{lead_time} 交期。其他变量按默认文案保留，由当前产品数据计算。';
+            if (!empty($definition[4])) $field['help'] = $definition[4];
             if ($type === 'html') $field['help'] = '保留 <br> 换行及现有强调文字标签；只修改标签之间的文字。';
             if ($prefix === 'catalog') $sections[$group]['fields'][] = $field;
             else $productFields[] = $field + ['group' => $group];

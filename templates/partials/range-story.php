@@ -42,7 +42,6 @@ if ($storyCategory === 'skid-steer-loaders') {
             ['big' => strtr(bl_content_html('loaders', 'range_story.engine_big'), ['{brand_count}' => (string) count($brands)]), 'title' => $rangeCopy['engine_title'], 'text' => strtr($rangeCopy['engine_text'], ['{engine_brands}' => (count($brands) > 1 ? implode(', ', array_slice($brands, 0, -1)) . ' or ' . end($brands) : implode('', $brands)), '{electric_note}' => ''])],
         ],
         'colour' => true,
-        'film' => ['src' => trim((string) $rangeCopy['film_video']), 'poster' => trim((string) $rangeCopy['film_poster']), 'caption' => trim((string) $rangeCopy['film_caption'])],
     ];
 } else {
     $mixers = [];
@@ -112,12 +111,6 @@ $at = static fn(int $v): string => rtrim(rtrim(number_format(($v - $scale['from'
     <div><p class="bl-eyebrow"><span class="bl-status-dot"></span> <?= $story['eyebrow'] ?></p><h2 id="range-story-title"><?= $story['title'] ?></h2></div>
     <p><?= bl_escape($story['intro']) ?></p>
   </div>
-  <?php if (!empty($story['film']['src'])): // the range film (a loader-page field); it loads only when played ?>
-  <figure class="bl-range-film bl-reveal">
-    <div class="bl-range-film-stage"><video controls playsinline preload="none"<?= $story['film']['poster'] !== '' ? ' poster="' . bl_escape(bl_product_media($story['film']['poster'])) . '"' : '' ?> src="<?= bl_escape(bl_product_media($story['film']['src'])) ?>"></video></div>
-    <?php if ($story['film']['caption'] !== ''): ?><figcaption><?= bl_escape($story['film']['caption']) ?></figcaption><?php endif; ?>
-  </figure>
-  <?php endif; ?>
   <div class="bl-range-story-chart">
     <div class="bl-range-story-copy bl-reveal">
       <p class="bl-eyebrow"><?= $story['chartEyebrow'] ?></p>

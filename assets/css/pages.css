@@ -491,10 +491,6 @@
 .bl-site .bl-range-story-head{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:clamp(32px,5vw,140px);align-items:end;padding-bottom:clamp(36px,3vw,72px);border-bottom:2px solid var(--ink)}
 .bl-site .bl-range-story-head h2{margin-top:clamp(18px,1.3vw,30px);font:700 var(--fs-display)/.88 var(--display);letter-spacing:-.015em}
 .bl-site .bl-range-story-head>p{max-width:34em;font-size:var(--fs-body);line-height:1.85;color:var(--muted);text-wrap:pretty}
-.bl-site .bl-range-film{margin:clamp(40px,3.5vw,88px) 0 0;max-width:1040px}
-.bl-site .bl-range-film-stage{position:relative;aspect-ratio:16/9;background:var(--ink)}
-.bl-site .bl-range-film video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--ink)}
-.bl-site .bl-range-film figcaption{margin-top:14px;font-size:var(--fs-small,14px);line-height:1.6;color:var(--muted)}
 .bl-site .bl-range-story-chart{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1.5fr);gap:clamp(40px,5vw,140px);align-items:start;margin-top:clamp(48px,4vw,104px)}
 .bl-site .bl-range-story-copy h3{margin:clamp(14px,1vw,24px) 0 clamp(18px,1.4vw,32px);font:700 var(--fs-h2)/.9 var(--display);letter-spacing:-.01em}
 .bl-site .bl-range-story-copy p:not(.bl-eyebrow){font-size:var(--fs-body);line-height:1.85;color:var(--muted);text-wrap:pretty}
@@ -897,6 +893,15 @@
 @keyframes bl-quick-dim{from{opacity:0}}
 @media print{.bl-site .bl-quick{display:none}}
 /* The family's catalogue under the hero intro, so it is one click from the range rather than inside Support. */
-.bl-site .bl-catalog-download{display:block;margin-top:22px}
-.bl-site .bl-catalog-download .bl-text-link{color:var(--ink)}
-.bl-site .bl-catalog-download small{display:block;margin-top:4px;font-size:12px;font-weight:400;opacity:.7}
+@media(min-width:1000px){.bl-site .bl-catalog-hero .bl-page-heading>p{max-width:clamp(295px,32vw,560px)}}
+.bl-site .bl-catalog-actions{display:flex;flex-wrap:wrap;align-items:flex-start;gap:18px clamp(28px,2.2vw,44px);margin-top:22px}
+.bl-site .bl-catalog-actions .bl-text-link{color:var(--ink);background:none;border-width:0 0 1px;border-style:solid;border-color:currentColor;padding-top:0;font-family:inherit;cursor:pointer;text-align:left}
+.bl-site .bl-catalog-actions .bl-text-link>span{display:block}
+.bl-site .bl-catalog-actions small{display:block;margin-top:4px;font-size:12px;font-weight:400;opacity:.7}
+.bl-site .bl-catalog-actions .bl-film-open .bl-icon{width:15px;height:15px}
+@media(hover:hover){.bl-site .bl-catalog-actions .bl-film-open:hover .bl-icon{transform:scale(1.15)}}
+/* The family film: a dark stage in a dialog, 16:9 at any width, with its caption underneath. */
+.bl-site .bl-film-dialog{width:min(1100px,calc(100% - 40px));background:var(--ink);color:#fff;overflow:hidden}
+.bl-site .bl-film-stage{aspect-ratio:16/9;background:#000}
+.bl-site .bl-film-stage video{display:block;width:100%;height:100%;object-fit:contain}
+.bl-site .bl-film-caption{padding:16px clamp(18px,2vw,32px) 20px;font-size:var(--fs-small,14px);line-height:1.6;color:#ffffffb8}

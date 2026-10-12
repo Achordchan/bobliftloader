@@ -23,11 +23,20 @@ $visible = count(array_filter($scope, static fn($item) => $matches($item)));
 $facetCount = static fn(string $key, string $value): int => count(array_filter($scope, static fn($item) => $matches($item, $key) && ($value === '' || $item['facets'][$key] === $value)));
 $heading = $category ? $catalogCopy('hero_title') : 'FIND YOUR<br>NEXT MACHINE.';
 $familyCatalogue = $category ? bl_family_catalogue($category) : null;
+// The family film opens in a dialog from a button beside the catalogue download; no address saved, no button.
+$film = $category ? ['src' => trim(bl_content_value($catalogPage, 'catalog.film_video')), 'poster' => trim(bl_content_value($catalogPage, 'catalog.film_poster')), 'caption' => trim(bl_content_value($catalogPage, 'catalog.film_caption'))] : ['src' => ''];
 ?>
 <section class="bl-page-hero bl-catalog-hero bl-shell">
   <?php bl_breadcrumbs([['label' => $category ? bl_family_label($category) : 'Search']]); ?>
-  <div class="bl-page-heading"><div><p class="bl-eyebrow"><?= $catalogCopy('hero_eyebrow') ?></p><h1><?= $heading ?></h1></div><p><?= $catalogCopy('hero_intro') ?><?php if ($familyCatalogue): ?><span class="bl-catalog-download"><a class="bl-text-link" href="<?= bl_escape($familyCatalogue['url']) ?>" target="_blank" rel="noopener"><span><?= $catalogCopy('hero_download') ?><small><?= bl_escape($familyCatalogue['kind']) ?></small></span><?= bl_icon('arrow-down') ?></a></span><?php endif; ?></p></div>
+  <div class="bl-page-heading"><div><p class="bl-eyebrow"><?= $catalogCopy('hero_eyebrow') ?></p><h1><?= $heading ?></h1></div><p><?= $catalogCopy('hero_intro') ?><?php if ($familyCatalogue || $film['src'] !== ''): ?><span class="bl-catalog-actions"><?php if ($film['src'] !== ''): ?><button class="bl-text-link bl-film-open" type="button" data-film-open="film-dialog"><span><?= $catalogCopy('hero_film') ?><small>Video</small></span><?= bl_icon('play') ?></button><?php endif; ?><?php if ($familyCatalogue): ?><a class="bl-text-link bl-catalog-download" href="<?= bl_escape($familyCatalogue['url']) ?>" target="_blank" rel="noopener"><span><?= $catalogCopy('hero_download') ?><small><?= bl_escape($familyCatalogue['kind']) ?></small></span><?= bl_icon('arrow-down') ?></a><?php endif; ?></span><?php endif; ?></p></div>
 </section>
+<?php if ($film['src'] !== ''): ?>
+<dialog class="bl-dialog bl-film-dialog" id="film-dialog" aria-label="<?= bl_escape($catalogCopy('hero_film')) ?>">
+  <button class="bl-dialog-close bl-circle-button" data-close-dialog aria-label="Close the film"><?= bl_icon('x') ?></button>
+  <div class="bl-film-stage"><video controls playsinline preload="none"<?= $film['poster'] !== '' ? ' poster="' . bl_escape(bl_product_media($film['poster'])) . '"' : '' ?> data-src="<?= bl_escape(bl_product_media($film['src'])) ?>"></video></div>
+  <?php if ($film['caption'] !== ''): ?><p class="bl-film-caption"><?= bl_escape($film['caption']) ?></p><?php endif; ?>
+</dialog>
+<?php endif; ?>
 <?php if ($category) require __DIR__ . '/../partials/section-nav.php'; // appears once the family switch scrolls away ?>
 <section class="bl-catalog bl-shell" id="models" aria-label="Product catalogue">
   <?php
