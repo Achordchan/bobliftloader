@@ -145,9 +145,8 @@
 /* The card's picture, laid over the film whenever it is not playing; the toggle sits above it (z-index below) so it can be pressed again. */
 .bl-site .bl-attachment-still{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff;pointer-events:none}
 .bl-site .bl-attachment-film.is-still .bl-attachment-still{display:block}
-/* The play / pause button every film card carries (assets/js/attachment-loops.js): a larger Play over the picture until the film is started, a small Pause in the corner while it runs. */
+/* The play / pause button every film card carries (assets/js/attachment-loops.js): Play while the picture shows, Pause while the film runs, always in the picture's lower right corner (clear of the product on its white ground). */
 .bl-site .bl-loop-toggle{position:absolute;z-index:1;right:8px;bottom:8px;display:grid;place-items:center;width:36px;height:36px;padding:0;border:0;border-radius:50%;background:rgba(8,28,43,.78);color:#fff;cursor:pointer}
-.bl-site .bl-attachment-film.is-still .bl-loop-toggle{right:50%;bottom:50%;width:48px;height:48px;transform:translate(50%,50%)}
 .bl-site .bl-loop-toggle:hover{background:var(--ink)}
 .bl-site .bl-loop-toggle:focus-visible{outline-offset:2px}
 .bl-site .bl-loop-toggle svg{width:16px;height:16px;fill:currentColor}
