@@ -647,5 +647,11 @@ function bl_home_hero_images(string $group = 'hero'): array
     $theme = static fn(string $file): string => is_file(dirname(__DIR__) . '/assets/' . $file) ? bl_asset($file) : '';
     $wide = $hero['image'] ?: $theme($wideFile);
     $narrow = $hero['image_mobile'] ?: ($hero['image'] ?: ($theme($narrowFile) ?: $wide));
-    return $wide && $narrow ? ['wide' => $wide, 'narrow' => $narrow] : [];
+    // Upright phones show only a slice of the theme's own phone picture, so they get that slice, cut to frame identically
+    // under the phone object-position (72%); a picture chosen in the admin is used whole.
+    $portrait = $narrow === $theme($narrowFile) ? $theme(substr($narrowFile, 0, -5) . '-portrait.webp') : '';
+    return $wide && $narrow ? ['wide' => $wide, 'narrow' => $narrow, 'portrait' => $portrait] : [];
 }
+
+/** The media query under which a hero slide shows its portrait slice: phones held upright (the slice is 3:4). */
+const BL_HERO_PORTRAIT_MEDIA = '(max-width: 800px) and (max-aspect-ratio: 2/3)';

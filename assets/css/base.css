@@ -1,9 +1,9 @@
-@font-face{font-family:Barlow Condensed;src:url('../fonts/barlow-condensed-600.ttf') format('truetype');font-weight:600;font-style:normal;font-display:swap}
-@font-face{font-family:Barlow Condensed;src:url('../fonts/barlow-condensed-700.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
-@font-face{font-family:Manrope;src:url('../fonts/manrope-400.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:Manrope;src:url('../fonts/manrope-500.ttf') format('truetype');font-weight:500;font-style:normal;font-display:swap}
-@font-face{font-family:Manrope;src:url('../fonts/manrope-600.ttf') format('truetype');font-weight:600;font-style:normal;font-display:swap}
-@font-face{font-family:Manrope;src:url('../fonts/manrope-700.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:Barlow Condensed;src:url('../fonts/barlow-condensed-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:Barlow Condensed;src:url('../fonts/barlow-condensed-700.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:Manrope;src:url('../fonts/manrope-400.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:Manrope;src:url('../fonts/manrope-500.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:Manrope;src:url('../fonts/manrope-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:Manrope;src:url('../fonts/manrope-700.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
 /* Stand-ins while the two families load (phones on a slow network see them longest): a system sans scaled to the same
    widths and line metrics, so headings and paragraphs keep their line breaks when the real font swaps in. */
 @font-face{font-family:'BL Display Fallback';src:local('Arial Bold'),local('Arial-BoldMT'),local('Helvetica Bold'),local('Helvetica-Bold'),local('Roboto Bold'),local('Roboto-Bold'),local('Liberation Sans Bold'),local('LiberationSans-Bold');font-weight:600 700;size-adjust:72%;ascent-override:139%;descent-override:28%;line-gap-override:0%}

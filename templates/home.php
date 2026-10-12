@@ -27,7 +27,8 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
   <?php /* One slide per family. The loader slide is the page's h1 and shows without the script; the script reveals the others and the switch. */ ?>
   <div class="bl-hero-media">
     <?php foreach ($heroSlides as $i => $slide): ?>
-    <picture class="bl-hero-picture<?= $i === 0 ? ' bl-active' : '' ?>" data-hero-picture<?= $i === 0 ? '' : ' aria-hidden="true"' ?>><source media="(min-width: 801px)" srcset="<?= bl_escape($slide['images']['wide']) ?>"><img src="<?= bl_escape($slide['images']['narrow']) ?>" alt="<?= bl_escape($slide['alt']) ?>" <?= $i === 0 ? 'fetchpriority="high"' : 'loading="lazy" decoding="async"' ?> width="1942" height="809"></picture>
+    <?php /* Later slides sit in view behind the first (transparent), so lazy loading would not hold them back: their addresses wait in data- attributes until hero.js sets them after the page has loaded. */ $attr = $i === 0 ? '' : 'data-'; ?>
+    <picture class="bl-hero-picture<?= $i === 0 ? ' bl-active' : '' ?>" data-hero-picture<?= $i === 0 ? '' : ' aria-hidden="true"' ?>><source media="(min-width: 801px)" <?= $attr ?>srcset="<?= bl_escape($slide['images']['wide']) ?>"><?php if ($slide['images']['portrait']): ?><source media="<?= BL_HERO_PORTRAIT_MEDIA ?>" <?= $attr ?>srcset="<?= bl_escape($slide['images']['portrait']) ?>"><?php endif; ?><img <?= $attr ?>src="<?= bl_escape($slide['images']['narrow']) ?>" alt="<?= bl_escape($slide['alt']) ?>" <?= $i === 0 ? 'fetchpriority="high"' : 'decoding="async"' ?> width="1942" height="809"></picture>
     <?php endforeach; ?>
   </div>
   <div class="bl-hero-content bl-shell">

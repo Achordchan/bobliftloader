@@ -29,6 +29,15 @@ add_action('after_setup_theme', static function (): void {
 // Our shared document renders one canonical, title and robots block for every route.
 remove_action('wp_head', 'rel_canonical');
 remove_action('wp_head', 'wp_robots', 1); // core adds it at priority 1; without the number nothing is removed and a second robots tag is printed
+// No emoji script or styles: every browser the site supports draws emoji itself, and the theme's pages use none.
+remove_action('wp_head', 'print_emoji_detection_script', 7);
+remove_action('wp_enqueue_scripts', 'wp_enqueue_emoji_styles');
+remove_action('wp_print_styles', 'print_emoji_styles');
+// The home page is all theme template, no editor blocks, so the block styles the platform inlines would only slow its first paint.
+add_action('wp_enqueue_scripts', static function (): void {
+    if (!is_front_page()) return;
+    foreach (['wp-block-library', 'wp-block-library-theme', 'classic-theme-styles', 'global-styles', 'jetpack-global-styles-frontend-style'] as $handle) wp_dequeue_style($handle);
+}, 100);
 // index.php renders one icon set; honor an administrator's site icon before theme defaults.
 remove_action('wp_head', 'wp_site_icon', 99);
 add_filter('get_site_icon_url', static fn($url, $size = 512) => get_option('site_icon') ? $url : bl_content_asset('global', 'brand.icon', (int) $size >= 180 ? 'images/icons/icon-192.png' : 'images/icons/icon-32.png'), 99, 2);
