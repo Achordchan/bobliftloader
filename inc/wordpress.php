@@ -70,7 +70,7 @@ function bl_wp_article_record(WP_Post $post): array
     if (!is_array($meta)) $meta = [];
     $meta['_bl_body_managed'] = bl_news_body_managed($post, $meta);
     $meta['line'] = bl_news_line($meta, $post->post_name);
-    $record = array_replace(['category' => '', 'line' => 'compact', 'source' => '', 'image' => '', 'caption' => '', 'sections' => [], 'event' => [], 'poster' => [], 'products' => []], $meta);
+    $record = array_replace(['category' => '', 'line' => 'compact', 'pinned' => false, 'source' => '', 'image' => '', 'caption' => '', 'sections' => [], 'event' => [], 'poster' => [], 'products' => []], $meta);
     if (!empty($record['poster']['image'])) $record['poster']['image'] = bl_wp_image($record['poster']['image']);
     // Stories saved before 'hide_cover' existed take it from their seed record, but only while they still keep the seed's
     // cover (a cover replaced since is the editor's own picture); a value saved since is the editor's.
