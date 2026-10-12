@@ -66,6 +66,10 @@ function bl_content_schema_fields(string $page, ?array $content = null): array
             'title' => ['label' => '名称', 'type' => 'text'],
             'text' => ['label' => '说明', 'type' => 'textarea'],
         ]],
+        ...($family === 'dumper' ? [['key' => 'product.factory.checks_wheeled', 'group' => '工厂与出厂检查', 'label' => '轮式翻斗车出厂检查', 'type' => 'list', 'add' => '添加检查项', 'summary' => ['title'], 'help' => '轮式翻斗车（FC、FY、FJZ 各型号）显示这一组；留空则和履带车一样显示上面的出厂检查。', 'fields' => [
+            'title' => ['label' => '名称', 'type' => 'text'],
+            'text' => ['label' => '说明', 'type' => 'textarea'],
+        ]]] : []),
         ['key' => 'product.faq', 'label' => '常见问题', 'type' => 'list', 'add' => '添加问题', 'summary' => ['q'], 'fields' => [
             'q' => ['label' => '问题', 'type' => 'text'],
             'a' => ['label' => '回答', 'type' => 'textarea'],

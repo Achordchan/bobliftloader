@@ -323,6 +323,8 @@ function bl_product_page_defaults(string $family): array
                 ['title' => 'Run and travel test', 'text' => 'We run the engine and operate every movement, then drive the machine to test the travel system.'],
                 ['title' => 'Leaks, cooling and final check', 'text' => 'We look for oil leaks, shut the machine down, inspect the cooling and finish with a last pipework check.'],
             ],
+            // The wheeled site dumpers are tested to their own list; empty means they show the checks above like the tracked models.
+            'checks_wheeled' => [],
         ],
         'faq' => [
             $faq('Two-wheel or four-wheel drive?', 'For loose ground and ramps, the FY20-4, FY30, FY40, FY50 and FJZ30 drive all four wheels. Tell us about your site and we confirm the drive of the model we quote.'),
