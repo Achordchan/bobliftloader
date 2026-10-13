@@ -117,9 +117,8 @@ class WebsiteTests(unittest.TestCase):
             if product['source']: self.assertNotIn('href="' + product['source'], html)
             for label, value in product['specs'].items():
                 self.assertIn(value.replace('&', '&amp;'), html)
-            schema = next(item for item in Page(html).structured[0]['@graph'] if item['@type'] == 'Product')
-            self.assertNotIn('offers', schema)
-            self.assertNotIn('aggregateRating', schema)
+            # No price, review or rating to state, so no Product markup for Google to flag.
+            self.assertNotIn('Product', [item['@type'] for item in Page(html).structured[0]['@graph']])
 
     def test_product_pages_guide_the_buyer(self):
         for product in self.products:
@@ -155,9 +154,6 @@ class WebsiteTests(unittest.TestCase):
             loader = product['category'] == 'skid-steer-loaders'
             self.assertEqual('class="bl-product-tools"' in main, loader)
             self.assertIn('aria-current="true"', main.split('class="bl-product-compare"', 1)[1])
-            schema = next(item for item in Page(html).structured[0]['@graph'] if item['@type'] == 'Product')
-            self.assertEqual((schema['sku'], schema['mpn']), (product['model'], product['model']))
-            if product['image']: self.assertIsInstance(schema['image'], list)
 
     def test_search_filters_and_empty_state(self):
         _, html, _ = fetch('/products/?q=BL-T1000-H')
@@ -521,6 +517,8 @@ class WebsiteTests(unittest.TestCase):
             self.assertIn('/product/' + slug + '/', main.split('Related products', 1)[1])
         event = next(item for item in Page(html).structured[0]['@graph'] if item['@type'] == 'Event')
         self.assertEqual((event['startDate'], event['endDate']), (fair['event']['start'], fair['event']['end']))
+        self.assertEqual(event['performer'], event['organizer'])
+        self.assertNotIn('offers', event)
         # Group stories are labelled as such and link to boblift.com once in the page body.
         for article in (a for a in self.articles if not a['category']):
             _, html, _ = fetch('/news/' + article['slug'] + '/')

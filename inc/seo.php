@@ -23,12 +23,7 @@ function bl_structured_data(array $route): array
         ['@type' => 'WebSite', '@id' => $base . '/#website', 'url' => $base . '/', 'name' => 'BOB-LIFT Loader', 'description' => 'The loader equipment business website of ' . bl_company('name'), 'publisher' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
         ['@type' => $route['type'] === 'about' ? 'AboutPage' : ($route['type'] === 'contact' ? 'ContactPage' : 'WebPage'), '@id' => $base . $route['path'] . '#webpage', 'url' => $base . $route['path'], 'name' => $route['title'], 'description' => $route['description'], 'isPartOf' => ['@id' => $base . '/#website'], 'about' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
     ];
-    if ($route['type'] === 'product' && $route['record']['model'] !== '') {
-        $p = $route['record'];
-        // Every photograph of the machine (gallery first, then the product's own photographs, drawings aside), once each.
-        $images = array_values(array_unique(array_map('bl_absolute_asset', array_filter([$p['image'], ...array_column(bl_product_gallery($p), 'src'), ...array_column(bl_product_photos($p, ['at-work', 'detail', 'delivery']), 'src')]))));
-        $graph[] = array_filter(['@type' => 'Product', 'name' => $p['name'], 'model' => $p['model'], 'sku' => $p['model'], 'mpn' => $p['model'], 'category' => $p['category'] === 'mini-dumpers' ? 'Mini dumpers' : 'Skid steer loaders', 'image' => $images ?: null, 'description' => bl_product_description($p), 'url' => $base . $route['path'], 'brand' => ['@type' => 'Brand', 'name' => 'BOB-LIFT'], 'manufacturer' => ['@id' => $organization['@id']], 'additionalProperty' => array_map(static fn($name, $value) => ['@type' => 'PropertyValue', 'name' => $name, 'value' => $value], array_keys($p['specs']), array_values($p['specs']))], static fn($value) => $value !== null); // models awaiting photography have no image
-    }
+    // No Product node: Google's product snippets need a price, a review or a rating, and the site states none of them.
     if ($route['type'] === 'application_case') {
         $c = $route['record'];
         $graph[] = array_filter(['@type' => 'Article', 'headline' => $c['title'], 'description' => $c['excerpt'], 'image' => bl_absolute_asset($c['image']), 'datePublished' => $c['date'], 'dateModified' => $c['updated'] ?? null, 'author' => ['@id' => $organization['@id']], 'publisher' => ['@id' => $organization['@id']], 'mainEntityOfPage' => ['@id' => $base . $route['path'] . '#webpage']], static fn($value) => $value !== null);
@@ -38,8 +33,9 @@ function bl_structured_data(array $route): array
         $graph[] = ['@type' => 'Article', 'headline' => $a['title'], 'description' => $a['excerpt'], 'image' => bl_absolute_asset($a['image']), 'datePublished' => $a['date'], 'author' => ['@id' => $organization['@id']], 'publisher' => ['@id' => $organization['@id']], 'mainEntityOfPage' => ['@id' => $base . $route['path'] . '#webpage'], 'citation' => $a['source'] ?: null];
         $graph[count($graph) - 1] = array_filter($graph[count($graph) - 1], static fn($value) => $value !== null);
         if (!empty($a['event']['start'])) {
+            // BOB-LIFT is the exhibitor, so it is also the performer. No offers: booths have no ticket price to state.
             $e = $a['event'];
-            $graph[] = ['@type' => 'Event', 'name' => 'BOB-LIFT at the ' . $e['name'] . ', booth ' . $e['booth'], 'startDate' => $e['start'], 'endDate' => $e['end'] ?: $e['start'], 'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode', 'eventStatus' => 'https://schema.org/EventScheduled', 'location' => ['@type' => 'Place', 'name' => $e['venue'], 'address' => $e['address']], 'organizer' => ['@id' => $organization['@id']], 'image' => bl_absolute_asset($a['image']), 'description' => $a['excerpt'], 'url' => $base . $route['path']];
+            $graph[] = ['@type' => 'Event', 'name' => 'BOB-LIFT at the ' . $e['name'] . ', booth ' . $e['booth'], 'startDate' => $e['start'], 'endDate' => $e['end'] ?: $e['start'], 'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode', 'eventStatus' => 'https://schema.org/EventScheduled', 'location' => ['@type' => 'Place', 'name' => $e['venue'], 'address' => $e['address']], 'organizer' => ['@id' => $organization['@id']], 'performer' => ['@id' => $organization['@id']], 'image' => bl_absolute_asset($a['image']), 'description' => $a['excerpt'], 'url' => $base . $route['path']];
         }
     }
     if ($route['path'] !== '/' && $route['status'] === 200) {
