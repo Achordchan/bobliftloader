@@ -110,7 +110,7 @@ $check(!str_contains($js, 'createElement(\'script\')') && !str_contains($js, 'do
 // elsewhere, then the cookie's choice), and the categories it serves get a banner even with no pasted code.
 $save([]);
 $check(bl_google_tag_markup() === '' && bl_google_tag_ids() === [], 'Google tag printed with no ID');
-$save(['google_tag' => " g-ABC1234XYZ, aw-123456789\nnot-an-id, AW-123456789", 'google_conversion' => 'AW-123456789/AbC-dEf_9']);
+$save(['google_tag' => " g-ABC1234XYZ, aw-123456789\nnot-an-id, AW-123456789", 'google_conversion' => 'AW-123456789/AbC-dEf_9', 'google_regional' => '1']);
 $check(bl_google_tag_ids() === ['G-ABC1234XYZ', 'AW-123456789'], 'Google tag IDs not parsed, upper-cased and de-duplicated');
 $check(bl_consent_categories() === ['analytics', 'advertising'], 'Google tag IDs do not create the banner categories');
 $markup = $capture(static fn() => run_hook('wp_head'));
@@ -120,22 +120,19 @@ $check(strpos($markup, '"region"') < strpos($markup, '{"ad_storage":"granted"'),
 $check(str_contains($markup, 'bl_consent=') && str_contains($markup, 'v.v!==1') && str_contains($markup, 'gtag("consent","update"') && str_contains($markup, '["analytics","advertising"]'), 'cookie choice not applied');
 $check(str_contains($markup, 'gtag("config","G-ABC1234XYZ");gtag("config","AW-123456789");') && str_contains($markup, 'window.blGoogleConversion="AW-123456789/AbC-dEf_9"'), 'config or conversion missing');
 $check(str_ends_with($markup, '<script async src="https://www.googletagmanager.com/gtag/js?id=G-ABC1234XYZ"></script>'), 'gtag.js not loaded async');
-$check(bl_consent_notices_regional() && str_contains(bl_google_tag_markup(), '{"ad_storage":"granted"'), 'the default texts do not allow the regional defaults');
-// Banner or privacy text saved before the regional defaults still promises opt-in everywhere: then nothing defaults to granted
-// (a fresh process, since saved content is cached per request), and the tracking screen asks for the texts to be updated.
-$legacy = static function (string $setup): string {
-    $code = 'require ' . var_export(__DIR__ . '/fixtures/wp-memory.php', true) . '; require ' . var_export(__DIR__ . '/../inc/bootstrap.php', true) . '; require ' . var_export(__DIR__ . '/../inc/wp-admin.php', true) . '; require ' . var_export(__DIR__ . '/../inc/wp-support.php', true) . '; require ' . var_export(__DIR__ . '/../inc/wp-content-editor.php', true) . '; require ' . var_export(__DIR__ . '/../inc/wp-tracking.php', true) . '; '
-        . $setup . ' $GLOBALS["options"]["bl_content_tracking"] = ["google_tag" => "G-ABC1234XYZ", "grouped" => "1"]; $GLOBALS["caps"] = ["manage_options" => true, "unfiltered_html" => true];'
-        . ' echo bl_google_tag_markup(), "|SCREEN|"; bl_tracking_screen();';
-    return (string) shell_exec('php -r ' . escapeshellarg($code) . ' 2>&1');
-};
-foreach (['$GLOBALS["options"]["bl_content_privacy"] = ["body" => ["ending" => "<p>They load only after you agree in the cookie banner.</p>"]];', '$GLOBALS["options"]["bl_content_global"] = ["consent" => ["text" => "They stay off unless you agree."]];'] as $setup) {
-    $out = $legacy($setup);
-    [$tag] = explode('|SCREEN|', $out);
-    $check(str_contains($tag, 'gtag("config","G-ABC1234XYZ")') && !str_contains($tag, '{"ad_storage":"granted"') && substr_count($tag, '"ad_storage":"denied"') === 2, 'legacy opt-in text still defaults to granted: ' . substr($out, 0, 300));
-    $check(str_contains($out, '横幅或隐私说明还是旧文字'), 'legacy notice text not flagged on the tracking screen');
-}
-$save(['google_tag' => 'AW-123456789', 'google_conversion' => 'AW-1/x"onload']);
+// Until an administrator confirms the texts describe the regional defaults, the whole Google tag is gated like pasted code:
+// nothing runs before the cookie agrees to a category it serves.
+$confirmed = bl_google_tag_markup();
+$save(['google_tag' => 'G-ABC1234XYZ, AW-123456789']);
+$gated = bl_google_tag_markup();
+$check(str_starts_with($gated, '<template data-bl-consent="google"><script>window.dataLayer') && str_contains($gated, 'c.some(function(k){return v[k]===true})') && str_contains($gated, 'document.write(t.innerHTML)') && str_ends_with($gated, ',["analytics","advertising"])</script>'), 'unconfirmed Google tag is not gated');
+$check(!str_starts_with($confirmed, '<template'), 'confirmed Google tag was gated');
+$GLOBALS['caps'] = ['manage_options' => true, 'unfiltered_html' => true];
+$check(str_contains($capture('bl_tracking_screen'), 'Google 标签目前仍是“同意后才加载”') && str_contains($capture('bl_tracking_screen'), 'name="bl_content[google_regional]" value="1">'), 'unconfirmed state not shown on the tracking screen');
+$save(['google_tag' => 'G-ABC1234XYZ', 'google_regional' => '1']);
+$check(!str_contains($capture('bl_tracking_screen'), 'Google 标签目前仍是') && str_contains($capture('bl_tracking_screen'), 'value="1" checked>'), 'confirmed state not shown on the tracking screen');
+$GLOBALS['caps'] = [];
+$save(['google_tag' => 'AW-123456789', 'google_conversion' => 'AW-1/x"onload', 'google_regional' => '1']);
 $check(bl_consent_categories() === ['advertising'] && !str_contains(bl_google_tag_markup(), 'blGoogleConversion'), 'malformed conversion printed or wrong category');
 $check(str_contains(bl_google_tag_markup(), 'window.blGoogleTag=true;'), 'theme Google tag not marked');
 $save(['google_tag' => 'GT-ABCDEFG, DC-1234567']);

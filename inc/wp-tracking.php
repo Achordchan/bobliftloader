@@ -56,12 +56,13 @@ function bl_tracking_screen(): void
         'google_conversion' => ['询盘转化（Google Ads）', '在 Google Ads 建好「提交潜在客户表单」转化后，填它的 send_to 值，形如 AW-123456789/AbCdEfGh。访客发出询盘、到达成功页时上报一次；同时总会上报 GA4 的 generate_lead 事件。'],
     ];
     echo '<h2 class="bl-ce-heading">Google 标签（同意模式）</h2>';
-    if (bl_google_tag_ids() && !bl_consent_notices_regional()) {
-        echo '<div class="notice notice-warning"><p><strong>横幅或隐私说明还是旧文字。</strong>旧文字写的是“同意前一律不加载”，所以目前所有地区都按默认拒绝处理。请把“全站设置 → Cookie 同意横幅”的说明和隐私说明改成区分地区的写法（主题默认文字已经改好，可参考），保存后欧洲以外地区才会默认允许。</p></div>';
-    }
+    $confirmed = ($values['google_regional'] ?? '') === '1';
+    echo '<p class="bl-field-help">勾选下面的确认之前，Google 标签和其他代码一样，访客同意后才加载。勾选后才按地区默认：欧洲经济区、英国、瑞士默认拒绝（只发不带 Cookie 的匿名信号），其他地区默认允许。</p>';
+    if (bl_google_tag_ids() && !$confirmed) echo '<div class="notice notice-warning"><p><strong>Google 标签目前仍是“同意后才加载”。</strong>先把“全站设置 → Cookie 同意横幅”的说明和隐私说明改成分地区的写法（主题默认文字可参考），再勾选下面的确认并保存。</p></div>';
     foreach ($google as $key => [$label, $help]) {
         echo '<div class="bl-field bl-ce-wide"><div class="bl-field-label"><label for="bl-tracking-' . $key . '">' . esc_html($label) . '</label></div><div class="bl-field-control"><input class="large-text code" type="text" spellcheck="false" id="bl-tracking-' . $key . '" name="bl_content[' . $key . ']" value="' . esc_attr((string) ($values[$key] ?? '')) . '"><p class="bl-field-help">' . esc_html($help) . '</p></div></div>';
     }
+    echo '<div class="bl-field bl-ce-wide"><div class="bl-field-label">按地区默认</div><div class="bl-field-control"><input type="hidden" name="bl_content[google_regional]" value=""><label><input type="checkbox" id="bl-tracking-google_regional" name="bl_content[google_regional]" value="1"' . ($confirmed ? ' checked' : '') . '> 我已确认横幅说明和隐私说明写明了：欧洲经济区、英国、瑞士同意后才使用 Cookie，其他地区默认开启、可随时关闭</label></div></div>';
     foreach ($categories as $category => [$title, $note]) {
         echo '<h2 class="bl-ce-heading">' . esc_html($title) . '</h2><p class="bl-field-help">' . esc_html($note) . '</p>';
         foreach ($positions as $position => [$label, $help]) {

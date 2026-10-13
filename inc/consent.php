@@ -75,7 +75,8 @@ function bl_consent_categories(): array
 
 /**
  * Google's own tags (GA4 "G-…", Google Ads "AW-…") are not pasted as code: their IDs are saved on the tracking screen and the
- * theme loads the Google tag on every page with Consent Mode v2. Until the visitor chooses, visitors in the EEA, the UK and
+ * theme loads the Google tag with Consent Mode v2. Once an administrator confirms that the banner and privacy texts say so
+ * (bl_google_regional_confirmed), it loads on every page: until the visitor chooses, visitors in the EEA, the UK and
  * Switzerland start with everything denied (Google then sends only cookieless pings, from which it models conversions) and
  * everyone else starts granted; the banner's choice, kept in the bl_consent cookie, then updates both. Because these tags run
  * without waiting for the banner, the categories they serve are marked as running (window.blConsentRan) only when the cookie
@@ -114,17 +115,15 @@ function bl_google_categories(): array
 }
 
 /**
- * Whether the banner and privacy texts in use describe the regional defaults. Text saved before them still says the tools
- * stay off until the visitor agrees, everywhere; while either does, the Google tag keeps every region opted out by default
- * (so the site does what it says) and the tracking screen asks for the texts to be updated.
+ * Whether an administrator has confirmed, on the tracking screen, that the banner and privacy texts describe the regional
+ * defaults. Until then the Google tag is held back like any other tracking code (nothing at all runs before the visitor
+ * agrees), because the texts in use may still promise that, in whatever words or language they were written.
  */
-function bl_consent_notices_regional(): bool
+function bl_google_regional_confirmed(): bool
 {
-    if (!function_exists('bl_content_value')) return false;
-    $banner = bl_content_value('global', 'consent.text');
-    $privacy = bl_content_value('privacy', 'body.ending');
-    $optInOnly = static fn(string $text, string $phrase, string $region): bool => stripos($text, $phrase) !== false && stripos($text, $region) === false;
-    return !$optInOnly($banner, 'unless you agree', 'EEA') && !$optInOnly($privacy, 'only after you agree', 'European Economic Area');
+    if (!function_exists('get_option')) return false;
+    $saved = get_option('bl_content_tracking', []);
+    return is_array($saved) && ($saved['google_regional'] ?? '') === '1';
 }
 
 /** The Google tag with its consent defaults, for the top of <head>; '' when no Google tag ID is saved. */
@@ -138,7 +137,7 @@ function bl_google_tag_markup(): string
     $json = static fn($value): string => (string) json_encode($value, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
     $script = 'window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}'
         . 'gtag("consent","default",' . $json($denied + ['region' => BL_CONSENT_DENIED_REGIONS, 'wait_for_update' => 500]) . ');'
-        . (bl_consent_notices_regional() ? 'gtag("consent","default",' . $json($granted) . ');' : 'gtag("consent","default",' . $json($denied + ['wait_for_update' => 500]) . ');')
+        . 'gtag("consent","default",' . $json($granted) . ');'
         . '(function(c){try{var m=document.cookie.match(/(?:^|; )bl_consent=([^;]*)/),v=m&&JSON.parse(decodeURIComponent(m[1]));if(!v||v.v!==1)return;'
         . 'var r=window.blConsentRan=window.blConsentRan||{};c.forEach(function(k){if(v[k]===true)r[k]=true});'
         . 'var a=v.analytics===true?"granted":"denied",d=v.advertising===true?"granted":"denied";'
@@ -147,5 +146,10 @@ function bl_google_tag_markup(): string
     foreach ($ids as $id) $script .= 'gtag("config",' . $json($id) . ');';
     $conversion = bl_google_conversion();
     if ($conversion !== '') $script .= 'window.blGoogleConversion=' . $json($conversion) . ';';
-    return '<script>' . $script . '</script><script async src="https://www.googletagmanager.com/gtag/js?id=' . rawurlencode($ids[0]) . '"></script>';
+    $markup = '<script>' . $script . '</script><script async src="https://www.googletagmanager.com/gtag/js?id=' . rawurlencode($ids[0]) . '"></script>';
+    if (bl_google_regional_confirmed()) return $markup;
+    // Not confirmed: inert until the visitor's cookie agrees to a category the tags serve, then written in as the page is read
+    // (the same gate as bl_tracking_markup), with the cookie's choice applied over the defaults.
+    $gate = '(function(t,c){try{var m=document.cookie.match(/(?:^|; )bl_consent=([^;]*)/),v=m&&JSON.parse(decodeURIComponent(m[1]));if(v&&v.v===1&&c.some(function(k){return v[k]===true}))document.write(t.innerHTML)}catch(e){}})(document.currentScript.previousElementSibling,' . $json(array_keys($categories)) . ')';
+    return '<template data-bl-consent="google">' . $markup . '</template><script>' . $gate . '</script>';
 }
