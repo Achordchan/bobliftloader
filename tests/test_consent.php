@@ -120,6 +120,21 @@ $check(strpos($markup, '"region"') < strpos($markup, '{"ad_storage":"granted"'),
 $check(str_contains($markup, 'bl_consent=') && str_contains($markup, 'v.v!==1') && str_contains($markup, 'gtag("consent","update"') && str_contains($markup, '["analytics","advertising"]'), 'cookie choice not applied');
 $check(str_contains($markup, 'gtag("config","G-ABC1234XYZ");gtag("config","AW-123456789");') && str_contains($markup, 'window.blGoogleConversion="AW-123456789/AbC-dEf_9"'), 'config or conversion missing');
 $check(str_ends_with($markup, '<script async src="https://www.googletagmanager.com/gtag/js?id=G-ABC1234XYZ"></script>'), 'gtag.js not loaded async');
+$check(bl_consent_notices_regional() && str_contains(bl_google_tag_markup(), '{"ad_storage":"granted"'), 'the default texts do not allow the regional defaults');
+// Banner or privacy text saved before the regional defaults still promises opt-in everywhere: then nothing defaults to granted
+// (a fresh process, since saved content is cached per request), and the tracking screen asks for the texts to be updated.
+$legacy = static function (string $setup): string {
+    $code = 'require ' . var_export(__DIR__ . '/fixtures/wp-memory.php', true) . '; require ' . var_export(__DIR__ . '/../inc/bootstrap.php', true) . '; require ' . var_export(__DIR__ . '/../inc/wp-admin.php', true) . '; require ' . var_export(__DIR__ . '/../inc/wp-support.php', true) . '; require ' . var_export(__DIR__ . '/../inc/wp-content-editor.php', true) . '; require ' . var_export(__DIR__ . '/../inc/wp-tracking.php', true) . '; '
+        . $setup . ' $GLOBALS["options"]["bl_content_tracking"] = ["google_tag" => "G-ABC1234XYZ", "grouped" => "1"]; $GLOBALS["caps"] = ["manage_options" => true, "unfiltered_html" => true];'
+        . ' echo bl_google_tag_markup(), "|SCREEN|"; bl_tracking_screen();';
+    return (string) shell_exec('php -r ' . escapeshellarg($code) . ' 2>&1');
+};
+foreach (['$GLOBALS["options"]["bl_content_privacy"] = ["body" => ["ending" => "<p>They load only after you agree in the cookie banner.</p>"]];', '$GLOBALS["options"]["bl_content_global"] = ["consent" => ["text" => "They stay off unless you agree."]];'] as $setup) {
+    $out = $legacy($setup);
+    [$tag] = explode('|SCREEN|', $out);
+    $check(str_contains($tag, 'gtag("config","G-ABC1234XYZ")') && !str_contains($tag, '{"ad_storage":"granted"') && substr_count($tag, '"ad_storage":"denied"') === 2, 'legacy opt-in text still defaults to granted: ' . substr($out, 0, 300));
+    $check(str_contains($out, '横幅或隐私说明还是旧文字'), 'legacy notice text not flagged on the tracking screen');
+}
 $save(['google_tag' => 'AW-123456789', 'google_conversion' => 'AW-1/x"onload']);
 $check(bl_consent_categories() === ['advertising'] && !str_contains(bl_google_tag_markup(), 'blGoogleConversion'), 'malformed conversion printed or wrong category');
 $check(str_contains(bl_google_tag_markup(), 'window.blGoogleTag=true;'), 'theme Google tag not marked');

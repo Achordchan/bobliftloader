@@ -56,6 +56,9 @@ function bl_tracking_screen(): void
         'google_conversion' => ['询盘转化（Google Ads）', '在 Google Ads 建好「提交潜在客户表单」转化后，填它的 send_to 值，形如 AW-123456789/AbCdEfGh。访客发出询盘、到达成功页时上报一次；同时总会上报 GA4 的 generate_lead 事件。'],
     ];
     echo '<h2 class="bl-ce-heading">Google 标签（同意模式）</h2>';
+    if (bl_google_tag_ids() && !bl_consent_notices_regional()) {
+        echo '<div class="notice notice-warning"><p><strong>横幅或隐私说明还是旧文字。</strong>旧文字写的是“同意前一律不加载”，所以目前所有地区都按默认拒绝处理。请把“全站设置 → Cookie 同意横幅”的说明和隐私说明改成区分地区的写法（主题默认文字已经改好，可参考），保存后欧洲以外地区才会默认允许。</p></div>';
+    }
     foreach ($google as $key => [$label, $help]) {
         echo '<div class="bl-field bl-ce-wide"><div class="bl-field-label"><label for="bl-tracking-' . $key . '">' . esc_html($label) . '</label></div><div class="bl-field-control"><input class="large-text code" type="text" spellcheck="false" id="bl-tracking-' . $key . '" name="bl_content[' . $key . ']" value="' . esc_attr((string) ($values[$key] ?? '')) . '"><p class="bl-field-help">' . esc_html($help) . '</p></div></div>';
     }

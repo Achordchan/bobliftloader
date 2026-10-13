@@ -113,6 +113,20 @@ function bl_google_categories(): array
     return $categories;
 }
 
+/**
+ * Whether the banner and privacy texts in use describe the regional defaults. Text saved before them still says the tools
+ * stay off until the visitor agrees, everywhere; while either does, the Google tag keeps every region opted out by default
+ * (so the site does what it says) and the tracking screen asks for the texts to be updated.
+ */
+function bl_consent_notices_regional(): bool
+{
+    if (!function_exists('bl_content_value')) return false;
+    $banner = bl_content_value('global', 'consent.text');
+    $privacy = bl_content_value('privacy', 'body.ending');
+    $optInOnly = static fn(string $text, string $phrase, string $region): bool => stripos($text, $phrase) !== false && stripos($text, $region) === false;
+    return !$optInOnly($banner, 'unless you agree', 'EEA') && !$optInOnly($privacy, 'only after you agree', 'European Economic Area');
+}
+
 /** The Google tag with its consent defaults, for the top of <head>; '' when no Google tag ID is saved. */
 function bl_google_tag_markup(): string
 {
@@ -124,7 +138,7 @@ function bl_google_tag_markup(): string
     $json = static fn($value): string => (string) json_encode($value, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
     $script = 'window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}'
         . 'gtag("consent","default",' . $json($denied + ['region' => BL_CONSENT_DENIED_REGIONS, 'wait_for_update' => 500]) . ');'
-        . 'gtag("consent","default",' . $json($granted) . ');'
+        . (bl_consent_notices_regional() ? 'gtag("consent","default",' . $json($granted) . ');' : 'gtag("consent","default",' . $json($denied + ['wait_for_update' => 500]) . ');')
         . '(function(c){try{var m=document.cookie.match(/(?:^|; )bl_consent=([^;]*)/),v=m&&JSON.parse(decodeURIComponent(m[1]));if(!v||v.v!==1)return;'
         . 'var r=window.blConsentRan=window.blConsentRan||{};c.forEach(function(k){if(v[k]===true)r[k]=true});'
         . 'var a=v.analytics===true?"granted":"denied",d=v.advertising===true?"granted":"denied";'
