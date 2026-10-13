@@ -65,8 +65,95 @@ function bl_tracking_code(string $key): string
 function bl_consent_categories(): array
 {
     $categories = [];
+    $google = bl_google_categories();
     foreach (BL_TRACKING_SLOTS as $category => $slots) {
+        if (isset($google[$category])) { $categories[] = $category; continue; }
         foreach ($slots as $key) if (bl_tracking_code($key) !== '') { $categories[] = $category; break; }
     }
     return $categories;
+}
+
+/**
+ * Google's own tags (GA4 "G-…", Google Ads "AW-…") are not pasted as code: their IDs are saved on the tracking screen and the
+ * theme loads the Google tag with Consent Mode v2. Once an administrator confirms that the banner and privacy texts say so
+ * (bl_google_regional_confirmed), it loads on every page: until the visitor chooses, visitors in the EEA, the UK and
+ * Switzerland start with everything denied (Google then sends only cookieless pings, from which it models conversions) and
+ * everyone else starts granted; the banner's choice, kept in the bl_consent cookie, then updates both. Because these tags run
+ * without waiting for the banner, the categories they serve are marked as running (window.blConsentRan) only when the cookie
+ * agrees, exactly like the gated slots, so assets/js/consent.js reloads and cleans up in the same way.
+ */
+const BL_CONSENT_DENIED_REGIONS = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'IS', 'LI', 'NO', 'GB', 'CH'];
+
+/**
+ * The valid Google tag IDs saved on the tracking screen (comma, space or newline separated), in order, without duplicates.
+ * Only GA4 (G-) and Google Ads (AW-) IDs are accepted: a combined Google tag (GT-) or Floodlight (DC-) ID does not say which
+ * consent category it serves, so it would get the wrong banner choice; such tools are pasted into the slots below instead.
+ */
+function bl_google_tag_ids(): array
+{
+    if (!function_exists('get_option')) return [];
+    $saved = get_option('bl_content_tracking', []);
+    $ids = preg_split('~[\s,;]+~', strtoupper((string) (is_array($saved) ? ($saved['google_tag'] ?? '') : '')), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+    return array_values(array_unique(array_filter($ids, static fn(string $id): bool => (bool) preg_match('~^(?:G|AW)-[A-Z0-9]{4,20}$~', $id))));
+}
+
+/** The Google Ads conversion that a sent enquiry reports ("AW-123456789/AbC-dEf"), or '' when none or malformed. */
+function bl_google_conversion(): string
+{
+    if (!function_exists('get_option')) return '';
+    $saved = get_option('bl_content_tracking', []);
+    $value = trim((string) (is_array($saved) ? ($saved['google_conversion'] ?? '') : ''));
+    return preg_match('~^AW-\d{6,15}/[A-Za-z0-9_-]{4,64}$~', $value) ? $value : '';
+}
+
+/** The consent categories the saved Google tags serve: analytics for GA4, advertising for Google Ads. */
+function bl_google_categories(): array
+{
+    $categories = [];
+    foreach (bl_google_tag_ids() as $id) $categories[str_starts_with($id, 'G-') ? 'analytics' : 'advertising'] = true;
+    return $categories;
+}
+
+/**
+ * Whether an administrator has confirmed, on the tracking screen, that the banner and privacy texts describe the regional
+ * defaults. Until then the Google tag is held back like any other tracking code (nothing at all runs before the visitor
+ * agrees), because the texts in use may still promise that, in whatever words or language they were written.
+ */
+function bl_google_regional_confirmed(): bool
+{
+    if (!function_exists('get_option')) return false;
+    $saved = get_option('bl_content_tracking', []);
+    return is_array($saved) && ($saved['google_regional'] ?? '') === '1';
+}
+
+/** The Google tag with its consent defaults, for the top of <head>; '' when no Google tag ID is saved. */
+function bl_google_tag_markup(): string
+{
+    $ids = bl_google_tag_ids();
+    if (!$ids) return '';
+    $categories = bl_google_categories();
+    $denied = ['ad_storage' => 'denied', 'ad_user_data' => 'denied', 'ad_personalization' => 'denied', 'analytics_storage' => 'denied'];
+    $granted = array_map(static fn() => 'granted', $denied);
+    $json = static fn($value): string => (string) json_encode($value, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+    $script = 'window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}'
+        . 'gtag("consent","default",' . $json($denied + ['region' => BL_CONSENT_DENIED_REGIONS, 'wait_for_update' => 500]) . ');'
+        . 'gtag("consent","default",' . $json($granted) . ');'
+        . '(function(c){try{var m=document.cookie.match(/(?:^|; )bl_consent=([^;]*)/),v=m&&JSON.parse(decodeURIComponent(m[1]));if(!v||v.v!==1)return;'
+        . 'var r=window.blConsentRan=window.blConsentRan||{};c.forEach(function(k){if(v[k]===true)r[k]=true});'
+        . 'var a=v.analytics===true?"granted":"denied",d=v.advertising===true?"granted":"denied";'
+        . 'gtag("consent","update",{analytics_storage:a,ad_storage:d,ad_user_data:d,ad_personalization:d})}catch(e){}})(' . $json(array_keys($categories)) . ');'
+        . 'gtag("set","ads_data_redaction",true);gtag("js",new Date());window.blGoogleTag=true;';
+    // Confirmed, every tag is configured and Consent Mode decides what it may send. Not confirmed, a tag whose category the
+    // visitor has not agreed to stays unconfigured, so it sends nothing at all (window.blConsentRan holds the agreed ones).
+    $confirmed = bl_google_regional_confirmed();
+    $allowed = static fn(string $category): string => $confirmed ? '' : 'if((window.blConsentRan||{})[' . $json($category) . '])';
+    foreach ($ids as $id) $script .= $allowed(str_starts_with($id, 'G-') ? 'analytics' : 'advertising') . 'gtag("config",' . $json($id) . ');';
+    $conversion = bl_google_conversion();
+    if ($conversion !== '') $script .= $allowed('advertising') . 'window.blGoogleConversion=' . $json($conversion) . ';';
+    $markup = '<script>' . $script . '</script><script async src="https://www.googletagmanager.com/gtag/js?id=' . rawurlencode($ids[0]) . '"></script>';
+    if ($confirmed) return $markup;
+    // Not confirmed: inert until the visitor's cookie agrees to a category the tags serve, then written in as the page is read
+    // (the same gate as bl_tracking_markup), with the cookie's choice applied over the defaults.
+    $gate = '(function(t,c){try{var m=document.cookie.match(/(?:^|; )bl_consent=([^;]*)/),v=m&&JSON.parse(decodeURIComponent(m[1]));if(v&&v.v===1&&c.some(function(k){return v[k]===true}))document.write(t.innerHTML)}catch(e){}})(document.currentScript.previousElementSibling,' . $json(array_keys($categories)) . ')';
+    return '<template data-bl-consent="google">' . $markup . '</template><script>' . $gate . '</script>';
 }

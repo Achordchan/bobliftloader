@@ -71,7 +71,7 @@ return [
         'llms' => ['intro' => ''],
         'consent' => [
             'title' => 'Cookies and your choices',
-            'text' => 'We use analytics and advertising cookies to see how this website is used and to measure our adverts. They stay off unless you agree.',
+            'text' => 'We use analytics and advertising cookies to see how this website is used and to measure our adverts. In the EEA, the UK and Switzerland they stay off unless you agree; everywhere else you can turn them off at any time.',
             'privacy' => 'How we use your information',
             'reject' => 'Reject all',
             'accept' => 'Accept all',

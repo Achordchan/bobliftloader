@@ -104,6 +104,11 @@ export function initializeConsent() {
   // differ from what it was served with reloads (declined cookies are cleared first); otherwise there is nothing to redo.
   const apply = (next) => {
     choice = next;
+    // The theme's Google tag runs before any choice (Consent Mode, inc/consent.php): it is told at once, reload or not.
+    if (typeof window.gtag === 'function') {
+      const ads = next.advertising === true ? 'granted' : 'denied';
+      window.gtag('consent', 'update', { analytics_storage: next.analytics === true ? 'granted' : 'denied', ad_storage: ads, ad_user_data: ads, ad_personalization: ads });
+    }
     const declined = categories.filter((name) => !next[name]);
     if (declined.length) clearToolCookies(declined);
     if (categories.some((name) => Boolean(next[name]) !== active.has(name))) {
