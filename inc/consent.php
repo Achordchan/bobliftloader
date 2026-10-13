@@ -65,8 +65,69 @@ function bl_tracking_code(string $key): string
 function bl_consent_categories(): array
 {
     $categories = [];
+    $google = bl_google_categories();
     foreach (BL_TRACKING_SLOTS as $category => $slots) {
+        if (isset($google[$category])) { $categories[] = $category; continue; }
         foreach ($slots as $key) if (bl_tracking_code($key) !== '') { $categories[] = $category; break; }
     }
     return $categories;
+}
+
+/**
+ * Google's own tags (GA4 "G-…", Google Ads "AW-…") are not pasted as code: their IDs are saved on the tracking screen and the
+ * theme loads the Google tag on every page with Consent Mode v2. Until the visitor chooses, visitors in the EEA, the UK and
+ * Switzerland start with everything denied (Google then sends only cookieless pings, from which it models conversions) and
+ * everyone else starts granted; the banner's choice, kept in the bl_consent cookie, then updates both. Because these tags run
+ * without waiting for the banner, the categories they serve are marked as running (window.blConsentRan) only when the cookie
+ * agrees, exactly like the gated slots, so assets/js/consent.js reloads and cleans up in the same way.
+ */
+const BL_CONSENT_DENIED_REGIONS = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'IS', 'LI', 'NO', 'GB', 'CH'];
+
+/** The valid Google tag IDs saved on the tracking screen (comma, space or newline separated), in order, without duplicates. */
+function bl_google_tag_ids(): array
+{
+    if (!function_exists('get_option')) return [];
+    $saved = get_option('bl_content_tracking', []);
+    $ids = preg_split('~[\s,;]+~', strtoupper((string) (is_array($saved) ? ($saved['google_tag'] ?? '') : '')), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+    return array_values(array_unique(array_filter($ids, static fn(string $id): bool => (bool) preg_match('~^(?:G|AW|GT|DC)-[A-Z0-9]{4,20}$~', $id))));
+}
+
+/** The Google Ads conversion that a sent enquiry reports ("AW-123456789/AbC-dEf"), or '' when none or malformed. */
+function bl_google_conversion(): string
+{
+    if (!function_exists('get_option')) return '';
+    $saved = get_option('bl_content_tracking', []);
+    $value = trim((string) (is_array($saved) ? ($saved['google_conversion'] ?? '') : ''));
+    return preg_match('~^AW-\d{6,15}/[A-Za-z0-9_-]{4,64}$~', $value) ? $value : '';
+}
+
+/** The consent categories the saved Google tags serve: analytics for GA4, advertising for Google Ads and Floodlight. */
+function bl_google_categories(): array
+{
+    $categories = [];
+    foreach (bl_google_tag_ids() as $id) $categories[str_starts_with($id, 'G-') ? 'analytics' : 'advertising'] = true;
+    return $categories;
+}
+
+/** The Google tag with its consent defaults, for the top of <head>; '' when no Google tag ID is saved. */
+function bl_google_tag_markup(): string
+{
+    $ids = bl_google_tag_ids();
+    if (!$ids) return '';
+    $categories = bl_google_categories();
+    $denied = ['ad_storage' => 'denied', 'ad_user_data' => 'denied', 'ad_personalization' => 'denied', 'analytics_storage' => 'denied'];
+    $granted = array_map(static fn() => 'granted', $denied);
+    $json = static fn($value): string => (string) json_encode($value, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+    $script = 'window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}'
+        . 'gtag("consent","default",' . $json($denied + ['region' => BL_CONSENT_DENIED_REGIONS, 'wait_for_update' => 500]) . ');'
+        . 'gtag("consent","default",' . $json($granted) . ');'
+        . '(function(c){try{var m=document.cookie.match(/(?:^|; )bl_consent=([^;]*)/),v=m&&JSON.parse(decodeURIComponent(m[1]));if(!v||v.v!==1)return;'
+        . 'var r=window.blConsentRan=window.blConsentRan||{};c.forEach(function(k){if(v[k]===true)r[k]=true});'
+        . 'var a=v.analytics===true?"granted":"denied",d=v.advertising===true?"granted":"denied";'
+        . 'gtag("consent","update",{analytics_storage:a,ad_storage:d,ad_user_data:d,ad_personalization:d})}catch(e){}})(' . $json(array_keys($categories)) . ');'
+        . 'gtag("set","ads_data_redaction",true);gtag("js",new Date());';
+    foreach ($ids as $id) $script .= 'gtag("config",' . $json($id) . ');';
+    $conversion = bl_google_conversion();
+    if ($conversion !== '') $script .= 'window.blGoogleConversion=' . $json($conversion) . ';';
+    return '<script>' . $script . '</script><script async src="https://www.googletagmanager.com/gtag/js?id=' . rawurlencode($ids[0]) . '"></script>';
 }

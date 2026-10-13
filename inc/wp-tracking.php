@@ -51,6 +51,14 @@ function bl_tracking_screen(): void
         'analytics' => ['统计类代码', 'Google Analytics（GA4）、Microsoft Clarity、Yandex Metrica、热力图等只用来统计访问的工具。访客在 Cookie 横幅里同意“Analytics”后才加载。'],
         'advertising' => ['广告类代码', 'Google Ads 转化、Meta 像素、TikTok、LinkedIn、Yandex 广告等用于投放和再营销的工具。访客同意“Advertising”后才加载。'],
     ];
+    $google = [
+        'google_tag' => ['Google 标签 ID', '填 GA4 的衡量 ID（G- 开头）和 Google Ads 的转化 ID（AW- 开头），多个用逗号隔开。主题会自动加载 Google 标签并开启同意模式 v2：欧洲经济区、英国、瑞士的访客在同意前默认拒绝（只发不带 Cookie 的匿名信号），其他地区默认允许；访客在横幅里的选择随时更新。填了这里就不要再把 GA4 或 Google Ads 的代码贴进下面的格子，否则会重复计数。'],
+        'google_conversion' => ['询盘转化（Google Ads）', '在 Google Ads 建好「提交潜在客户表单」转化后，填它的 send_to 值，形如 AW-123456789/AbCdEfGh。访客发出询盘、到达成功页时上报一次；同时总会上报 GA4 的 generate_lead 事件。'],
+    ];
+    echo '<h2 class="bl-ce-heading">Google 标签（同意模式）</h2>';
+    foreach ($google as $key => [$label, $help]) {
+        echo '<div class="bl-field bl-ce-wide"><div class="bl-field-label"><label for="bl-tracking-' . $key . '">' . esc_html($label) . '</label></div><div class="bl-field-control"><input class="large-text code" type="text" spellcheck="false" id="bl-tracking-' . $key . '" name="bl_content[' . $key . ']" value="' . esc_attr((string) ($values[$key] ?? '')) . '"><p class="bl-field-help">' . esc_html($help) . '</p></div></div>';
+    }
     foreach ($categories as $category => [$title, $note]) {
         echo '<h2 class="bl-ce-heading">' . esc_html($title) . '</h2><p class="bl-field-help">' . esc_html($note) . '</p>';
         foreach ($positions as $position => [$label, $help]) {
@@ -78,6 +86,7 @@ function bl_render_tracking(string $position): void
     }
 }
 
+add_action('wp_head', static fn() => print(bl_google_tag_markup()), 0);
 add_action('wp_head', static fn() => bl_render_tracking('head'), 1);
 add_action('wp_body_open', static fn() => bl_render_tracking('body_open'), 1);
 add_action('wp_footer', static fn() => bl_render_tracking('footer'), 99);

@@ -49,6 +49,11 @@ function reportSentInquiry() {
   if (!sent) return;
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({ event: 'generate_lead', form: 'enquiry', enquiry_product: sent.product || '', enquiry_model: sent.model || '' });
+  // With the theme's Google tag (inc/consent.php, bl_google_tag_markup) the same enquiry is reported to GA4 and, when a
+  // conversion is set, to Google Ads; Consent Mode decides whether that goes with cookies or as a cookieless ping.
+  if (typeof window.gtag !== 'function') return;
+  window.gtag('event', 'generate_lead', { form: 'enquiry', enquiry_product: sent.product || '', enquiry_model: sent.model || '' });
+  if (window.blGoogleConversion) window.gtag('event', 'conversion', { send_to: window.blGoogleConversion });
 }
 
 export function initializeInquiry() {

@@ -106,4 +106,31 @@ $check(str_contains($js, 'clearToolCookies(declined)') && str_contains($js, 'loc
 $check(str_contains($js, 'BroadcastChannel') && str_contains($js, 'visibilitychange') && str_contains($js, 'readSaved()'), 'consent script no longer syncs other tabs');
 $check(!str_contains($js, 'createElement(\'script\')') && !str_contains($js, 'document.write'), 'consent script runs tracking code itself');
 
+// Google tag IDs: the theme loads the Google tag with Consent Mode v2 (denied by default in the EEA, UK and Switzerland, granted
+// elsewhere, then the cookie's choice), and the categories it serves get a banner even with no pasted code.
+$save([]);
+$check(bl_google_tag_markup() === '' && bl_google_tag_ids() === [], 'Google tag printed with no ID');
+$save(['google_tag' => " g-ABC1234XYZ, aw-123456789\nnot-an-id, AW-123456789", 'google_conversion' => 'AW-123456789/AbC-dEf_9']);
+$check(bl_google_tag_ids() === ['G-ABC1234XYZ', 'AW-123456789'], 'Google tag IDs not parsed, upper-cased and de-duplicated');
+$check(bl_consent_categories() === ['analytics', 'advertising'], 'Google tag IDs do not create the banner categories');
+$markup = $capture(static fn() => run_hook('wp_head'));
+$check(str_starts_with($markup, '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("consent","default",{"ad_storage":"denied"'), 'consent defaults are not first');
+$check(str_contains($markup, '"region":["AT",') && str_contains($markup, '"GB","CH"]') && str_contains($markup, '"wait_for_update":500'), 'denied region default missing');
+$check(strpos($markup, '"region"') < strpos($markup, '{"ad_storage":"granted"'), 'granted default before the regional one');
+$check(str_contains($markup, 'bl_consent=') && str_contains($markup, 'v.v!==1') && str_contains($markup, 'gtag("consent","update"') && str_contains($markup, '["analytics","advertising"]'), 'cookie choice not applied');
+$check(str_contains($markup, 'gtag("config","G-ABC1234XYZ");gtag("config","AW-123456789");') && str_contains($markup, 'window.blGoogleConversion="AW-123456789/AbC-dEf_9"'), 'config or conversion missing');
+$check(str_ends_with($markup, '<script async src="https://www.googletagmanager.com/gtag/js?id=G-ABC1234XYZ"></script>'), 'gtag.js not loaded async');
+$save(['google_tag' => 'AW-123456789', 'google_conversion' => 'AW-1/x"onload']);
+$check(bl_consent_categories() === ['advertising'] && !str_contains(bl_google_tag_markup(), 'blGoogleConversion'), 'malformed conversion printed or wrong category');
+$save(['google_tag' => '<script>x()</script>']);
+$check(bl_google_tag_markup() === '' && bl_consent_categories() === [], 'invalid tag ID printed');
+$GLOBALS['caps'] = ['manage_options' => true, 'unfiltered_html' => true];
+$screen = $capture('bl_tracking_screen');
+$check(str_contains($screen, 'name="bl_content[google_tag]"') && str_contains($screen, 'name="bl_content[google_conversion]"'), 'Google fields missing from the tracking screen');
+$GLOBALS['caps'] = [];
+$check(array_key_exists('google_tag', bl_content_defaults('tracking')) && array_key_exists('google_conversion', bl_content_defaults('tracking')), 'Google fields missing from defaults');
+$check(str_contains($js, "window.gtag('consent', 'update'"), 'banner choice does not update Google consent at once');
+$inquiry = file_get_contents(__DIR__ . '/../assets/js/inquiry.js');
+$check(str_contains($inquiry, "window.gtag('event', 'generate_lead'") && str_contains($inquiry, "send_to: window.blGoogleConversion"), 'enquiry not reported to the Google tag');
+
 echo "ok ($checks checks)\n";
