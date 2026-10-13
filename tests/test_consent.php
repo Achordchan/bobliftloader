@@ -127,6 +127,12 @@ $save(['google_tag' => 'G-ABC1234XYZ, AW-123456789']);
 $gated = bl_google_tag_markup();
 $check(str_starts_with($gated, '<template data-bl-consent="google"><script>window.dataLayer') && str_contains($gated, 'c.some(function(k){return v[k]===true})') && str_contains($gated, 'document.write(t.innerHTML)') && str_ends_with($gated, ',["analytics","advertising"])</script>'), 'unconfirmed Google tag is not gated');
 $check(!str_starts_with($confirmed, '<template'), 'confirmed Google tag was gated');
+$check(str_contains($gated, 'if((window.blConsentRan||{})["analytics"])gtag("config","G-ABC1234XYZ");if((window.blConsentRan||{})["advertising"])gtag("config","AW-123456789");') && str_contains($confirmed, ';gtag("config","G-ABC1234XYZ");gtag("config","AW-123456789");'), 'unconfirmed tags not configured per agreed category');
+// Run the gated script with a cookie that agrees to analytics only: GA4 is configured, Google Ads is not.
+preg_match('~<script>(window\.dataLayer.*?)</script>~', $gated, $inline);
+$run = static fn(string $cookie): string => (string) shell_exec('node -e ' . escapeshellarg('global.window=global;global.document={cookie:' . json_encode($cookie) . '};eval(' . json_encode($inline[1]) . ');console.log(JSON.stringify(dataLayer.filter(a=>a[0]==="config").map(a=>a[1])))'));
+$check(trim($run('bl_consent=' . rawurlencode('{"v":1,"analytics":true,"advertising":false}'))) === '["G-ABC1234XYZ"]', 'declined advertising tag was configured');
+$check(trim($run('bl_consent=' . rawurlencode('{"v":1,"analytics":true,"advertising":true}'))) === '["G-ABC1234XYZ","AW-123456789"]', 'agreed tags were not configured');
 $GLOBALS['caps'] = ['manage_options' => true, 'unfiltered_html' => true];
 $check(str_contains($capture('bl_tracking_screen'), 'Google 标签目前仍是“同意后才加载”') && str_contains($capture('bl_tracking_screen'), 'name="bl_content[google_regional]" value="1">'), 'unconfirmed state not shown on the tracking screen');
 $save(['google_tag' => 'G-ABC1234XYZ', 'google_regional' => '1']);

@@ -143,11 +143,15 @@ function bl_google_tag_markup(): string
         . 'var a=v.analytics===true?"granted":"denied",d=v.advertising===true?"granted":"denied";'
         . 'gtag("consent","update",{analytics_storage:a,ad_storage:d,ad_user_data:d,ad_personalization:d})}catch(e){}})(' . $json(array_keys($categories)) . ');'
         . 'gtag("set","ads_data_redaction",true);gtag("js",new Date());window.blGoogleTag=true;';
-    foreach ($ids as $id) $script .= 'gtag("config",' . $json($id) . ');';
+    // Confirmed, every tag is configured and Consent Mode decides what it may send. Not confirmed, a tag whose category the
+    // visitor has not agreed to stays unconfigured, so it sends nothing at all (window.blConsentRan holds the agreed ones).
+    $confirmed = bl_google_regional_confirmed();
+    $allowed = static fn(string $category): string => $confirmed ? '' : 'if((window.blConsentRan||{})[' . $json($category) . '])';
+    foreach ($ids as $id) $script .= $allowed(str_starts_with($id, 'G-') ? 'analytics' : 'advertising') . 'gtag("config",' . $json($id) . ');';
     $conversion = bl_google_conversion();
-    if ($conversion !== '') $script .= 'window.blGoogleConversion=' . $json($conversion) . ';';
+    if ($conversion !== '') $script .= $allowed('advertising') . 'window.blGoogleConversion=' . $json($conversion) . ';';
     $markup = '<script>' . $script . '</script><script async src="https://www.googletagmanager.com/gtag/js?id=' . rawurlencode($ids[0]) . '"></script>';
-    if (bl_google_regional_confirmed()) return $markup;
+    if ($confirmed) return $markup;
     // Not confirmed: inert until the visitor's cookie agrees to a category the tags serve, then written in as the page is read
     // (the same gate as bl_tracking_markup), with the cookie's choice applied over the defaults.
     $gate = '(function(t,c){try{var m=document.cookie.match(/(?:^|; )bl_consent=([^;]*)/),v=m&&JSON.parse(decodeURIComponent(m[1]));if(v&&v.v===1&&c.some(function(k){return v[k]===true}))document.write(t.innerHTML)}catch(e){}})(document.currentScript.previousElementSibling,' . $json(array_keys($categories)) . ')';
