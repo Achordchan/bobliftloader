@@ -521,6 +521,8 @@ class WebsiteTests(unittest.TestCase):
             self.assertIn('/product/' + slug + '/', main.split('Related products', 1)[1])
         event = next(item for item in Page(html).structured[0]['@graph'] if item['@type'] == 'Event')
         self.assertEqual((event['startDate'], event['endDate']), (fair['event']['start'], fair['event']['end']))
+        self.assertEqual(event['performer'], event['organizer'])
+        self.assertNotIn('offers', event)
         # Group stories are labelled as such and link to boblift.com once in the page body.
         for article in (a for a in self.articles if not a['category']):
             _, html, _ = fetch('/news/' + article['slug'] + '/')
