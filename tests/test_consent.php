@@ -122,6 +122,9 @@ $check(str_contains($markup, 'gtag("config","G-ABC1234XYZ");gtag("config","AW-12
 $check(str_ends_with($markup, '<script async src="https://www.googletagmanager.com/gtag/js?id=G-ABC1234XYZ"></script>'), 'gtag.js not loaded async');
 $save(['google_tag' => 'AW-123456789', 'google_conversion' => 'AW-1/x"onload']);
 $check(bl_consent_categories() === ['advertising'] && !str_contains(bl_google_tag_markup(), 'blGoogleConversion'), 'malformed conversion printed or wrong category');
+$check(str_contains(bl_google_tag_markup(), 'window.blGoogleTag=true;'), 'theme Google tag not marked');
+$save(['google_tag' => 'GT-ABCDEFG, DC-1234567']);
+$check(bl_google_tag_ids() === [] && bl_consent_categories() === [], 'ambiguous GT-/DC- IDs accepted');
 $save(['google_tag' => '<script>x()</script>']);
 $check(bl_google_tag_markup() === '' && bl_consent_categories() === [], 'invalid tag ID printed');
 $GLOBALS['caps'] = ['manage_options' => true, 'unfiltered_html' => true];
@@ -131,6 +134,6 @@ $GLOBALS['caps'] = [];
 $check(array_key_exists('google_tag', bl_content_defaults('tracking')) && array_key_exists('google_conversion', bl_content_defaults('tracking')), 'Google fields missing from defaults');
 $check(str_contains($js, "window.gtag('consent', 'update'"), 'banner choice does not update Google consent at once');
 $inquiry = file_get_contents(__DIR__ . '/../assets/js/inquiry.js');
-$check(str_contains($inquiry, "window.gtag('event', 'generate_lead'") && str_contains($inquiry, "send_to: window.blGoogleConversion"), 'enquiry not reported to the Google tag');
+$check(str_contains($inquiry, "if (!window.blGoogleTag || typeof window.gtag !== 'function') return;") && str_contains($inquiry, "window.gtag('event', 'generate_lead'") && str_contains($inquiry, "send_to: window.blGoogleConversion"), 'enquiry not reported to the Google tag');
 
 echo "ok ($checks checks)\n";

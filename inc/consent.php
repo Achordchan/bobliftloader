@@ -83,13 +83,17 @@ function bl_consent_categories(): array
  */
 const BL_CONSENT_DENIED_REGIONS = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'IS', 'LI', 'NO', 'GB', 'CH'];
 
-/** The valid Google tag IDs saved on the tracking screen (comma, space or newline separated), in order, without duplicates. */
+/**
+ * The valid Google tag IDs saved on the tracking screen (comma, space or newline separated), in order, without duplicates.
+ * Only GA4 (G-) and Google Ads (AW-) IDs are accepted: a combined Google tag (GT-) or Floodlight (DC-) ID does not say which
+ * consent category it serves, so it would get the wrong banner choice; such tools are pasted into the slots below instead.
+ */
 function bl_google_tag_ids(): array
 {
     if (!function_exists('get_option')) return [];
     $saved = get_option('bl_content_tracking', []);
     $ids = preg_split('~[\s,;]+~', strtoupper((string) (is_array($saved) ? ($saved['google_tag'] ?? '') : '')), -1, PREG_SPLIT_NO_EMPTY) ?: [];
-    return array_values(array_unique(array_filter($ids, static fn(string $id): bool => (bool) preg_match('~^(?:G|AW|GT|DC)-[A-Z0-9]{4,20}$~', $id))));
+    return array_values(array_unique(array_filter($ids, static fn(string $id): bool => (bool) preg_match('~^(?:G|AW)-[A-Z0-9]{4,20}$~', $id))));
 }
 
 /** The Google Ads conversion that a sent enquiry reports ("AW-123456789/AbC-dEf"), or '' when none or malformed. */
@@ -101,7 +105,7 @@ function bl_google_conversion(): string
     return preg_match('~^AW-\d{6,15}/[A-Za-z0-9_-]{4,64}$~', $value) ? $value : '';
 }
 
-/** The consent categories the saved Google tags serve: analytics for GA4, advertising for Google Ads and Floodlight. */
+/** The consent categories the saved Google tags serve: analytics for GA4, advertising for Google Ads. */
 function bl_google_categories(): array
 {
     $categories = [];
@@ -125,7 +129,7 @@ function bl_google_tag_markup(): string
         . 'var r=window.blConsentRan=window.blConsentRan||{};c.forEach(function(k){if(v[k]===true)r[k]=true});'
         . 'var a=v.analytics===true?"granted":"denied",d=v.advertising===true?"granted":"denied";'
         . 'gtag("consent","update",{analytics_storage:a,ad_storage:d,ad_user_data:d,ad_personalization:d})}catch(e){}})(' . $json(array_keys($categories)) . ');'
-        . 'gtag("set","ads_data_redaction",true);gtag("js",new Date());';
+        . 'gtag("set","ads_data_redaction",true);gtag("js",new Date());window.blGoogleTag=true;';
     foreach ($ids as $id) $script .= 'gtag("config",' . $json($id) . ');';
     $conversion = bl_google_conversion();
     if ($conversion !== '') $script .= 'window.blGoogleConversion=' . $json($conversion) . ';';

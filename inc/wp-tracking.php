@@ -52,7 +52,7 @@ function bl_tracking_screen(): void
         'advertising' => ['广告类代码', 'Google Ads 转化、Meta 像素、TikTok、LinkedIn、Yandex 广告等用于投放和再营销的工具。访客同意“Advertising”后才加载。'],
     ];
     $google = [
-        'google_tag' => ['Google 标签 ID', '填 GA4 的衡量 ID（G- 开头）和 Google Ads 的转化 ID（AW- 开头），多个用逗号隔开。主题会自动加载 Google 标签并开启同意模式 v2：欧洲经济区、英国、瑞士的访客在同意前默认拒绝（只发不带 Cookie 的匿名信号），其他地区默认允许；访客在横幅里的选择随时更新。填了这里就不要再把 GA4 或 Google Ads 的代码贴进下面的格子，否则会重复计数。'],
+        'google_tag' => ['Google 标签 ID', '填 GA4 的衡量 ID（G- 开头）和 Google Ads 的转化 ID（AW- 开头），多个用逗号隔开；其他开头的 ID（GT-、DC- 等）不会生效，请按工具给的代码贴到下面的格子。主题会自动加载 Google 标签并开启同意模式 v2：欧洲经济区、英国、瑞士的访客在同意前默认拒绝（只发不带 Cookie 的匿名信号），其他地区默认允许；访客在横幅里的选择随时更新。填了这里就不要再把 GA4 或 Google Ads 的代码贴进下面的格子，否则会重复计数。'],
         'google_conversion' => ['询盘转化（Google Ads）', '在 Google Ads 建好「提交潜在客户表单」转化后，填它的 send_to 值，形如 AW-123456789/AbCdEfGh。访客发出询盘、到达成功页时上报一次；同时总会上报 GA4 的 generate_lead 事件。'],
     ];
     echo '<h2 class="bl-ce-heading">Google 标签（同意模式）</h2>';
