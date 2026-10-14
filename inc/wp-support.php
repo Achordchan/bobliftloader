@@ -26,7 +26,7 @@ function bl_product_videos_meta_box(WP_Post $post): void
 {
     $record = get_post_meta($post->ID, '_bl_record', true);
     wp_nonce_field('bl_save_videos', 'bl_videos_nonce');
-    echo '<p class="bl-box-intro">显示在产品页概述区，使用独立视频播放器播放。MP4 建议 960px 宽、3 MB 以内；封面图用作缩略图和播放前的画面。最多 8 个。</p>';
+    echo '<p class="bl-box-intro">显示在产品页概述区，使用独立视频播放器播放。MP4 建议 1920×1080、约 2.5 Mbps、单文件 20 MB 以内（超过会被上传网关拒绝）；封面图用作缩略图和播放前的画面。最多 8 个。</p>';
     echo '<ol class="bl-rows" data-bl-rows="videos" data-bl-max="' . BL_CONTENT_LIMITS['videos'] . '">';
     foreach ((array) (is_array($record) ? ($record['videos'] ?? []) : []) as $video) if (is_array($video)) echo bl_product_video_row($video);
     echo '</ol><template data-bl-template="videos">' . bl_product_video_row([]) . '</template>';

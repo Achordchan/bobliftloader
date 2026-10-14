@@ -11,7 +11,7 @@ function bl_catalog_copy_fields(bool $loader): array
         'hero_download' => ['下载画册按钮', $loader ? 'Download the loader catalogue' : 'Download the dumper catalogue', '栏目首屏', 'text'],
         // The range film opens from a second button beside the catalogue download; with no address saved the button is not shown.
         'hero_film' => ['宣传片按钮', 'Watch the range film', '栏目首屏', 'text'],
-        'film_video' => ['系列宣传片：视频地址', '', '栏目首屏', 'url', '可选。点击首屏「观看宣传片」按钮后弹窗播放的横版 16:9 视频（建议 960 px 宽、3 MB 以内的 MP4）；留空则不显示按钮。'],
+        'film_video' => ['系列宣传片：视频地址', '', '栏目首屏', 'url', '可选。点击首屏「观看宣传片」按钮后弹窗播放的横版 16:9 视频（建议 1920×1080、约 2.5 Mbps、单文件 20 MB 以内的 MP4；超过 20 MB 会被上传网关拒绝）；留空则不显示按钮。'],
         'film_poster' => ['系列宣传片：封面图', '', '栏目首屏', 'url', '弹窗里开始播放前显示的图片地址，建议用视频的首帧。'],
         'film_caption' => ['系列宣传片：说明文字', '', '栏目首屏', 'text'],
         'card_label' => ['系列名称', $loader ? 'Mini skid steer loaders' : 'Mini dumpers', '系列卡片', 'text'],
