@@ -80,6 +80,27 @@ function bl_company(string $key): string
     };
 }
 
+/** The social profiles the company has set, in display order; a network with no web address is left out. */
+function bl_social_links(): array
+{
+    $links = [];
+    foreach (['youtube' => 'YouTube', 'facebook' => 'Facebook'] as $key => $name) {
+        $url = bl_company($key . '_url');
+        if (preg_match('~^https?://~i', $url)) $links[$key] = ['name' => $name, 'url' => $url];
+    }
+    return $links;
+}
+
+/** The network's mark, in the inline-SVG style of the contact bar's WhatsApp and Email icons. */
+function bl_social_icon(string $key): string
+{
+    return match ($key) {
+        'youtube' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8ZM10 15V9l5.2 3L10 15Z"/></svg>',
+        'facebook' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13.5 21v-7.8h2.6l.4-3.1h-3V8.2c0-.9.3-1.5 1.5-1.5h1.6V3.9c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.3H7.8v3.1h2.6V21h3.1Z"/></svg>',
+        default => '',
+    };
+}
+
 /** A mailto: address with the characters a URL reads as syntax (%, ?, #, &) escaped; the address shown stays as typed. */
 function bl_mailto(string $address): string
 {

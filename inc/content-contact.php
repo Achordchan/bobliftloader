@@ -10,7 +10,7 @@ return [
             'image_alt' => 'Finished skid steer loaders at the BOB-LIFT factory in Xuzhou',
             'breadcrumb' => 'Contact',
         ],
-        'channels' => ['whatsapp' => 'WhatsApp · photos and quick questions', 'email' => 'Email · specifications and quotations'],
+        'channels' => ['whatsapp' => 'WhatsApp · photos and quick questions', 'email' => 'Email · specifications and quotations', 'youtube' => 'Videos · our machines at work', 'facebook' => 'Company news and updates'],
         'form' => ['prepare_title' => 'WHAT HELPS US REPLY WELL', 'eyebrow' => 'TELL US ABOUT YOUR PROJECT', 'line1' => 'THE RIGHT CONVERSATION', 'line2' => 'STARTS WITH YOU.'],
         'visit' => [
             'eyebrow' => 'MEET US IN XUZHOU',
@@ -56,6 +56,8 @@ Equipment of interest:
             'fields' => [
                 ['key' => 'channels.whatsapp', 'label' => 'WhatsApp 说明', 'type' => 'text'],
                 ['key' => 'channels.email', 'label' => '邮件说明', 'type' => 'text'],
+                ['key' => 'channels.youtube', 'label' => 'YouTube 说明', 'type' => 'text'],
+                ['key' => 'channels.facebook', 'label' => 'Facebook 说明', 'type' => 'text'],
             ],
         ],
         [

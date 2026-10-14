@@ -8,7 +8,7 @@ function bl_structured_data(array $route): array
         '@type' => 'Organization', '@id' => bl_company('website') . '#organization',
         'name' => bl_company('name'), 'alternateName' => 'BOB-LIFT',
         'url' => bl_company('website'), 'email' => bl_company('email'), 'telephone' => bl_company('phone_seo'),
-        'sameAs' => ['https://www.boblift.com/', 'https://www.bobliftcrane.com/'],
+        'sameAs' => array_merge(['https://www.boblift.com/', 'https://www.bobliftcrane.com/'], array_column(bl_social_links(), 'url')),
         'logo' => bl_absolute_asset(bl_brand_logo()),
         'address' => ['@type' => 'PostalAddress', 'streetAddress' => bl_company('street'), 'addressLocality' => bl_company('city'), 'addressRegion' => bl_company('region'), 'addressCountry' => bl_company('country_code')],
     ];
