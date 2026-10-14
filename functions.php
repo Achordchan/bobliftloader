@@ -20,6 +20,7 @@ require_once __DIR__ . '/inc/wp-admin-ui.php';
 require_once __DIR__ . '/inc/wp-inquiry.php';
 require_once __DIR__ . '/inc/wp-inquiry-templates.php';
 require_once __DIR__ . '/inc/wp-rest.php';
+require_once __DIR__ . '/inc/wp-enquiries-rest.php';
 require_once __DIR__ . '/inc/wp-tracking.php';
 
 add_action('after_setup_theme', static function (): void {
