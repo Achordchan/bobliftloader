@@ -5,8 +5,8 @@ declare(strict_types=1);
  * The enquiry form as a real form: Contact Form 7 sends the mail and Flamingo keeps every entry in the WordPress admin
  * (both plugins are needed).
  * The form's HTML is the theme's own (its CSS is unchanged); the theme creates the form once, so installing the two plugins
- * is all a site needs. Without them the theme keeps its email-draft form. Spam protection (Cloudflare Turnstile) is
- * switched on in Contact → Integration with the site's own keys.
+ * is all a site needs. Without them the theme keeps its email-draft form. Spam protection: a hidden field bots fill in,
+ * Akismet (below), and Cloudflare Turnstile once its keys are saved in Contact → Integration.
  */
 
 // Raised when the theme's form or notification email changes, so the form the theme made earlier gets the new one once
@@ -120,6 +120,22 @@ add_filter('wpcf7_autop_or_not', static function (bool $autop, $options = []): b
 
 // A field only a script fills in: anything in it means a bot filled every box.
 add_filter('wpcf7_spam', static fn(bool $spam): bool => $spam || trim((string) ($_POST['bl_website'] ?? '')) !== '');
+
+/**
+ * Akismet checks the theme's form too. CF7 asks Akismet only about forms whose fields carry an akismet: option, and the
+ * form saved on the site has none, so the name and email fields get theirs here, as CF7 reads the form. A field an editor
+ * already marked is left as it is. Akismet's verdict files spam under Flamingo → Spam: no mail, no thank-you page.
+ */
+function bl_wp_inquiry_akismet_tag($tag)
+{
+    $role = ['name' => 'author', 'email' => 'author_email'][$tag['name'] ?? ''] ?? '';
+    if ($role === '' || !is_array($tag['options'] ?? null) || preg_grep('/^akismet:/i', $tag['options'])) return $tag;
+    $form = class_exists('WPCF7_ContactForm') ? WPCF7_ContactForm::get_current() : null;
+    if (!$form || (int) $form->id() !== bl_wp_inquiry_form_id()) return $tag;
+    $tag['options'][] = 'akismet:' . $role;
+    return $tag;
+}
+add_filter('wpcf7_form_tag', 'bl_wp_inquiry_akismet_tag');
 
 /**
  * The notification the team receives: the BOB-LIFT logo, the page the enquiry came from, the product (photo, name,
