@@ -27,6 +27,7 @@ return static function (array $d): string {
         . $row('来源国家', $e($d['country'] !== '' ? $d['country'] : '未知'))
         . ($d['ip'] !== '' ? $row('IP 地址', '<span style="' . $mono . '">' . $e($d['ip']) . '</span>') : '')
         . $row('提交时间', $e($d['time']));
+    foreach ($d['attribution'] as [$label, $value, $isMono]) $details .= $row($label, $isMono ? '<span style="' . $mono . '">' . $value . '</span>' : $value);
     $logo = esc_url($d['logo']);
     $reply = esc_url($d['reply'], ['mailto']);
     $mailto = esc_url('mailto:' . $d['email'], ['mailto']);

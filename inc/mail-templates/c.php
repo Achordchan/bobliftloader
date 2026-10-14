@@ -29,6 +29,7 @@ return static function (array $d): string {
     $trace = $fact('来源国家', $e($d['country'] !== '' ? $d['country'] : '未知'), $f)
         . ($d['ip'] !== '' ? $fact('IP 地址', $e($d['ip']), $mono) : '')
         . $fact('提交时间', $e($d['time']), $mono);
+    foreach ($d['attribution'] as [$label, $value, $isMono]) $trace .= $fact($label, $value, $isMono ? $mono : $f);
     $logo = esc_url($d['logo']);
     $reply = esc_url($d['reply'], ['mailto']);
     $url = $d['url'] !== '' ? '&nbsp;&nbsp;<a href="' . esc_url($d['url']) . '" style="color:#9fb3c8;text-decoration:none;word-break:break-all;">' . $e($d['url']) . '</a>' : '';

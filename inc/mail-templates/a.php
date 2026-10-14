@@ -35,6 +35,7 @@ return static function (array $d): string {
         . $row('国家', $e($d['country'] !== '' ? $d['country'] : '未知'))
         . ($d['ip'] !== '' ? $row('IP 地址', $e($d['ip']), $mono) : '')
         . $row('提交时间', $e($d['time']), $mono);
+    foreach ($d['attribution'] as [$label, $value, $isMono]) $rows .= $row($label, $value, $isMono ? $mono : '');
     $logo = esc_url($d['logo']);
     $reply = esc_url($d['reply'], ['mailto']);
 

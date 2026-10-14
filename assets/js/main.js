@@ -1,4 +1,5 @@
 import { initializeAttachmentLoops } from './attachment-loops.js';
+import { initializeAttribution } from './attribution.js';
 import { initializeConsent } from './consent.js';
 import { initializeDialogs } from './dialogs.js';
 import { initializeFilm } from './film.js';
@@ -17,6 +18,7 @@ import { initializeSectionNav } from './section-nav.js';
 import { initializeQuick } from './quick.js';
 
 initializeAttachmentLoops();
+initializeAttribution();
 initializeConsent();
 initializeDialogs();
 initializeFilm();

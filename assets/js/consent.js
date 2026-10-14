@@ -4,6 +4,8 @@
 // code itself: it keeps the choice (one cookie of this site's own, for a year) and reloads the page when the set of
 // agreed categories changes, which starts newly agreed code in the page's normal way and stops withdrawn code (after
 // clearing the tools' own cookies).
+import { forgetAttribution } from './attribution.js';
+
 const COOKIE = 'bl_consent';
 const VERSION = 1;
 const YEAR = 365 * 24 * 60 * 60;
@@ -38,6 +40,8 @@ function saveChoice(choice) {
 }
 
 function clearToolCookies(categories) {
+  // The advertisement the visitor came from (assets/js/attribution.js) is kept in the browser's storage, not a cookie, and goes with advertising.
+  if (categories.includes('advertising')) forgetAttribution();
   const labels = location.hostname.split('.');
   const domains = ['', ...labels.map((_, index) => labels.slice(index).join('.')).filter((name) => name.includes('.')).flatMap((name) => [name, `.${name}`])];
   // A tool may have been told to keep its cookie on a deeper path (GA's cookie_path), so every ancestor of this page's path is tried as well as the root.
