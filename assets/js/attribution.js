@@ -9,7 +9,8 @@
 const KEY = 'bl_attribution';
 const VERSION = 1;
 const DAYS = 90;
-const WAIT = 6000; // how long to wait for Google's tag to say what the default is
+const WAIT = 6000; // how long Google's tag is asked every quarter of a second what the default is
+const GIVE_UP = 120000; // after that, every two seconds, until here
 // Click IDs: a newer ad click replaces the stored record. Tags alone never replace a click ID.
 const CLICK_IDS = ['gclid', 'gbraid', 'wbraid'];
 const PARAMS = [...CLICK_IDS, 'gad_source', 'gad_campaignid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
@@ -97,7 +98,9 @@ function nextRecord(stored) {
   const storedHasClick = stored && CLICK_IDS.some((name) => stored.params[name]);
   if (!hasClick && (Object.keys(found).length === 0 || storedHasClick)) return stored;
   // The same click seen again (a reload, a second submit from the landing page, a revisit of the tagged link) is not a new click: its landing time and 90 days stay as they were.
-  if (stored && (CLICK_IDS.some((name) => found[name] && found[name] === stored.params[name]) || (!hasClick && JSON.stringify(found) === JSON.stringify(stored.params)))) return stored;
+  // The click ID that counts is the first present of gclid, gbraid, wbraid; a gbraid or wbraid can stand for grouped activity, so it only identifies a click when there is no gclid.
+  const primary = CLICK_IDS.find((name) => found[name]);
+  if (stored && (primary ? found[primary] === stored.params[primary] : JSON.stringify(found) === JSON.stringify(stored.params))) return stored;
   if (stored && (stored.arrived || 0) > arrivedAt) return stored;
   return { v: VERSION, arrived: arrivedAt, first_seen: new Date(arrivedAt).toISOString(), landing: clean(location.origin + location.pathname, 300), params: found, expires: arrivedAt + DAYS * 864e5 };
 }
@@ -143,14 +146,19 @@ function settle() {
 
 export function initializeAttribution() {
   try {
-    // Google's tag loads after the page: until it has said what the default is, the answer is "not known yet", so ask again for a few seconds.
+    // Google's tag loads after the page: until it has said what the default is, the answer is "not known yet", so ask again, quickly
+    // at first and then every two seconds for two minutes (a slow connection). Leaving the page asks one last time, so a visitor who
+    // moves on to another product keeps the click they arrived with.
     let waited = 0;
     const ask = () => {
-      if (settle() !== null || waited >= WAIT) return;
-      waited += 250;
-      setTimeout(ask, 250);
+      if (settle() !== null || waited >= GIVE_UP) return;
+      const step = waited < WAIT ? 250 : 2000;
+      waited += step;
+      setTimeout(ask, step);
     };
     ask();
+    window.addEventListener('pagehide', settle);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') settle(); });
     // The form is filled in when it is sent, so a choice made on this page counts; the capture phase runs before Contact Form 7 reads the form.
     document.addEventListener('submit', (event) => {
       const form = event.target;

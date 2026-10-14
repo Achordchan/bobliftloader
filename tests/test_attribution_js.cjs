@@ -105,6 +105,23 @@ const cookie = (advertising) => `document.cookie = 'bl_consent=' + encodeURIComp
   assert.equal(await stored(lateA), recordB, 'a tab whose consent came late changed the kept record');
   await context.close();
 
+  // 2d. A new gclid with the same gbraid is a new click; Google's tag that is slow to say what the default is is still waited for, and leaving the page asks one last time.
+  context = await browser.newContext();
+  page = await visit(context, '/p/?gclid=GC-ONE&gbraid=BR-SAME', googleState(true));
+  page = await visit(context, '/q/?gclid=GC-TWO&gbraid=BR-SAME', googleState(true));
+  assert.equal(JSON.parse(await stored(page)).params.gclid, 'GC-TWO', 'a new gclid with a repeated gbraid was dropped as the same click');
+  await context.close();
+  context = await browser.newContext();
+  const slow = await visit(context, '/slow/?gclid=GC-SLOW', googleState(null));
+  assert.equal(await stored(slow), null);
+  await slow.evaluate(() => { window.google_tag_data = { ics: { entries: { ad_storage: { default: true } } } }; });
+  await slow.waitForTimeout(9000);
+  assert.equal(JSON.parse(await stored(slow)).params.gclid, 'GC-SLOW', 'a tag that answered after six seconds was never asked again');
+  const leaving = await visit(context, '/leaving/?gclid=GC-LEAVE', googleState(null));
+  await leaving.evaluate(() => { window.google_tag_data = { ics: { entries: { ad_storage: { default: true } } } }; window.dispatchEvent(new Event('pagehide')); });
+  assert.equal(JSON.parse(await stored(leaving)).params.gclid, 'GC-LEAVE', 'leaving the page did not keep the click');
+  await context.close();
+
   // 3. A region that starts denied (EEA, UK, Switzerland): nothing kept, nothing sent.
   context = await browser.newContext();
   page = await visit(context, '/p/?gclid=GC-3&utm_source=google', googleState(false));

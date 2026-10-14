@@ -49,7 +49,9 @@ $check(($data['bl_attr_gclid'] ?? '') === 'EAIaIQ-1' && ($data['bl_attr_utm_sour
 $check(!isset($data['bl_attr_evil']) && !isset($data['bl_attr_gbraid']) && !isset($data['bl_attr_utm_medium']), 'an unknown, malformed or stale attribution field survived');
 WPCF7_ContactForm::$current = new WPCF7_ContactForm(6);
 $other = run_filter('wpcf7_posted_data', ['name' => 'Ann', 'bl_attr_gclid' => 'x']);
-$check($other === ['name' => 'Ann'], 'another form received attribution fields');
+$check($other === ['name' => 'Ann', 'bl_attr_gclid' => 'x'], 'another form was changed, or its own bl_attr_ field removed');
+WPCF7_ContactForm::$current = null;
+$check(run_filter('wpcf7_posted_data', ['name' => 'Ann', 'bl_attr_gclid' => 'x']) === ['name' => 'Ann', 'bl_attr_gclid' => 'x'], 'a submission of unknown form was changed');
 WPCF7_ContactForm::$current = new WPCF7_ContactForm(5);
 $_POST = ['name' => 'Ann'];
 $check(run_filter('wpcf7_posted_data', ['name' => 'Ann']) === ['name' => 'Ann'], 'fields appeared although none were sent');

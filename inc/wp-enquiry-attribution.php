@@ -26,9 +26,10 @@ function bl_enquiry_attribution_clean(string $name, $value): string
 
 add_filter('wpcf7_posted_data', static function ($data) {
     if (!is_array($data)) return $data;
-    foreach (array_keys($data) as $key) if (str_starts_with((string) $key, BL_ENQUIRY_ATTRIBUTION_PREFIX)) unset($data[$key]);
+    // Any other form (or a submission whose form cannot be told) is left exactly as it is, even if it declares fields with this prefix.
     $form = class_exists('WPCF7_ContactForm') ? WPCF7_ContactForm::get_current() : null;
-    if ($form && (int) $form->id() !== bl_wp_inquiry_form_id()) return $data;
+    if (!$form || (int) $form->id() !== bl_wp_inquiry_form_id()) return $data;
+    foreach (array_keys($data) as $key) if (str_starts_with((string) $key, BL_ENQUIRY_ATTRIBUTION_PREFIX)) unset($data[$key]);
     $posted = function_exists('wp_unslash') ? wp_unslash($_POST) : $_POST;
     foreach (array_keys(BL_ENQUIRY_ATTRIBUTION) as $name) {
         $value = bl_enquiry_attribution_clean($name, $posted[BL_ENQUIRY_ATTRIBUTION_PREFIX . $name] ?? '');
