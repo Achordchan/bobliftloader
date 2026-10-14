@@ -21,10 +21,17 @@ function clean(value, length) {
   return String(value ?? '').replace(/[\u0000-\u001f\u007f<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, length);
 }
 
+// A click ID that is too long or has other characters is dropped, never shortened: a cut ID matches nothing in Google Ads, and a
+// malformed one must not count as a new click (the server applies the same rule in bl_enquiry_attribution_clean).
 function cleanParams(source) {
   const found = {};
   PARAMS.forEach((name) => {
-    const value = clean(source[name], CLICK_IDS.includes(name) ? 255 : 120);
+    if (CLICK_IDS.includes(name)) {
+      const raw = String(source[name] ?? '').trim();
+      if (raw.length <= 255 && /^[A-Za-z0-9_.~=-]+$/.test(raw)) found[name] = raw;
+      return;
+    }
+    const value = clean(source[name], 120);
     if (value) found[name] = value;
   });
   return found;
@@ -60,18 +67,21 @@ function advertisingAgreed() {
   return chosen !== null ? chosen : googleAdStorage();
 }
 
-function readStored() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (!saved || saved.v !== VERSION || !(saved.expires > Date.now()) || typeof saved.params !== 'object' || !saved.params) return null;
-    return saved;
-  } catch {
-    return null;
-  }
-}
-
 function forget() {
   try { localStorage.removeItem(KEY); } catch { /* storage blocked */ }
+}
+
+// A record past its 90 days (or one this script does not understand) is removed from the browser, not just ignored.
+function readStored() {
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch { return null; }
+  if (raw === null) return null;
+  try {
+    const saved = JSON.parse(raw);
+    if (saved && saved.v === VERSION && saved.expires > Date.now() && typeof saved.params === 'object' && saved.params) return saved;
+  } catch { /* unreadable: removed below */ }
+  forget();
+  return null;
 }
 
 // The record to keep after this visit: the new click or tags if the address has them, else what is already kept.
@@ -81,6 +91,8 @@ function nextRecord(stored) {
   const hasClick = CLICK_IDS.some((name) => found[name]);
   const storedHasClick = stored && CLICK_IDS.some((name) => stored.params[name]);
   if (!hasClick && (Object.keys(found).length === 0 || storedHasClick)) return stored;
+  // The same click seen again (a reload, a second submit from the landing page, a revisit of the tagged link) is not a new click: its landing time and 90 days stay as they were.
+  if (stored && (CLICK_IDS.some((name) => found[name] && found[name] === stored.params[name]) || (!hasClick && JSON.stringify(found) === JSON.stringify(stored.params)))) return stored;
   const now = Date.now();
   return { v: VERSION, first_seen: new Date(now).toISOString(), landing: clean(location.origin + location.pathname, 300), params: found, expires: now + DAYS * 864e5 };
 }

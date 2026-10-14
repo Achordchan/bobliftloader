@@ -70,6 +70,25 @@ const cookie = (advertising) => `document.cookie = 'bl_consent=' + encodeURIComp
   assert.equal(fields.bl_attr_gclid, undefined);
   await context.close();
 
+  // 2b. The same click seen again keeps its landing time and expiry; an over-long or malformed click ID is dropped, not cut, and replaces nothing.
+  context = await browser.newContext();
+  page = await visit(context, '/land/?gclid=GC-SAME&utm_source=google', googleState(true));
+  const first = JSON.parse(await stored(page));
+  await page.evaluate((record) => localStorage.setItem('bl_attribution', JSON.stringify({ ...record, first_seen: '2026-01-01T00:00:00.000Z', expires: record.expires - 1000 })), first);
+  const aged = JSON.parse(await stored(page));
+  page = await visit(context, '/other/?gclid=GC-SAME', googleState(true));
+  let again = JSON.parse(await stored(page));
+  assert.equal(again.first_seen, aged.first_seen, 'the same click got a new landing time');
+  assert.equal(again.expires, aged.expires, 'the same click renewed its 90 days');
+  assert.equal(again.landing, aged.landing);
+  assert.equal(again.params.utm_source, 'google', 'the same click lost its tags');
+  page = await visit(context, `/x/?gclid=${'a'.repeat(300)}`, googleState(true));
+  again = JSON.parse(await stored(page));
+  assert.equal(again.params.gclid, 'GC-SAME', 'an over-long click ID replaced the record');
+  page = await visit(context, '/y/?gclid=a%20b', googleState(true));
+  assert.equal(JSON.parse(await stored(page)).params.gclid, 'GC-SAME', 'a malformed click ID replaced the record');
+  await context.close();
+
   // 3. A region that starts denied (EEA, UK, Switzerland): nothing kept, nothing sent.
   context = await browser.newContext();
   page = await visit(context, '/p/?gclid=GC-3&utm_source=google', googleState(false));
@@ -99,9 +118,10 @@ const cookie = (advertising) => `document.cookie = 'bl_consent=' + encodeURIComp
   page = await visit(context, '/p/', googleState(true));
   await page.evaluate(() => localStorage.setItem('bl_attribution', JSON.stringify({ v: 1, first_seen: 'x', landing: 'https://old.test/', params: { gclid: 'OLD' }, expires: Date.now() - 1 })));
   assert.deepEqual(await submitted(page), {}, 'an expired record was sent');
+  assert.equal(await stored(page), null, 'an expired record stayed in storage');
   page = await visit(context, '/p/?gclid=%3Cscript%3E', googleState(true));
   fields = await submitted(page);
-  assert.equal(fields.bl_attr_gclid.includes('<'), false, 'markup in a click ID was carried');
+  assert.equal(fields.bl_attr_gclid, undefined, 'markup in a click ID was carried');
 
   await browser.close();
   server.close();
