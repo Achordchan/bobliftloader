@@ -84,6 +84,11 @@ function readStored() {
   return null;
 }
 
+// This page's own arrival. The address is read for what it brought once, as of the moment the page was opened: a page left open in
+// another tab, or one whose consent became known late, must never lay an older click over one a newer page has kept since.
+const arrivedAt = Date.now();
+let arrivalHandled = false;
+
 // The record to keep after this visit: the new click or tags if the address has them, else what is already kept.
 function nextRecord(stored) {
   const query = Object.fromEntries(new URLSearchParams(location.search));
@@ -93,8 +98,8 @@ function nextRecord(stored) {
   if (!hasClick && (Object.keys(found).length === 0 || storedHasClick)) return stored;
   // The same click seen again (a reload, a second submit from the landing page, a revisit of the tagged link) is not a new click: its landing time and 90 days stay as they were.
   if (stored && (CLICK_IDS.some((name) => found[name] && found[name] === stored.params[name]) || (!hasClick && JSON.stringify(found) === JSON.stringify(stored.params)))) return stored;
-  const now = Date.now();
-  return { v: VERSION, first_seen: new Date(now).toISOString(), landing: clean(location.origin + location.pathname, 300), params: found, expires: now + DAYS * 864e5 };
+  if (stored && (stored.arrived || 0) > arrivedAt) return stored;
+  return { v: VERSION, arrived: arrivedAt, first_seen: new Date(arrivedAt).toISOString(), landing: clean(location.origin + location.pathname, 300), params: found, expires: arrivedAt + DAYS * 864e5 };
 }
 
 function store(record) {
@@ -128,8 +133,11 @@ function fillForm(form) {
 // Keep this visit's tags if advertising is agreed; drop a record kept earlier if it has been refused since.
 function settle() {
   const agreed = advertisingAgreed();
-  if (agreed === true) store(nextRecord(readStored()));
-  else if (agreed === false) forget();
+  if (agreed === true) {
+    // Reading the address again at submit time would only repeat (or, in an old tab, undo) what arrival already did.
+    if (!arrivalHandled) store(nextRecord(readStored()));
+    arrivalHandled = true;
+  } else if (agreed === false) forget();
   return agreed;
 }
 

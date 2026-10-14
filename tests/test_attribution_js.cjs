@@ -89,6 +89,22 @@ const cookie = (advertising) => `document.cookie = 'bl_consent=' + encodeURIComp
   assert.equal(JSON.parse(await stored(page)).params.gclid, 'GC-SAME', 'a malformed click ID replaced the record');
   await context.close();
 
+  // 2c. Two tabs: the older one, submitted after a newer click was kept, neither replaces it nor renews it (also when its consent was only known late).
+  context = await browser.newContext();
+  const tabA = await visit(context, '/a/?gclid=GC-A', googleState(true));
+  const lateA = await visit(context, '/late/?gclid=GC-LATE', googleState(null));
+  assert.equal(JSON.parse(await stored(tabA)).params.gclid, 'GC-A');
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  const tabB = await visit(context, '/b/?gclid=GC-B', googleState(true));
+  const recordB = await stored(tabB);
+  assert.equal(JSON.parse(recordB).params.gclid, 'GC-B');
+  assert.equal((await submitted(tabA)).bl_attr_gclid, 'GC-B', 'an older tab sent its own click');
+  assert.equal(await stored(tabA), recordB, 'an older tab changed the kept record');
+  await lateA.evaluate(() => { window.google_tag_data = { ics: { entries: { ad_storage: { default: true } } } }; });
+  assert.equal((await submitted(lateA)).bl_attr_gclid, 'GC-B', 'a tab whose consent came late replaced a newer click');
+  assert.equal(await stored(lateA), recordB, 'a tab whose consent came late changed the kept record');
+  await context.close();
+
   // 3. A region that starts denied (EEA, UK, Switzerland): nothing kept, nothing sent.
   context = await browser.newContext();
   page = await visit(context, '/p/?gclid=GC-3&utm_source=google', googleState(false));
