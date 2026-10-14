@@ -280,10 +280,16 @@ function bl_wp_inquiry_uploads_file(string $address): string
     return trailingslashit((string) $uploads['basedir']) . substr($path, strlen($base) + 1);
 }
 
-/** An image address a mail program can open: one kept as a path from the site root gets the site's address in front of it. */
+/**
+ * An image address a mail program can open: one kept as a path from the site root gets the site's scheme and host in front of
+ * it (not the home URL, which on a site in a subfolder already ends with that folder, and the path names it too).
+ */
 function bl_wp_inquiry_absolute_url(string $address): string
 {
-    return str_starts_with($address, '/') && !str_starts_with($address, '//') ? home_url($address) : $address;
+    if (!str_starts_with($address, '/') || str_starts_with($address, '//')) return $address;
+    $home = (array) wp_parse_url(home_url());
+    if (empty($home['scheme']) || empty($home['host'])) return $address;
+    return $home['scheme'] . '://' . $home['host'] . (isset($home['port']) ? ':' . $home['port'] : '') . $address;
 }
 
 /**

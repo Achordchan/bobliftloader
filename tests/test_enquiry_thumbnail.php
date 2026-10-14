@@ -12,7 +12,7 @@ $GLOBALS['posts'] = [];
 // What inc/wp-inquiry.php takes from WordPress.
 function add_action(...$args) {}
 function add_filter(...$args) {}
-function home_url($path = '') { return 'https://example.test' . $path; }
+function home_url($path = '') { return ($GLOBALS['home'] ?? 'https://example.test') . $path; }
 function wp_parse_url($url, $component = -1) { return parse_url($url, $component); }
 function trailingslashit($value) { return rtrim($value, '/') . '/'; }
 function wp_upload_dir() { return ['basedir' => $GLOBALS['root'] . '/uploads', 'baseurl' => 'https://example.test/wp-content/uploads']; }
@@ -72,6 +72,13 @@ $bad = bl_wp_inquiry_thumbnail($product('bad', '/wp-content/uploads/2026/10/bad.
 $check($bad === 'https://example.test/wp-content/uploads/2026/10/bad.webp', 'an unreadable file gave a relative or wrong address: ' . $bad);
 $full = bl_wp_inquiry_thumbnail($product('cdn', 'https://cdn.test/a.jpg', 'https://cdn.test/a.jpg'));
 $check($full === 'https://cdn.test/a.jpg', 'a full address from elsewhere was changed');
+
+// A site in a subfolder: the path already names the folder, so only the scheme and host go in front of it.
+$GLOBALS['home'] = 'https://example.test/site';
+$check(bl_wp_inquiry_absolute_url('/site/wp-content/uploads/photo.webp') === 'https://example.test/site/wp-content/uploads/photo.webp', 'a path on a site in a subfolder got the folder twice');
+$GLOBALS['home'] = 'http://localhost:8080';
+$check(bl_wp_inquiry_absolute_url('/wp-content/uploads/photo.webp') === 'http://localhost:8080/wp-content/uploads/photo.webp', 'the port was lost');
+$GLOBALS['home'] = 'https://example.test';
 $check(bl_wp_inquiry_absolute_url('//cdn.test/a.jpg') === '//cdn.test/a.jpg' && bl_wp_inquiry_absolute_url('') === '', 'a protocol-relative or empty address was changed');
 
 echo "enquiry thumbnail ok ($checks checks)\n";
