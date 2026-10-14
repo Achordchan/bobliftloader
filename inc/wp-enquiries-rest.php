@@ -10,7 +10,8 @@ defined('ABSPATH') || exit;
  *
  * List: /wp/v2/bl_enquiries (newest first; title = the equipment chosen, status "flamingo-spam" for spam, which the
  * default list includes). One enquiry with context=edit carries meta._bl_enquiry: sender, every posted field, the page,
- * IP, browser, time and the spam verdict (why it was spam, Akismet's answer).
+ * IP, browser, time and the spam verdict (why it was spam, Akismet's answer), and meta._bl_enquiry.attribution: the Google click ID
+ * (gclid / gbraid / wbraid), campaign tags and landing page the sender arrived with, when they agreed to advertising storage.
  */
 
 if (class_exists('WP_REST_Posts_Controller')) {
@@ -90,6 +91,8 @@ function bl_enquiry_record(int $postId): array
         'from_name' => (string) $message->from_name,
         'from_email' => (string) $message->from_email,
         'fields' => (array) $message->fields,
+        // The advertisement the sender came from (Google click ID, campaign tags, landing page), when they agreed to advertising storage.
+        'attribution' => function_exists('bl_enquiry_attribution') ? bl_enquiry_attribution((array) $message->fields) : [],
         'meta' => (array) $message->meta,
         'channel' => (string) $message->channel,
         'submission_status' => (string) $message->submission_status,
