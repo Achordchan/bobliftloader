@@ -139,5 +139,9 @@ $mailProbe = [];
 exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/fixtures/check-backend-p1-mail.php'), $mailProbe, $mailStatus);
 $check($mailStatus === 0, 'CF7 primary recipient or legacy compatibility failed');
 
+$akismetProbe = [];
+exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/fixtures/check-inquiry-akismet.php'), $akismetProbe, $akismetStatus);
+$check($akismetStatus === 0, 'enquiry form fields lack their Akismet options');
+
 if ($failures) { fwrite(STDERR, implode("\n", $failures) . "\n"); exit(1); }
 echo "backend P1 regression ok\n";
