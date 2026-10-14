@@ -86,7 +86,9 @@ function bl_social_links(): array
     $links = [];
     foreach (['youtube' => 'YouTube', 'facebook' => 'Facebook'] as $key => $name) {
         $url = bl_company($key . '_url');
-        if (preg_match('~^https?://~i', $url)) $links[$key] = ['name' => $name, 'url' => $url];
+        $host = (string) parse_url($url, PHP_URL_HOST);
+        // An unfinished address such as "https://" has a scheme but no host; a profile needs a real domain name.
+        if (preg_match('~^https?://~i', $url) && preg_match('~^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$~i', $host)) $links[$key] = ['name' => $name, 'url' => $url];
     }
     return $links;
 }
