@@ -29,6 +29,7 @@
   .bl-site .bl-footer-top .bl-brand img{width:125px}
   .bl-site .bl-footer-links{grid-template-columns:1fr 1fr;row-gap:32px}
   .bl-site .bl-footer-domain{border:0;padding:0}
+  .bl-site .bl-footer-social>span{flex:0 0 100%;margin:0}
   .bl-site .bl-footer-bottom>span:last-child{display:none}
   /* The contact bar carries Top from here down. */
   .bl-site .bl-footer-top>.bl-circle-button{display:none}

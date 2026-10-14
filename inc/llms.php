@@ -65,6 +65,7 @@ function bl_llms_txt(): string
                 bl_company('factory_street') === '' ? '' : '- Main factory: ' . bl_company_full_address('factory_street'),
                 bl_company('office_street') === '' ? '' : '- Office: ' . bl_company_full_address('office_street'),
             ]),
+            ...array_map(static fn($link) => '- ' . $link['name'] . ': ' . $link['url'], array_values(bl_social_links())),
             '- Parent company website: https://www.boblift.com/',
         ],
     ];

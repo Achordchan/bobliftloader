@@ -25,6 +25,11 @@
 .bl-site .bl-footer-links a{position:relative}
 @media(hover:hover){.bl-site .bl-footer-links a:hover{color:white;text-decoration:underline;text-underline-offset:5px}}
 .bl-site .bl-footer-links .bl-icon{filter:invert(1);width:15px;height:15px;margin-left:10px}
+.bl-site .bl-footer-social{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:8px}
+.bl-site .bl-footer-social>span{font-size:var(--fs-micro);letter-spacing:1.2px;color:#8399aa;margin-right:4px;white-space:nowrap}
+.bl-site .bl-footer-links .bl-footer-social a{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;border:1px solid #435662;border-radius:50%;color:#c3cdd5;transition:color .2s,border-color .2s}
+.bl-site .bl-footer-social svg{width:20px;height:20px}
+@media(hover:hover){.bl-site .bl-footer-links .bl-footer-social a:hover{color:white;border-color:#8399aa;text-decoration:none}}
 .bl-site .bl-footer-domain{border-left:1px solid #435662;padding-left:32px}
 .bl-site .bl-footer-domain>span:last-child{font-size:var(--fs-micro);color:#8399aa}
 .bl-site .bl-footer-bottom{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:6px 28px;align-items:center;padding-top:20px;padding-bottom:20px;border-top:1px solid #425360;color:#8fa0ad;font-size:var(--fs-micro)}
