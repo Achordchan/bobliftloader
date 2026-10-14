@@ -16,7 +16,7 @@ $check(bl_company_address_part(0) === 'No. 79, Zone B, Jingluotuo Industrial Par
 $llms = bl_llms_txt();
 foreach (['- Registered address: No. 79, Zone B, Jingluotuo Industrial Park', '- Main factory: S324 Provincial Road, Zhangji Town, Tongshan District, Xuzhou, Jiangsu, China', '- Office: 13F, Building A, Yongjia New Town Center'] as $line) $check(str_contains($llms, $line), 'llms.txt misses ' . $line);
 
-foreach (['- YouTube: https://www.youtube.com/@bobliftloader', '- Facebook: https://facebook.com/122103113139506578'] as $line) $check(str_contains($llms, $line), 'llms.txt misses ' . $line);
+foreach (['- YouTube: https://www.youtube.com/@bobliftloader', '- Facebook: https://www.facebook.com/@bobliftloader'] as $line) $check(str_contains($llms, $line), 'llms.txt misses ' . $line);
 
 $graph = bl_structured_data(['type' => 'contact', 'path' => '/contact/', 'title' => 'Contact', 'description' => 'Contact', 'record' => null, 'status' => 200]);
 $organization = array_values(array_filter($graph['@graph'] ?? $graph, static fn($item) => ($item['@type'] ?? '') === 'Organization'))[0] ?? [];

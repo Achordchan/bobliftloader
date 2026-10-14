@@ -19,11 +19,11 @@ $sameAs = static fn() => bl_structured_data($route)['@graph'][0]['sameAs'];
 // Defaults: both profiles show, in the footer with a new-tab, noopener link, and and in the structured data (llms.txt is checked in test_company_addresses.php).
 $links = bl_social_links();
 $check(array_keys($links) === ['youtube', 'facebook'], 'default social networks: ' . implode(',', array_keys($links)));
-$check($links['youtube']['url'] === 'https://www.youtube.com/@bobliftloader' && $links['facebook']['url'] === 'https://facebook.com/122103113139506578', 'default social addresses changed');
+$check($links['youtube']['url'] === 'https://www.youtube.com/@bobliftloader' && $links['facebook']['url'] === 'https://www.facebook.com/@bobliftloader', 'default social addresses changed');
 $footer = $capture(static fn() => require __DIR__ . '/../templates/footer.php');
-$check(str_contains($footer, 'href="https://www.youtube.com/@bobliftloader" target="_blank" rel="noopener noreferrer"') && str_contains($footer, 'href="https://facebook.com/122103113139506578" target="_blank" rel="noopener noreferrer"'), 'footer social links missing or not opening safely in a new tab');
+$check(str_contains($footer, 'href="https://www.youtube.com/@bobliftloader" target="_blank" rel="noopener noreferrer"') && str_contains($footer, 'href="https://www.facebook.com/@bobliftloader" target="_blank" rel="noopener noreferrer"'), 'footer social links missing or not opening safely in a new tab');
 $check(str_contains($footer, 'aria-label="BOB-LIFT Loader on YouTube (opens in a new tab)"') && str_contains($footer, '>Follow us<'), 'footer social links have no accessible name');
-$check(count(array_intersect($sameAs(), ['https://www.youtube.com/@bobliftloader', 'https://facebook.com/122103113139506578'])) === 2 && in_array('https://www.boblift.com/', $sameAs(), true), 'sameAs lost a profile or the sister sites');
+$check(count(array_intersect($sameAs(), ['https://www.youtube.com/@bobliftloader', 'https://www.facebook.com/@bobliftloader'])) === 2 && in_array('https://www.boblift.com/', $sameAs(), true), 'sameAs lost a profile or the sister sites');
 
 if ($failures) { fwrite(STDERR, implode("\n", $failures) . "\n"); exit(1); }
 echo "social links ok\n";
