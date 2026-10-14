@@ -11,7 +11,7 @@ return [
             'domain' => 'bobliftloader.com',
             'website' => 'https://www.boblift.com/',
             'youtube_url' => 'https://www.youtube.com/@bobliftloader',
-            'facebook_url' => 'https://facebook.com/122103113139506578',
+            'facebook_url' => 'https://www.facebook.com/@bobliftloader',
             'street' => 'No. 79, Zone B, Jingluotuo Industrial Park, Yunlong District',
             'factory_street' => 'S324 Provincial Road, Zhangji Town, Tongshan District',
             'office_street' => '13F, Building A, Yongjia New Town Center, Yunlong District',
