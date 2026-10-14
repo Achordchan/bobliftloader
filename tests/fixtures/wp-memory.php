@@ -18,7 +18,7 @@ function run_filter($name, $value, ...$args) {
 }
 function register_rest_field($type, $name, $args) { $GLOBALS['rest_fields'][$type][$name] = $args; }
 function home_url($path = '') { return 'https://example.test' . $path; }
-function wp_parse_url($url) { return parse_url($url); }
+function wp_parse_url($url, $component = -1) { return parse_url($url, $component); }
 function get_template_directory_uri() { return 'https://example.test/theme'; }
 function wp_cache_get(...$args) { return false; }
 function wp_cache_set(...$args) {}

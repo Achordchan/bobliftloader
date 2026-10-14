@@ -50,23 +50,36 @@ function bl_enquiry_attribution(array $fields): array
     return $found;
 }
 
-/** The "advertisement" block of the notification card: what the visitor arrived with. Empty when nothing was sent. */
-function bl_wp_inquiry_attribution_block(array $attribution): string
+/**
+ * What the visitor arrived with, as [label, value as safe HTML, monospace?] lines for the notification mail. The first line says
+ * what kind of arrival it is; none at all when nothing was sent. Every design in inc/mail-templates/ and the classic card use it.
+ */
+function bl_wp_inquiry_attribution_lines(array $attribution): array
 {
-    if (!$attribution) return '';
+    if (!$attribution) return [];
     $ads = isset($attribution['gclid']) || isset($attribution['gbraid']) || isset($attribution['wbraid']) || isset($attribution['gad_source']);
     $labels = [
-        'gclid' => '点击编号 gclid', 'gbraid' => '点击编号 gbraid', 'wbraid' => '点击编号 wbraid', 'gad_campaignid' => '广告系列编号',
-        'utm_source' => '来源 utm_source', 'utm_medium' => '媒介 utm_medium', 'utm_campaign' => '系列 utm_campaign', 'utm_term' => '关键词 utm_term', 'utm_content' => '内容 utm_content',
-        'landing' => '落地页', 'first_seen' => '落地时间',
+        'gclid' => ['gclid', true], 'gbraid' => ['gbraid', true], 'wbraid' => ['wbraid', true], 'gad_campaignid' => ['广告系列编号', true],
+        'utm_source' => ['UTM 来源', false], 'utm_medium' => ['UTM 媒介', false], 'utm_campaign' => ['UTM 系列', false], 'utm_term' => ['UTM 关键词', false], 'utm_content' => ['UTM 内容', false],
+        'landing' => ['落地页', false], 'first_seen' => ['落地时间', true],
     ];
-    $rows = '';
-    foreach ($labels as $name => $label) {
-        if (!isset($attribution[$name])) continue;
-        $rows .= '<div style="padding:3px 0;font-size:13px;line-height:1.6;color:#334155;word-break:break-all;"><span style="color:#64748b;">' . esc_html($label) . '</span> ' . esc_html($attribution[$name]) . '</div>';
+    $lines = [['广告来源', '<b>' . ($ads ? 'Google Ads 点击' : '营销标记') . '</b>', false]];
+    foreach ($labels as $name => [$label, $mono]) {
+        if (isset($attribution[$name])) $lines[] = [$label, '<span style="word-break:break-all;">' . esc_html($attribution[$name]) . '</span>', $mono];
     }
-    $pill = '<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:#e3ebfc;color:#215bdb;font-size:12px;font-weight:bold;">' . ($ads ? 'Google Ads 点击' : '营销标记') . '</span>';
-    return '<tr><td style="padding:20px 36px 0;"><table width="100%" cellspacing="0" cellpadding="0" style="background:#f5f7fa;border-radius:8px;"><tr><td style="padding:14px 18px;"><div style="font-size:12px;color:#64748b;padding-bottom:6px;">广告来源 &nbsp;' . $pill . '</div>' . $rows . '</td></tr></table></td></tr>' . "\n";
+    return $lines;
+}
+
+/** The same lines as one grey block of the classic notification card. Empty when nothing was sent. */
+function bl_wp_inquiry_attribution_block(array $attribution): string
+{
+    $lines = bl_wp_inquiry_attribution_lines($attribution);
+    if (!$lines) return '';
+    $rows = '';
+    foreach ($lines as [$label, $value]) {
+        $rows .= '<div style="padding:3px 0;font-size:13px;line-height:1.6;color:#334155;word-break:break-all;"><span style="color:#64748b;">' . esc_html($label) . '</span> ' . $value . '</div>';
+    }
+    return '<tr><td style="padding:20px 36px 0;"><table width="100%" cellspacing="0" cellpadding="0" style="background:#f5f7fa;border-radius:8px;"><tr><td style="padding:14px 18px;">' . $rows . '</td></tr></table></td></tr>' . "\n";
 }
 
 // The block goes in front of the card's reply button. Only the theme's card is touched: an edited mail without the marker, or

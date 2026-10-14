@@ -54,6 +54,7 @@ add_filter('wpcf7_mail_html_body', static function ($body) {
         'url' => (string) $submission->get_meta('url'),
         'ip' => (string) $submission->get_meta('remote_ip'),
         'time' => (int) ($submission->get_meta('timestamp') ?: time()),
+        'attribution' => function_exists('bl_enquiry_attribution') ? bl_enquiry_attribution((array) $submission->get_posted_data()) : [],
     ]));
 }, 20);
 
@@ -85,6 +86,7 @@ function bl_wp_inquiry_data(array $raw): array
         'ip' => $ip,
         'country' => $raw['country'] ?? ($ip === '' ? '' : (bl_wp_ip_country($ip) ?: '未能识别')),
         'time' => wp_date('Y-m-d H:i', (int) ($raw['time'] ?? time())),
+        'attribution' => function_exists('bl_wp_inquiry_attribution_lines') ? bl_wp_inquiry_attribution_lines((array) ($raw['attribution'] ?? [])) : [],
         'logo' => bl_asset('images/logo.png'),
         'site' => (string) wp_parse_url(home_url(), PHP_URL_HOST),
         'reply' => 'mailto:' . $email . '?subject=' . rawurlencode($productName !== '' ? 'Re: Your inquiry about ' . $productName : 'Re: Your inquiry to BOB-LIFT'),
@@ -133,6 +135,7 @@ function bl_wp_inquiry_sample(string $kind): array
         'ip' => '216.232.48.35',
         'country' => '加拿大',
         'time' => time(),
+        'attribution' => $kind !== 'contact' ? ['gclid' => 'EAIaIQobChMI-sample', 'gad_campaignid' => '24354771502', 'utm_source' => 'google', 'utm_medium' => 'cpc', 'landing' => (string) ($product['url'] ?? home_url('/')), 'first_seen' => '2026-10-14T03:20:00.000Z'] : [],
     ];
 }
 
