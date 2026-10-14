@@ -266,8 +266,31 @@ function bl_wp_inquiry_product_card(string $family, string $model): string
 }
 
 /**
- * A square of the product's photo (twice its 104 px size, for sharp screens ), from its featured image, else the theme's own catalogue image, saved once as a JPEG
- * in the uploads: product photos are WebP, which some desktop mail programs do not show. Falls back to the image as it is.
+ * The file in the uploads folder that a stored image address points to (the media library keeps it as a path from the site
+ * root, "/wp-content/uploads/2026/10/x.webp", or as a full address), or '' for any other address.
+ */
+function bl_wp_inquiry_uploads_file(string $address): string
+{
+    $uploads = wp_upload_dir();
+    $base = rtrim((string) wp_parse_url((string) $uploads['baseurl'], PHP_URL_PATH), '/');
+    $host = wp_parse_url($address, PHP_URL_HOST);
+    if ($base === '' || ($host && $host !== wp_parse_url((string) $uploads['baseurl'], PHP_URL_HOST))) return '';
+    $path = rawurldecode((string) wp_parse_url($address, PHP_URL_PATH));
+    if (!str_starts_with($path, $base . '/') || str_contains($path, '..')) return '';
+    return trailingslashit((string) $uploads['basedir']) . substr($path, strlen($base) + 1);
+}
+
+/** An image address a mail program can open: one kept as a path from the site root gets the site's address in front of it. */
+function bl_wp_inquiry_absolute_url(string $address): string
+{
+    return str_starts_with($address, '/') && !str_starts_with($address, '//') ? home_url($address) : $address;
+}
+
+/**
+ * A square of the product's photo (twice its 104 px size, for sharp screens ), from its featured image, else the image the
+ * product record names (the media library's, or the theme's own catalogue image), saved once as a JPEG in the uploads:
+ * product photos are WebP, which some desktop mail programs do not show. Falls back to the image as it is, with its full
+ * address: a path from the site root opens in the browser but is a broken picture in a mail.
  */
 function bl_wp_inquiry_thumbnail(array $product): string
 {
@@ -278,14 +301,16 @@ function bl_wp_inquiry_thumbnail(array $product): string
         $record = get_post_meta($post->ID, '_bl_record', true);
         $stored = is_array($record) ? (string) ($record['image'] ?? '') : '';
         if (str_starts_with($stored, 'images/') && !str_contains($stored, '..')) $file = get_template_directory() . '/assets/' . $stored;
+        elseif ($stored !== '') $file = bl_wp_inquiry_uploads_file($stored);
     }
-    if (!$file || !is_file($file)) return (string) $product['image'];
+    $fallback = bl_wp_inquiry_absolute_url((string) $product['image']);
+    if (!$file || !is_file($file)) return $fallback;
     $uploads = wp_upload_dir();
     $name = 'bl-mail/' . substr(md5($file . filemtime($file)), 0, 12) . '-208.jpg';
     $path = trailingslashit($uploads['basedir']) . $name;
     if (!is_file($path)) {
         $editor = wp_get_image_editor($file);
-        if (is_wp_error($editor) || is_wp_error($editor->resize(208, 208, true)) || is_wp_error($editor->save($path, 'image/jpeg'))) return (string) $product['image'];
+        if (is_wp_error($editor) || is_wp_error($editor->resize(208, 208, true)) || is_wp_error($editor->save($path, 'image/jpeg'))) return $fallback;
     }
     return trailingslashit($uploads['baseurl']) . $name;
 }
