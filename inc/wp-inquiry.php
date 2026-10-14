@@ -128,11 +128,15 @@ add_filter('wpcf7_spam', static fn(bool $spam): bool => $spam || trim((string) (
  */
 function bl_wp_inquiry_akismet_tag($tag)
 {
-    $role = ['name' => 'author', 'email' => 'author_email'][$tag['name'] ?? ''] ?? '';
-    if ($role === '' || !is_array($tag['options'] ?? null) || preg_grep('/^akismet:/i', $tag['options'])) return $tag;
+    // CF7 6.2 hands over an array; a WPCF7_FormTag (ArrayAccess, read by value) is handled too, so the options are
+    // read out and written back whole rather than appended in place.
+    $role = ['name' => 'author', 'email' => 'author_email'][(string) ($tag['name'] ?? '')] ?? '';
+    $options = $tag['options'] ?? null;
+    if ($role === '' || !is_array($options) || preg_grep('/^akismet:/i', $options)) return $tag;
     $form = class_exists('WPCF7_ContactForm') ? WPCF7_ContactForm::get_current() : null;
     if (!$form || (int) $form->id() !== bl_wp_inquiry_form_id()) return $tag;
-    $tag['options'][] = 'akismet:' . $role;
+    $options[] = 'akismet:' . $role;
+    $tag['options'] = $options;
     return $tag;
 }
 add_filter('wpcf7_form_tag', 'bl_wp_inquiry_akismet_tag');

@@ -24,4 +24,17 @@ WPCF7_ContactForm::$current = new WPCF7_ContactForm(19);
 if (bl_wp_inquiry_akismet_tag($tag('name')) !== $tag('name')) exit(5);
 WPCF7_ContactForm::$current = null;
 if (bl_wp_inquiry_akismet_tag($tag('name')) !== $tag('name')) exit(6);
+// CF7's form-tag object: ArrayAccess whose offsetGet returns by value, as WPCF7_FormTag does.
+$object = new class implements ArrayAccess {
+    public $name = 'email';
+    public $options = ['autocomplete:email'];
+    function offsetExists($o): bool { return property_exists($this, $o); }
+    function offsetGet($o): mixed { return property_exists($this, $o) ? $this->{$o} : null; }
+    function offsetSet($o, $v): void { if (property_exists($this, $o)) $this->{$o} = $v; }
+    function offsetUnset($o): void {}
+};
+WPCF7_ContactForm::$current = new WPCF7_ContactForm(18);
+set_error_handler(static function () { exit(7); });
+if (bl_wp_inquiry_akismet_tag($object)->options !== ['autocomplete:email', 'akismet:author_email']) exit(8);
+restore_error_handler();
 echo "inquiry akismet ok\n";
