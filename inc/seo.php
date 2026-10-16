@@ -20,7 +20,7 @@ function bl_structured_data(array $route): array
     }
     if ($places) $organization['location'] = $places;
     $graph = [$organization,
-        ['@type' => 'WebSite', '@id' => $base . '/#website', 'url' => $base . '/', 'name' => 'BOB-LIFT Loader', 'description' => 'The loader equipment business website of ' . bl_company('name'), 'publisher' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
+        ['@type' => 'WebSite', '@id' => $base . '/#website', 'url' => $base . '/', 'name' => 'BOB-LIFT Loader', 'alternateName' => 'BOB-LIFT', 'description' => 'The loader equipment business website of ' . bl_company('name'), 'publisher' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
         ['@type' => $route['type'] === 'about' ? 'AboutPage' : ($route['type'] === 'contact' ? 'ContactPage' : 'WebPage'), '@id' => $base . $route['path'] . '#webpage', 'url' => $base . $route['path'], 'name' => $route['title'], 'description' => $route['description'], 'isPartOf' => ['@id' => $base . '/#website'], 'about' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
     ];
     // No Product node: Google's product snippets need a price, a review or a rating, and the site states none of them.
@@ -75,7 +75,8 @@ function bl_share_image(array $route): string
 
 function bl_render_seo(array $route): void
 {
-    $title = $route['title'] . ' | BOB-LIFT';
+    // The home page carries the site name Google shows above results (BOB-LIFT Loader, as in the WebSite node and og:site_name); other pages keep the shorter brand.
+    $title = $route['title'] . ' | ' . ($route['type'] === 'home' ? 'BOB-LIFT Loader' : 'BOB-LIFT');
     $canonical = bl_public_base() . $route['path'];
     $filtered = (bool) array_filter(['q', 's', 'load', 'gear', 'operator', 'opening', 'payload', 'category', 'product'], static fn($key) => bl_query($key) !== '');
     $robots = $route['status'] === 200 && bl_indexable() && !$filtered && empty($route['preview']) && $route['type'] !== 'thanks' ? 'index, follow, max-image-preview:large' : 'noindex, follow';
