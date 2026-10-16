@@ -32,6 +32,9 @@ $check($read['excerpt'] === bl_product_excerpt($read), 'the hero would treat the
 // A written summary keeps its words, loses its tags and decodes its entities once.
 $post->post_excerpt = "<p>Seated &amp; tracked,\n for soft ground.</p>";
 $check(bl_wp_product_record($post)['excerpt'] === 'Seated & tracked, for soft ground.', 'a written HTML summary kept its tags or entities');
+// Breaks and paragraph boundaries keep the words apart.
+$post->post_excerpt = '<p>Suitable for indoor<br>and outdoor work.</p><p>Seated.</p><ul><li>One</li><li>Two</li></ul>';
+$check(bl_wp_product_record($post)['excerpt'] === 'Suitable for indoor and outdoor work. Seated. One Two', 'a break or block boundary merged two words');
 $post->post_excerpt = 'Plain words stay as they are.';
 $check(bl_wp_product_record($post)['excerpt'] === 'Plain words stay as they are.', 'a plain summary changed');
 $post->post_excerpt = '<p> </p>';

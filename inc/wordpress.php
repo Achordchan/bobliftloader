@@ -48,7 +48,9 @@ function bl_wp_product_record(WP_Post $post): array
     $record['url'] = get_permalink($post);
     // The summary is plain text: a copy saved as HTML (e.g. "<p>…</p>" from a rendered excerpt) is read without its tags,
     // so it is neither printed as markup nor mistaken for a hand-written summary.
-    $excerpt = trim((string) preg_replace('/\s+/u', ' ', html_entity_decode(wp_strip_all_tags($post->post_excerpt), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+    // A line break or a block boundary becomes a space first, so "indoor<br>and" does not read "indoorand".
+    $excerpt = (string) preg_replace('~<br\s*/?>|</?(?:p|div|li|ul|ol|h[1-6]|blockquote)\b[^>]*>~i', ' ', $post->post_excerpt);
+    $excerpt = trim((string) preg_replace('/\s+/u', ' ', html_entity_decode(wp_strip_all_tags($excerpt), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
     // The import kept the original name in the record, so a summary generated before a rename is still recognised.
     if (bl_is_generated_product_excerpt($excerpt, [$post->post_title, $record['name'], $data['name'] ?? ''])) $record['excerpt'] = bl_product_excerpt($record);
     else $record['excerpt'] = $excerpt ?: (wp_trim_words(wp_strip_all_tags($post->post_content), 35) ?: bl_product_excerpt($record));
