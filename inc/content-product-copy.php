@@ -35,6 +35,8 @@ function bl_product_copy_fields(bool $loader): array
         'spec_source_default' => ['未填写来源时说明', 'Model details transcribed from the linked BOB-LIFT product page and its product literature.', '规格参数', 'text'],
         'spec_confirm' => ['订购确认说明', 'Confirm the final specification before ordering.', '规格参数', 'text'],
         'spec_engine' => ['发动机配置说明', 'Engine brand, attachments and configuration are set per order. Tell us your preferred engine and the work you have in mind.', '规格参数', 'text'],
+        // A general hearing warning, no figures: the factory's noise readings are estimates, not declared values (research 2026-10-16).
+        'spec_safety' => ['安全提示（留空不显示）', $loader ? 'Noise at the operator position can exceed 85 dB(A) at full engine speed on some models. Always wear hearing protection when operating the machine.' : '', '规格参数', 'text'],
         'spec_compare' => ['系列比较链接', $loader ? 'Compare every loader' : 'Compare every dumper', '规格参数', 'text'],
         'spec_empty_title' => ['无参数标题', 'LET’S SPECIFY<br>YOUR MACHINE.', '规格参数', 'html'],
         'spec_empty_intro' => ['无参数说明', 'Request the current technical sheet for the {model}.', '规格参数', 'text'],
