@@ -38,7 +38,7 @@
 .bl-site .bl-product-highlights p{font-size:var(--fs-small);line-height:1.65;color:var(--muted)}
 
 /* Specification with a dimension drawing beside it. */
-.bl-site .bl-spec-body-drawing{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr);gap:clamp(24px,2.4vw,56px);align-items:start}
+.bl-site .bl-spec-body-drawing{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr);gap:var(--spec-gap);align-items:start}
 .bl-site .bl-spec-body-drawing .bl-spec-sheet,.bl-site .bl-spec-body-drawing .bl-spec-sheet[data-groups="3"]{grid-template-columns:repeat(2,minmax(0,1fr))}
 .bl-site .bl-spec-drawing{margin:clamp(40px,3.2vw,72px) 0 0;display:grid;gap:10px}
 .bl-site .bl-spec-drawing button{display:block;width:100%;background:#fff;padding:clamp(12px,1vw,24px);cursor:zoom-in;border:1px solid transparent;transition:border-color .2s}
@@ -189,6 +189,7 @@
   .bl-site .bl-product-buying-grid{grid-template-columns:1fr;grid-template-rows:none}
   .bl-site .bl-product-buying-grid article>.bl-text-link{margin-top:6px}
   .bl-site .bl-spec-body-drawing{grid-template-columns:1fr}
+  .bl-site .bl-specifications-sheet[data-spec-layout="drawing"]{--spec-lead:calc((100% - var(--spec-gap)) / 2)}
 }
 @media(max-width:800px){
   .bl-site .bl-product-section-head,.bl-site .bl-product-enquiry-inner{grid-template-columns:1fr;gap:20px}
