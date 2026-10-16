@@ -73,8 +73,11 @@
 /* Specification sheet: heading and notes share the top row; the groups sit side by side beneath, so a 24-row sheet
    reads in one screen instead of a single long column. */
 .bl-site .bl-specifications-sheet{display:block}
-/* The head shares the sheet's grid: the notes start on the sheet's second column and run to its right edge, so the
-   text, the rule above the safety note and the table below line up (data-spec-layout = the sheet's column count). */
+/* The head shares the sheet's grid: the notes start on a sheet column and run to its right edge, so the text, the rule
+   above the safety note and the table below line up (data-spec-layout = the sheet's column count). They start on the
+   column nearest the middle, as every two-column section head on the page does: the second of 2 or 3, the third of 4.
+   Four columns therefore keep the two-column lead on purpose (half the sheet = two columns and one gap); starting on
+   the second of 4 would squeeze the heading into a quarter and stretch the notes over three. */
 .bl-site .bl-specifications-sheet{--spec-gap:clamp(24px,2.4vw,56px);--spec-lead:calc((100% - var(--spec-gap)) / 2)}
 .bl-site .bl-specifications-sheet[data-spec-layout="3"]{--spec-lead:calc((100% - 2 * var(--spec-gap)) / 3)}
 .bl-site .bl-specifications-sheet[data-spec-layout="drawing"]{--spec-lead:calc(((100% - var(--spec-gap)) * 2.2 / 3.2 - var(--spec-gap)) / 2)}
