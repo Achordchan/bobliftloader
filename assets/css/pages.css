@@ -73,11 +73,17 @@
 /* Specification sheet: heading and notes share the top row; the groups sit side by side beneath, so a 24-row sheet
    reads in one screen instead of a single long column. */
 .bl-site .bl-specifications-sheet{display:block}
-.bl-site .bl-spec-head{display:grid;grid-template-columns:1fr 1.1fr;gap:9%;align-items:end}
-.bl-site .bl-spec-notes{display:grid;justify-items:start;gap:14px;max-width:560px;font-size:var(--fs-small);line-height:1.7;color:var(--muted)}
+/* The head shares the sheet's grid: the notes start on the sheet's second column and run to its right edge, so the
+   text, the rule above the safety note and the table below line up (data-spec-layout = the sheet's column count). */
+.bl-site .bl-specifications-sheet{--spec-gap:clamp(24px,2.4vw,56px);--spec-lead:calc((100% - var(--spec-gap)) / 2)}
+.bl-site .bl-specifications-sheet[data-spec-layout="3"]{--spec-lead:calc((100% - 2 * var(--spec-gap)) / 3)}
+.bl-site .bl-specifications-sheet[data-spec-layout="drawing"]{--spec-lead:calc(((100% - var(--spec-gap)) * 2.2 / 3.2 - var(--spec-gap)) / 2)}
+.bl-site .bl-spec-head{display:grid;grid-template-columns:var(--spec-lead) minmax(0,1fr);gap:var(--spec-gap);align-items:end}
+.bl-site .bl-spec-notes{display:grid;justify-items:start;gap:14px;font-size:var(--fs-small);line-height:1.7;color:var(--muted)}
+.bl-site .bl-spec-notes>p{justify-self:stretch;text-wrap:pretty}
 /* The safety note reads in the page's own ink and weight, set off by a rule rather than a coloured panel. */
 .bl-site .bl-spec-safety{color:var(--ink);font-weight:600;padding-top:14px;border-top:1px solid var(--line)}
-.bl-site .bl-spec-sheet{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(24px,2.4vw,56px);margin-top:clamp(40px,3.2vw,72px)}
+.bl-site .bl-spec-sheet{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--spec-gap);margin-top:clamp(40px,3.2vw,72px)}
 .bl-site .bl-spec-sheet[data-groups="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
 .bl-site .bl-spec-sheet[data-groups="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
 .bl-site .bl-spec-sheet[data-groups="1"]{grid-template-columns:minmax(0,1fr);max-width:640px}
@@ -92,7 +98,7 @@
 .bl-site .bl-spec-block dl>div{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 16px;padding:11px 0;border-bottom:1px solid #b4c1c8;font-size:var(--fs-small);line-height:1.4}
 .bl-site .bl-spec-block dt{color:var(--muted)}
 .bl-site .bl-spec-block dd{margin:0 0 0 auto;font-weight:600;text-align:right}
-@media(max-width:1150px){.bl-site .bl-spec-sheet,.bl-site .bl-spec-sheet[data-groups="3"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1150px){.bl-site .bl-spec-sheet,.bl-site .bl-spec-sheet[data-groups="3"]{grid-template-columns:repeat(2,minmax(0,1fr))}.bl-site .bl-specifications-sheet[data-spec-layout="3"]{--spec-lead:calc((100% - var(--spec-gap)) / 2)}}
 @media(max-width:800px){.bl-site .bl-spec-head{grid-template-columns:1fr;gap:20px}}
 @media(max-width:600px){
   .bl-site .bl-spec-sheet,.bl-site .bl-spec-sheet[data-groups]{grid-template-columns:minmax(0,1fr);gap:0}
