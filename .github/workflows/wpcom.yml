@@ -34,12 +34,18 @@ jobs:
         with:
           script: |
             const cutoff = Date.now() - 60 * 60 * 1000;
-            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, { owner: context.repo.owner, repo: context.repo.repo, per_page: 100 });
+            // Only this workflow's packages (name "wpcom"); artifacts from any other workflow keep their own retention.
+            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, { owner: context.repo.owner, repo: context.repo.repo, name: 'wpcom', per_page: 100 });
             let removed = 0;
             for (const artifact of artifacts) {
-              if (artifact.expired || new Date(artifact.created_at).getTime() > cutoff) continue;
-              await github.rest.actions.deleteArtifact({ owner: context.repo.owner, repo: context.repo.repo, artifact_id: artifact.id });
-              removed++;
+              if (artifact.name !== 'wpcom' || artifact.expired || new Date(artifact.created_at).getTime() > cutoff) continue;
+              try {
+                await github.rest.actions.deleteArtifact({ owner: context.repo.owner, repo: context.repo.repo, artifact_id: artifact.id });
+                removed++;
+              } catch (error) {
+                // An overlapping deploy run may already have deleted it.
+                if (error.status !== 404) throw error;
+              }
             }
             core.info(`Removed ${removed} of ${artifacts.length} earlier deploy packages`);
 
