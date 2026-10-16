@@ -10,6 +10,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # actions: write lets the job delete earlier deploy packages, which otherwise fill the account's artifact storage.
+    permissions:
+      contents: read
+      actions: write
     steps:
       - uses: actions/checkout@v4
 
@@ -22,8 +26,32 @@ jobs:
           test -f build/style.css && test -f build/functions.php
           du -sh build
 
+      # Each deploy package is ~27 MB and GitHub kept them for 90 days, so on 2026-10-16 the storage quota was hit and the
+      # upload failed. WordPress.com fetches the package once, right after the run, so earlier ones are not needed; anything
+      # less than an hour old is kept in case WordPress.com is still fetching it.
+      - name: Remove earlier deploy packages
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const cutoff = Date.now() - 60 * 60 * 1000;
+            // Only this workflow's packages (name "wpcom"); artifacts from any other workflow keep their own retention.
+            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, { owner: context.repo.owner, repo: context.repo.repo, name: 'wpcom', per_page: 100 });
+            let removed = 0;
+            for (const artifact of artifacts) {
+              if (artifact.name !== 'wpcom' || artifact.expired || new Date(artifact.created_at).getTime() > cutoff) continue;
+              try {
+                await github.rest.actions.deleteArtifact({ owner: context.repo.owner, repo: context.repo.repo, artifact_id: artifact.id });
+                removed++;
+              } catch (error) {
+                // An overlapping deploy run may already have deleted it.
+                if (error.status !== 404) throw error;
+              }
+            }
+            core.info(`Removed ${removed} of ${artifacts.length} earlier deploy packages`);
+
       - name: Upload artifact for WordPress.com
         uses: actions/upload-artifact@v4
         with:
           name: wpcom
           path: build/
+          retention-days: 3
