@@ -15,7 +15,7 @@ $render = static function (array $product): string {
 $products = bl_read_data('products');
 $loaders = array_values(array_filter($products, static fn(array $p): bool => $p['category'] === 'skid-steer-loaders'));
 $dumper = array_values(array_filter($products, static fn(array $p): bool => $p['category'] !== 'skid-steer-loaders'))[0];
-$warning = 'Noise at the operator position can exceed 85 dB(A) at full engine speed. Always wear hearing protection when operating the machine.';
+$warning = 'Noise at the operator position can exceed 85 dB(A) at full engine speed on some models. Always wear hearing protection when operating the machine.';
 
 // bl_editable() keeps each page's content for the whole request, so each saved state runs in its own process.
 $scenario = $argv[1] ?? '';
