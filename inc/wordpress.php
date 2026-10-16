@@ -46,9 +46,12 @@ function bl_wp_product_record(WP_Post $post): array
     $record['slug'] = $post->post_name;
     $record['name'] = bl_plain_title(get_the_title($post));
     $record['url'] = get_permalink($post);
+    // The summary is plain text: a copy saved as HTML (e.g. "<p>…</p>" from a rendered excerpt) is read without its tags,
+    // so it is neither printed as markup nor mistaken for a hand-written summary.
+    $excerpt = trim((string) preg_replace('/\s+/u', ' ', html_entity_decode(wp_strip_all_tags($post->post_excerpt), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
     // The import kept the original name in the record, so a summary generated before a rename is still recognised.
-    if (bl_is_generated_product_excerpt($post->post_excerpt, [$post->post_title, $record['name'], $data['name'] ?? ''])) $record['excerpt'] = bl_product_excerpt($record);
-    else $record['excerpt'] = $post->post_excerpt ?: (wp_trim_words(wp_strip_all_tags($post->post_content), 35) ?: bl_product_excerpt($record));
+    if (bl_is_generated_product_excerpt($excerpt, [$post->post_title, $record['name'], $data['name'] ?? ''])) $record['excerpt'] = bl_product_excerpt($record);
+    else $record['excerpt'] = $excerpt ?: (wp_trim_words(wp_strip_all_tags($post->post_content), 35) ?: bl_product_excerpt($record));
     $record['content_html'] = $post->post_content ? apply_filters('the_content', $post->post_content) : '';
     $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: bl_wp_image($record['image']);
     $record['image_id'] = $record['image'] && $record['image'] === get_the_post_thumbnail_url($post, 'large') ? (int) get_post_thumbnail_id($post) : 0;
