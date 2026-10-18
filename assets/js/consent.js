@@ -54,6 +54,38 @@ function clearToolCookies(categories) {
   });
 }
 
+// Where the banner lists regions (templates/partials/consent.php), it asks on its own only there: Europe's time zones count
+// at once, otherwise the country comes from WordPress.com's geolocation (kept for the visit). A visitor whose country
+// cannot be told is asked.
+const GEO = 'https://public-api.wordpress.com/geo/';
+const EUROPE_ZONES = /^(?:Europe\/|Atlantic\/(?:Reykjavik|Canary|Madeira|Azores|Faroe)$|Arctic\/Longyearbyen$)/;
+
+export async function askedHere(list) {
+  if (!list) return true;
+  try {
+    if (EUROPE_ZONES.test(Intl.DateTimeFormat().resolvedOptions().timeZone || '')) return true;
+  } catch {
+    // no time zone: the country decides
+  }
+  let country = '';
+  try { country = sessionStorage.getItem('bl_country') || ''; } catch { country = ''; }
+  if (!/^[A-Z]{2}$/.test(country)) {
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), 4000);
+    try {
+      const response = await fetch(GEO, { signal: abort.signal, credentials: 'omit' });
+      country = String((await response.json())?.country_short || '').toUpperCase();
+    } catch {
+      return true;
+    } finally {
+      clearTimeout(timer);
+    }
+    if (!/^[A-Z]{2}$/.test(country)) return true;
+    try { sessionStorage.setItem('bl_country', country); } catch { /* asked again on the next page */ }
+  }
+  return list.split(',').includes(country);
+}
+
 function reloadedJustNow() {
   try {
     const last = Number(sessionStorage.getItem('bl_consent_reload') || 0);
@@ -180,5 +212,8 @@ export function initializeConsent() {
   if (choice) {
     const declined = categories.filter((name) => !choice[name]);
     if (declined.length) clearToolCookies(declined);
-  } else open(false);
+  } else {
+    // Opened meanwhile from the footer, or chosen in another tab: nothing more to ask.
+    askedHere(banner.dataset.regions).then((ask) => { if (ask && !choice && banner.hidden) open(false); });
+  }
 }

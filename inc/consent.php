@@ -85,6 +85,19 @@ function bl_consent_categories(): array
 const BL_CONSENT_DENIED_REGIONS = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'IS', 'LI', 'NO', 'GB', 'CH'];
 
 /**
+ * Whether the banner asks only visitors in BL_CONSENT_DENIED_REGIONS (assets/js/consent.js; the footer link still opens it for
+ * anyone). That holds only while the Google tag's regional defaults are confirmed, so everyone else already starts granted,
+ * and no code is pasted into the slots: pasted code waits for a yes from every visitor, and outside those regions nobody
+ * would be asked for one.
+ */
+function bl_consent_regional_banner(): bool
+{
+    if (!bl_google_regional_confirmed() || !bl_google_tag_ids()) return false;
+    foreach (BL_TRACKING_SLOTS as $slots) foreach ($slots as $key) if (bl_tracking_code($key) !== '') return false;
+    return true;
+}
+
+/**
  * The valid Google tag IDs saved on the tracking screen (comma, space or newline separated), in order, without duplicates.
  * Only GA4 (G-) and Google Ads (AW-) IDs are accepted: a combined Google tag (GT-) or Floodlight (DC-) ID does not say which
  * consent category it serves, so it would get the wrong banner choice; such tools are pasted into the slots below instead.
