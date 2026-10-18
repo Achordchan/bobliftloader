@@ -101,6 +101,14 @@
 .bl-site .bl-sup-faq-item[open] summary .bl-icon{transform:rotate(45deg)}
 .bl-site .bl-sup-faq-item>div{display:grid;justify-items:start;gap:16px;padding:0 clamp(40px,4vw,120px) clamp(22px,1.6vw,36px) 0}
 .bl-site .bl-sup-faq-item>div p{font-size:var(--fs-body);line-height:1.85;color:var(--muted);text-wrap:pretty}
+/* A family page's buying guide (templates/partials/range-guide.php): numbered points, always open, above the questions. */
+.bl-site .bl-range-guide-points ol{margin:0;padding:0;list-style:none}
+.bl-site .bl-range-guide-points li{display:grid;grid-template-columns:clamp(36px,2.6vw,56px) minmax(0,1fr);gap:clamp(12px,1vw,24px);padding:clamp(20px,1.5vw,34px) 0;border-bottom:1px solid var(--line)}
+.bl-site .bl-range-guide-points li>span{padding-top:.2em;font:700 var(--fs-label)/1 var(--display);letter-spacing:1px;color:var(--blue);font-variant-numeric:tabular-nums}
+.bl-site .bl-range-guide-points h4{margin:0 0 10px;font:600 var(--fs-h5)/1.2 var(--display)}
+.bl-site .bl-range-guide-points p{font-size:var(--fs-body);line-height:1.85;color:var(--muted);text-wrap:pretty}
+.bl-site .bl-range-guide-points p a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+@media(hover:hover){.bl-site .bl-range-guide-points p a:hover{color:var(--blue)}}
 /* Hover looks only where there is a pointer: on a touch screen a tapped download row would stay white and shifted,
    and a tapped question blue, until the next tap somewhere else. */
 @media(hover:hover){
