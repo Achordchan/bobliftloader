@@ -12,6 +12,7 @@ $sectionLinks = array_filter([
     'how-they-are-made' => bl_editable($loaderPage ? 'loaders' : 'dumpers')['making']['steps'] ? 'How they’re made' : null,
     'compare-' . $category => 'Compare',
     'model-names' => $loaderPage || bl_dumper_name_groups() ? 'Model names' : null,
+    'buying-guide' => array_filter(array_intersect_key(bl_family_buying($loaderPage ? 'loaders' : 'dumpers'), ['points' => 1, 'faq' => 1])) ? 'Buying guide' : null,
 ]);
 ?>
 <nav class="bl-section-nav" aria-label="On this page" data-section-nav>

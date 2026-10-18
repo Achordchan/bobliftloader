@@ -243,6 +243,18 @@ function bl_loaders_defaults(): array
 {
     $tool = static fn(string $slug, string $name, string $use, string $group): array => ['group' => $group, 'name' => $name, 'use' => $use, 'image' => bl_asset('images/attachments/' . $slug . '.webp')];
     return [
+        // The buying guide and questions on the family page (templates/partials/range-guide.php): written in WordPress, so the
+        // lists start empty and the section stays out of the page until they are filled.
+        'buying' => [
+            'eyebrow' => 'BUYING GUIDE',
+            'title' => "HOW TO CHOOSE\n*YOUR LOADER.*",
+            'intro' => '',
+            'link' => 'Ask which model suits your job',
+            'points_label' => 'What to check first',
+            'points' => [],
+            'faq_label' => 'Common questions',
+            'faq' => [],
+        ],
         'jobs' => [
             'eyebrow' => 'WHERE IT WORKS',
             'items' => [
@@ -356,6 +368,18 @@ function bl_product_page_defaults(string $family): array
 function bl_dumpers_defaults(): array
 {
     return [
+        // The buying guide and questions on the family page (templates/partials/range-guide.php): written in WordPress, so the
+        // lists start empty and the section stays out of the page until they are filled.
+        'buying' => [
+            'eyebrow' => 'BUYING GUIDE',
+            'title' => "HOW TO CHOOSE\n*YOUR DUMPER.*",
+            'intro' => '',
+            'link' => 'Ask which model suits your job',
+            'points_label' => 'What to check first',
+            'points' => [],
+            'faq_label' => 'Common questions',
+            'faq' => [],
+        ],
         'about' => [
             'eyebrow' => 'ABOUT THE DUMPERS',
             'title' => "FROM THE GARDEN\nPATH TO THE SITE.",
@@ -609,6 +633,18 @@ function bl_heading_lines(string $text, bool $period = false): string
         $html .= $accent ? '<span class="bl-blue-text">' . $inner . '</span>' : '<span>' . $inner . '</span>';
     }
     return $html;
+}
+
+/** The family page's buying guide: its points and questions with the empty rows left out (templates/partials/range-guide.php). */
+function bl_family_buying(string $page): array
+{
+    $buying = bl_editable($page)['buying'] ?? [];
+    $rows = static fn($list, array $need): array => array_values(array_filter(is_array($list) ? $list : [], static function ($row) use ($need): bool {
+        if (!is_array($row)) return false;
+        foreach ($need as $key) if (trim((string) ($row[$key] ?? '')) === '') return false;
+        return true;
+    }));
+    return ['points' => $rows($buying['points'] ?? [], ['title', 'text']), 'faq' => $rows($buying['faq'] ?? [], ['q', 'a'])] + $buying;
 }
 
 /** Rich text: already filtered when saved (links, bold, italics), so only its line breaks are turned into <br>. */

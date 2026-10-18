@@ -77,6 +77,25 @@ function bl_content_schema_fields(string $page, ?array $content = null): array
             'link_url' => ['label' => '链接地址', 'type' => 'url', 'help' => '可留空；文字和地址都填了才显示链接。站内页面写 /support/…。'],
         ]],
     ])];
+    // The family page's buying guide and questions (templates/partials/range-guide.php), above the related guides.
+    $buying = static fn(string $family): array => ['title' => '选型指南与常见问题', 'note' => '栏目页“相关文章”上方的选型要点和常见问题（#buying-guide），给还在比较型号的买家看。要点和问题都删光则不显示这一块。', 'fields' => [
+        ['key' => 'buying.eyebrow', 'label' => '小标题', 'type' => 'text'],
+        ['key' => 'buying.title', 'label' => '标题', 'type' => 'heading', 'help' => $heading],
+        ['key' => 'buying.intro', 'label' => '标题下说明', 'type' => 'textarea', 'help' => $optional],
+        ['key' => 'buying.link', 'label' => '询价链接文字', 'type' => 'text', 'help' => '链接去联系页（已选好' . ($family === 'loader' ? '滑移装载机' : '翻斗车') . '）。留空不显示。'],
+        ['key' => 'buying.points_label', 'label' => '要点分组名', 'type' => 'text'],
+        ['key' => 'buying.points', 'label' => '选型要点', 'type' => 'list', 'add' => '添加要点', 'summary' => ['title'], 'fields' => [
+            'title' => ['label' => '标题', 'type' => 'text'],
+            'text' => ['label' => '说明', 'type' => 'rich', 'help' => $rich . ' 站内链接写 /product/…、/support/… 这样的地址。'],
+        ]],
+        ['key' => 'buying.faq_label', 'label' => '问题分组名', 'type' => 'text'],
+        ['key' => 'buying.faq', 'label' => '常见问题', 'type' => 'list', 'add' => '添加问题', 'summary' => ['q'], 'fields' => [
+            'q' => ['label' => '问题', 'type' => 'text'],
+            'a' => ['label' => '回答', 'type' => 'textarea'],
+            'link_label' => ['label' => '链接文字', 'type' => 'text', 'help' => $optional],
+            'link_url' => ['label' => '链接地址', 'type' => 'url', 'help' => '可留空；文字和地址都填了才显示链接。站内页面写 /support/…。'],
+        ]],
+    ]];
     if ($page === 'applications') {
         $names = ['landscaping' => '景观绿化', 'site-preparation' => '场地准备', 'material-transport' => '物料运输', 'gardens-and-homesteads' => '园林家用', 'farms-and-orchards' => '农场果园', 'building-sites' => '工地'];
         $sections = [
@@ -152,7 +171,7 @@ function bl_content_schema_fields(string $page, ?array $content = null): array
                 'video' => ['label' => '循环视频', 'type' => 'url', 'help' => '可选。8 到 15 秒、无声、首尾衔接的 4:3 视频文件地址（媒体库里视频的链接）。进入屏幕才加载并循环播放，留空则只显示图片。同一条视频也会出现在列出该属具的机型页上。'],
             ]],
             ['key' => 'attachments.note', 'label' => '底部备注', 'type' => 'textarea', 'help' => $optional],
-        ]], ...$makingSection, $productPage('loader'),
+        ]], ...$makingSection, $buying('loader'), $productPage('loader'),
     ];
     if ($page === 'dumpers') return [...$extra,
         ['title' => '栏目介绍与配置', 'note' => '翻斗车栏目页产品列表下方的介绍（#about-the-range）：标题、介绍、载荷图旁的说明和下面一排配置说明。载荷图本身由产品数据自动生成。', 'fields' => [
@@ -207,6 +226,7 @@ function bl_content_schema_fields(string $page, ?array $content = null): array
                 'text' => ['label' => '含义', 'type' => 'textarea'],
             ]],
         ]],
+        $buying('dumper'),
         $productPage('dumper'),
     ];
     if ($page === 'thanks') return [
