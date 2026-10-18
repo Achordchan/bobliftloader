@@ -31,7 +31,7 @@ foreach (['loaders' => 'skid-steer-loaders', 'dumpers' => 'mini-dumpers'] as $pa
     foreach (bl_content_schema($page, bl_content_defaults($page)) as $section) foreach ($section['fields'] as $field) $keys[$field['key']] = $field['type'];
     $check(($keys['catalog.hero_quote'] ?? '') === 'text' && ($keys['catalog.hero_whatsapp'] ?? '') === 'text', "$page: the quote and WhatsApp fields are not editable");
     $html = $render($category);
-    $check(preg_match('~<span class="bl-catalog-contact"><a class="bl-button bl-button-blue" href="[^"]*/contact/#enquiry" data-quick-open>Get a quote ~', $html) === 1, "$category: no quote button opening the quick enquiry");
+    $check(preg_match('~<span class="bl-catalog-contact"><a class="bl-button bl-button-blue" href="[^"]*/contact/\?equipment=' . ($page === 'loaders' ? 'loader' : 'dumper') . '#enquiry" data-quick-open>Get a quote ~', $html) === 1, "$category: no quote button opening the quick enquiry, or the contact form with this family");
     $message = $page === 'loaders' ? 'mini skid steer loaders' : 'mini dumpers';
     $check(str_contains($html, '<a class="bl-catalog-wa" href="' . bl_escape(bl_company('sales_whatsapp_url')) . '?text=' . rawurlencode("Hello BOB-LIFT, I am interested in your $message.") . '" target="_blank" rel="noopener"'), "$category: WhatsApp does not carry the family message");
     $check(strpos($html, 'bl-catalog-contact') < strpos($html, 'bl-catalog-actions'), "$category: the contact row is not before the film and catalogue");
