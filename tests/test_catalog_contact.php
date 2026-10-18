@@ -37,4 +37,14 @@ foreach (['loaders' => 'skid-steer-loaders', 'dumpers' => 'mini-dumpers'] as $pa
     $check(strpos($html, 'bl-catalog-contact') < strpos($html, 'bl-catalog-actions'), "$category: the contact row is not before the film and catalogue");
 }
 $check(!str_contains($render(''), 'bl-catalog-contact'), 'a search shows the contact row');
+
+// The quote button opens the quick panel; without a form there, its link to the contact form keeps the family too.
+$quick = static function (string $category): string {
+    $route = ['category' => $category, 'path' => '/products/' . $category . '/', 'type' => 'products'];
+    ob_start(); require __DIR__ . '/../templates/partials/quick-enquiry.php'; return ob_get_clean();
+};
+foreach (['skid-steer-loaders' => 'loader', 'mini-dumpers' => 'dumper'] as $category => $family) {
+    $html = $quick($category);
+    $check(!bl_inquiry_form_id() && str_contains($html, '/contact/?equipment=' . $family . '#enquiry">Write your enquiry'), "$category: the quick panel's contact link loses the family");
+}
 echo "Catalog contact: $checks checks passed\n";
