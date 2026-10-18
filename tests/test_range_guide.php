@@ -51,7 +51,7 @@ $check(!str_contains($html, 'id="buying-guide"') && !str_contains($html, 'href="
 // Filled: points numbered with their links, questions with an optional link, a blank row left out, the nav pointing at it,
 // and the section placed after the model names and before the closing call to action (the related guides sit between, when there are any).
 $html = $render('skid-steer-loaders');
-$check(str_contains($html, 'id="buying-guide"') && str_contains($html, '<span class="bl-blue-text">YOUR LOADER.</span>'), 'a filled guide does not show');
+$check(str_contains($html, 'id="buying-guide"') && str_contains($html, '<span class="bl-blue-text">YOUR MINI SKID STEER.</span>'), 'a filled guide does not show');
 $check(str_contains($html, '<span>01</span><div><h4>Match the size</h4><p>Read <a href="/support/#containers">container loading</a>.</p>') && str_contains($html, '<span>02</span><div><h4>Pick the engine</h4>') && !str_contains($html, '<span>03</span><div><h4>'), 'points are not numbered, lose their link, or keep a blank row');
 $check(substr_count($html, 'class="bl-sup-faq-item"') === 2 && str_contains($html, '/product/bl-t360-h/">See it'), 'questions or their link are missing');
 $check(str_contains($html, '<p>Start with the job.</p>') && str_contains($html, '/contact/?equipment=loader#enquiry">Ask which model suits your job'), 'the intro or the enquiry link is missing');

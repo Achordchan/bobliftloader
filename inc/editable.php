@@ -247,7 +247,7 @@ function bl_loaders_defaults(): array
         // lists start empty and the section stays out of the page until they are filled.
         'buying' => [
             'eyebrow' => 'BUYING GUIDE',
-            'title' => "HOW TO CHOOSE\n*YOUR LOADER.*",
+            'title' => "HOW TO CHOOSE\n*YOUR MINI SKID STEER.*",
             'intro' => '',
             'link' => 'Ask which model suits your job',
             'points_label' => 'What to check first',
@@ -372,7 +372,7 @@ function bl_dumpers_defaults(): array
         // lists start empty and the section stays out of the page until they are filled.
         'buying' => [
             'eyebrow' => 'BUYING GUIDE',
-            'title' => "HOW TO CHOOSE\n*YOUR DUMPER.*",
+            'title' => "HOW TO CHOOSE\n*YOUR MINI DUMPER.*",
             'intro' => '',
             'link' => 'Ask which model suits your job',
             'points_label' => 'What to check first',
