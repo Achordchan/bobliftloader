@@ -103,9 +103,13 @@
 .bl-site .bl-sup-faq-item>div p{font-size:var(--fs-body);line-height:1.85;color:var(--muted);text-wrap:pretty}
 /* A family page's buying guide (templates/partials/range-guide.php): numbered points, always open, above the questions. */
 .bl-site .bl-range-guide-points ol{margin:0;padding:0;list-style:none}
-.bl-site .bl-range-guide-points li{display:grid;grid-template-columns:clamp(36px,2.6vw,56px) minmax(0,1fr);gap:clamp(12px,1vw,24px);padding:clamp(20px,1.5vw,34px) 0;border-bottom:1px solid var(--line)}
-.bl-site .bl-range-guide-points li>span{padding-top:.2em;font:700 var(--fs-label)/1 var(--display);letter-spacing:1px;color:var(--blue);font-variant-numeric:tabular-nums}
-.bl-site .bl-range-guide-points h4{margin:0 0 10px;font:600 var(--fs-h5)/1.2 var(--display)}
+/* The number sits on the heading's baseline and the text starts at the column's edge, so the points line up with the
+   questions below them and with the label above. */
+.bl-site .bl-range-guide-points li{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:baseline;gap:0 clamp(12px,.9vw,20px);padding:clamp(20px,1.5vw,34px) 0;border-bottom:1px solid var(--line)}
+.bl-site .bl-range-guide-points li>div{display:contents}
+.bl-site .bl-range-guide-points li>span{font:700 var(--fs-label)/1 var(--display);letter-spacing:1px;color:var(--blue);font-variant-numeric:tabular-nums}
+.bl-site .bl-range-guide-points h4{margin:0;font:600 var(--fs-h5)/1.2 var(--display)}
+.bl-site .bl-range-guide-points li p{grid-column:1/-1;margin-top:10px;padding-right:clamp(40px,4vw,120px)}
 .bl-site .bl-range-guide-points p{font-size:var(--fs-body);line-height:1.85;color:var(--muted);text-wrap:pretty}
 .bl-site .bl-range-guide-points p a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 @media(hover:hover){.bl-site .bl-range-guide-points p a:hover{color:var(--blue)}}
@@ -278,7 +282,7 @@
   .bl-site .bl-sup-after-actions{margin-top:36px}
   .bl-site .bl-sup-downloads{padding-top:var(--m-sec,56px);padding-bottom:0}
   .bl-site .bl-sup-faq{gap:32px;padding-top:var(--m-sec-tight,40px);padding-bottom:var(--m-sec,56px)}
-  .bl-site .bl-sup-faq-item>div{padding-right:0}
+  .bl-site :is(.bl-sup-faq-item>div,.bl-range-guide-points li p){padding-right:0}
   /* Questions break evenly, the sign level with their first line. */
   .bl-site .bl-sup-faq-item summary{text-wrap:balance}
   .bl-site .bl-sup-faq-item summary .bl-icon{flex-shrink:0;align-self:flex-start;margin-top:4px}
