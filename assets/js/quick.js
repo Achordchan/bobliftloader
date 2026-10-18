@@ -85,6 +85,11 @@ export function initializeQuick() {
     }
     setOpen(panel.hidden, barEnquiry);
   });
+  // A range page's first screen has its own quote button: it opens the panel (the sheet on phones), family already chosen.
+  document.querySelectorAll('[data-quick-open]').forEach((link) => link.addEventListener('click', (event) => {
+    event.preventDefault();
+    setOpen(true, link);
+  }));
   // Turning the phone past the sheet's limits leaves a dimmed, locked page behind: close it instead.
   sheet.addEventListener('change', () => { if (!panel.hidden) setOpen(false); });
 

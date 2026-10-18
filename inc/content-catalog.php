@@ -8,6 +8,9 @@ function bl_catalog_copy_fields(bool $loader): array
         'hero_eyebrow' => ['眉题', 'THE BOB-LIFT EQUIPMENT RANGE', '栏目首屏', 'text'],
         'hero_title' => ['标题', $loader ? 'COMPACT SIZE.<br>MORE CAPABILITY.' : 'KEEP MATERIALS<br>MOVING.', '栏目首屏', 'html'],
         'hero_intro' => ['介绍', $loader ? 'Start with the work ahead. Explore our compact equipment, then get into the details.' : 'Published capacities. Real models. Find the mini dumper that fits your material transport requirements.', '栏目首屏', 'textarea'],
+        // Ads land on the range pages from phones, so the first screen offers a quote and WhatsApp before the catalogue.
+        'hero_quote' => ['询价按钮', 'Get a quote', '栏目首屏', 'text'],
+        'hero_whatsapp' => ['WhatsApp 预填消息', $loader ? 'Hello BOB-LIFT, I am interested in your mini skid steer loaders.' : 'Hello BOB-LIFT, I am interested in your mini dumpers.', '栏目首屏', 'text', '访客点首屏 WhatsApp 按钮后聊天框里预先填好的一句话。'],
         'hero_download' => ['下载画册按钮', $loader ? 'Download the loader catalogue' : 'Download the dumper catalogue', '栏目首屏', 'text'],
         // The range film opens from a second button beside the catalogue download; with no address saved the button is not shown.
         'hero_film' => ['宣传片按钮', 'Watch the range film', '栏目首屏', 'text'],
