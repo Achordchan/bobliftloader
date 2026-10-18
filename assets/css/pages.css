@@ -933,6 +933,22 @@
 .bl-site .bl-catalog-actions small{display:block;margin-top:4px;font-size:12px;font-weight:400;opacity:.7}
 .bl-site .bl-catalog-actions .bl-film-open .bl-icon{width:15px;height:15px}
 @media(hover:hover){.bl-site .bl-catalog-actions .bl-film-open:hover .bl-icon{transform:scale(1.15)}}
+/* The range's contact row under the intro: the quote button, and WhatsApp beside it as a white button of the same height. */
+.bl-site .bl-catalog-contact{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin-top:clamp(22px,1.8vw,34px)}
+.bl-site .bl-catalog-contact .bl-button{flex:0 1 auto}
+.bl-site .bl-catalog-wa{display:inline-flex;align-items:center;gap:10px;padding:0 clamp(18px,1.1vw,26px);font-size:var(--fs-small);font-weight:700;color:var(--ink);background:#fff;border:1px solid #b9c4c9;transition:transform .12s,background .2s,border-color .2s}
+.bl-site .bl-catalog-wa svg{width:24px;height:24px;flex:none;color:#1fb457}
+@media(hover:hover){.bl-site .bl-catalog-wa:hover{background:#effbf3;border-color:#1fb457}}
+.bl-site .bl-catalog-wa:active{transform:scale(.97);background:#effbf3}
+/* Below 1000px the intro column is too narrow for both labels: as on a product page, the quote button fills the row and
+   WhatsApp is a 54px square with the green mark beside it. */
+@media(max-width:1000px){
+  .bl-site .bl-catalog-contact{display:grid;grid-template-columns:minmax(0,1fr) 54px}
+  .bl-site .bl-catalog-contact .bl-button{width:100%}
+  .bl-site .bl-catalog-wa{justify-content:center;padding:0}
+  .bl-site .bl-catalog-wa svg{width:26px;height:26px}
+  .bl-site .bl-catalog-wa span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+}
 /* The family film: a dark stage in a dialog, 16:9 at any width, with its caption underneath. */
 .bl-site .bl-film-dialog{width:min(1100px,calc(100% - 40px));background:var(--ink);color:#fff}
 /* The stage is as wide as the viewport height allows (dialog height minus the caption), so a landscape phone shows the whole film and its controls. */
@@ -949,4 +965,5 @@
   .bl-site .bl-catalog-actions{flex-direction:column;align-items:stretch;gap:10px;margin-top:20px}
   .bl-site .bl-catalog-actions .bl-text-link{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:10px 16px;background:#fff;border:1px solid var(--line)}
   .bl-site .bl-catalog-actions .bl-text-link .bl-icon{flex:none}
+  .bl-site .bl-catalog-contact{margin-top:20px}
 }
