@@ -28,6 +28,14 @@ add_action('init', static function (): void {
 });
 
 add_action('init', static function (): void {
+    register_post_meta('bl_news', '_bl_social_share', [
+        'type' => 'boolean', 'single' => true, 'default' => false, 'show_in_rest' => true,
+        'description' => '发布时经 Jetpack Social 分享到已连接的社媒主页。默认不分享，帖子文案确认后再打开。',
+        'auth_callback' => static fn(bool $allowed, string $key, int $postId): bool => current_user_can('edit_post', $postId),
+    ]);
+});
+
+add_action('init', static function (): void {
     register_meta('user', 'bl_title', [
         'type' => 'string', 'single' => true, 'show_in_rest' => true,
         'description' => '新闻作者职位，显示在文章署名中。',
