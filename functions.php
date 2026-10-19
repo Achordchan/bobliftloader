@@ -51,6 +51,7 @@ add_action('wp', static function (): void {
     $related = Jetpack_RelatedPosts::init();
     remove_filter('the_content', [$related, 'filter_add_target_to_dom'], 40);
 }, 20);
+add_filter('jetpack_stats_footer_js_data', static fn($data) => bl_stats_view_data((array) $data, is_post_type_archive(['bl_product', 'bl_news']), (string) wp_unslash($_SERVER['REQUEST_URI'] ?? '')));
 // Search and AI crawlers are welcome: drop the per-bot blocks the platform adds to robots.txt.
 add_filter('robots_txt', 'bl_allow_ai_crawlers', 99999);
 add_action('init', 'bl_register_content_types');
