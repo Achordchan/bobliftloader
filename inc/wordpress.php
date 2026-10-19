@@ -24,6 +24,20 @@ function bl_register_content_types(): void
     add_rewrite_rule('^products/(skid-steer-loaders|mini-dumpers)/?$', 'index.php?post_type=bl_product&bl_category=$matches[1]', 'top');
 }
 
+/**
+ * Jetpack Stats counts the theme's list pages (/news/, /products/skid-steer-loaders/, /products/mini-dumpers/) as one
+ * nameless archive, since none of them is a post. Report each by its path, as Jetpack does for addresses it cannot classify.
+ */
+function bl_stats_view_data(array $data, bool $is_list, string $request_uri): array
+{
+    if (!$is_list || (string) ($data['post'] ?? '') !== '0') return $data;
+    $path = (string) parse_url($request_uri, PHP_URL_PATH);
+    if ($path === '') return $data;
+    unset($data['arch_results']);
+    $data['arch_other'] = substr($path, 0, 255);
+    return $data;
+}
+
 function bl_wp_image(string $path): string
 {
     return str_starts_with($path, 'images/') || str_starts_with($path, 'videos/') ? bl_asset($path) : esc_url_raw($path);
