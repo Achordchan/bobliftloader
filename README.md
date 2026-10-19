@@ -95,6 +95,7 @@ python3 tests/test_site.py http://127.0.0.1:9402
 - 站点名为 **BOB-LIFT Loader**（与兄弟站 bobliftcrane.com 对应）；标签页图标是主题自带的一套（`assets/images/icons/`），不依赖后台的站点图标。
 - robots.txt 允许 AI 爬虫：主题在 `bl_allow_ai_crawlers()` 里去掉平台默认加的 GPTBot / ClaudeBot 等屏蔽段（`php tests/test_robots.php`）。
 - Jetpack 统计：新闻列表和两个产品分类页不是文章，Jetpack 默认把它们记成同一个无名归档；主题在 `bl_stats_view_data()` 里按网址路径分别上报（`php tests/test_stats_view_data.php`）。
+- Jetpack Social：新闻支持分享到已连接的社媒主页，但只有文章元数据 `_bl_social_share` 为真才会在发布时分享，默认不发；Jetpack 的 Open Graph 标签关闭，由 inc/seo.php 统一输出（`php tests/test_social_share.php`）。
 - 公司 / 产品资料来自用户指定的两个官网。装载机和两款履带翻斗车的定量参数来自供应商参数表（`滑移装载机参数表.xlsx`），见 `docs/content-verification.md`。
 - 视觉以 2560 × 1440 为设计基准、其余分辨率自适应：流体 token、2240px 内容框、全出血首屏、双机展台、三联应用图、翻斗车对比表、详情页直达联系与常驻侧栏，详见 `docs/design-2k.md`。产品详情保留官网实拍，场景图标为示意。
 - 未验证生产 MySQL、邮件实际收件、第三方 SEO 插件及 Google 实际收录。
