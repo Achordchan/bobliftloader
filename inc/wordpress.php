@@ -12,7 +12,7 @@ function bl_register_content_types(): void
     register_post_type('bl_news', [
         'labels' => ['name' => '企业新闻', 'singular_name' => '企业新闻', 'add_new_item' => '新增企业新闻', 'edit_item' => '编辑企业新闻', 'view_item' => '查看文章', 'featured_image' => '封面图片', 'set_featured_image' => '设置封面图片', 'remove_featured_image' => '移除封面图片', 'use_featured_image' => '用作封面图片'],
         'public' => true, 'show_in_rest' => true, 'has_archive' => 'news', 'rewrite' => ['slug' => 'news', 'with_front' => false],
-        'supports' => ['revisions', 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'author'], 'menu_icon' => 'dashicons-media-document',
+        'supports' => ['revisions', 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'author', 'publicize'], 'menu_icon' => 'dashicons-media-document',
     ]);
     // A specific application (one job, one site, the machines used), written in the block editor. Its hub is a saved choice.
     register_post_type('bl_application', [
@@ -36,6 +36,15 @@ function bl_stats_view_data(array $data, bool $is_list, string $request_uri): ar
     unset($data['arch_results']);
     $data['arch_other'] = substr($path, 0, 255);
     return $data;
+}
+
+/**
+ * Jetpack Social shares news to the connected pages only when the article opts in (_bl_social_share), because every
+ * post is approved before it goes out; other types keep Jetpack's own decision.
+ */
+function bl_social_share_allowed(bool $submit, string $post_type, $opt_in): bool
+{
+    return $post_type === 'bl_news' ? $submit && (bool) $opt_in : $submit;
 }
 
 function bl_wp_image(string $path): string
