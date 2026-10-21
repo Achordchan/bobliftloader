@@ -67,6 +67,22 @@
 .bl-site .bl-empty{padding:85px 0;text-align:center}
 .bl-site .bl-empty h2{font:600 var(--fs-h3)/1 var(--display)}
 .bl-site .bl-empty p{font-size:var(--fs-body);margin:20px 0;color:var(--muted)}
+.bl-site .bl-empty .bl-empty-sister{margin:28px 0 0;font-size:var(--fs-small)}
+.bl-site .bl-empty-sister a{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+/* Our crane website at the foot of a family page (templates/partials/sister-site.php): words left, two crane cut-outs on
+   a pale ground right, the truck crane set against the panel's edge because its photograph is cut off there. */
+.bl-site .bl-sister{padding-bottom:clamp(60px,calc(46.1px + 2.01vw),98px)}
+.bl-site .bl-sister-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);background:var(--white);overflow:hidden}
+.bl-site .bl-sister-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:clamp(32px,3vw,76px)}
+.bl-site .bl-sister-copy h2{margin:clamp(12px,.8vw,20px) 0 clamp(12px,.8vw,20px);font:600 var(--fs-h4)/1 var(--display);text-transform:uppercase;text-wrap:balance}
+.bl-site .bl-sister-copy p:not(.bl-eyebrow){max-width:44ch;margin:0 0 clamp(24px,1.8vw,44px);font-size:var(--fs-body);line-height:1.75;color:var(--muted)}
+.bl-site .bl-sister-button{color:white;background:var(--ink)}
+.bl-site .bl-sister-button .bl-icon{filter:invert(1)}
+.bl-site .bl-sister-media{display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(12px,1.2vw,32px);min-height:clamp(260px,18vw,460px);padding:clamp(28px,2.4vw,60px) clamp(24px,2.4vw,60px) clamp(28px,2.4vw,60px) 0;background:linear-gradient(160deg,#f6f7f5 0%,#e2e6e5 100%)}
+.bl-site .bl-sister-media img{display:block;height:auto;transition:transform .4s}
+.bl-site .bl-sister-media img:first-child{width:60%}
+.bl-site .bl-sister-media img:last-child{width:32%}
+@media(hover:hover){.bl-site .bl-sister-button:hover{background:var(--blue)}.bl-site .bl-sister-card:has(.bl-sister-media:hover) img{transform:translateY(-4px)}}
 .bl-site .bl-product-overview,.bl-site .bl-specifications{display:grid;grid-template-columns:1fr 1.1fr;gap:9%;padding-block:clamp(64px,calc(49.1px + 2.14vw),104px)}
 .bl-site .bl-specifications{background:#e7ecef}
 .bl-site .bl-specifications>div>p:not(.bl-product-display){font-size:var(--fs-body);line-height:1.9;color:var(--muted)}

@@ -188,6 +188,17 @@ function bl_site_switch_items(): array
     return $items;
 }
 
+/** Our crane website as the family pages point to it: its address from 全站设置, its name and mark from the site switch (the leave-site notice shows them); null when no address is saved. */
+function bl_sister_site(): ?array
+{
+    $url = trim(bl_content_value('global', 'sister.url'));
+    if ($url === '') return null;
+    $domain = preg_replace('/^www\./', '', strtolower((string) parse_url($url, PHP_URL_HOST)));
+    $site = ['name' => 'BOB-LIFT', 'mark' => 'B'];
+    foreach (bl_site_switch_items() as $item) if ($item['domain'] === $domain) $site = $item;
+    return ['url' => $url, 'domain' => $domain, 'name' => $site['name'], 'mark' => $site['mark']];
+}
+
 /** Editable prose references shared company values without copying them into every page. */
 function bl_company_text(string $page, string $path): string
 {
