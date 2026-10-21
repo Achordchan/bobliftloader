@@ -214,11 +214,11 @@ class WebsiteTests(unittest.TestCase):
         # The registered address, the main factory and the office each carry their own name on the contact page.
         _, html, _ = fetch('/contact/')
         block = html.split('class="bl-contact-visit-details"', 1)[1].split('</dl>', 1)[0]
-        self.assertIn('<address><em>Registered address</em>No. 79, Zone B, Jingluotuo Industrial Park,<br>Yunlong District, Xuzhou, Jiangsu, China</address>', block)
+        self.assertIn('<address><em>Registered address</em>No. 79, Zone B, Jinluotuo Industrial Park,<br>Yunlong District, Xuzhou, Jiangsu, China</address>', block)
         self.assertIn('<address><em>Main factory</em>S324 Provincial Road, Zhangji Town,<br>Tongshan District, Xuzhou, Jiangsu, China</address>', block)
         self.assertIn('<address><em>Office</em>13F, Building A, Yongjia New Town Center,<br>Yunlong District, Xuzhou, Jiangsu, China</address>', block)
         organization = next(item for item in Page(html).structured[0]['@graph'] if item['@type'] == 'Organization')
-        self.assertEqual(organization['address']['streetAddress'], 'No. 79, Zone B, Jingluotuo Industrial Park, Yunlong District')
+        self.assertEqual(organization['address']['streetAddress'], 'No. 79, Zone B, Jinluotuo Industrial Park, Yunlong District')
         self.assertEqual([place['name'] for place in organization['location']], ['Main factory', 'Office'])
 
     def test_header_search_index(self):
