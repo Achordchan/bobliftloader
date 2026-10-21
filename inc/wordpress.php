@@ -114,12 +114,22 @@ function bl_wp_article_record(WP_Post $post): array
     $record['content_html'] = apply_filters('the_content', $post->post_content);
     // The person who wrote it: name, job title and biography from their profile, avatar, and how many stories they have published. No contact details are shown.
     $author = (int) $post->post_author;
-    if ($author) $record['author'] = ['name' => get_the_author_meta('display_name', $author), 'title' => (string) get_user_meta($author, 'bl_title', true), 'avatar' => (string) get_avatar_url($author, ['size' => 128]), 'bio' => trim((string) (get_user_meta($author, 'bl_bio', true) ?: get_the_author_meta('description', $author)))];
+    if ($author) $record['author'] = ['name' => get_the_author_meta('display_name', $author), 'title' => (string) get_user_meta($author, 'bl_title', true), 'avatar' => bl_author_avatar($author), 'bio' => trim((string) (get_user_meta($author, 'bl_bio', true) ?: get_the_author_meta('description', $author)))];
     if (get_the_modified_date('Y-m-d', $post) > $record['date']) $record['updated'] = get_the_modified_date('Y-m-d', $post);
     $record['image'] = get_the_post_thumbnail_url($post, 'large') ?: bl_wp_image($record['image']);
     $record['image_id'] = $record['image'] && $record['image'] === get_the_post_thumbnail_url($post, 'large') ? (int) get_post_thumbnail_id($post) : 0;
     if (!$record['image']) $record['image'] = bl_asset('images/company/boblift-workshop-aerial-mobile.webp');
     return $record;
+}
+
+/** The author's photo set on the news content screen (matched by login), else their Gravatar. */
+function bl_author_avatar(int $author): string
+{
+    $login = strtolower((string) get_the_author_meta('user_login', $author));
+    foreach ((array) (bl_editable('news')['authors']['items'] ?? []) as $row) {
+        if (is_array($row) && $login !== '' && strtolower(trim((string) ($row['login'] ?? ''))) === $login && ($row['image'] ?? '') !== '') return bl_wp_image((string) $row['image']);
+    }
+    return (string) get_avatar_url($author, ['size' => 128]);
 }
 
 /** The application cases (each a page of its own under /application/), newest first. */
