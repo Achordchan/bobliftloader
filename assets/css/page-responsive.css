@@ -18,6 +18,9 @@
   .bl-site .bl-news-card :is(h2,h3){font-size:31px}
   .bl-site .bl-contact-grid{grid-template-columns:1fr;grid-template-areas:"intro" "form" "prepare";grid-template-rows:auto;row-gap:36px}
   .bl-site .bl-contact-prepare ol{grid-template-columns:1fr 1fr}
+  /* The crane card stacks: words first, the two cranes below them. */
+  .bl-site .bl-sister-card{grid-template-columns:1fr}
+  .bl-site .bl-sister-media{min-height:0;padding-top:8px}
 }
 @media(max-width:600px){
   .bl-site .bl-nav>a{font-size:34px}
@@ -55,6 +58,8 @@
   .bl-site .bl-product-section-nav{gap:25px;min-height:62px;font-size:13px}
   .bl-site .bl-product-overview,.bl-site .bl-specifications{padding-block:var(--m-sec,56px)}
   .bl-site .bl-related{padding-block:var(--m-sec,56px)}
+  .bl-site .bl-sister{padding-bottom:var(--m-sec,56px)}
+  .bl-site .bl-sister-copy{padding:28px 24px}
   .bl-site .bl-related-guides{padding-block:var(--m-sec,56px)}
   .bl-site .bl-small-section-heading{flex-direction:column;align-items:flex-start;gap:22px}
   .bl-site .bl-small-section-heading h2{font-size:var(--m-h2,clamp(38px,11vw,46px))}

@@ -70,6 +70,15 @@ return [
             'xml_label' => 'XML sitemap for search engines',
         ],
         'cta' => ['eyebrow' => 'YOUR NEXT MOVE', 'title' => 'LET’S FIND YOUR FIT.', 'url' => '/contact/', 'button' => 'Talk to our team '],
+        // At the foot of each family page, after its guides: our crane website, for buyers who came for a crane. Opens through the leave-site notice.
+        'sister' => [
+            'eyebrow' => 'Also from BOB-LIFT',
+            'title' => 'Truck-mounted, marine and pickup cranes',
+            'text' => 'Our cranes are listed on a separate website, with their specifications.',
+            'button' => 'Visit bobliftcrane.com',
+            'url' => 'https://www.bobliftcrane.com/',
+            'empty' => 'Looking for cranes?',
+        ],
         'side' => ['whatsapp' => 'WhatsApp', 'email' => 'Email', 'enquiry' => 'Enquiry', 'top' => 'Top', 'enquiry_url' => '/contact/#enquiry'],
         'llms' => ['intro' => ''],
         'consent' => [
@@ -179,6 +188,17 @@ return [
                 ['key' => 'cta.title', 'label' => '标题', 'type' => 'text'],
                 ['key' => 'cta.url', 'label' => '按钮链接', 'type' => 'url'],
                 ['key' => 'cta.button', 'label' => '按钮文字', 'type' => 'verbatim'],
+            ],
+        ],
+        [
+            'title' => '起重机站推荐（产品分类页底部）',
+            'fields' => [
+                ['key' => 'sister.eyebrow', 'label' => '小标题', 'type' => 'text'],
+                ['key' => 'sister.title', 'label' => '标题', 'type' => 'text'],
+                ['key' => 'sister.text', 'label' => '说明', 'type' => 'textarea'],
+                ['key' => 'sister.button', 'label' => '按钮文字', 'type' => 'text'],
+                ['key' => 'sister.url', 'label' => '起重机站地址', 'type' => 'url', 'help' => '点按钮或图片先弹出离站提示，确认后在新标签页打开。留空则整块和筛选无结果时的那行提示都不显示。'],
+                ['key' => 'sister.empty', 'label' => '筛选无结果时的提示', 'type' => 'text', 'help' => '筛选没有匹配型号时，提示下面多一行，后面接起重机站域名链接。'],
             ],
         ],
         [

@@ -80,7 +80,7 @@ $film = $category ? ['src' => trim(bl_content_value($catalogPage, 'catalog.film_
     <div class="bl-product-grid"><?php foreach ($items as $item) { $attributes = ' data-catalog-card data-search="' . bl_escape($item['search']) . '"'; foreach ($item['facets'] as $key => $value) $attributes .= ' data-' . $key . '="' . $value . '"'; bl_product_card($item['product'], $attributes . ($matches($item) ? '' : ' hidden')); } ?></div>
   </div>
   <?php endforeach; ?>
-  <div class="bl-empty" data-catalog-empty<?= $visible ? ' hidden' : '' ?>><h2><?= $catalogCopy('empty_title') ?></h2><p><?= $catalogCopy('empty_intro') ?></p><a class="bl-text-link" href="<?= bl_escape($clear['url']) ?>" <?= $clear['attr'] ?>><?= $catalogCopy('empty_clear') ?> <?= bl_icon('arrow-up-right') ?></a></div>
+  <div class="bl-empty" data-catalog-empty<?= $visible ? ' hidden' : '' ?>><h2><?= $catalogCopy('empty_title') ?></h2><p><?= $catalogCopy('empty_intro') ?></p><a class="bl-text-link" href="<?= bl_escape($clear['url']) ?>" <?= $clear['attr'] ?>><?= $catalogCopy('empty_clear') ?> <?= bl_icon('arrow-up-right') ?></a><?php if ($sister = bl_sister_site()): ?><p class="bl-empty-sister"><?= bl_escape(bl_content_value('global', 'sister.empty')) ?> <a href="<?= bl_escape($sister['url']) ?>" data-leave-site data-name="<?= bl_escape($sister['name']) ?>" data-domain="<?= bl_escape($sister['domain']) ?>" data-mark="<?= bl_escape($sister['mark']) ?>"><?= bl_escape($sister['domain']) ?></a></p><?php endif; ?></div>
 </section>
 <?php if ($category) { $storyCategory = $category; require __DIR__ . '/../partials/range-story.php'; } // what the family is for, before the model-by-model comparison ?>
 <?php if ($category === 'mini-dumpers') require __DIR__ . '/../partials/dumper-jobs.php'; // the jobs each dumper suits, after the load chart ?>
@@ -91,4 +91,5 @@ $film = $category ? ['src' => trim(bl_content_value($catalogPage, 'catalog.film_
 <?php if ($category === 'mini-dumpers') require __DIR__ . '/../partials/dumper-names.php'; ?>
 <?php if ($category) require __DIR__ . '/../partials/range-guide.php'; // how to choose, and the questions buyers ask, before the guides that go deeper ?>
 <?php if ($category) { $guides = bl_related_articles([], $category); $guideCopy = $catalogCopy; require __DIR__ . '/../partials/related-guides.php'; } ?>
+<?php if ($category) require __DIR__ . '/../partials/sister-site.php'; // our crane website, last of the page's own content ?>
 <?php require __DIR__ . '/../partials/page-cta.php'; ?>
