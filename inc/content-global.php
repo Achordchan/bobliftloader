@@ -12,7 +12,7 @@ return [
             'website' => 'https://www.boblift.com/',
             'youtube_url' => 'https://www.youtube.com/@bobliftloader',
             'facebook_url' => 'https://www.facebook.com/@bobliftloader',
-            'street' => 'No. 79, Zone B, Jingluotuo Industrial Park, Yunlong District',
+            'street' => 'No. 79, Zone B, Jinluotuo Industrial Park, Yunlong District',
             'factory_street' => 'S324 Provincial Road, Zhangji Town, Tongshan District',
             'office_street' => '13F, Building A, Yongjia New Town Center, Yunlong District',
             'city' => 'Xuzhou',
@@ -21,7 +21,7 @@ return [
             'country_code' => 'CN',
             'hours' => 'Monday–Friday · 08:30–18:00',
             'timezone' => 'China Standard Time (UTC+8)',
-            'map_address' => 'No. 79, Zone B, Jingluotuo Industrial Park, Yunlong District, Xuzhou, Jiangsu, China',
+            'map_address' => 'No. 79, Zone B, Jinluotuo Industrial Park, Yunlong District, Xuzhou, Jiangsu, China',
         ],
         'brand' => ['logo' => '', 'icon' => ''],
         'footer' => [
