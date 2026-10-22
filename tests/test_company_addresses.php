@@ -24,5 +24,14 @@ $check(($organization['address']['streetAddress'] ?? '') === 'No. 79, Zone B, Ji
 $places = array_column($organization['location'] ?? [], 'address', 'name');
 $check(($places['Main factory']['streetAddress'] ?? '') === 'S324 Provincial Road, Zhangji Town, Tongshan District' && ($places['Office']['streetAddress'] ?? '') === '13F, Building A, Yongjia New Town Center, Yunlong District', 'factory and office are not listed as places');
 
+// The Chinese registered name is an alternate name of the same organisation and appears beside the English name.
+$check(($organization['legalName'] ?? '') === 'Xuzhou BOB-LIFT Construction Machinery Co., Ltd.' && in_array('徐州巴布工程机械有限公司', (array) ($organization['alternateName'] ?? []), true) && in_array('BOB-LIFT', (array) ($organization['alternateName'] ?? []), true), 'organisation names: ' . json_encode([$organization['legalName'] ?? null, $organization['alternateName'] ?? null], JSON_UNESCAPED_UNICODE));
+$check(str_contains($llms, '- Company name: Xuzhou BOB-LIFT Construction Machinery Co., Ltd. (徐州巴布工程机械有限公司)'), 'llms.txt Company section misses the Chinese company name');
+$check(str_contains($llms, 'line of Xuzhou BOB-LIFT Construction Machinery Co., Ltd. (徐州巴布工程机械有限公司), a manufacturer'), 'llms.txt opening misses the Chinese company name');
+// Both lines follow 全站设置: a changed Chinese name replaces the old one, an empty one leaves the brackets out.
+$check(bl_llms_txt_company_name('Xuzhou BOB-LIFT Construction Machinery Co., Ltd.', '') === 'Xuzhou BOB-LIFT Construction Machinery Co., Ltd.', 'an empty Chinese name still shows');
+$check(bl_llms_txt_company_name('Xuzhou BOB-LIFT Construction Machinery Co., Ltd.', '巴布') === 'Xuzhou BOB-LIFT Construction Machinery Co., Ltd. (巴布)', 'a changed Chinese name is not used');
+$check(!str_contains((string) file_get_contents(__DIR__ . '/../inc/llms.php'), '徐州巴布'), 'inc/llms.php hardcodes the Chinese name instead of reading 全站设置');
+
 if ($failures) { fwrite(STDERR, implode("\n", $failures) . "\n"); exit(1); }
 echo "company addresses ok\n";

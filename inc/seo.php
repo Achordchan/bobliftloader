@@ -6,7 +6,9 @@ function bl_structured_data(array $route): array
     $base = bl_public_base();
     $organization = [
         '@type' => 'Organization', '@id' => bl_company('website') . '#organization',
-        'name' => bl_company('name'), 'alternateName' => 'BOB-LIFT',
+        'name' => bl_company('name'), 'legalName' => bl_company('name'),
+        // The Chinese registered name lets search engines and AI assistants match Chinese-language queries to the same company.
+        'alternateName' => bl_company('name_zh') !== '' ? ['BOB-LIFT', bl_company('name_zh')] : 'BOB-LIFT',
         'url' => bl_company('website'), 'email' => bl_company('email'), 'telephone' => bl_company('phone_seo'),
         'sameAs' => array_merge(['https://www.boblift.com/', 'https://www.bobliftcrane.com/'], array_column(bl_social_links(), 'url')),
         'logo' => bl_absolute_asset(bl_brand_logo()),

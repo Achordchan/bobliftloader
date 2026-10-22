@@ -42,7 +42,7 @@ foreach (bl_editable('about')['group']['product_links'] as $item) {
       <li class="bl-tree-root">
         <div class="bl-tree-root-card">
           <div class="bl-tree-root-photo"><img src="<?= bl_escape(bl_content_asset('about', 'group.image', 'images/company/boblift-workshop-aerial-mobile.webp')) ?>" alt="<?= bl_escape(bl_content_value('about', 'factory.image_alt_2')) ?>" width="1280" height="720" loading="lazy"></div>
-          <div class="bl-tree-root-name"><span><?= bl_content_text('about', 'group.company_label') ?></span><h3><?= bl_content_text('about', 'group.company_brand') ?></h3><p><?= bl_escape(bl_company('name')) ?></p></div>
+          <div class="bl-tree-root-name"><span><?= bl_content_text('about', 'group.company_label') ?></span><h3><?= bl_content_text('about', 'group.company_brand') ?></h3><p><?= bl_escape(bl_company('name')) ?><?php if (bl_company('name_zh') !== ''): ?><br><span lang="zh-CN"><?= bl_escape(bl_company('name_zh')) ?></span><?php endif; ?></p></div>
           <a class="bl-tree-link" href="<?= bl_company_url('website') ?>" target="_blank" rel="noopener"><span><?= bl_content_text('about', 'group.website_label') ?></span><?= bl_content_text('about', 'group.website_domain') ?><?= bl_icon('arrow-up-right') ?></a>
         </div>
         <ul class="bl-tree-branches">

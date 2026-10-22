@@ -44,11 +44,12 @@ $check(!is_wp_error($write(2, ['items' => [['id' => 'catalogue', 'url' => $url, 
 $check(bl_family_catalogue('mini-dumpers') === null, 'a family without a book still offers one');
 
 // llms.txt intro: the global item wins over the older setting (bl_editable() caches per request, so write before reading).
-$check(str_contains(bl_llms_txt_default_intro(), 'stand-on and seated models, on tracks or wheels') && !str_contains(bl_llms_txt_default_intro(), 'tracked and wheeled seated'), 'default intro still has the old range wording');
 $GLOBALS['options']['bl_llms_txt_intro'] = 'Older setting intro.';
 $check(!is_wp_error($write(1, ['llms' => ['intro' => "Intro from the item.\n\n- Fact one"]])), 'global llms write failed');
 $llms = bl_llms_txt();
 $check(str_contains($llms, "Intro from the item.\n\n- Fact one") && !str_contains($llms, 'Older setting intro.'), 'item intro not used first');
+// Checked after the write: the default intro reads the company names from the global content, which is then cached.
+$check(str_contains(bl_llms_txt_default_intro(), 'stand-on and seated models, on tracks or wheels') && !str_contains(bl_llms_txt_default_intro(), 'tracked and wheeled seated'), 'default intro still has the old range wording');
 $check(($read(1)['llms']['intro'] ?? '') === "Intro from the item.\n\n- Fact one", 'llms intro not readable');
 
 // Engine brands: model codes and product lines do not count as extra brands.
