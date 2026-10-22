@@ -11,10 +11,17 @@ declare(strict_types=1);
 
 const BL_LLMS_TXT_INTRO_OPTION = 'bl_llms_txt_intro';
 
+/** The English company name, followed by the Chinese one in brackets when 全站设置 has one. */
+function bl_llms_txt_company_name(string $name, string $nameZh): string
+{
+    return $name . ($nameZh !== '' ? ' (' . $nameZh . ')' : '');
+}
+
 function bl_llms_txt_default_intro(): string
 {
-    return <<<'MD'
-BOB-LIFT Loader is the mini skid steer loader and mini dumper line of Xuzhou BOB-LIFT Construction Machinery Co., Ltd. (徐州巴布工程机械有限公司), a manufacturer in Xuzhou, Jiangsu, China. Machines are welded, painted and assembled at the company's own factory in Xuzhou and built to order for export.
+    // The company names come from 全站设置, so the opening always matches the Company section below it.
+    return 'BOB-LIFT Loader is the mini skid steer loader and mini dumper line of ' . bl_llms_txt_company_name(bl_company('name'), bl_company('name_zh')) . <<<'MD'
+, a manufacturer in Xuzhou, Jiangsu, China. Machines are welded, painted and assembled at the company's own factory in Xuzhou and built to order for export.
 
 Key facts:
 - Mini skid steer loaders rated from 200 to 500 kg: stand-on and seated models, on tracks or wheels
@@ -58,7 +65,7 @@ function bl_llms_txt(): string
             bl_llms_txt_link('About BOB-LIFT Loader', '/about/', 'The company, factory and team behind the machines'),
             bl_llms_txt_link('Support', '/support/', 'Ordering, shipping, warranty, parts and after-delivery service'),
             bl_llms_txt_link('Contact', '/contact/', 'Enquiry form for quotations and specifications'),
-            '- Company name: ' . bl_company('name') . (bl_company('name_zh') !== '' ? ' (Chinese: ' . bl_company('name_zh') . ')' : ''),
+            '- Company name: ' . bl_llms_txt_company_name(bl_company('name'), bl_company('name_zh')),
             '- Email: ' . bl_company('email'),
             ...(bl_company('phone') === bl_company('sales_whatsapp_label') ? ['- Phone and WhatsApp: ' . bl_company('phone')] : ['- Phone: ' . bl_company('phone'), '- WhatsApp: ' . bl_company('sales_whatsapp_label')]),
             ...array_filter([
