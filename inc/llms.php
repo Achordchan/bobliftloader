@@ -14,7 +14,7 @@ const BL_LLMS_TXT_INTRO_OPTION = 'bl_llms_txt_intro';
 function bl_llms_txt_default_intro(): string
 {
     return <<<'MD'
-BOB-LIFT Loader is the mini skid steer loader and mini dumper line of Xuzhou BOB-LIFT Construction Machinery Co., Ltd., a manufacturer in Xuzhou, Jiangsu, China. Machines are welded, painted and assembled at the company's own factory in Xuzhou and built to order for export.
+BOB-LIFT Loader is the mini skid steer loader and mini dumper line of Xuzhou BOB-LIFT Construction Machinery Co., Ltd. (徐州巴布工程机械有限公司), a manufacturer in Xuzhou, Jiangsu, China. Machines are welded, painted and assembled at the company's own factory in Xuzhou and built to order for export.
 
 Key facts:
 - Mini skid steer loaders rated from 200 to 500 kg: stand-on and seated models, on tracks or wheels
@@ -58,6 +58,7 @@ function bl_llms_txt(): string
             bl_llms_txt_link('About BOB-LIFT Loader', '/about/', 'The company, factory and team behind the machines'),
             bl_llms_txt_link('Support', '/support/', 'Ordering, shipping, warranty, parts and after-delivery service'),
             bl_llms_txt_link('Contact', '/contact/', 'Enquiry form for quotations and specifications'),
+            '- Company name: ' . bl_company('name') . (bl_company('name_zh') !== '' ? ' (Chinese: ' . bl_company('name_zh') . ')' : ''),
             '- Email: ' . bl_company('email'),
             ...(bl_company('phone') === bl_company('sales_whatsapp_label') ? ['- Phone and WhatsApp: ' . bl_company('phone')] : ['- Phone: ' . bl_company('phone'), '- WhatsApp: ' . bl_company('sales_whatsapp_label')]),
             ...array_filter([
