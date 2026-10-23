@@ -1,10 +1,15 @@
 <?php
 declare(strict_types=1);
 
-/** Resolve an allowlisted page template; request paths never become file paths. */
-function bl_resolve_route(): array
+/**
+ * Resolve an allowlisted page template; request paths never become file paths. Given a path, it names that page instead of
+ * the current request (the enquiry notifications use it for the page an enquiry came from); WordPress's own query, an
+ * editor's preview and the 404 state belong to the current request and are then left out.
+ */
+function bl_resolve_route(?string $requestPath = null): array
 {
-    $rawPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    $current = $requestPath === null;
+    $rawPath = parse_url($current ? ($_SERVER['REQUEST_URI'] ?? '/') : $requestPath, PHP_URL_PATH) ?: '/';
     $basePath = bl_is_wordpress() ? rtrim((string) parse_url(home_url('/'), PHP_URL_PATH), '/') : '';
     $path = $basePath && str_starts_with($rawPath, $basePath . '/') ? substr($rawPath, strlen($basePath)) : $rawPath;
     $path = '/' . trim(rawurldecode($path), '/') . '/';
@@ -54,6 +59,7 @@ function bl_resolve_route(): array
     if (preg_match('~^/applications/([a-z0-9-]+)/$~', $path, $matches) && isset(bl_editable('applications')['jobs'][$matches[1]])) {
         return $route;
     }
+    if (!$current) return $route;
     // An editor's preview (draft, or unsaved changes to a published post) arrives at the site root with the post id.
     if (bl_is_wordpress() && ($preview = bl_wp_preview())) {
         $route = array_replace($route, ['type' => $preview['type'], 'title' => $preview['title'], 'description' => $preview['type'] === 'product' ? bl_product_description($preview['record']) : $preview['record']['excerpt'], 'record' => $preview['record'], 'status' => 200, 'preview' => true, 'path' => $preview['path']]);

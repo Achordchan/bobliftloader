@@ -73,6 +73,7 @@ function bl_wp_inquiry_data(array $raw): array
     $ip = trim((string) ($raw['ip'] ?? ''));
     $email = trim((string) ($raw['email'] ?? ''));
     $productName = $product ? (string) $product['name'] : '';
+    $page = bl_wp_inquiry_page((string) ($raw['url'] ?? ''));
     return [
         'name' => trim((string) ($raw['name'] ?? '')),
         'email' => $email,
@@ -82,7 +83,8 @@ function bl_wp_inquiry_data(array $raw): array
         'type' => $type !== '' ? $type : '未选择',
         'product' => $product ? ['name' => $productName, 'url' => (string) $product['url'], 'image' => $raw['image'] ?? bl_wp_inquiry_thumbnail($product)] + bl_wp_inquiry_title($productName, $model) : null,
         'kind' => $model !== '' ? '产品询盘' : '询盘表单',
-        'url' => (string) ($raw['url'] ?? ''),
+        'page' => $page,
+        'url' => $page['url'],
         'ip' => $ip,
         'country' => $raw['country'] ?? ($ip === '' ? '' : (bl_wp_ip_country($ip) ?: '未能识别')),
         'time' => wp_date('Y-m-d H:i', (int) ($raw['time'] ?? time())),
@@ -143,12 +145,11 @@ function bl_wp_inquiry_sample(string $kind): array
 function bl_wp_inquiry_classic_preview(array $raw): string
 {
     $d = bl_wp_inquiry_data($raw);
-    $link = static fn(string $url): string => '<a href="' . esc_url($url) . '" target="_blank" style="color:#215bdb;text-decoration:none;">' . esc_html($url) . '</a>';
     $tags = [
         '[bl_logo]' => '<img src="' . esc_url($d['logo']) . '" width="112" height="45" alt="BOB-LIFT" style="display:block;width:112px;height:45px;border:0;">',
         '[bl_time]' => esc_html($d['time']),
         '[bl_enquiry_kind]' => $d['kind'],
-        '[bl_page_url]' => $link($d['url']),
+        '[bl_page_url]' => bl_wp_inquiry_page_html($d['page'], '#215bdb'),
         '[bl_product_card]' => bl_wp_inquiry_product_card((string) $raw['family'], $d['model']),
         '[bl_ip_country]' => esc_html($d['country']),
         '[bl_site]' => esc_html($d['site']),

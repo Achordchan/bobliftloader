@@ -23,7 +23,7 @@ return static function (array $d): string {
     } else {
         $details = ($d['model'] !== '' ? $row('型号', $e($d['model'])) : '') . $row('询盘类型', $chip($d['type'], '#e8effd', '#215bdb'));
     }
-    $details .= $row('来源页面', ($d['url'] !== '' ? '<a href="' . esc_url($d['url']) . '" style="color:#215bdb;text-decoration:none;word-break:break-all;">' . $e($d['url']) . '</a>&nbsp; ' : '') . $chip($d['kind'], '#f1ede6', '#6f6a62'))
+    $details .= $row('来源页面', ($d['url'] !== '' ? bl_wp_inquiry_page_html($d['page'], '#215bdb') . '&nbsp; ' : '') . $chip($d['kind'], '#f1ede6', '#6f6a62'))
         . $row('来源国家', $e($d['country'] !== '' ? $d['country'] : '未知'))
         . ($d['ip'] !== '' ? $row('IP 地址', '<span style="' . $mono . '">' . $e($d['ip']) . '</span>') : '')
         . $row('提交时间', $e($d['time']));

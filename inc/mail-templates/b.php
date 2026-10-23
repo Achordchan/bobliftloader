@@ -22,7 +22,7 @@ return static function (array $d): string {
     } else {
         $product = '<div style="' . $f . 'font-size:16px;line-height:26px;color:#0b1f33;">询盘类型：<b>' . $e($d['type']) . '</b>' . ($d['model'] !== '' ? '&nbsp;&nbsp;·&nbsp;&nbsp;型号 ' . $e($d['model']) : '') . '</div>';
     }
-    $source = $e($d['kind']) . ($d['url'] !== '' ? ' · <a href="' . esc_url($d['url']) . '" style="color:#5d6b7c;text-decoration:underline;word-break:break-all;">' . $e($d['url']) . '</a>' : '');
+    $source = $e($d['kind']) . ($d['page']['title'] !== '' ? ' · <b style="color:#0b1f33;">' . $e($d['page']['title']) . '</b>' : '') . ($d['url'] !== '' ? ' · <a href="' . esc_url($d['url']) . '" style="color:#5d6b7c;text-decoration:underline;word-break:break-all;">' . $e($d['url']) . '</a>' : '');
     // Label rows rather than three columns, which a phone fitting the mail to its screen squeezed until words broke.
     $cell = static fn(string $label, string $value, string $font): string => '<tr><td width="96" valign="top" style="padding:5px 0;' . $f . 'font-size:13px;line-height:22px;color:#5d6b7c;">' . $label . '</td><td valign="top" style="padding:5px 0;' . $font . 'font-size:15px;line-height:22px;color:#0b1f33;">' . $value . '</td></tr>';
     $trace = $cell('来源国家', $e($d['country'] !== '' ? $d['country'] : '未知'), $f) . ($d['ip'] !== '' ? $cell('IP 地址', $e($d['ip']), $mono) : '') . $cell('提交时间', $e($d['time']), $mono);
