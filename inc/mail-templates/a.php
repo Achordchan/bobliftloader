@@ -10,7 +10,7 @@ return static function (array $d): string {
     $row = static fn(string $label, string $value, string $font = ''): string => '<tr><td width="88" valign="top" style="padding:12px 0;border-bottom:1px solid #eef1f5;' . $f . 'font-size:14px;color:#6b7a8c;">' . $label . '</td><td valign="top" style="padding:12px 0;border-bottom:1px solid #eef1f5;' . ($font ?: $f) . 'font-size:16px;line-height:24px;color:#0b1f33;word-break:break-word;">' . $value . '</td></tr>';
 
     $rows = $section('01', '来源页面');
-    if ($d['url'] !== '') $rows .= $row('页面', '<a href="' . esc_url($d['url']) . '" style="color:#215bdb;text-decoration:none;word-break:break-all;">' . $e($d['url']) . '</a>');
+    if ($d['url'] !== '') $rows .= $row('页面', bl_wp_inquiry_page_html($d['page'], '#215bdb'));
     $rows .= $row('类型', $chip($d['kind'], '#eef1f5', '#4a5a6c'));
     $rows .= $section('02', '产品信息');
     if ($d['product']) {

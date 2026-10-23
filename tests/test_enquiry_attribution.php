@@ -34,6 +34,8 @@ function bl_asset(string $path): string { return 'https://example.test/theme/ass
 function bl_wp_ip_country(string $ip): string { return '加拿大'; }
 function bl_wp_inquiry_thumbnail(array $product): string { return ''; }
 function bl_wp_inquiry_product_card(string $family, string $model): string { return ''; }
+function bl_wp_inquiry_page(string $url): array { return ['url' => $url, 'title' => '']; }
+function bl_wp_inquiry_page_html(array $page, string $color): string { return '<a href="' . esc_url($page['url']) . '">' . esc_html($page['url']) . '</a>'; }
 require __DIR__ . '/../inc/wp-enquiry-attribution.php';
 require __DIR__ . '/../inc/wp-inquiry-templates.php';
 

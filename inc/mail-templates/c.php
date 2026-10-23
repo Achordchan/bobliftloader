@@ -32,7 +32,7 @@ return static function (array $d): string {
     foreach ($d['attribution'] as [$label, $value, $isMono]) $trace .= $fact($label, $value, $isMono ? $mono : $f);
     $logo = esc_url($d['logo']);
     $reply = esc_url($d['reply'], ['mailto']);
-    $url = $d['url'] !== '' ? '&nbsp;&nbsp;<a href="' . esc_url($d['url']) . '" style="color:#9fb3c8;text-decoration:none;word-break:break-all;">' . $e($d['url']) . '</a>' : '';
+    $url = ($d['page']['title'] !== '' ? '&nbsp;&nbsp;<b style="color:#dce6f0;">' . $e($d['page']['title']) . '</b>' : '') . ($d['url'] === '' ? '' : '&nbsp;&nbsp;<a href="' . esc_url($d['url']) . '" style="color:#9fb3c8;text-decoration:none;word-break:break-all;">' . $e($d['url']) . '</a>');
 
     return <<<HTML
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background:#dfe4ea;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;text-size-adjust:100%;">

@@ -242,6 +242,13 @@ add_action('init', static function (): void {
     update_option('bl_inquiry_mail_version', BL_ENQUIRY_MAIL_VERSION);
 });
 
+/** The page an enquiry came from, for a mail: its title in bold (when known) above its address as a link. */
+function bl_wp_inquiry_page_html(array $page, string $color, string $titleColor = '#0b1f33'): string
+{
+    $link = '<a href="' . esc_url($page['url']) . '" target="_blank" style="color:' . $color . ';text-decoration:none;word-break:break-all;">' . esc_html($page['url']) . '</a>';
+    return ($page['title'] !== '' ? '<b style="color:' . $titleColor . ';">' . esc_html($page['title']) . '</b><br>' : '') . $link;
+}
+
 /** Whether CF7 is composing the theme's notification card: the form's main mail, whose body still carries the marker. */
 function bl_wp_inquiry_card_mail(): bool
 {
@@ -340,6 +347,64 @@ function bl_wp_ip_country(string $ip): string
     return $names[$code] ?? $code;
 }
 
+// Ad and analytics tracking parameters. They are left out of the page an enquiry came from (the attribution block lists the
+// advert by itself), so the address says which page it was.
+const BL_ENQUIRY_TRACKING = '/^(utm_[a-z_]+|gclid|gclsrc|gbraid|wbraid|dclid|gad_[a-z_]+|fbclid|msclkid|ttclid|twclid|li_fat_id|srsltid|_gl)$/i';
+
+// WordPress's own public query variables (themes and plugins add theirs to $wp->public_query_vars); used when $wp is not there.
+const BL_WP_QUERY_VARS = ['m', 'p', 'posts', 'w', 'cat', 'withcomments', 'withoutcomments', 's', 'search', 'exact', 'sentence', 'calendar', 'page', 'paged', 'more', 'tb', 'pb', 'author', 'order', 'orderby', 'year', 'monthnum', 'day', 'hour', 'minute', 'second', 'name', 'category_name', 'tag', 'feed', 'author_name', 'pagename', 'page_id', 'error', 'attachment', 'attachment_id', 'subpost', 'subpost_id', 'preview', 'robots', 'favicon', 'taxonomy', 'term', 'cpage', 'post_type', 'embed'];
+
+/**
+ * What an address's query asks WordPress for: 'post' when it names one by its ID (?p=9, ?page_id=9), 'listing' when it
+ * asks for anything else WordPress reads (?s=, ?cat=), '' when it selects nothing (?ref=partner).
+ */
+function bl_wp_query_selects(string $query): string
+{
+    if ($query === '') return '';
+    parse_str($query, $vars);
+    foreach (['p', 'page_id', 'attachment_id'] as $key) {
+        if (isset($vars[$key]) && is_string($vars[$key]) && ctype_digit($vars[$key]) && (int) $vars[$key] > 0) return 'post';
+    }
+    $public = isset($GLOBALS['wp']->public_query_vars) ? (array) $GLOBALS['wp']->public_query_vars : BL_WP_QUERY_VARS;
+    return array_intersect_key($vars, array_flip($public)) ? 'listing' : '';
+}
+
+/**
+ * The page an enquiry was sent from: its address without tracking parameters (a site-relative one gets the site's own
+ * origin) and the page's title as the site titles it, empty for an address this site does not serve.
+ */
+function bl_wp_inquiry_page(string $url): array
+{
+    // A path from the site root already holds any folder the site lives in, so it takes only the scheme and host.
+    $url = bl_wp_inquiry_absolute_url(trim($url));
+    $hash = '';
+    if (($at = strpos($url, '#')) !== false) [$url, $hash] = [substr($url, 0, $at), substr($url, $at)];
+    if (($at = strpos($url, '?')) !== false) {
+        $kept = array_filter(explode('&', substr($url, $at + 1)), static fn(string $pair): bool => $pair !== '' && !preg_match(BL_ENQUIRY_TRACKING, rawurldecode(explode('=', $pair, 2)[0])));
+        $url = substr($url, 0, $at) . ($kept ? '?' . implode('&', $kept) : '');
+    }
+    $url .= $hash;
+    $title = '';
+    $host = static fn($address): string => preg_replace('/^www\./', '', strtolower((string) wp_parse_url((string) $address, PHP_URL_HOST)));
+    if ($url !== '' && $host($url) === $host(home_url('/'))) {
+        // An address that names a post by its ID (?p=9, ?page_id=9) is that post, whatever its path looks like. The home
+        // page's address asking for a search or archive (?s=, ?cat=) is a WordPress listing, not the home page; one with a
+        // query that selects nothing (?ref=partner) is still the home page.
+        $selects = bl_wp_query_selects((string) wp_parse_url($url, PHP_URL_QUERY));
+        $path = (string) (wp_parse_url($url, PHP_URL_PATH) ?: '/');
+        $home = (string) (wp_parse_url(home_url('/'), PHP_URL_PATH) ?: '/');
+        $listing = $selects === 'listing' && rtrim($path, '/') === rtrim($home, '/');
+        $route = $selects === 'post' || $listing ? ['status' => 404] : bl_resolve_route($path);
+        if ($route['status'] === 200) $title = bl_plain_title((string) $route['title']);
+        elseif (!$listing && ($id = url_to_postid($url)) > 0) $title = bl_plain_title(get_the_title($id));
+    }
+    return ['url' => $url, 'title' => $title];
+}
+
+// The DingTalk plugin heads each message with the site, and names the page an enquiry came from the way this theme does.
+add_filter('achord_dingtalk_site_name', static fn($name) => trim((string) $name) !== '' ? $name : '装载设备站');
+add_filter('achord_dingtalk_page_title', static fn($title, $url) => trim((string) $title) !== '' ? $title : bl_wp_inquiry_page((string) $url)['title'], 10, 2);
+
 // The notification's own tags. CF7 asks for them only when the mail names them, so other forms are not affected.
 add_filter('wpcf7_special_mail_tags', static function ($output, string $name, bool $html) {
     if (!in_array($name, ['bl_page_link', 'bl_page_url', 'bl_enquiry_kind', 'bl_logo', 'bl_site', 'bl_time', 'bl_product_card', 'bl_ip_country'], true)) return $output;
@@ -367,8 +432,9 @@ add_filter('wpcf7_special_mail_tags', static function ($output, string $name, bo
     $model = trim((string) $submission->get_posted_string('model'));
     if ($name === 'bl_enquiry_kind') return $model !== '' ? '产品询盘' : '询盘表单';
     if ($name === 'bl_page_url') {
-        $url = (string) $submission->get_meta('url');
-        return $html ? '<a href="' . esc_url($url) . '" target="_blank" style="color:#215bdb;text-decoration:none;">' . esc_html($url) . '</a>' : $url;
+        $page = bl_wp_inquiry_page((string) $submission->get_meta('url'));
+        if (!$html) return trim($page['title'] . ' ' . $page['url']);
+        return bl_wp_inquiry_page_html($page, '#215bdb');
     }
     // Kept for a Mail body an editor built on the version 2 card.
     if ($name === 'bl_page_link') {
