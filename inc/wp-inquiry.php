@@ -369,9 +369,13 @@ function bl_wp_inquiry_page(string $url): array
     $title = '';
     $host = static fn($address): string => preg_replace('/^www\./', '', strtolower((string) wp_parse_url((string) $address, PHP_URL_HOST)));
     if ($url !== '' && $host($url) === $host(home_url('/'))) {
-        // An address that names a post by its ID (?p=9, ?page_id=9) is that post, whatever its path looks like.
-        $byId = (bool) preg_match('/(?:^|&)(?:p|page_id|attachment_id)=\d/', (string) wp_parse_url($url, PHP_URL_QUERY));
-        $route = $byId ? ['status' => 404] : bl_resolve_route((string) (wp_parse_url($url, PHP_URL_PATH) ?: '/'));
+        // An address that names a post by its ID (?p=9, ?page_id=9) is that post, whatever its path looks like; the home
+        // page's address with any other query (?s=, ?cat=) is a WordPress listing, not the home page.
+        $query = (string) wp_parse_url($url, PHP_URL_QUERY);
+        $path = (string) (wp_parse_url($url, PHP_URL_PATH) ?: '/');
+        $home = (string) (wp_parse_url(home_url('/'), PHP_URL_PATH) ?: '/');
+        $byQuery = preg_match('/(?:^|&)(?:p|page_id|attachment_id)=\d/', $query) || ($query !== '' && rtrim($path, '/') === rtrim($home, '/'));
+        $route = $byQuery ? ['status' => 404] : bl_resolve_route($path);
         if ($route['status'] === 200) $title = bl_plain_title((string) $route['title']);
         elseif (($id = url_to_postid($url)) > 0) $title = bl_plain_title(get_the_title($id));
     }

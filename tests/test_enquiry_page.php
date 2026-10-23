@@ -33,6 +33,8 @@ $check($page === ['url' => 'https://www.bobliftloader.com/products/skid-steer-lo
 $check(bl_wp_inquiry_page('https://bobliftloader.com/privacy-old/')['title'] === 'Old & privacy', 'a WordPress page outside the theme routes has no title');
 $check(bl_wp_inquiry_page('https://bobliftloader.com/?page_id=9&gclid=1') === ['url' => 'https://bobliftloader.com/?page_id=9', 'title' => 'Old & privacy'], 'a page named by its ID is taken for the home page');
 $check(bl_wp_inquiry_page('https://bobliftloader.com/?page_id=12')['title'] === '', 'an unknown post ID is named as the home page');
+$check(bl_wp_inquiry_page('https://bobliftloader.com/?s=loader&gclid=1') === ['url' => 'https://bobliftloader.com/?s=loader', 'title' => ''] && bl_wp_inquiry_page('https://bobliftloader.com?cat=5')['title'] === '', 'a search or listing at the home address is named as the home page');
+$check(bl_wp_inquiry_page('https://bobliftloader.com/#top')['title'] === 'Mini Skid Steer Loaders & Mini Dumpers', 'the home page with a fragment loses its title');
 $check(bl_wp_inquiry_page('https://bobliftloader.com/nowhere/?gclid=1') === ['url' => 'https://bobliftloader.com/nowhere/', 'title' => ''], 'an unknown page gets a title');
 $check(bl_wp_inquiry_page('https://elsewhere.example/contact/?gclid=1')['title'] === '', "another site's page is named as one of ours");
 $check(bl_wp_inquiry_page('//elsewhere.example/contact/')['url'] === '//elsewhere.example/contact/', 'a protocol-relative address is taken as one of ours');
