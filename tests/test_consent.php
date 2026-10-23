@@ -119,20 +119,7 @@ $check(str_contains($markup, '"region":["AT",') && str_contains($markup, '"GB","
 $check(strpos($markup, '"region"') < strpos($markup, '{"ad_storage":"granted"'), 'granted default before the regional one');
 $check(str_contains($markup, 'bl_consent=') && str_contains($markup, 'v.v!==1') && str_contains($markup, 'gtag("consent","update"') && str_contains($markup, '["analytics","advertising"]'), 'cookie choice not applied');
 $check(str_contains($markup, 'gtag("config","G-ABC1234XYZ");gtag("config","AW-123456789");') && str_contains($markup, 'window.blGoogleConversion="AW-123456789/AbC-dEf_9"'), 'config or conversion missing');
-// gtag.js is not in the markup: the inline script adds it on the first touch, key, scroll or wheel, 12 seconds after load,
-// or at once for a visit from an ad or a tagged link.
-$check(!str_contains($markup, '<script async') && str_contains($markup, 's.src="https://www.googletagmanager.com/gtag/js?id=G-ABC1234XYZ"') && str_contains($markup, 'window.blLoadGoogleTag=load;') && str_ends_with($markup, 'setTimeout(load,12000)})})();</script>'), 'gtag.js not deferred');
-$load = static function (string $search, array $fire = []) use (&$markup): string {
-    preg_match('~<script>(window\.dataLayer.*?)</script>~', $markup, $inline);
-    $js = 'var added=[],on={};global.window=global;global.document={cookie:"",head:{appendChild:function(s){added.push(s.src)}},createElement:function(){return {}}};'
-        . 'global.location={search:' . json_encode($search) . '};global.addEventListener=function(e,f){(on[e]=on[e]||[]).push(f)};global.removeEventListener=function(e,f){on[e]=(on[e]||[]).filter(function(g){return g!==f})};'
-        . 'global.setTimeout=function(f){f()};eval(' . json_encode($inline[1]) . ');'
-        . json_encode($fire) . '.forEach(function(e){(on[e]||[]).slice().forEach(function(f){f()})});console.log(JSON.stringify(added))';
-    return trim((string) shell_exec('node -e ' . escapeshellarg($js)));
-};
-$gtag = '["https://www.googletagmanager.com/gtag/js?id=G-ABC1234XYZ"]';
-$check($load('') === '[]' && $load('', ['pointerdown', 'scroll']) === $gtag && $load('', ['load']) === $gtag, 'gtag.js not loaded once on the first interaction or after load');
-$check($load('?gclid=abc') === $gtag && $load('?x=1&utm_source=fb') === $gtag && $load('?ref=gclid=1') === '[]', 'a visit from an ad does not load gtag.js at once');
+$check(str_ends_with($markup, '<script async src="https://www.googletagmanager.com/gtag/js?id=G-ABC1234XYZ"></script>'), 'gtag.js not loaded async');
 // Until an administrator confirms the texts describe the regional defaults, the whole Google tag is gated like pasted code:
 // nothing runs before the cookie agrees to a category it serves.
 $confirmed = bl_google_tag_markup();
@@ -143,7 +130,7 @@ $check(!str_starts_with($confirmed, '<template'), 'confirmed Google tag was gate
 $check(str_contains($gated, 'if((window.blConsentRan||{})["analytics"])gtag("config","G-ABC1234XYZ");if((window.blConsentRan||{})["advertising"])gtag("config","AW-123456789");') && str_contains($confirmed, ';gtag("config","G-ABC1234XYZ");gtag("config","AW-123456789");'), 'unconfirmed tags not configured per agreed category');
 // Run the gated script with a cookie that agrees to analytics only: GA4 is configured, Google Ads is not.
 preg_match('~<script>(window\.dataLayer.*?)</script>~', $gated, $inline);
-$run = static fn(string $cookie): string => (string) shell_exec('node -e ' . escapeshellarg('global.window=global;global.document={cookie:' . json_encode($cookie) . '};global.location={search:""};global.addEventListener=function(){};eval(' . json_encode($inline[1]) . ');console.log(JSON.stringify(dataLayer.filter(a=>a[0]==="config").map(a=>a[1])))'));
+$run = static fn(string $cookie): string => (string) shell_exec('node -e ' . escapeshellarg('global.window=global;global.document={cookie:' . json_encode($cookie) . '};eval(' . json_encode($inline[1]) . ');console.log(JSON.stringify(dataLayer.filter(a=>a[0]==="config").map(a=>a[1])))'));
 $check(trim($run('bl_consent=' . rawurlencode('{"v":1,"analytics":true,"advertising":false}'))) === '["G-ABC1234XYZ"]', 'declined advertising tag was configured');
 $check(trim($run('bl_consent=' . rawurlencode('{"v":1,"analytics":true,"advertising":true}'))) === '["G-ABC1234XYZ","AW-123456789"]', 'agreed tags were not configured');
 $GLOBALS['caps'] = ['manage_options' => true, 'unfiltered_html' => true];

@@ -55,8 +55,6 @@ function reportSentInquiry() {
   if (!window.blGoogleTag || typeof window.gtag !== 'function') return;
   window.gtag('event', 'generate_lead', { form: 'enquiry', enquiry_product: sent.product || '', enquiry_model: sent.model || '' });
   if (window.blGoogleConversion) window.gtag('event', 'conversion', { send_to: window.blGoogleConversion });
-  // gtag.js otherwise waits for the visitor's first touch (inc/consent.php); a visitor who closes this page at once still counts.
-  window.blLoadGoogleTag?.();
 }
 
 export function initializeInquiry() {

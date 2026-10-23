@@ -163,19 +163,7 @@ function bl_google_tag_markup(): string
     foreach ($ids as $id) $script .= $allowed(str_starts_with($id, 'G-') ? 'analytics' : 'advertising') . 'gtag("config",' . $json($id) . ');';
     $conversion = bl_google_conversion();
     if ($conversion !== '') $script .= $allowed('advertising') . 'window.blGoogleConversion=' . $json($conversion) . ';';
-    // gtag.js (and the Google Ads script it pulls in, about 340 KB between them) waits for the visitor's first touch, key,
-    // scroll or wheel, or 12 seconds after the page has loaded, so it no longer competes with the page's first paint; the
-    // commands above queue in dataLayer until then. A visit from an ad or a tagged link loads it at once, so its landing
-    // is counted with the click; the thank-you page calls blLoadGoogleTag itself (assets/js/inquiry.js).
-    $source = 'https://www.googletagmanager.com/gtag/js?id=' . rawurlencode($ids[0]);
-    $script .= '(function(){var done=false,events=["pointerdown","keydown","touchstart","scroll","wheel"];'
-        . 'function load(){if(done)return;done=true;events.forEach(function(e){removeEventListener(e,load,true)});'
-        . 'var s=document.createElement("script");s.async=true;s.src=' . $json($source) . ';document.head.appendChild(s)}'
-        . 'window.blLoadGoogleTag=load;'
-        . 'if(/[?&](gclid|gbraid|wbraid|utm_[a-z]+)=/.test(location.search)){load();return}'
-        . 'events.forEach(function(e){addEventListener(e,load,{capture:true,passive:true})});'
-        . 'addEventListener("load",function(){setTimeout(load,12000)})})();';
-    $markup = '<script>' . $script . '</script>';
+    $markup = '<script>' . $script . '</script><script async src="https://www.googletagmanager.com/gtag/js?id=' . rawurlencode($ids[0]) . '"></script>';
     if ($confirmed) return $markup;
     // Not confirmed: inert until the visitor's cookie agrees to a category the tags serve, then written in as the page is read
     // (the same gate as bl_tracking_markup), with the cookie's choice applied over the defaults.
