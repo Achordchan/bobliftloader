@@ -357,12 +357,8 @@ const BL_ENQUIRY_TRACKING = '/^(utm_[a-z_]+|gclid|gclsrc|gbraid|wbraid|dclid|gad
  */
 function bl_wp_inquiry_page(string $url): array
 {
-    $url = trim($url);
     // A path from the site root already holds any folder the site lives in, so it takes only the scheme and host.
-    if (preg_match('#^/(?!/)#', $url)) {
-        $home = wp_parse_url(home_url('/'));
-        $url = ($home['scheme'] ?? 'https') . '://' . ($home['host'] ?? '') . (isset($home['port']) ? ':' . $home['port'] : '') . $url;
-    }
+    $url = bl_wp_inquiry_absolute_url(trim($url));
     $hash = '';
     if (($at = strpos($url, '#')) !== false) [$url, $hash] = [substr($url, 0, $at), substr($url, $at)];
     if (($at = strpos($url, '?')) !== false) {
@@ -373,7 +369,9 @@ function bl_wp_inquiry_page(string $url): array
     $title = '';
     $host = static fn($address): string => preg_replace('/^www\./', '', strtolower((string) wp_parse_url((string) $address, PHP_URL_HOST)));
     if ($url !== '' && $host($url) === $host(home_url('/'))) {
-        $route = bl_resolve_route((string) (wp_parse_url($url, PHP_URL_PATH) ?: '/'));
+        // An address that names a post by its ID (?p=9, ?page_id=9) is that post, whatever its path looks like.
+        $byId = (bool) preg_match('/(?:^|&)(?:p|page_id|attachment_id)=\d/', (string) wp_parse_url($url, PHP_URL_QUERY));
+        $route = $byId ? ['status' => 404] : bl_resolve_route((string) (wp_parse_url($url, PHP_URL_PATH) ?: '/'));
         if ($route['status'] === 200) $title = bl_plain_title((string) $route['title']);
         elseif (($id = url_to_postid($url)) > 0) $title = bl_plain_title(get_the_title($id));
     }

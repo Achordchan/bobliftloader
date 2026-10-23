@@ -8,7 +8,7 @@ function add_action(...$args) {}
 function add_filter($name, $callback, $priority = 10, $args = 1) { $GLOBALS['filters'][$name] = $callback; }
 function home_url($path = '') { return ($GLOBALS['home'] ?? 'https://bobliftloader.com') . $path; }
 function wp_parse_url($url, $component = -1) { return parse_url($url, $component); }
-function url_to_postid($url) { return str_contains($url, '/privacy-old/') ? 9 : 0; }
+function url_to_postid($url) { return str_contains($url, '/privacy-old/') || str_contains($url, 'page_id=9') ? 9 : 0; }
 function get_the_title($id) { return 'Old &amp; privacy'; }
 function esc_url($value) { return htmlspecialchars($value, ENT_QUOTES); }
 function esc_html($value) { return htmlspecialchars($value, ENT_QUOTES); }
@@ -31,6 +31,8 @@ $check($page === ['url' => 'https://bobliftloader.com/', 'title' => 'Mini Skid S
 $page = bl_wp_inquiry_page('https://www.bobliftloader.com/products/skid-steer-loaders/?utm_source=google&utm_medium=cpc&color=red#models');
 $check($page === ['url' => 'https://www.bobliftloader.com/products/skid-steer-loaders/?color=red#models', 'title' => 'Mini Skid Steer Loaders'], 'other parameters and the fragment are lost, or the www address is not recognised: ' . json_encode($page));
 $check(bl_wp_inquiry_page('https://bobliftloader.com/privacy-old/')['title'] === 'Old & privacy', 'a WordPress page outside the theme routes has no title');
+$check(bl_wp_inquiry_page('https://bobliftloader.com/?page_id=9&gclid=1') === ['url' => 'https://bobliftloader.com/?page_id=9', 'title' => 'Old & privacy'], 'a page named by its ID is taken for the home page');
+$check(bl_wp_inquiry_page('https://bobliftloader.com/?page_id=12')['title'] === '', 'an unknown post ID is named as the home page');
 $check(bl_wp_inquiry_page('https://bobliftloader.com/nowhere/?gclid=1') === ['url' => 'https://bobliftloader.com/nowhere/', 'title' => ''], 'an unknown page gets a title');
 $check(bl_wp_inquiry_page('https://elsewhere.example/contact/?gclid=1')['title'] === '', "another site's page is named as one of ours");
 $check(bl_wp_inquiry_page('//elsewhere.example/contact/')['url'] === '//elsewhere.example/contact/', 'a protocol-relative address is taken as one of ours');
