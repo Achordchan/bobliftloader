@@ -48,13 +48,15 @@ function bl_asset_versioned(string $path): string
  * which also serves it as WebP or AVIF where the browser takes them. A card or thumbnail then downloads a picture its own
  * size rather than the full photograph. The address is returned unchanged off WordPress, on a site served on its own
  * port (the CDN cannot reach it), for a picture that is not a
- * file on this site, one already no wider than $width, and one that carries Content Credentials (C2PA): the CDN signs
- * every copy of those again, and the signature makes a 300-pixel copy weigh a megabyte.
+ * file on this site, one already no wider than $width, and a light one that carries Content Credentials (C2PA): the CDN
+ * signs every copy of those again, keeping the credentials, and the signature adds about 21 KB to each copy (a 240-pixel
+ * copy of a 122 KB studio picture weighs 28 KB, measured October 2026), so such a picture is resized only when its
+ * file is heavier than BL_IMAGE_SIGNED_MIN.
  */
 function bl_image_resized(string $url, int $width): string
 {
     $facts = bl_image_facts($url);
-    if (!$facts || $facts['c2pa'] || $facts['width'] <= $width) return $url;
+    if (!$facts || !bl_image_resizable($facts) || $facts['width'] <= $width) return $url;
     $parts = parse_url($url);
     // ssl=1 has the CDN fetch the original over HTTPS; a picture served over plain HTTP (or a site address that is) is fetched that way.
     $https = ($parts['scheme'] ?? parse_url(home_url(), PHP_URL_SCHEME)) === 'https';
@@ -80,13 +82,43 @@ function bl_image_cdn_host(string $home): string
 function bl_image_srcset(string $url, array $widths): string
 {
     $facts = bl_image_facts($url);
-    if (!$facts || $facts['c2pa']) return '';
+    if (!$facts || !bl_image_resizable($facts)) return '';
     $candidates = [];
     foreach ($widths as $width) if ($width < $facts['width']) $candidates[] = bl_image_resized($url, $width) . ' ' . $width . 'w';
     return $candidates ? implode(', ', [...$candidates, $url . ' ' . $facts['width'] . 'w']) : '';
 }
 
-/* The width and Content Credentials of a picture on this site, read from its file once and remembered while it is unchanged; null for anything else. */
+/*
+ * Pictures in a story's text get a srcset from the image CDN, so a phone downloads them at its own width: WordPress adds one
+ * only to an image inserted with its media-library class, and the stories' charts and photographs are inserted by address.
+ * An image that already has a srcset, or that cannot be resized (see bl_image_resized), is left as it is. $slots maps each
+ * media condition ('' for the rest) to the column's width there; every slot is capped at the picture's own pixel width,
+ * because with a srcset the browser takes the slot as the picture's natural size, and a story picture sized width:auto on
+ * wide screens (news.css) would otherwise grow past its pixels to fill the column.
+ */
+function bl_content_image_srcset(string $html, array $slots): string
+{
+    if (!class_exists('WP_HTML_Tag_Processor') || stripos($html, '<img') === false) return $html;
+    $tags = new WP_HTML_Tag_Processor($html);
+    while ($tags->next_tag('img')) {
+        $src = $tags->get_attribute('src');
+        if ($tags->get_attribute('srcset') !== null || $tags->get_attribute('sizes') !== null || !is_string($src) || ($srcset = bl_image_srcset($src, [480, 800, 1200])) === '') continue;
+        $width = (int) bl_image_facts($src)['width'];
+        $tags->set_attribute('srcset', $srcset);
+        $tags->set_attribute('sizes', implode(', ', array_map(static fn(string $media, string $slot): string => ltrim($media . ' min(' . $slot . ', ' . $width . 'px)'), array_keys($slots), $slots)));
+    }
+    return $tags->get_updated_html();
+}
+
+/* A picture with Content Credentials under this many bytes is lighter whole than as a re-signed CDN copy (see bl_image_resized). */
+const BL_IMAGE_SIGNED_MIN = 65536;
+
+function bl_image_resizable(array $facts): bool
+{
+    return !$facts['c2pa'] || $facts['bytes'] > BL_IMAGE_SIGNED_MIN;
+}
+
+/* The width, weight and Content Credentials of a picture on this site, read from its file once and remembered while it is unchanged; null for anything else. */
 function bl_image_facts(string $url): ?array
 {
     static $known = [];
@@ -103,11 +135,11 @@ function bl_image_facts(string $url): ?array
     foreach ($roots as $prefix => $dir) if ($prefix !== '' && str_starts_with($path, $prefix . '/')) $file = $dir . substr(rawurldecode($path), strlen($prefix));
     if ($file === '' || str_contains($file, '..') || !is_file($file)) return $known[$url] = null;
     $key = md5($file . '|' . filemtime($file) . '|' . filesize($file));
-    $facts = get_transient('bl_image_' . $key);
+    $facts = get_transient('bl_image_facts_' . $key);
     if (!is_array($facts)) {
         $size = @getimagesize($file);
-        $facts = ['width' => (int) ($size[0] ?? 0), 'c2pa' => bl_image_has_c2pa($file)];
-        set_transient('bl_image_' . $key, $facts, MONTH_IN_SECONDS);
+        $facts = ['width' => (int) ($size[0] ?? 0), 'bytes' => (int) filesize($file), 'c2pa' => bl_image_has_c2pa($file)];
+        set_transient('bl_image_facts_' . $key, $facts, MONTH_IN_SECONDS);
     }
     return $known[$url] = $facts['width'] ? $facts : null;
 }

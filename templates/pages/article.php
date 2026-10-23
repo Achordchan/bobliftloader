@@ -24,10 +24,13 @@ $leadFigure = !$poster || empty($article['hide_cover']) || !empty($article['imag
 // button over each picture stays hidden until the script runs, so without it the pictures are plain images.
 $zoom = static fn(int $index, string $src, string $alt, string $caption): string => '<button class="bl-story-zoom" type="button" data-lightbox-open="' . $index . '" hidden>' . bl_icon('magnifying-glass') . '<span class="bl-visually-hidden">View larger</span></button><span hidden data-lightbox-item="' . $index . '" data-src="' . bl_escape($src) . '" data-alt="' . bl_escape($alt) . '" data-caption="' . bl_escape($caption) . '"></span>';
 $posterIndex = $leadFigure ? 1 : 0;
+// A featured image comes in the media library's widths (the image CDN's, on WordPress.com), so a phone downloads a picture its
+// own width rather than the 1024-pixel one; the column is the page's width up to 1000px, about 70% of it beside the side column.
+$coverSrcset = !empty($article['image_id']) && function_exists('wp_get_attachment_image_srcset') ? (string) wp_get_attachment_image_srcset((int) $article['image_id'], 'large') : '';
 $posterFigure = static fn(array $poster): string => '<figure class="bl-story-poster"><span class="bl-story-zoom-frame"><img src="' . bl_escape($poster['image']) . '" alt="' . bl_escape($poster['alt']) . '" width="889" height="2000" loading="lazy">' . $zoom($posterIndex, $poster['image'], $poster['alt'], $poster['caption']) . '</span><figcaption>' . bl_escape($poster['caption']) . '</figcaption></figure>';
 // Text written in WordPress places the artwork as imported sections do: at the head of section 'after' (floated beside it
 // on wide screens), or after the text when that section does not exist. Sections start at each <h2>.
-$contentHtml = !empty($article['content_html']) ? wp_kses_post($article['content_html']) : '';
+$contentHtml = !empty($article['content_html']) ? bl_content_image_srcset(wp_kses_post($article['content_html']), ['(max-width: 1000px)' => '100vw', '' => '70vw']) : '';
 // The contents list (side column on wide screens, a fold-out above the text on phones) takes the text's <h2> headings, from
 // WordPress text or from imported sections alike, and shows from three headings up.
 $contents = bl_story_contents($contentHtml !== '' ? $contentHtml : (!empty($article['_bl_body_managed']) ? '' : implode('', array_map(static fn(array $s): string => '<h2>' . bl_escape($s['heading']) . '</h2>', $article['sections'] ?? []))));
@@ -68,7 +71,7 @@ if ($contentHtml !== '' && $poster) {
         <?= $contentsList($contentItems) ?>
       </details><?php endif; ?>
       <div class="bl-story-body">
-        <?php if ($leadFigure): ?><figure class="bl-story-figure"><span class="bl-story-zoom-frame"><img src="<?= bl_escape($article['image']) ?>" alt="<?= bl_escape($article['caption']) ?>" width="1500" height="900" fetchpriority="high"><?= $zoom(0, $article['image'], $article['caption'], $article['caption']) ?></span><figcaption><?= bl_escape($article['caption']) ?></figcaption></figure><?php endif; ?>
+        <?php if ($leadFigure): ?><figure class="bl-story-figure"><span class="bl-story-zoom-frame"><img<?= $coverSrcset !== '' ? ' srcset="' . bl_escape($coverSrcset) . '" sizes="(max-width: 1000px) 100vw, 70vw"' : '' ?> src="<?= bl_escape($article['image']) ?>" alt="<?= bl_escape($article['caption']) ?>" width="1500" height="900" fetchpriority="high"><?= $zoom(0, $article['image'], $article['caption'], $article['caption']) ?></span><figcaption><?= bl_escape($article['caption']) ?></figcaption></figure><?php endif; ?>
         <div class="bl-story-text">
           <?php if ($contentHtml !== '' || !empty($article['_bl_body_managed'])): ?><?= $contentHtml === '' && $poster ? $posterFigure($poster) : '' ?><div class="bl-wp-article-content"><?= $contentHtml ?></div>
           <?php else: foreach ($article['sections'] as $i => $section): ?><?= $poster && $i + 1 === $posterAfter ? $posterFigure($poster) : '' ?><h2<?= isset($contents['ids'][$i]) ? ' id="' . bl_escape($contents['ids'][$i]) . '"' : '' ?>><?= bl_escape($section['heading']) ?></h2><p><?= bl_escape($section['text']) ?></p><?php endforeach; ?><?= $poster && ($posterAfter < 1 || $posterAfter > count($article['sections'])) ? $posterFigure($poster) : '' ?><?php endif; ?>
