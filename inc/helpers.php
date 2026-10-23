@@ -91,17 +91,21 @@ function bl_image_srcset(string $url, array $widths): string
 /*
  * Pictures in a story's text get a srcset from the image CDN, so a phone downloads them at its own width: WordPress adds one
  * only to an image inserted with its media-library class, and the stories' charts and photographs are inserted by address.
- * An image that already has a srcset, or that cannot be resized (see bl_image_resized), is left as it is.
+ * An image that already has a srcset, or that cannot be resized (see bl_image_resized), is left as it is. $slots maps each
+ * media condition ('' for the rest) to the column's width there; every slot is capped at the picture's own pixel width,
+ * because with a srcset the browser takes the slot as the picture's natural size, and a story picture sized width:auto on
+ * wide screens (news.css) would otherwise grow past its pixels to fill the column.
  */
-function bl_content_image_srcset(string $html, string $sizes): string
+function bl_content_image_srcset(string $html, array $slots): string
 {
     if (!class_exists('WP_HTML_Tag_Processor') || stripos($html, '<img') === false) return $html;
     $tags = new WP_HTML_Tag_Processor($html);
     while ($tags->next_tag('img')) {
         $src = $tags->get_attribute('src');
-        if ($tags->get_attribute('srcset') !== null || !is_string($src) || ($srcset = bl_image_srcset($src, [480, 800, 1200])) === '') continue;
+        if ($tags->get_attribute('srcset') !== null || $tags->get_attribute('sizes') !== null || !is_string($src) || ($srcset = bl_image_srcset($src, [480, 800, 1200])) === '') continue;
+        $width = (int) bl_image_facts($src)['width'];
         $tags->set_attribute('srcset', $srcset);
-        if ($tags->get_attribute('sizes') === null) $tags->set_attribute('sizes', $sizes);
+        $tags->set_attribute('sizes', implode(', ', array_map(static fn(string $media, string $slot): string => ltrim($media . ' min(' . $slot . ', ' . $width . 'px)'), array_keys($slots), $slots)));
     }
     return $tags->get_updated_html();
 }

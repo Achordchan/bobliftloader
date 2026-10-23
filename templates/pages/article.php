@@ -30,7 +30,7 @@ $coverSrcset = !empty($article['image_id']) && function_exists('wp_get_attachmen
 $posterFigure = static fn(array $poster): string => '<figure class="bl-story-poster"><span class="bl-story-zoom-frame"><img src="' . bl_escape($poster['image']) . '" alt="' . bl_escape($poster['alt']) . '" width="889" height="2000" loading="lazy">' . $zoom($posterIndex, $poster['image'], $poster['alt'], $poster['caption']) . '</span><figcaption>' . bl_escape($poster['caption']) . '</figcaption></figure>';
 // Text written in WordPress places the artwork as imported sections do: at the head of section 'after' (floated beside it
 // on wide screens), or after the text when that section does not exist. Sections start at each <h2>.
-$contentHtml = !empty($article['content_html']) ? bl_content_image_srcset(wp_kses_post($article['content_html']), '(max-width: 1000px) 100vw, 70vw') : '';
+$contentHtml = !empty($article['content_html']) ? bl_content_image_srcset(wp_kses_post($article['content_html']), ['(max-width: 1000px)' => '100vw', '' => '70vw']) : '';
 // The contents list (side column on wide screens, a fold-out above the text on phones) takes the text's <h2> headings, from
 // WordPress text or from imported sections alike, and shows from three headings up.
 $contents = bl_story_contents($contentHtml !== '' ? $contentHtml : (!empty($article['_bl_body_managed']) ? '' : implode('', array_map(static fn(array $s): string => '<h2>' . bl_escape($s['heading']) . '</h2>', $article['sections'] ?? []))));
