@@ -6,7 +6,7 @@ $GLOBALS['filters'] = [];
 // What inc/wp-inquiry.php takes from WordPress and the rest of the theme.
 function add_action(...$args) {}
 function add_filter($name, $callback, $priority = 10, $args = 1) { $GLOBALS['filters'][$name] = $callback; }
-function home_url($path = '') { return 'https://bobliftloader.com' . $path; }
+function home_url($path = '') { return ($GLOBALS['home'] ?? 'https://bobliftloader.com') . $path; }
 function wp_parse_url($url, $component = -1) { return parse_url($url, $component); }
 function url_to_postid($url) { return str_contains($url, '/privacy-old/') ? 9 : 0; }
 function get_the_title($id) { return 'Old &amp; privacy'; }
@@ -35,6 +35,9 @@ $check(bl_wp_inquiry_page('https://bobliftloader.com/nowhere/?gclid=1') === ['ur
 $check(bl_wp_inquiry_page('https://elsewhere.example/contact/?gclid=1')['title'] === '', "another site's page is named as one of ours");
 $check(bl_wp_inquiry_page('//elsewhere.example/contact/')['url'] === '//elsewhere.example/contact/', 'a protocol-relative address is taken as one of ours');
 $check(bl_wp_inquiry_page('') === ['url' => '', 'title' => ''], 'an empty address is not left empty');
+$GLOBALS['home'] = 'https://example.test:8443/shop';
+$check(bl_wp_inquiry_page('/shop/contact/?gclid=1')['url'] === 'https://example.test:8443/shop/contact/', 'a site in a folder repeats the folder in a path from the root');
+unset($GLOBALS['home']);
 
 $html = bl_wp_inquiry_page_html(['url' => 'https://bobliftloader.com/?a=1&b=2', 'title' => 'Loaders <&>'], '#215bdb');
 $check(str_contains($html, '<b style="color:#0b1f33;">Loaders &lt;&amp;&gt;</b><br><a href="https://bobliftloader.com/?a=1&amp;b=2"'), 'the mail does not show the title above the link, escaped: ' . $html);

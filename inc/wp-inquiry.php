@@ -358,7 +358,11 @@ const BL_ENQUIRY_TRACKING = '/^(utm_[a-z_]+|gclid|gclsrc|gbraid|wbraid|dclid|gad
 function bl_wp_inquiry_page(string $url): array
 {
     $url = trim($url);
-    if (preg_match('#^/(?!/)#', $url)) $url = rtrim(home_url('/'), '/') . $url;
+    // A path from the site root already holds any folder the site lives in, so it takes only the scheme and host.
+    if (preg_match('#^/(?!/)#', $url)) {
+        $home = wp_parse_url(home_url('/'));
+        $url = ($home['scheme'] ?? 'https') . '://' . ($home['host'] ?? '') . (isset($home['port']) ? ':' . $home['port'] : '') . $url;
+    }
     $hash = '';
     if (($at = strpos($url, '#')) !== false) [$url, $hash] = [substr($url, 0, $at), substr($url, $at)];
     if (($at = strpos($url, '?')) !== false) {
