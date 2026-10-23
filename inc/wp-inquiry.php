@@ -351,6 +351,24 @@ function bl_wp_ip_country(string $ip): string
 // advert by itself), so the address says which page it was.
 const BL_ENQUIRY_TRACKING = '/^(utm_[a-z_]+|gclid|gclsrc|gbraid|wbraid|dclid|gad_[a-z_]+|fbclid|msclkid|ttclid|twclid|li_fat_id|srsltid|_gl)$/i';
 
+// WordPress's own public query variables (themes and plugins add theirs to $wp->public_query_vars); used when $wp is not there.
+const BL_WP_QUERY_VARS = ['m', 'p', 'posts', 'w', 'cat', 'withcomments', 'withoutcomments', 's', 'search', 'exact', 'sentence', 'calendar', 'page', 'paged', 'more', 'tb', 'pb', 'author', 'order', 'orderby', 'year', 'monthnum', 'day', 'hour', 'minute', 'second', 'name', 'category_name', 'tag', 'feed', 'author_name', 'pagename', 'page_id', 'error', 'attachment', 'attachment_id', 'subpost', 'subpost_id', 'preview', 'robots', 'favicon', 'taxonomy', 'term', 'cpage', 'post_type', 'embed'];
+
+/**
+ * What an address's query asks WordPress for: 'post' when it names one by its ID (?p=9, ?page_id=9), 'listing' when it
+ * asks for anything else WordPress reads (?s=, ?cat=), '' when it selects nothing (?ref=partner).
+ */
+function bl_wp_query_selects(string $query): string
+{
+    if ($query === '') return '';
+    parse_str($query, $vars);
+    foreach (['p', 'page_id', 'attachment_id'] as $key) {
+        if (isset($vars[$key]) && is_string($vars[$key]) && ctype_digit($vars[$key]) && (int) $vars[$key] > 0) return 'post';
+    }
+    $public = isset($GLOBALS['wp']->public_query_vars) ? (array) $GLOBALS['wp']->public_query_vars : BL_WP_QUERY_VARS;
+    return array_intersect_key($vars, array_flip($public)) ? 'listing' : '';
+}
+
 /**
  * The page an enquiry was sent from: its address without tracking parameters (a site-relative one gets the site's own
  * origin) and the page's title as the site titles it, empty for an address this site does not serve.
@@ -369,15 +387,16 @@ function bl_wp_inquiry_page(string $url): array
     $title = '';
     $host = static fn($address): string => preg_replace('/^www\./', '', strtolower((string) wp_parse_url((string) $address, PHP_URL_HOST)));
     if ($url !== '' && $host($url) === $host(home_url('/'))) {
-        // An address that names a post by its ID (?p=9, ?page_id=9) is that post, whatever its path looks like; the home
-        // page's address with any other query (?s=, ?cat=) is a WordPress listing, not the home page.
-        $query = (string) wp_parse_url($url, PHP_URL_QUERY);
+        // An address that names a post by its ID (?p=9, ?page_id=9) is that post, whatever its path looks like. The home
+        // page's address asking for a search or archive (?s=, ?cat=) is a WordPress listing, not the home page; one with a
+        // query that selects nothing (?ref=partner) is still the home page.
+        $selects = bl_wp_query_selects((string) wp_parse_url($url, PHP_URL_QUERY));
         $path = (string) (wp_parse_url($url, PHP_URL_PATH) ?: '/');
         $home = (string) (wp_parse_url(home_url('/'), PHP_URL_PATH) ?: '/');
-        $byQuery = preg_match('/(?:^|&)(?:p|page_id|attachment_id)=\d/', $query) || ($query !== '' && rtrim($path, '/') === rtrim($home, '/'));
-        $route = $byQuery ? ['status' => 404] : bl_resolve_route($path);
+        $listing = $selects === 'listing' && rtrim($path, '/') === rtrim($home, '/');
+        $route = $selects === 'post' || $listing ? ['status' => 404] : bl_resolve_route($path);
         if ($route['status'] === 200) $title = bl_plain_title((string) $route['title']);
-        elseif (($id = url_to_postid($url)) > 0) $title = bl_plain_title(get_the_title($id));
+        elseif (!$listing && ($id = url_to_postid($url)) > 0) $title = bl_plain_title(get_the_title($id));
     }
     return ['url' => $url, 'title' => $title];
 }
