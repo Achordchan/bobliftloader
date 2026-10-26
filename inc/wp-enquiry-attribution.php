@@ -168,10 +168,10 @@ add_filter('wpcf7_mail_components', static function (array $components, $form, $
     $tracking = bl_wp_inquiry_tracking_html($attribution);
     if ($tracking !== '') {
         // After the reply line when the card still has it; a saved card whose reply text was edited or removed gets the values
-        // right after its button row instead (the button's own row ends at the first </table></td></tr> after it).
+        // just above its reply button, the row that is known to be inside the card (as they were placed before).
         $reply = strpos($body, '也可以直接回复这封邮件');
         $end = $reply !== false ? strpos($body, '</tr>', $reply) : false;
-        $end = $end !== false ? $end + strlen('</tr>') : (($close = strpos($body, '</table></td></tr>', (int) strpos($body, $button))) !== false ? $close + strlen('</table></td></tr>') : false);
+        $end = $end !== false ? $end + strlen('</tr>') : strpos($body, $button);
         if ($end !== false) $body = substr($body, 0, $end) . "\n" . '<tr><td style="padding:0 36px 28px;">' . $tracking . '</td></tr>' . substr($body, $end);
     }
     $components['body'] = $body;
