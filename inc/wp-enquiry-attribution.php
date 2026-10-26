@@ -166,10 +166,13 @@ add_filter('wpcf7_mail_components', static function (array $components, $form, $
     $attribution = bl_enquiry_attribution((array) $submission->get_posted_data());
     $body = substr($body, 0, $at) . bl_wp_inquiry_attribution_block($attribution, (string) $submission->get_meta('user_agent')) . substr($body, $at);
     $tracking = bl_wp_inquiry_tracking_html($attribution);
-    $reply = '也可以直接回复这封邮件，回信会发到';
-    if ($tracking !== '' && ($end = strpos($body, '</tr>', (int) strpos($body, $reply))) !== false && str_contains($body, $reply)) {
-        $end += strlen('</tr>');
-        $body = substr($body, 0, $end) . "\n" . '<tr><td style="padding:0 36px 28px;">' . $tracking . '</td></tr>' . substr($body, $end);
+    if ($tracking !== '') {
+        // After the reply line when the card still has it; a saved card whose reply text was edited or removed gets the values
+        // right after its button row instead (the button's own row ends at the first </table></td></tr> after it).
+        $reply = strpos($body, '也可以直接回复这封邮件');
+        $end = $reply !== false ? strpos($body, '</tr>', $reply) : false;
+        $end = $end !== false ? $end + strlen('</tr>') : (($close = strpos($body, '</table></td></tr>', (int) strpos($body, $button))) !== false ? $close + strlen('</table></td></tr>') : false);
+        if ($end !== false) $body = substr($body, 0, $end) . "\n" . '<tr><td style="padding:0 36px 28px;">' . $tracking . '</td></tr>' . substr($body, $end);
     }
     $components['body'] = $body;
     return $components;

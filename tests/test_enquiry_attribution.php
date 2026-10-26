@@ -88,6 +88,10 @@ $check(str_contains($out['body'], 'Google Ads 广告 · 广告系列 24354771502
 $raw = strpos($out['body'], 'EAIaIQ-1');
 $check($raw !== false && $raw > strpos($out['body'], '也可以直接回复') && str_contains($out['body'], '广告追踪参数') && !str_contains($out['body'], '<1>'), 'the raw values are missing, not at the foot, or not escaped');
 $check(!str_contains($out['body'], '广告来源'), 'the old 广告来源 line is still there');
+// A saved card whose reply-help sentence was edited away still gets the raw values, right after its button row.
+$customCard = '<table width="100%"><tr><td>body</td></tr>' . $button . '<table><tr><td>reply</td></tr></table></td></tr><tr><td>Write back soon.</td></tr></table>';
+$custom = run_filter('wpcf7_mail_components', ['body' => $customCard], new WPCF7_ContactForm(5, BL_ENQUIRY_CARD_MARKER . "\n" . $customCard), new WPCF7_Mail('mail'));
+$check(str_contains($custom['body'], 'EAIaIQ-1') && strpos($custom['body'], 'EAIaIQ-1') > strpos($custom['body'], 'reply</td>') && strpos($custom['body'], 'EAIaIQ-1') < strpos($custom['body'], 'Write back soon.'), 'a card with edited reply text lost the raw values or got them in the wrong place');
 $autoreply = run_filter('wpcf7_mail_components', ['body' => $card], $form, new WPCF7_Mail('mail_2'));
 $check($autoreply['body'] === $card, 'the autoresponder got the block');
 $edited = run_filter('wpcf7_mail_components', ['body' => $card], new WPCF7_ContactForm(5, 'plain edited body'), new WPCF7_Mail('mail'));
