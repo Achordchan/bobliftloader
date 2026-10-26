@@ -18,7 +18,7 @@ class WPCF7_Submission
     public static function get_instance(): ?WPCF7_Submission { return self::$instance; }
     public function get_posted_data(): array { return $this->data; }
     public function get_posted_string(string $name): string { return (string) ($this->data[$name] ?? ''); }
-    public function get_meta(string $name) { return ['url' => 'https://example.test/product/t460/', 'remote_ip' => '', 'timestamp' => 1760412000][$name] ?? ''; }
+    public function get_meta(string $name) { return ['url' => 'https://example.test/product/t460/', 'remote_ip' => '', 'timestamp' => 1760412000, 'user_agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'][$name] ?? ''; }
 }
 class WPCF7_Mail
 {
@@ -74,25 +74,30 @@ $attribution = bl_enquiry_attribution(['name' => 'Ann', 'bl_attr_gclid' => 'EAIa
 $check($attribution === ['gclid' => 'EAIaIQ-1', 'gad_campaignid' => '24354771502'], 'the stored attribution was not read back: ' . json_encode($attribution));
 $check(bl_enquiry_attribution(['name' => 'Ann']) === [], 'attribution found in an enquiry without it');
 
-// The notification card: the block sits in front of the reply button, and only the theme's card gets it.
+// The notification card: the channel block sits in front of the reply button, the raw values after the reply line, and only
+// the theme's card gets them.
 $button = '<tr><td align="center" style="padding:32px 36px 12px;">';
-$card = '<table width="100%"><tr><td>body</td></tr>' . $button . 'reply</td></tr></table>';
+$replyLine = '<tr><td align="center">也可以直接回复这封邮件，回信会发到 ann@example.test</td></tr>';
+$card = '<table width="100%"><tr><td>body</td></tr>' . $button . 'reply</td></tr>' . $replyLine . '</table>';
 $form = new WPCF7_ContactForm(5, BL_ENQUIRY_CARD_MARKER . "\n" . $card);
-WPCF7_Submission::$instance = new WPCF7_Submission(['bl_attr_gclid' => 'EAIaIQ-1', 'bl_attr_utm_campaign' => 'loaders <1>']);
+WPCF7_Submission::$instance = new WPCF7_Submission(['bl_attr_gclid' => 'EAIaIQ-1', 'bl_attr_gad_campaignid' => '24354771502', 'bl_attr_utm_campaign' => 'loaders <1>']);
 $out = run_filter('wpcf7_mail_components', ['body' => $card], $form, new WPCF7_Mail('mail'));
-$at = strpos($out['body'], '广告来源');
-$check($at !== false && $at < strpos($out['body'], $button), 'the advertisement block is missing or after the button');
-$check(str_contains($out['body'], 'EAIaIQ-1') && str_contains($out['body'], 'Google Ads 点击') && !str_contains($out['body'], '<1>'), 'the block lacks the click ID, the label, or escapes nothing');
+$at = strpos($out['body'], '来源渠道');
+$check($at !== false && $at < strpos($out['body'], $button), 'the channel block is missing or after the button');
+$check(str_contains($out['body'], 'Google Ads 广告 · 广告系列 24354771502') && str_contains($out['body'], '手机 · iPhone · Safari'), 'the channel or device line is wrong');
+$raw = strpos($out['body'], 'EAIaIQ-1');
+$check($raw !== false && $raw > strpos($out['body'], '也可以直接回复') && str_contains($out['body'], '广告追踪参数') && !str_contains($out['body'], '<1>'), 'the raw values are missing, not at the foot, or not escaped');
+$check(!str_contains($out['body'], '广告来源'), 'the old 广告来源 line is still there');
 $autoreply = run_filter('wpcf7_mail_components', ['body' => $card], $form, new WPCF7_Mail('mail_2'));
 $check($autoreply['body'] === $card, 'the autoresponder got the block');
 $edited = run_filter('wpcf7_mail_components', ['body' => $card], new WPCF7_ContactForm(5, 'plain edited body'), new WPCF7_Mail('mail'));
 $check($edited['body'] === $card, 'an edited mail got the block');
 WPCF7_Submission::$instance = new WPCF7_Submission(['name' => 'Ann']);
 $none = run_filter('wpcf7_mail_components', ['body' => $card], $form, new WPCF7_Mail('mail'));
-$check($none['body'] === $card, 'the card changed for an enquiry without attribution');
+$check(str_contains($none['body'], '没有广告记录') && !str_contains($none['body'], '广告追踪参数'), 'an enquiry without attribution lacks its channel line or got a raw block');
 WPCF7_Submission::$instance = new WPCF7_Submission(['bl_attr_utm_source' => 'newsletter']);
 $tagsOnly = run_filter('wpcf7_mail_components', ['body' => $card], $form, new WPCF7_Mail('mail'));
-$check(str_contains($tagsOnly['body'], '营销标记') && !str_contains($tagsOnly['body'], 'Google Ads 点击'), 'tags alone were labelled as a Google Ads click');
+$check(str_contains($tagsOnly['body'], '营销链接 · newsletter') && !str_contains($tagsOnly['body'], 'Google Ads 广告'), 'tags alone were labelled as a Google Ads click');
 
 // The designs: the notification is drawn by wpcf7_mail_html_body (the default design c, and a, b, d), which replaces the whole body,
 // so each design carries the lines itself. Run the whole pipeline: html body first, then the mail components.
@@ -107,16 +112,22 @@ foreach (['c', 'a', 'b', 'd'] as $design) {
     WPCF7_Submission::$instance = new WPCF7_Submission($posted);
     $html = run_filter('wpcf7_mail_html_body', $stock);
     $mail = run_filter('wpcf7_mail_components', ['body' => $html], $stockForm, new WPCF7_Mail('mail'));
-    $check(str_contains($mail['body'], '新询盘通知') && str_contains($mail['body'], 'EAIaIQ-1') && str_contains($mail['body'], 'Google Ads 点击'), "design $design lacks the click ID or its label");
-    $check(str_contains($mail['body'], '24354771502') && str_contains($mail['body'], 'https://example.test/product/t460/') && str_contains($mail['body'], '2026-10-14T03:20:00.000Z'), "design $design lacks the campaign, landing page or time");
-    $check(substr_count($mail['body'], 'EAIaIQ-1') === 1, "design $design shows the click ID more than once");
+    $check(str_contains($mail['body'], '新询盘通知') && str_contains($mail['body'], 'Google Ads 广告 · 广告系列 24354771502') && str_contains($mail['body'], '手机 · iPhone · Safari'), "design $design lacks the channel or device");
+    $check(str_contains($mail['body'], 'EAIaIQ-1') && str_contains($mail['body'], 'https://example.test/product/t460/') && str_contains($mail['body'], '2026-10-14T03:20:00.000Z'), "design $design lacks the click ID, landing page or time");
+    $check(substr_count($mail['body'], 'EAIaIQ-1') === 1 && substr_count($mail['body'], '来源渠道') === 1, "design $design shows the click ID or channel more than once");
+    $check(strpos($mail['body'], 'EAIaIQ-1') > strpos($mail['body'], '立即回复客户'), "design $design shows the raw values above the reply button");
     WPCF7_Submission::$instance = new WPCF7_Submission(['name' => 'Ann', 'email' => 'ann@example.test', 'bl_attr_utm_campaign' => '<b>x</b>']);
     $plain = run_filter('wpcf7_mail_html_body', $stock);
-    $check(str_contains($plain, '营销标记') && !str_contains($plain, '<b>x') && !str_contains($plain, 'Google Ads 点击'), "design $design escaped nothing or labelled tags as a click");
+    $check(str_contains($plain, '营销链接') && !str_contains($plain, '<b>x') && !str_contains($plain, 'Google Ads 广告'), "design $design escaped nothing or labelled tags as a click");
     WPCF7_Submission::$instance = new WPCF7_Submission(['name' => 'Ann', 'email' => 'ann@example.test']);
     $none = run_filter('wpcf7_mail_html_body', $stock);
-    $check(!str_contains($none, '广告来源'), "design $design shows an advertisement block for an enquiry without one");
+    $check(str_contains($none, '没有广告记录') && !str_contains($none, '广告追踪参数'), "design $design shows raw values for an enquiry without them");
 }
 $check(str_contains(bl_wp_inquiry_render('c', bl_wp_inquiry_data(bl_wp_inquiry_sample('product'))), 'EAIaIQobChMI-sample'), 'the preview sample has no advertisement lines');
+
+// Devices from real User-Agents.
+$check(bl_wp_inquiry_device('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36') === '电脑 · Windows · Chrome', 'a Windows Chrome was misread');
+$check(bl_wp_inquiry_device('Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36') === '手机 · Android · Chrome', 'an Android phone was misread');
+$check(bl_wp_inquiry_device('') === '', 'an empty User-Agent gave a device');
 
 echo "Enquiry attribution: $checks checks passed\n";

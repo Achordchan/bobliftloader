@@ -34,6 +34,7 @@ return static function (array $d): string {
     $reply = esc_url($d['reply'], ['mailto']);
     $url = ($d['page']['title'] !== '' ? '&nbsp;&nbsp;<b style="color:#dce6f0;">' . $e($d['page']['title']) . '</b>' : '') . ($d['url'] === '' ? '' : '&nbsp;&nbsp;<a href="' . esc_url($d['url']) . '" style="color:#9fb3c8;text-decoration:none;word-break:break-all;">' . $e($d['url']) . '</a>');
 
+    $tracking = $d['tracking'] !== '' ? '<tr><td style="padding:24px 36px 0;">' . $d['tracking'] . '</td></tr>' : '';
     return <<<HTML
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background:#dfe4ea;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;text-size-adjust:100%;">
 <tr><td align="center" style="padding:32px 12px;">
@@ -58,6 +59,7 @@ return static function (array $d): string {
 <a href="{$reply}" style="display:block;padding:15px 32px;{$f}font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:8px;white-space:nowrap;">立即回复客户 &rarr;</a>
 </td></tr></table>
 <div style="padding-top:10px;{$f}font-size:14px;line-height:22px;color:#6b7a8c;">也可以直接回复这封邮件</div></td></tr>
+{$tracking}
 <tr><td style="padding:30px 36px 28px;"><div style="border-top:1px solid #eef1f5;padding-top:18px;{$f}font-size:12px;line-height:20px;color:#8a97a6;">此邮件由 {$e($d['site'])} 询盘表单自动发送 · 副本见网站后台 Flamingo</div></td></tr>
 </table>
 </td></tr></table>
