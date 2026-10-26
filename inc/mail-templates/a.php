@@ -39,6 +39,7 @@ return static function (array $d): string {
     $logo = esc_url($d['logo']);
     $reply = esc_url($d['reply'], ['mailto']);
 
+    $tracking = $d['tracking'] !== '' ? '<tr><td style="padding:0 36px 28px;">' . $d['tracking'] . '</td></tr>' : '';
     return <<<HTML
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background:#eef1f5;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;text-size-adjust:100%;">
 <tr><td align="center" style="padding:32px 12px;">
@@ -55,6 +56,7 @@ return static function (array $d): string {
 <td align="center" bgcolor="#215bdb" style="background:#215bdb;border-radius:8px;"><a href="{$reply}" style="display:block;padding:15px 32px;{$f}font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:8px;">立即回复客户 &rarr;</a></td>
 </tr></table></td></tr>
 <tr><td align="center" style="padding:4px 36px 32px;{$f}font-size:14px;color:#6b7a8c;">也可以直接回复这封邮件</td></tr>
+{$tracking}
 <tr><td bgcolor="#f6f8fb" style="background:#f6f8fb;padding:18px 36px;border-top:1px solid #e3e8ef;border-radius:0 0 10px 10px;{$f}font-size:12px;line-height:20px;color:#8a97a6;text-align:center;">此邮件由 {$e($d['site'])} 询盘表单自动发送 · 副本见网站后台 Flamingo</td></tr>
 </table>
 </td></tr></table>

@@ -31,6 +31,7 @@ return static function (array $d): string {
     $reply = esc_url($d['reply'], ['mailto']);
     $mailto = esc_url('mailto:' . $d['email'], ['mailto']);
 
+    $tracking = $d['tracking'] !== '' ? '<tr><td style="padding:0 40px 28px;">' . $d['tracking'] . '</td></tr>' : '';
     return <<<HTML
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background:#eceff4;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;text-size-adjust:100%;">
 <tr><td align="center" style="padding:32px 12px;">
@@ -59,6 +60,7 @@ return static function (array $d): string {
 </td></tr>
 <tr><td style="padding:28px 40px 0;"><div style="border-top:1px solid #e6eaf0;font-size:0;line-height:0;">&nbsp;</div></td></tr>
 <tr><td style="padding:17px 40px 29px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">{$trace}</table></td></tr>
+{$tracking}
 </table>
 <table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0" style="width:660px;"><tr>
 <td align="center" style="padding:20px 40px 0;{$f}font-size:12px;line-height:20px;color:#8a97a6;">此邮件由 {$e($d['site'])} 询盘表单自动发送 · 副本见网站后台 Flamingo</td></tr></table>
