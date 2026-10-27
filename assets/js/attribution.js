@@ -5,7 +5,9 @@
 // It follows the cookie banner exactly as the Google tag does: nothing is kept, and nothing is sent, unless advertising
 // storage is agreed to. That is the banner's cookie when the visitor has chosen; before a choice it is Google's own
 // consent state, which already holds the regional default (denied in the EEA, the UK and Switzerland, granted elsewhere).
-// With neither readable, nothing is kept.
+// With neither readable, nothing is kept. A visit from another site with neither (natural search, a link) keeps that site's name.
+// Sent with every enquiry whatever the choice, since nothing is kept in the browser for them: the site that linked to the page
+// the form is sent from, whether advertising is agreed to, and whether the screen takes touch (fillContext below).
 const KEY = 'bl_attribution';
 const VERSION = 1;
 const DAYS = 90;
@@ -15,7 +17,18 @@ const GIVE_UP = 120000; // after that, every two seconds, until here
 const CLICK_IDS = ['gclid', 'gbraid', 'wbraid'];
 const PARAMS = [...CLICK_IDS, 'gad_source', 'gad_campaignid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
 const FIELD_PREFIX = 'bl_attr_';
-const FIELDS = [...PARAMS, 'landing', 'first_seen'];
+const FIELDS = [...PARAMS, 'landing', 'first_seen', 'referrer'];
+
+// The site that linked to this page, host only (www. dropped); empty for this site's own pages and for direct visits.
+const bareHost = (host) => String(host || '').toLowerCase().replace(/^www\./, '');
+function externalReferrer() {
+  try {
+    const host = bareHost(new URL(document.referrer).hostname);
+    return host && host !== bareHost(location.hostname) && host.length <= 120 ? host : '';
+  } catch {
+    return '';
+  }
+}
 
 // Same limits as the server (bl_enquiry_attribution_clean): printable characters only, one line, short.
 function clean(value, length) {
@@ -94,15 +107,21 @@ let arrivalHandled = false;
 function nextRecord(stored) {
   const query = Object.fromEntries(new URLSearchParams(location.search));
   const found = cleanParams(query);
+  const referrer = externalReferrer();
   const hasClick = CLICK_IDS.some((name) => found[name]);
   const storedHasClick = stored && CLICK_IDS.some((name) => stored.params[name]);
-  if (!hasClick && (Object.keys(found).length === 0 || storedHasClick)) return stored;
+  // A visit from another site with neither is kept only over another such visit or nothing: never over a click or tags.
+  if (!hasClick && Object.keys(found).length === 0) {
+    if (!referrer || (stored && (Object.keys(stored.params).length || stored.referrer === referrer || (stored.arrived || 0) > arrivedAt))) return stored;
+    return { v: VERSION, arrived: arrivedAt, first_seen: new Date(arrivedAt).toISOString(), landing: clean(location.origin + location.pathname, 300), referrer, params: {}, expires: arrivedAt + DAYS * 864e5 };
+  }
+  if (!hasClick && storedHasClick) return stored;
   // The same click seen again (a reload, a second submit from the landing page, a revisit of the tagged link) is not a new click: its landing time and 90 days stay as they were.
   // The click ID that counts is the first present of gclid, gbraid, wbraid; a gbraid or wbraid can stand for grouped activity, so it only identifies a click when there is no gclid.
   const primary = CLICK_IDS.find((name) => found[name]);
   if (stored && (primary ? found[primary] === stored.params[primary] : JSON.stringify(found) === JSON.stringify(stored.params))) return stored;
   if (stored && (stored.arrived || 0) > arrivedAt) return stored;
-  return { v: VERSION, arrived: arrivedAt, first_seen: new Date(arrivedAt).toISOString(), landing: clean(location.origin + location.pathname, 300), params: found, expires: arrivedAt + DAYS * 864e5 };
+  return { v: VERSION, arrived: arrivedAt, first_seen: new Date(arrivedAt).toISOString(), landing: clean(location.origin + location.pathname, 300), referrer, params: found, expires: arrivedAt + DAYS * 864e5 };
 }
 
 function store(record) {
@@ -115,10 +134,31 @@ function currentValues() {
   if (advertisingAgreed() !== true) return {};
   const record = readStored();
   if (!record) return {};
-  return { ...record.params, landing: clean(record.landing, 300), first_seen: clean(record.first_seen, 40) };
+  return { ...record.params, landing: clean(record.landing, 300), first_seen: clean(record.first_seen, 40), referrer: bareHost(clean(record.referrer, 120)) };
+}
+
+// The fields sent with every enquiry (read by bl_enquiry_context in inc/wp-enquiry-attribution.php).
+function fillContext(form) {
+  const agreed = advertisingAgreed();
+  const values = {
+    bl_page_referrer: externalReferrer(),
+    bl_ad_consent: typeof agreed === 'boolean' ? String(agreed) : '',
+    bl_touch: navigator.maxTouchPoints > 1 ? '1' : '0',
+  };
+  Object.entries(values).forEach(([name, value]) => {
+    let input = form.querySelector(`input[name="${name}"]`);
+    if (!input) {
+      input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      form.append(input);
+    }
+    input.value = value;
+  });
 }
 
 function fillForm(form) {
+  fillContext(form);
   const values = currentValues();
   FIELDS.forEach((name) => {
     let input = form.querySelector(`input[name="${FIELD_PREFIX}${name}"]`);
