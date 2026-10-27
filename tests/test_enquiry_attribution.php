@@ -26,6 +26,7 @@ class WPCF7_Mail
     public function name(): string { return $this->name; }
 }
 const BL_ENQUIRY_CARD_MARKER = '<!-- bl-inquiry-card -->'; // as in inc/wp-inquiry.php
+const BL_ENQUIRY_FAMILIES_ZH = ['Skid steer loader' => '滑移装载机', 'Mini dumper' => '迷你翻斗车', 'Help me choose' => '帮我选型', 'Parts & service' => '配件与服务']; // as in inc/wp-inquiry.php
 // What inc/wp-inquiry-templates.php takes from the rest of the theme.
 function bl_wp_inquiry_card_mail(): bool { return true; }
 function bl_wp_inquiry_mail(): array { return ['body' => BL_ENQUIRY_CARD_MARKER . "\n<table width=\"100%\"><tr><td>stock card</td></tr></table>"]; }
@@ -68,6 +69,25 @@ $check(run_filter('wpcf7_posted_data', ['name' => 'Ann', 'bl_attr_gclid' => 'x']
 WPCF7_ContactForm::$current = new WPCF7_ContactForm(5);
 $_POST = ['name' => 'Ann'];
 $check(run_filter('wpcf7_posted_data', ['name' => 'Ann']) === ['name' => 'Ann'], 'fields appeared although none were sent');
+// The fields sent whatever the cookie choice: a referring host (never this site), the consent answer and touch, cleaned.
+$_POST = ['name' => 'Ann', 'bl_page_referrer' => 'WWW.Google.com.cy', 'bl_ad_consent' => 'false', 'bl_touch' => '1', 'bl_attr_referrer' => 'chatgpt.com/path'];
+$data = run_filter('wpcf7_posted_data', ['name' => 'Ann', 'bl_page_referrer' => 'stale']);
+$check(($data['bl_page_referrer'] ?? '') === 'google.com.cy' && ($data['bl_ad_consent'] ?? '') === 'false' && ($data['bl_touch'] ?? '') === '1' && !isset($data['bl_attr_referrer']), 'the context fields were not cleaned and added: ' . json_encode($data));
+$_POST = ['name' => 'Ann', 'bl_page_referrer' => home_url('/'), 'bl_ad_consent' => 'maybe', 'bl_touch' => 'yes', 'bl_attr_referrer' => 'www.chatgpt.com'];
+$data = run_filter('wpcf7_posted_data', ['name' => 'Ann']);
+$check(!isset($data['bl_page_referrer']) && !isset($data['bl_ad_consent']) && !isset($data['bl_touch']) && ($data['bl_attr_referrer'] ?? '') === 'chatgpt.com', 'a malformed context field was kept, or the kept referrer lost: ' . json_encode($data));
+$_POST = ['name' => 'Ann', 'bl_page_referrer' => (string) wp_parse_url(home_url(), PHP_URL_HOST)];
+$check(!isset(run_filter('wpcf7_posted_data', ['name' => 'Ann'])['bl_page_referrer']), "this site's own pages counted as a referring site");
+
+// The channel in the crane site's words: a click, then tags, then the site the visitor came from, then why nothing is known.
+$channel = static fn(array $attribution, array $context = []): string => bl_wp_inquiry_channel($attribution, $context);
+$check($channel([], ['page_referrer' => 'google.com.cy']) === '自然搜索 · Google' && $channel([], ['page_referrer' => 'bing.com']) === '自然搜索 · Bing', 'a search engine was not named');
+$check($channel([], ['page_referrer' => 'docs.google.com']) === '外部网站 · docs.google.com' && $channel([], ['page_referrer' => 'bobliftcrane.com']) === '外部网站 · bobliftcrane.com', 'a link from another site was misread');
+$check($channel([], ['page_referrer' => 'gemini.google.com']) === 'AI 助手推荐 · Gemini' && $channel(['referrer' => 'chatgpt.com']) === 'AI 助手推荐 · ChatGPT', 'an AI assistant was misread');
+$check($channel([], ['page_referrer' => 'm.facebook.com']) === '社交媒体 · Facebook' && $channel([], ['page_referrer' => 'googleadservices.com']) === 'Google Ads 广告 · Google Ads（没有点击编号）', 'a social site or an ad without click ID was misread');
+$check($channel(['referrer' => 'bing.com'], ['page_referrer' => 'facebook.com']) === '自然搜索 · Bing', 'the referrer kept since landing did not win over the form page');
+$check($channel(['gclid' => 'x', 'utm_term' => 'mini loader'], ['page_referrer' => 'google.com']) === 'Google Ads 广告 · 关键词 mini loader', 'a click did not win over the referrer');
+$check($channel([], ['ad_consent' => 'false']) === '来源未知 · 访客没同意广告 Cookie，进站来源没有记录' && str_starts_with($channel([]), '直接访问'), 'a visit with nothing known was misread');
 
 // What Flamingo keeps, read back without the prefix.
 $attribution = bl_enquiry_attribution(['name' => 'Ann', 'bl_attr_gclid' => 'EAIaIQ-1', 'bl_attr_gad_campaignid' => '24354771502', 'bl_attr_gbraid' => "x<y"]);
@@ -102,7 +122,11 @@ $edited = run_filter('wpcf7_mail_components', ['body' => $card], new WPCF7_Conta
 $check($edited['body'] === $card, 'an edited mail got the block');
 WPCF7_Submission::$instance = new WPCF7_Submission(['name' => 'Ann']);
 $none = run_filter('wpcf7_mail_components', ['body' => $card], $form, new WPCF7_Mail('mail'));
-$check(str_contains($none['body'], '没有广告记录') && !str_contains($none['body'], '广告追踪参数'), 'an enquiry without attribution lacks its channel line or got a raw block');
+$check(str_contains($none['body'], '来源渠道') && str_contains($none['body'], '直接访问') && !str_contains($none['body'], '广告追踪参数'), 'an enquiry without attribution lacks its channel line or got a raw block');
+// From version 7 the card has its own 来源渠道 cell ([bl_channel]): no second block, the raw values still at the foot.
+WPCF7_Submission::$instance = new WPCF7_Submission(['bl_attr_gclid' => 'EAIaIQ-1']);
+$v7 = run_filter('wpcf7_mail_components', ['body' => $card], new WPCF7_ContactForm(5, BL_ENQUIRY_CARD_MARKER . "\n<table>[bl_channel]</table>"), new WPCF7_Mail('mail'));
+$check(!str_contains($v7['body'], '来源渠道') && str_contains($v7['body'], 'EAIaIQ-1'), 'a version 7 card got the old channel block, or lost its raw values');
 WPCF7_Submission::$instance = new WPCF7_Submission(['bl_attr_utm_source' => 'newsletter']);
 $tagsOnly = run_filter('wpcf7_mail_components', ['body' => $card], $form, new WPCF7_Mail('mail'));
 $check(str_contains($tagsOnly['body'], '营销链接 · newsletter') && !str_contains($tagsOnly['body'], 'Google Ads 广告'), 'tags alone were labelled as a Google Ads click');
@@ -129,7 +153,9 @@ foreach (['c', 'a', 'b', 'd'] as $design) {
     $check(str_contains($plain, '营销链接') && !str_contains($plain, '<b>x') && !str_contains($plain, 'Google Ads 广告'), "design $design escaped nothing or labelled tags as a click");
     WPCF7_Submission::$instance = new WPCF7_Submission(['name' => 'Ann', 'email' => 'ann@example.test']);
     $none = run_filter('wpcf7_mail_html_body', $stock);
-    $check(str_contains($none, '没有广告记录') && !str_contains($none, '广告追踪参数'), "design $design shows raw values for an enquiry without them");
+    $check(str_contains($none, '直接访问') && !str_contains($none, '广告追踪参数'), "design $design shows raw values for an enquiry without them");
+    WPCF7_Submission::$instance = new WPCF7_Submission(['name' => 'Ann', 'email' => 'ann@example.test', 'bl_page_referrer' => 'www.google.com.cy']);
+    $check(str_contains(run_filter('wpcf7_mail_html_body', $stock), '自然搜索 · Google'), "design $design does not name a visit from Google search");
 }
 $check(str_contains(bl_wp_inquiry_render('c', bl_wp_inquiry_data(bl_wp_inquiry_sample('product'))), 'EAIaIQobChMI-sample'), 'the preview sample has no advertisement lines');
 
@@ -137,5 +163,12 @@ $check(str_contains(bl_wp_inquiry_render('c', bl_wp_inquiry_data(bl_wp_inquiry_s
 $check(bl_wp_inquiry_device('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36') === '电脑 · Windows · Chrome', 'a Windows Chrome was misread');
 $check(bl_wp_inquiry_device('Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36') === '手机 · Android · Chrome', 'an Android phone was misread');
 $check(bl_wp_inquiry_device('') === '', 'an empty User-Agent gave a device');
+$mac = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15';
+$check(bl_wp_inquiry_device($mac, true) === '平板 · iPad · Safari' && bl_wp_inquiry_device($mac) === '电脑 · Mac · Safari', 'an iPad in desktop mode was not told from a Mac');
+
+// The DingTalk plugin's 来源渠道 line: the same channel for the theme's form, for every enquiry; other forms keep the plugin's own.
+$check(run_filter('achord_dingtalk_cf7_channel', '', ['bl_page_referrer' => 'google.com'], new WPCF7_ContactForm(5)) === '自然搜索 · Google', 'DingTalk did not get the channel');
+$check(str_starts_with(run_filter('achord_dingtalk_cf7_channel', '', [], new WPCF7_ContactForm(5)), '直接访问'), 'DingTalk got no channel for a direct visit');
+$check(run_filter('achord_dingtalk_cf7_channel', 'kept', ['bl_page_referrer' => 'google.com'], new WPCF7_ContactForm(6)) === 'kept', 'another form got the theme channel');
 
 echo "Enquiry attribution: $checks checks passed\n";

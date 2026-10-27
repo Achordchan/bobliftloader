@@ -6,13 +6,13 @@
  */
 
 const BL_INQUIRY_MAIL_TEMPLATES = [
-    'classic' => ['name' => '经典卡片', 'note' => '蓝色顶条、浅灰来源框、产品卡片和信息行，最早上线的一版。'],
+    'classic' => ['name' => '经典卡片（与起重机站一致）', 'note' => '蓝色顶条、浅灰来源框、产品卡片和信息行，底部两行六格：来源渠道、访问设备、来源国家、页面语言、提交时间、IP 地址。起重机站用的就是这一版。'],
     'a' => ['name' => 'A 出厂工单', 'note' => '白色页眉加蓝线，按来源、产品、客户、来源追踪分区编号，像一张设备工单。'],
     'b' => ['name' => 'B 回复优先', 'note' => '白底，客户姓名大字放最上面，紧跟回复按钮，再看留言和产品。'],
     'c' => ['name' => 'C 设备铭牌', 'note' => '深色铭牌区突出询问的设备，下方白底放客户、留言和回复按钮。'],
     'd' => ['name' => 'D 来信', 'note' => '暖色纸张底，留言像一封信放在正中，其余信息收在「询盘详情」里。'],
 ];
-const BL_INQUIRY_MAIL_TEMPLATE_DEFAULT = 'c';
+const BL_INQUIRY_MAIL_TEMPLATE_DEFAULT = 'classic';
 
 /** The design the notification uses now. */
 function bl_wp_inquiry_mail_template(): string
@@ -56,6 +56,7 @@ add_filter('wpcf7_mail_html_body', static function ($body) {
         'agent' => (string) $submission->get_meta('user_agent'),
         'time' => (int) ($submission->get_meta('timestamp') ?: time()),
         'attribution' => function_exists('bl_enquiry_attribution') ? bl_enquiry_attribution((array) $submission->get_posted_data()) : [],
+        'context' => function_exists('bl_enquiry_context') ? bl_enquiry_context((array) $submission->get_posted_data()) : [],
     ]));
 }, 20);
 
@@ -66,11 +67,10 @@ function bl_wp_inquiry_data(array $raw): array
     $product = null;
     if ($model !== '') foreach (bl_products() as $record) if (strcasecmp((string) $record['model'], $model) === 0) { $product = $record; break; }
     $family = trim((string) ($raw['family'] ?? ''));
-    $families = ['Skid steer loader' => '滑移装载机', 'Mini dumper' => '迷你翻斗车', 'Help me choose' => '帮我选型', 'Parts & service' => '配件与服务'];
     $categories = ['skid-steer-loaders' => '滑移装载机', 'mini-dumpers' => '迷你翻斗车'];
     // What the sender picked comes first (a parts & service request keeps its model); the product's category fills in
     // only when no family came through.
-    $type = $family !== '' ? ($families[$family] ?? $family) : ($product ? ($categories[$product['category'] ?? ''] ?? '') : '');
+    $type = $family !== '' ? (BL_ENQUIRY_FAMILIES_ZH[$family] ?? $family) : ($product ? ($categories[$product['category'] ?? ''] ?? '') : '');
     $ip = trim((string) ($raw['ip'] ?? ''));
     $email = trim((string) ($raw['email'] ?? ''));
     $productName = $product ? (string) $product['name'] : '';
@@ -89,7 +89,7 @@ function bl_wp_inquiry_data(array $raw): array
         'ip' => $ip,
         'country' => $raw['country'] ?? ($ip === '' ? '' : (bl_wp_ip_country($ip) ?: '未能识别')),
         'time' => wp_date('Y-m-d H:i', (int) ($raw['time'] ?? time())),
-        'attribution' => function_exists('bl_wp_inquiry_attribution_lines') ? bl_wp_inquiry_attribution_lines((array) ($raw['attribution'] ?? []), (string) ($raw['agent'] ?? '')) : [],
+        'attribution' => function_exists('bl_wp_inquiry_attribution_lines') ? bl_wp_inquiry_attribution_lines((array) ($raw['attribution'] ?? []), (string) ($raw['agent'] ?? ''), (array) ($raw['context'] ?? [])) : [],
         'tracking' => function_exists('bl_wp_inquiry_tracking_html') ? bl_wp_inquiry_tracking_html((array) ($raw['attribution'] ?? [])) : '',
         'logo' => bl_asset('images/logo.png'),
         'site' => (string) wp_parse_url(home_url(), PHP_URL_HOST),
@@ -140,6 +140,7 @@ function bl_wp_inquiry_sample(string $kind): array
         'agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
         'country' => '加拿大',
         'time' => time(),
+        'context' => $kind !== 'contact' ? [] : ['page_referrer' => 'google.com', 'ad_consent' => '', 'touch' => ''],
         'attribution' => $kind !== 'contact' ? ['gclid' => 'EAIaIQobChMI-sample', 'gad_campaignid' => '24354771502', 'utm_source' => 'google', 'utm_medium' => 'cpc', 'landing' => (string) ($product['url'] ?? home_url('/')), 'first_seen' => '2026-10-14T03:20:00.000Z'] : [],
     ];
 }
@@ -148,6 +149,7 @@ function bl_wp_inquiry_sample(string $kind): array
 function bl_wp_inquiry_classic_preview(array $raw): string
 {
     $d = bl_wp_inquiry_data($raw);
+    $device = bl_wp_inquiry_device((string) ($raw['agent'] ?? ''));
     $tags = [
         '[bl_logo]' => '<img src="' . esc_url($d['logo']) . '" width="112" height="45" alt="BOB-LIFT" style="display:block;width:112px;height:45px;border:0;">',
         '[bl_time]' => esc_html($d['time']),
@@ -161,10 +163,18 @@ function bl_wp_inquiry_classic_preview(array $raw): string
         '[email]' => esc_html($d['email']),
         '[company]' => esc_html($d['company']),
         '[message]' => bl_wp_inquiry_text($d['message']),
+        '[bl_channel]' => bl_wp_inquiry_strip_value(...bl_wp_inquiry_channel_parts((array) ($raw['attribution'] ?? []), (array) ($raw['context'] ?? []))),
+        '[bl_device]' => $device !== '' ? bl_wp_inquiry_strip_value(...array_pad(explode(' · ', $device, 2), 2, '')) : '未能识别',
+        '[bl_language]' => bl_wp_inquiry_language(),
     ];
     // CF7's "exclude blank": a line whose field is empty goes.
     $lines = array_filter(explode("\n", (string) bl_wp_inquiry_mail()['body']), static fn(string $line): bool => !(($d['company'] === '' && str_contains($line, '[company]')) || ($d['message'] === '' && str_contains($line, '[message]'))));
-    return strtr(implode("\n", $lines), $tags);
+    $card = strtr(implode("\n", $lines), $tags);
+    // The raw ad values go after the reply line, as the sent mail has them (wp-enquiry-attribution.php).
+    $reply = strpos($card, '也可以直接回复这封邮件');
+    $end = $reply !== false ? strpos($card, '</tr>', $reply) : false;
+    if ($d['tracking'] !== '' && $end !== false) $card = substr($card, 0, $end + 5) . "\n" . '<tr><td style="padding:0 36px 28px;">' . $d['tracking'] . '</td></tr>' . substr($card, $end + 5);
+    return $card;
 }
 
 add_action('admin_post_bl_inquiry_mail_preview', static function (): void {

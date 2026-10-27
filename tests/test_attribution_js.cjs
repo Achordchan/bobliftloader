@@ -30,10 +30,10 @@ const cookie = (advertising) => `document.cookie = 'bl_consent=' + encodeURIComp
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   const origin = `http://127.0.0.1:${server.address().port}`;
   const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : { executablePath: '/opt/pw-browsers/chromium' });
-  const visit = async (context, target, init = '') => {
+  const visit = async (context, target, init = '', referer = undefined) => {
     const page = await context.newPage();
     if (init) await page.addInitScript(init);
-    await page.goto(origin + target);
+    await page.goto(origin + target, referer ? { referer } : {});
     await page.waitForTimeout(400);
     return page;
   };
@@ -43,6 +43,8 @@ const cookie = (advertising) => `document.cookie = 'bl_consent=' + encodeURIComp
     return Object.fromEntries([...form.querySelectorAll('input[name^="bl_attr_"]')].map((input) => [input.name, input.value]));
   });
   const stored = (page) => page.evaluate(() => localStorage.getItem('bl_attribution'));
+  // The fields sent with every enquiry, whatever the cookie choice (read after a submit).
+  const sentContext = (page) => page.evaluate(() => Object.fromEntries(['bl_page_referrer', 'bl_ad_consent', 'bl_touch'].map((name) => [name, document.querySelector(`form input[name="${name}"]`)?.value])));
 
   // 1. Outside the regions that start denied: kept on landing, and sent from another page with the landing page.
   let context = await browser.newContext();
@@ -155,6 +157,32 @@ const cookie = (advertising) => `document.cookie = 'bl_consent=' + encodeURIComp
   page = await visit(context, '/p/?gclid=%3Cscript%3E', googleState(true));
   fields = await submitted(page);
   assert.equal(fields.bl_attr_gclid, undefined, 'markup in a click ID was carried');
+
+  // 7. A visit from a search engine or another site, with advertising agreed: its name (not the address) is kept and sent from any page;
+  // it never replaces a click, and a click replaces it.
+  await context.close();
+  context = await browser.newContext();
+  page = await visit(context, '/product/t460/', googleState(true), 'https://www.google.com.cy/search?q=mini+skid+steer');
+  assert.equal(JSON.parse(await stored(page)).referrer, 'google.com.cy');
+  page = await visit(context, '/product/t1000/', googleState(true));
+  fields = await submitted(page);
+  assert.equal(fields.bl_attr_referrer, 'google.com.cy');
+  assert.equal(fields.bl_attr_landing, `${origin}/product/t460/`);
+  assert.equal((await sentContext(page)).bl_page_referrer, '', "this site's own page counted as the referring site");
+  page = await visit(context, '/a/?gclid=GC-7', googleState(true), 'https://www.bing.com/');
+  page = await visit(context, '/b/', googleState(true), 'https://facebook.com/');
+  assert.equal(JSON.parse(await stored(page)).params.gclid, 'GC-7', 'a visit from another site replaced a click');
+  await context.close();
+
+  // 8. Advertising refused (a region that starts denied): nothing kept, but the form says which site linked to its page, that consent was refused, and touch.
+  context = await browser.newContext();
+  page = await visit(context, '/product/t1000/', googleState(false), 'https://www.google.com/');
+  assert.equal(await stored(page), null, 'a referring site was kept although advertising storage is denied');
+  assert.deepEqual(await submitted(page), {});
+  assert.deepEqual(await sentContext(page), { bl_page_referrer: 'google.com', bl_ad_consent: 'false', bl_touch: '0' });
+  page = await visit(context, '/contact/', googleState(null));
+  await submitted(page);
+  assert.deepEqual(await sentContext(page), { bl_page_referrer: '', bl_ad_consent: '', bl_touch: '0' }, 'an unknown consent was sent as an answer');
 
   await browser.close();
   server.close();
