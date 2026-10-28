@@ -725,19 +725,64 @@ function bl_case_card(array $case, string $heading = 'h2'): void
 }
 
 /**
- * Stories to offer beside a product or a range: those that name one of the given products first, then any other story
- * filed under the family, newest first within each, never a group story. Built from the products each story names, so a
- * new guide shows up on its products' pages without anyone editing them.
+ * Stories to offer beside a product or a range, never a group story. On a product page, the guides whose text links to
+ * the model come first, the most specific first (one whose product links mostly point at this model before a round-up
+ * linking all nine, so the evergreen guides are not pushed out by each newer attachment story); then stories that only
+ * name it, fair reports among them; then the rest of its family; then company news; newest first within each. Built
+ * from the stories themselves, so a new guide shows up on its products' pages without anyone editing them.
  */
 function bl_related_articles(array $productSlugs, string $family, int $limit = 3): array
 {
-    $named = $inFamily = [];
-    foreach (bl_articles() as $article) {
+    $linked = $named = $inFamily = $general = [];
+    foreach (bl_articles() as $i => $article) {
         if (($article['line'] ?? '') === 'group') continue;
-        if (array_intersect($productSlugs, (array) ($article['products'] ?? []))) $named[] = $article;
-        elseif (in_array($family, bl_news_families($article), true)) $inFamily[] = $article;
+        $links = $productSlugs ? bl_article_product_links($article) : [];
+        $hits = array_sum(array_intersect_key($links, array_flip($productSlugs)));
+        $families = bl_news_families($article);
+        if ($hits && empty($article['event']['start'])) $linked[] = ['article' => $article, 'score' => $hits / array_sum($links), 'hits' => $hits, 'i' => $i];
+        elseif ($hits || array_intersect($productSlugs, (array) ($article['products'] ?? []))) $named[] = $article;
+        elseif (in_array($family, $families, true)) $inFamily[] = $article;
+        elseif ($productSlugs && !$families) $general[] = $article; // a product page tops up with company news; a range page does not
     }
-    return array_slice(array_merge($named, $inFamily), 0, $limit);
+    usort($linked, static fn(array $a, array $b): int => [$b['score'], $b['hits'], $a['i']] <=> [$a['score'], $a['hits'], $b['i']]);
+    return array_slice(array_merge(array_column($linked, 'article'), $named, $inFamily, $general), 0, $limit);
+}
+
+/** How many times a story's text links to each product page, by product slug; links to anything else are left out. */
+function bl_article_product_links(array $article): array
+{
+    $html = (string) ($article['content_html'] ?? '');
+    if ($html === '' || !preg_match_all('~href\s*=\s*["\']([^"\']+)["\']~i', $html, $matches)) return [];
+    static $paths = [];
+    $host = static fn(string $url): string => preg_replace('/^www\./', '', strtolower((string) parse_url($url, PHP_URL_HOST)));
+    if (!$paths) foreach (bl_products() as $product) {
+        $url = bl_product_url($product);
+        $paths[rtrim((string) parse_url($url, PHP_URL_PATH), '/')] = ['slug' => $product['slug'], 'host' => $host($url)];
+    }
+    $links = [];
+    foreach ($matches[1] as $href) {
+        $href = html_entity_decode($href);
+        $page = $paths[rtrim(bl_resolve_link_path((string) parse_url($href, PHP_URL_PATH), (string) ($article['url'] ?? '')), '/')] ?? null;
+        // A relative link is this site's; an absolute one only when it names this site (another site's /product/ is not ours).
+        if ($page === null || (parse_url($href, PHP_URL_HOST) !== null && $host($href) !== $page['host'])) continue;
+        $links[$page['slug']] = ($links[$page['slug']] ?? 0) + 1;
+    }
+    return $links;
+}
+
+/** A link's path as the browser reads it on the page at $base: "../product/x/" resolved against that page, dot segments removed. */
+function bl_resolve_link_path(string $path, string $base): string
+{
+    if ($path === '') return '';
+    if ($path[0] !== '/') $path = preg_replace('~[^/]*$~', '', (string) parse_url($base, PHP_URL_PATH)) . $path;
+    $segments = [];
+    foreach (explode('/', $path) as $segment) {
+        if ($segment === '..') array_pop($segments);
+        elseif ($segment !== '.') $segments[] = $segment;
+    }
+    $resolved = implode('/', $segments);
+    if (preg_match('~/\.\.?$~', $path)) $resolved .= '/';
+    return '/' . ltrim($resolved, '/');
 }
 
 function bl_news_card(array $article, string $heading = 'h2'): void
