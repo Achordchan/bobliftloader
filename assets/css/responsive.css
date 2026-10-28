@@ -44,7 +44,7 @@
   .bl-site .bl-menu-close{display:none}
   .bl-site .bl-menu-toggle[aria-expanded=true] .bl-menu-open{display:none}
   .bl-site .bl-menu-toggle[aria-expanded=true] .bl-menu-close{display:block}
-  .bl-site .bl-nav{position:absolute;top:100%;left:0;right:0;background:var(--ink);padding:12px var(--gutter) 32px;display:none;border-top:1px solid #425766;box-shadow:0 20px 25px #081c2b33;height:calc(100svh - var(--header-height) + 1px);overflow:auto;overscroll-behavior:contain}
+  .bl-site .bl-nav{position:absolute;top:100%;left:0;right:0;background:var(--ink);padding:12px var(--gutter) 32px;display:none;border-top:1px solid #425766;box-shadow:0 20px 25px #081c2b33;height:calc(100svh - var(--bl-nav-top,var(--header-height)) + 1px);overflow:auto;overscroll-behavior:contain}
   /* The open menu takes the whole screen below the header: the contact bar steps aside instead of covering its foot (main.js marks the root while it is open). */
   .bl-menu-on .bl-site .bl-side-contact,.bl-menu-on .bl-site .bl-quick{visibility:hidden}
   /* The page behind holds still while the menu is open: a swipe on a menu too short to scroll would otherwise move the page underneath. */

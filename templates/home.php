@@ -119,7 +119,7 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
 </section>
 
 
-<section class="bl-home-journal bl-shell"><div class="bl-small-section-heading"><div><p class="bl-eyebrow"><?= bl_escape($content['journal']['eyebrow']) ?></p><h2><?= bl_escape($content['journal']['title']) ?></h2></div><a class="bl-text-link" href="<?= bl_escape(bl_url('/news/')) ?>"><?= bl_escape($content['journal']['link']) ?> <?= bl_icon('arrow-up-right') ?></a></div><div class="bl-news-grid"><?php foreach (array_slice(bl_articles(), 0, 3) as $article) bl_news_card($article); ?></div></section>
+<section class="bl-home-journal bl-shell"><div class="bl-small-section-heading"><div><p class="bl-eyebrow"><?= bl_escape($content['journal']['eyebrow']) ?></p><h2><?= bl_escape($content['journal']['title']) ?></h2></div><a class="bl-text-link" href="<?= bl_escape(bl_url('/news/')) ?>"><?= bl_escape($content['journal']['link']) ?> <?= bl_icon('arrow-up-right') ?></a></div><?php require __DIR__ . '/partials/event-card.php'; ?><div class="bl-news-grid"><?php foreach (array_slice(bl_articles(), 0, 3) as $article) bl_news_card($article); ?></div></section>
 
 <section class="bl-contact" id="contact" aria-labelledby="contact-title">
   <div class="bl-contact-layout bl-shell">

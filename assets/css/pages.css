@@ -984,3 +984,22 @@
   .bl-site .bl-catalog-actions .bl-text-link .bl-icon{flex:none}
   .bl-site .bl-catalog-contact{margin-top:20px}
 }
+
+/* Home event card between the company-stories heading and the story cards (templates/partials/event-card.php). */
+.bl-site .bl-event-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);margin-bottom:clamp(36px,calc(27.6px + 1.2vw),58px);background:var(--ink);color:var(--paper)}
+.bl-site .bl-event-card-plain{grid-template-columns:minmax(0,1fr)}
+.bl-site .bl-event-card-media{min-height:clamp(300px,24vw,460px);background:#d9dcd8}
+.bl-site .bl-event-card-media img{width:100%;height:100%;object-fit:cover;display:block}
+.bl-site .bl-event-card-body{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:clamp(16px,1.1vw,24px);padding:clamp(32px,3.2vw,72px)}
+.bl-site .bl-event-card-body .bl-eyebrow{color:#8fb0ff}
+.bl-site .bl-event-card h3{font:600 clamp(34px,calc(29px + 1.2vw),60px)/.98 var(--display);text-transform:uppercase}
+.bl-site .bl-event-card-text{max-width:34em;color:#c6d0d7;font-size:var(--fs-body);line-height:1.6}
+.bl-site .bl-event-card-facts{display:flex;flex-wrap:wrap;gap:14px clamp(28px,2.2vw,48px)}
+.bl-site .bl-event-card-facts dt{font-size:var(--fs-micro);letter-spacing:1.2px;text-transform:uppercase;color:#8d9ba5}
+.bl-site .bl-event-card-facts dd{margin:4px 0 0;font-size:var(--fs-lead);font-weight:600;color:white}
+@media(max-width:800px){
+  .bl-site .bl-event-card{grid-template-columns:minmax(0,1fr)}
+  .bl-site .bl-event-card-media{min-height:0;aspect-ratio:3/2}
+  .bl-site .bl-event-card-body{padding:28px 22px 32px}
+  .bl-site .bl-event-card-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+}
