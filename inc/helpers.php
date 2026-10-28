@@ -754,11 +754,18 @@ function bl_article_product_links(array $article): array
     $html = (string) ($article['content_html'] ?? '');
     if ($html === '' || !preg_match_all('~href\s*=\s*["\']([^"\']+)["\']~i', $html, $matches)) return [];
     static $paths = [];
-    if (!$paths) foreach (bl_products() as $product) $paths[rtrim((string) parse_url(bl_product_url($product), PHP_URL_PATH), '/')] = $product['slug'];
+    $host = static fn(string $url): string => preg_replace('/^www\./', '', strtolower((string) parse_url($url, PHP_URL_HOST)));
+    if (!$paths) foreach (bl_products() as $product) {
+        $url = bl_product_url($product);
+        $paths[rtrim((string) parse_url($url, PHP_URL_PATH), '/')] = ['slug' => $product['slug'], 'host' => $host($url)];
+    }
     $links = [];
     foreach ($matches[1] as $href) {
-        $slug = $paths[rtrim((string) parse_url(html_entity_decode($href), PHP_URL_PATH), '/')] ?? null;
-        if ($slug !== null) $links[$slug] = ($links[$slug] ?? 0) + 1;
+        $href = html_entity_decode($href);
+        $page = $paths[rtrim((string) parse_url($href, PHP_URL_PATH), '/')] ?? null;
+        // A relative link is this site's; an absolute one only when it names this site (another site's /product/ is not ours).
+        if ($page === null || (parse_url($href, PHP_URL_HOST) !== null && $host($href) !== $page['host'])) continue;
+        $links[$page['slug']] = ($links[$page['slug']] ?? 0) + 1;
     }
     return $links;
 }

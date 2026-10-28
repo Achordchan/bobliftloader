@@ -36,7 +36,8 @@ $slugs = static fn(array $articles) => implode(',', array_column($articles, 'slu
 $check($slugs(bl_related_articles(['loader-a'], 'skid-steer-loaders')) === 'a-specific,round-up,a-fair', 'loader-a page: ' . $slugs(bl_related_articles(['loader-a'], 'skid-steer-loaders')));
 $check($slugs(bl_related_articles(['loader-a'], 'skid-steer-loaders', 10)) === 'a-specific,round-up,a-fair,a-guide,a-older,b-newest,both-older,company', 'loader-a page in full: ' . $slugs(bl_related_articles(['loader-a'], 'skid-steer-loaders', 10)));
 $check($slugs(bl_related_articles(['dumper-a'], 'mini-dumpers', 10)) === 'dumper,both-older,company', 'dumper page: ' . $slugs(bl_related_articles(['dumper-a'], 'mini-dumpers', 10)));
-$check(bl_article_product_links(['content_html' => '<a href="/product/loader-b/">B</a><a href="/product/nope/">?</a>']) === ['loader-b' => 1], 'links to unknown pages counted');
+$check(bl_article_product_links(['content_html' => '<a href="/product/loader-b/">B</a><a href="/product/nope/">?</a><a href="https://another-site.example/product/loader-a/">x</a><a href="//another-site.example/product/loader-a/">x</a>']) === ['loader-b' => 1], 'links to unknown pages or other sites counted');
+$check(bl_article_product_links(['content_html' => '<a href="' . bl_url('/product/loader-a/') . '">A</a>']) === ['loader-a' => 1], 'an absolute link to this site was not counted');
 $check($slugs(bl_related_articles([], 'skid-steer-loaders')) === 'round-up,a-specific,a-fair', 'loader range: ' . $slugs(bl_related_articles([], 'skid-steer-loaders')));
 $check($slugs(bl_related_articles([], 'mini-dumpers', 5)) === 'dumper,both-older', 'dumper range: ' . $slugs(bl_related_articles([], 'mini-dumpers', 5)));
 ob_start(); $guides = bl_related_articles([], 'mini-dumpers'); $guideCopy = static fn(string $key): string => $key; require __DIR__ . '/../templates/partials/related-guides.php'; $html = (string) ob_get_clean();
