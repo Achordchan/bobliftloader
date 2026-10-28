@@ -65,6 +65,8 @@ menuToggle.addEventListener('click', () => {
   const open = menuToggle.getAttribute('aria-expanded') !== 'true';
   menuToggle.setAttribute('aria-expanded', String(open));
   menuToggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+  // The open menu fills the screen below the header, which sits lower while the event bar above it is in view.
+  if (open) navigation.style.setProperty('--bl-nav-top', `${Math.max(0, Math.round(header.getBoundingClientRect().bottom))}px`);
   navigation.classList.toggle('bl-open', open);
   document.documentElement.classList.toggle('bl-menu-on', open);
 });
