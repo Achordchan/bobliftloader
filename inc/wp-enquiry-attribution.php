@@ -56,6 +56,31 @@ add_filter('wpcf7_posted_data', static function ($data) {
 });
 
 /**
+ * What Akismet reads as the message. CF7 builds it from every posted field, so the hidden fields above (click IDs, campaign
+ * numbers, landing page, 'true', '1') reach Akismet as if the visitor had typed them; an advert-led enquiry with a short message
+ * then reads like number spam (Flamingo 793, 2026-10-23). Each hidden value is taken back out, once, where CF7 put it: a
+ * paragraph of its own. What the visitor typed stays, and the name and email still go to Akismet as author fields.
+ */
+function bl_wp_inquiry_akismet_parameters($comment)
+{
+    if (!is_array($comment) || !isset($comment['comment_content'])) return $comment;
+    $form = class_exists('WPCF7_ContactForm') ? WPCF7_ContactForm::get_current() : null;
+    if (!$form || (int) $form->id() !== bl_wp_inquiry_form_id()) return $comment;
+    $parts = explode("\n\n", (string) $comment['comment_content']);
+    foreach ((array) $_POST as $key => $value) {
+        if (!str_starts_with((string) $key, BL_ENQUIRY_ATTRIBUTION_PREFIX) && !in_array($key, BL_ENQUIRY_CONTEXT, true)) continue;
+        // As CF7 joins one field's values (modules/akismet/akismet.php): the non-blank ones, comma separated.
+        $values = array_filter(array_map('strval', array_filter((array) $value, 'is_scalar')), static fn(string $v): bool => trim($v) !== '');
+        if (!$values) continue;
+        $at = array_search(implode(', ', $values), $parts, true);
+        if ($at !== false) unset($parts[$at]);
+    }
+    $comment['comment_content'] = trim(implode("\n\n", $parts));
+    return $comment;
+}
+add_filter('wpcf7_akismet_parameters', 'bl_wp_inquiry_akismet_parameters');
+
+/**
  * The fields sent with every enquiry, cleaned: page_referrer (a host, never this site's own), ad_consent ('true', 'false' or
  * '' when not known) and touch ('1' or ''). Reads the posted data or Flamingo's fields alike.
  */
