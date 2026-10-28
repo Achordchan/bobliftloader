@@ -762,12 +762,27 @@ function bl_article_product_links(array $article): array
     $links = [];
     foreach ($matches[1] as $href) {
         $href = html_entity_decode($href);
-        $page = $paths[rtrim((string) parse_url($href, PHP_URL_PATH), '/')] ?? null;
+        $page = $paths[rtrim(bl_resolve_link_path((string) parse_url($href, PHP_URL_PATH), (string) ($article['url'] ?? '')), '/')] ?? null;
         // A relative link is this site's; an absolute one only when it names this site (another site's /product/ is not ours).
         if ($page === null || (parse_url($href, PHP_URL_HOST) !== null && $host($href) !== $page['host'])) continue;
         $links[$page['slug']] = ($links[$page['slug']] ?? 0) + 1;
     }
     return $links;
+}
+
+/** A link's path as the browser reads it on the page at $base: "../product/x/" resolved against that page, dot segments removed. */
+function bl_resolve_link_path(string $path, string $base): string
+{
+    if ($path === '') return '';
+    if ($path[0] !== '/') $path = preg_replace('~[^/]*$~', '', (string) parse_url($base, PHP_URL_PATH)) . $path;
+    $segments = [];
+    foreach (explode('/', $path) as $segment) {
+        if ($segment === '..') array_pop($segments);
+        elseif ($segment !== '.') $segments[] = $segment;
+    }
+    $resolved = implode('/', $segments);
+    if (preg_match('~/\.\.?$~', $path)) $resolved .= '/';
+    return '/' . ltrim($resolved, '/');
 }
 
 function bl_news_card(array $article, string $heading = 'h2'): void
