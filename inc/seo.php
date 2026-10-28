@@ -34,6 +34,7 @@ function bl_structured_data(array $route): array
         $a = $route['record'];
         $graph[] = ['@type' => 'Article', 'headline' => $a['title'], 'description' => $a['excerpt'], 'image' => bl_absolute_asset($a['image']), 'datePublished' => $a['date'], 'author' => ['@id' => $organization['@id']], 'publisher' => ['@id' => $organization['@id']], 'mainEntityOfPage' => ['@id' => $base . $route['path'] . '#webpage'], 'citation' => $a['source'] ?: null];
         $graph[count($graph) - 1] = array_filter($graph[count($graph) - 1], static fn($value) => $value !== null);
+        foreach (bl_article_videos((string) ($a['content_html'] ?? '')) as $video) $graph[] = $video;
         if (!empty($a['event']['start'])) {
             // BOB-LIFT is the exhibitor, so it is also the performer. No offers: booths have no ticket price to state.
             $e = $a['event'];
@@ -56,6 +57,37 @@ function bl_structured_data(array $route): array
         $graph[] = ['@type' => 'FAQPage', 'mainEntity' => $questions, 'isPartOf' => ['@id' => $base . '/#website']];
     }
     return ['@context' => 'https://schema.org', '@graph' => $graph];
+}
+
+/**
+ * Films set into a story's text, as VideoObject nodes. A film counts when written as
+ * <figure class="bl-article-video" data-upload-date="…" data-duration="PT57S"><video title="…" poster="…" src="…"></video><figcaption>…</figcaption></figure>;
+ * Google needs a name, a thumbnail and the upload date, so a film missing any of them is left out rather than marked up half.
+ */
+function bl_article_videos(string $html): array
+{
+    if (!str_contains($html, 'bl-article-video') || !class_exists('DOMDocument')) return [];
+    $document = new DOMDocument();
+    $previous = libxml_use_internal_errors(true);
+    $document->loadHTML('<?xml encoding="utf-8"?><div>' . $html . '</div>', LIBXML_NONET);
+    libxml_clear_errors();
+    libxml_use_internal_errors($previous);
+    $nodes = [];
+    foreach ((new DOMXPath($document))->query('//figure[contains(concat(" ", normalize-space(@class), " "), " bl-article-video ")]') as $figure) {
+        $video = $figure->getElementsByTagName('video')->item(0);
+        if (!$video instanceof DOMElement) continue;
+        $caption = $figure->getElementsByTagName('figcaption')->item(0);
+        $name = trim($video->getAttribute('title'));
+        $description = $caption ? trim(preg_replace('/\s+/', ' ', $caption->textContent)) : '';
+        $node = array_filter([
+            '@type' => 'VideoObject', 'name' => $name, 'description' => $description !== '' ? $description : $name,
+            'thumbnailUrl' => $video->getAttribute('poster') !== '' ? bl_absolute_asset($video->getAttribute('poster')) : '',
+            'contentUrl' => $video->getAttribute('src') !== '' ? bl_absolute_asset($video->getAttribute('src')) : '',
+            'uploadDate' => trim($figure->getAttribute('data-upload-date')), 'duration' => trim($figure->getAttribute('data-duration')),
+        ], static fn($value) => $value !== '');
+        if (isset($node['name'], $node['thumbnailUrl'], $node['uploadDate'], $node['contentUrl'])) $nodes[] = $node;
+    }
+    return $nodes;
 }
 
 function bl_absolute_asset(string $url): string
