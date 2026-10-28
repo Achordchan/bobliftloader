@@ -80,6 +80,8 @@ return [
             'url' => 'https://www.bobliftcrane.com/',
             'empty' => 'Looking for cranes?',
         ],
+        // Empty until a notice is written: the bar shows only with words in it and inside its dates.
+        'event_bar' => ['badge' => '', 'text' => '', 'short' => '', 'link' => '', 'url' => '', 'starts' => '', 'ends' => ''],
         'side' => ['whatsapp' => 'WhatsApp', 'email' => 'Email', 'enquiry' => 'Enquiry', 'top' => 'Top', 'enquiry_url' => '/contact/#enquiry'],
         'llms' => ['intro' => ''],
         'consent' => [
@@ -201,6 +203,19 @@ return [
                 ['key' => 'sister.button', 'label' => '按钮文字', 'type' => 'text'],
                 ['key' => 'sister.url', 'label' => '起重机站地址', 'type' => 'url', 'help' => '点按钮或图片先弹出离站提示，确认后在新标签页打开。留空则整块和筛选无结果时的那行提示都不显示。'],
                 ['key' => 'sister.empty', 'label' => '筛选无结果时的提示', 'type' => 'text', 'help' => '筛选没有匹配型号时，提示下面多一行，后面接起重机站域名链接。'],
+            ],
+        ],
+        [
+            'title' => '顶部公告条（展会、活动）',
+            'note' => '显示在每个页面最顶部、导航栏上方，往下滚动时随页面移走。“普通文案”留空或不在显示日期内就不显示，过了结束日期自动收起。',
+            'fields' => [
+                ['key' => 'event_bar.badge', 'label' => '标签', 'type' => 'text', 'help' => '左侧蓝底小标签，例如 BAUMA CHINA 2026，可留空。'],
+                ['key' => 'event_bar.text', 'label' => '普通文案', 'type' => 'text', 'help' => '电脑上显示的一句话，控制在 90 个字符以内。'],
+                ['key' => 'event_bar.short', 'label' => '手机文案', 'type' => 'text', 'help' => '手机上替代“普通文案”，控制在 25 个字符以内；留空则手机也用普通文案。'],
+                ['key' => 'event_bar.link', 'label' => '链接文字', 'type' => 'text'],
+                ['key' => 'event_bar.url', 'label' => '链接地址', 'type' => 'url', 'help' => '本站地址写 /news/... 这样的相对路径。'],
+                ['key' => 'event_bar.starts', 'label' => '开始日期', 'type' => 'text', 'help' => '格式 2026-11-01（中国时间），留空表示立即显示。'],
+                ['key' => 'event_bar.ends', 'label' => '结束日期', 'type' => 'text', 'help' => '格式 2026-11-27，当天仍显示、次日起自动收起；留空表示一直显示。'],
             ],
         ],
         [

@@ -42,6 +42,7 @@ if (bl_is_wordpress()) status_header($route['status']); else http_response_code(
   <?php if (bl_is_wordpress()) wp_body_open(); ?>
   <a class="bl-skip" href="#main">Skip to content</a>
   <?php require __DIR__ . '/templates/partials/consent.php'; ?>
+  <?php require __DIR__ . '/templates/partials/event-bar.php'; ?>
   <?php require __DIR__ . '/templates/header.php'; ?>
   <main id="main"><?php require __DIR__ . '/templates/' . ($route['type'] === 'home' ? 'home' : 'pages/' . $route['type']) . '.php'; ?></main>
   <?php require __DIR__ . '/templates/footer.php'; ?>

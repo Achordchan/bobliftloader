@@ -891,3 +891,25 @@ function bl_application_focus(array $application): array
         default => ['value' => str_replace(' kg', '', bl_load_range($load)), 'unit' => 'kg', 'label' => 'Rated load across ' . count($loads) . ' ' . $noun],
     };
 }
+
+/**
+ * Whether a dated notice (the event bar, the home event card) shows today: from its first day to its last day, both
+ * written Y-m-d and counted in China time, the company's own. An empty first day starts at once, an empty last day
+ * never ends; a date that is not Y-m-d hides the notice rather than guess.
+ */
+function bl_notice_live(string $starts, string $ends, ?string $today = null): bool
+{
+    $today ??= (new DateTimeImmutable('now', new DateTimeZone('Asia/Shanghai')))->format('Y-m-d');
+    foreach ([$starts, $ends] as $day) {
+        if ($day === '') continue;
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', $day);
+        if (!$date || $date->format('Y-m-d') !== $day) return false;
+    }
+    return ($starts === '' || $starts <= $today) && ($ends === '' || $today <= $ends);
+}
+
+/** A notice's words as saved (their defaults are empty, so they are always edited text): decoded once, then escaped. */
+function bl_notice_text(mixed $value): string
+{
+    return bl_escape(html_entity_decode((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+}

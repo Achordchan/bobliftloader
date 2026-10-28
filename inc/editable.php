@@ -101,6 +101,13 @@ function bl_home_defaults(): array
                 ['title' => 'Visit our factory.', 'text' => 'Send us your dates to visit our factory in Xuzhou, Jiangsu. <a href="' . bl_escape(bl_url('/contact/') . '#enquiry') . '">Plan a visit</a>'],
             ],
         ],
+        // A dated promotion above the company stories (a trade show); it shows only with a title and inside its dates.
+        'event' => [
+            'eyebrow' => '', 'title' => '', 'text' => '',
+            'facts' => [],
+            'button' => '', 'url' => '', 'image' => '', 'alt' => '',
+            'starts' => '', 'ends' => '',
+        ],
         'journal' => [
             'eyebrow' => 'FROM THE COMPANY',
             'title' => 'INSIDE BOB-LIFT.',
