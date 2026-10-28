@@ -171,4 +171,20 @@ $check(run_filter('achord_dingtalk_cf7_channel', '', ['bl_page_referrer' => 'goo
 $check(str_starts_with(run_filter('achord_dingtalk_cf7_channel', '', [], new WPCF7_ContactForm(5)), '直接访问'), 'DingTalk got no channel for a direct visit');
 $check(run_filter('achord_dingtalk_cf7_channel', 'kept', ['bl_page_referrer' => 'google.com'], new WPCF7_ContactForm(6)) === 'kept', 'another form got the theme channel');
 
+// Akismet reads only what the visitor typed: the hidden fields come out of its message, other forms are left alone.
+$_POST = ['bl_model' => 'BL-T1000-H', 'message' => 'I would like a quotation.', 'bl_attr_utm_source' => 'fb', 'bl_attr_utm_medium' => 'paid',
+    'bl_attr_utm_campaign' => '52524537252862', 'bl_attr_landing' => 'https://example.test/products/skid-steer-loaders/', 'bl_ad_consent' => 'true', 'bl_touch' => '1', 'bl_page_referrer' => ''];
+$comment = ['comment_author' => 'Lyle', 'comment_content' => "BL-T1000-H\n\nI would like a quotation.\n\nfb\n\npaid\n\n52524537252862\n\nhttps://example.test/products/skid-steer-loaders/\n\ntrue\n\n1"];
+WPCF7_ContactForm::$current = new WPCF7_ContactForm(5);
+$cleaned = run_filter('wpcf7_akismet_parameters', $comment);
+$check($cleaned['comment_content'] === "BL-T1000-H\n\nI would like a quotation.", 'hidden fields still reach Akismet');
+$check($cleaned['comment_author'] === 'Lyle', 'the author sent to Akismet changed');
+$_POST['message'] = 'fb';
+$typed = run_filter('wpcf7_akismet_parameters', ['comment_content' => "BL-T1000-H\n\nfb\n\nfb\n\npaid"]);
+$check($typed['comment_content'] === "BL-T1000-H\n\nfb", 'a message that matches a hidden value was taken out too');
+WPCF7_ContactForm::$current = new WPCF7_ContactForm(6);
+$check(run_filter('wpcf7_akismet_parameters', $comment) === $comment, 'another form had its Akismet message changed');
+WPCF7_ContactForm::$current = null;
+$_POST = [];
+
 echo "Enquiry attribution: $checks checks passed\n";
