@@ -182,8 +182,14 @@ function bl_header_active(string $id, string $type): bool
 
 function bl_site_switch_items(): array
 {
+    // Each site's real photo in its square: the one saved in the back office, else the theme's own for our three websites, else none (the letter shows).
+    $photos = ['boblift.com' => 'images/sister/switch-boblift.webp', 'bobliftcrane.com' => 'images/sister/switch-cranes.webp', 'bobliftloader.com' => 'images/sister/switch-loader.webp'];
     $items = bl_editable('global')['switcher']['sites'];
-    foreach ($items as &$item) if ($item['url'] === '') $item['domain'] = bl_company('domain');
+    foreach ($items as &$item) {
+        if ($item['url'] === '') $item['domain'] = bl_company('domain');
+        $domain = preg_replace('/^www\./', '', strtolower((string) $item['domain']));
+        $item['image'] = (string) ($item['image'] ?? '') ?: (isset($photos[$domain]) ? bl_asset($photos[$domain]) : '');
+    }
     unset($item);
     return $items;
 }

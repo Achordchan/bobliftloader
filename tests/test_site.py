@@ -400,6 +400,8 @@ class WebsiteTests(unittest.TestCase):
         self.assertNotIn('target=', switch)
         self.assertIn('aria-current="true"', switch)
         self.assertIn('bobliftloader.com', switch)
+        # Each website shows its real photo in the square, not a letter.
+        self.assertEqual([re.sub(r'\?.*', '', src).rsplit('/', 1)[-1] for src in re.findall(r'<i class="bl-site-photo" aria-hidden="true"><img src="([^"]+)" alt=""', switch)], ['switch-boblift.webp', 'switch-cranes.webp', 'switch-loader.webp'])
         # The logo still goes home on its own.
         self.assertIn('<a class="bl-brand" href="/" aria-label="BOB-LIFT home">', html)
 
