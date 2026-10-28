@@ -91,6 +91,8 @@
 .bl-site .bl-wp-article-content h3{margin:clamp(22px,1.6vw,34px) 0 8px;font:700 var(--fs-lead)/1.35 var(--sans);color:var(--ink)}
 .bl-site .bl-wp-article-content figure{margin:clamp(24px,1.8vw,40px) 0}
 .bl-site .bl-wp-article-content figure img{width:100%;height:auto;background:#e7e9e3}
+/* A film set into the text keeps its 16:9 frame at column width and only downloads when played (preload="none"). */
+.bl-site .bl-wp-article-content .bl-article-video video{display:block;width:100%;height:auto;aspect-ratio:16/9;background:var(--ink)}
 .bl-site .bl-wp-article-content figcaption{padding-top:10px;font-size:var(--fs-label);line-height:1.6;color:var(--muted)}
 /* A chart can come in two drawings in one figure: a landscape one (.bl-chart-wide) for wider screens and the tall one
    (.bl-chart-tall) whose lettering stays readable on a phone. Only the one shown is downloaded, as both load lazily. */
