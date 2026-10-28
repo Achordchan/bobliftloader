@@ -1,6 +1,6 @@
 <?php
 /**
- * Product and range pages list the stories about them, at most three, never a group story or a story about the other
+ * Product and range pages list the stories about them, at most three, never a group story, one marked no_related or a story about the other
  * family. On a product page, guides whose text links to the model come first, the most specific first; then stories
  * naming it (fair reports among them), the rest of its family and company news, newest first. A range page lists its
  * family's stories, newest first.
@@ -18,6 +18,7 @@ function bl_wp_articles() {
     $story = static fn(string $slug, string $date, array $products, array $extra = []) => $extra + ['slug' => $slug, 'title' => 'Story ' . $slug, 'url' => '/news/' . $slug . '/', 'date' => $date, 'excerpt' => '', 'image' => '/img/' . $slug . '.jpg', 'category' => 'industry-news', 'line' => 'compact', 'products' => $products, 'event' => []];
     return [
         $story('round-up', '2026-10-12', ['loader-a', 'loader-b'], ['content_html' => '<p><a href="' . bl_url('/product/loader-a/') . '">A</a> <a href=\'/product/loader-b\'>B</a> <a href="/news/x/">x</a></p>']),
+        $story('a-hidden', '2026-10-11', ['loader-a'], ['content_html' => '<a href="/product/loader-a/">A</a>', 'no_related' => true]),
         $story('a-specific', '2026-10-11', ['loader-a'], ['content_html' => '<a href="/product/loader-a/#specs">A</a> and <a href="/product/loader-a/">again</a>']),
         $story('a-fair', '2026-10-10', ['loader-a'], ['content_html' => '<a href="/product/loader-a/">A</a>', 'event' => ['start' => '2026-10-15']]),
         $story('b-newest', '2026-10-10', ['loader-b']),

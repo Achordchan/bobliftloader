@@ -725,7 +725,7 @@ function bl_case_card(array $case, string $heading = 'h2'): void
 }
 
 /**
- * Stories to offer beside a product or a range, never a group story. On a product page, the guides whose text links to
+ * Stories to offer beside a product or a range, never a group story or one marked "no_related". On a product page, the guides whose text links to
  * the model come first, the most specific first (one whose product links mostly point at this model before a round-up
  * linking all nine, so the evergreen guides are not pushed out by each newer attachment story); then stories that only
  * name it, fair reports among them; then the rest of its family; then company news; newest first within each. Built
@@ -735,7 +735,7 @@ function bl_related_articles(array $productSlugs, string $family, int $limit = 3
 {
     $linked = $named = $inFamily = $general = [];
     foreach (bl_articles() as $i => $article) {
-        if (($article['line'] ?? '') === 'group') continue;
+        if (($article['line'] ?? '') === 'group' || !empty($article['no_related'])) continue; // editors can keep a story out ("no_related")
         $links = $productSlugs ? bl_article_product_links($article) : [];
         $hits = array_sum(array_intersect_key($links, array_flip($productSlugs)));
         $families = bl_news_families($article);
