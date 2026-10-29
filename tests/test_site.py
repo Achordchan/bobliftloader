@@ -173,7 +173,7 @@ class WebsiteTests(unittest.TestCase):
         self.assertEqual(len(visible_cards(html)), 4)
         # Each family page compares only its own models; search results across both families have no table.
         _, html, _ = fetch('/products/?q=mini')
-        self.assertNotIn('bl-compare-table', html)
+        self.assertNotIn('bl-compare-table', html.split('<body', 1)[1])
         _, html, _ = fetch('/products/skid-steer-loaders/')
         self.assertIn('id="compare-skid-steer-loaders"', html)
         self.assertNotIn('id="compare-mini-dumpers"', html)
@@ -262,9 +262,9 @@ class WebsiteTests(unittest.TestCase):
         self.assertNotIn('bl-ruler', main)
         self.assertNotIn('data-making-step', main)
         self.assertIn('/products/skid-steer-loaders/#how-they-are-made', main)
-        self.assertIn('/css/about.css', html)
+        self.assertIn('id="bl-css-about"', html)
         _, home, _ = fetch('/')
-        self.assertNotIn('/css/about.css', home)
+        self.assertNotIn('id="bl-css-about"', home)
         # Every responsive size of the workshop photography resolves, not only the fallback src.
         for asset in set(re.findall(r'/assets/images/about/[\w-]+\.webp', html)):
             with OPENER.open(BASE + asset, timeout=30) as response:
@@ -286,7 +286,7 @@ class WebsiteTests(unittest.TestCase):
         self.assertEqual(sum(mm(p['specs']['Machine width']) <= 950 for p in loaders), sum(s == 'hit' for s, *_ in rows(fetch('/products/skid-steer-loaders/?opening=950')[1])))
         # Dumpers: no marker until a load is given; then models rated below it drop out.
         _, html, _ = fetch('/products/mini-dumpers/')
-        self.assertNotIn('bl-ruler-marked', html)
+        self.assertNotIn('bl-ruler-marked', html.split('<body', 1)[1])
         self.assertTrue(all(s == 'hit' for s, *_ in rows(html)))
         _, html, _ = fetch('/products/mini-dumpers/?payload=2000')
         self.assertIn('bl-ruler-marked', html)
@@ -308,9 +308,9 @@ class WebsiteTests(unittest.TestCase):
         self.assertIn(f'{widest:,}<small>mm', main)
         self.assertNotIn('type="range"', main)
         self.assertNotIn('boblift.com/', main)
-        self.assertIn('/css/applications.css', html)
+        self.assertIn('id="bl-css-applications"', html)
         _, home, _ = fetch('/')
-        self.assertNotIn('/css/applications.css', home)
+        self.assertNotIn('id="bl-css-applications"', home)
         # Each job lists its machines in the order that matters to it and hands over to the family page.
         _, html, _ = fetch('/applications/landscaping/')
         cards = re.findall(r'<article class="bl-product-card">\s*<a class="bl-product-card-image" href="/product/([^/]+)/', html)
@@ -499,7 +499,7 @@ class WebsiteTests(unittest.TestCase):
         self.assertEqual(main.count('>BOB-LIFT group<'), sum(not a['category'] for a in self.articles))
         sections = {a['category'] for a in self.articles if a['category']}
         self.assertEqual(set(re.findall(r'\?category=([a-z-]+)"', main)), sections)
-        self.assertIn('/css/news.css', html)
+        self.assertIn('id="bl-css-news"', html)
         for section in sections:
             _, html, _ = fetch('/news/?category=' + section)
             main = html.split('<main', 1)[1].split('</main>', 1)[0]
@@ -559,11 +559,13 @@ class WebsiteTests(unittest.TestCase):
         _, html, _ = fetch('/products/mini-dumpers/')
         # The preview serves assets from /assets/, WordPress from /wp-content/themes/<theme>/assets/.
         asset_path = lambda url: urlsplit(urljoin(BASE + '/', url)).path
+        # Theme styles are written into the page (bl_inline_stylesheet), so no theme stylesheet is linked and the first
+        # frame waits on no CSS download; each block names its file and that file's version.
         stylesheets = re.findall(r'<link rel="stylesheet" href="([^"]+)"', html)
-        theme_styles = [href for href in stylesheets if '/assets/css/' in asset_path(href)]
-        self.assertTrue(any(asset_path(href).endswith('/assets/css/support.css') for href in theme_styles))
-        for href in theme_styles:
-            self.assertRegex(href, r'\.css\?ver=\d+$', href)
+        self.assertFalse([href for href in stylesheets if '/assets/css/' in asset_path(href)], stylesheets)
+        self.assertRegex(html, r'<style id="bl-css-support" data-ver="\d+">')
+        self.assertNotIn("url('../", html)
+        self.assertIn('/assets/fonts/manrope-400.woff2', html)
         entry = re.search(r'<script type="module" src="([^"]+)"></script>', html).group(1)
         self.assertTrue(asset_path(entry).endswith('/assets/js/main.js'), entry)
         self.assertRegex(entry, r'\?ver=\d+$')
