@@ -13,6 +13,11 @@ $cases = [
     'a{background:url("//cdn.example/x.png")}' => 'a{background:url("//cdn.example/x.png")}',
     'a{background:url("/abs.png")}' => 'a{background:url("/abs.png")}',
     'a{mask:url("#m")}' => 'a{mask:url("#m")}',
+    'a{background:url( "https://cdn.example/x.png")}' => 'a{background:url( "https://cdn.example/x.png")}',
+    'a{background:url(  https://cdn.example/x.png)}' => 'a{background:url(  https://cdn.example/x.png)}',
+    "a{background:url( '/abs.png')}" => "a{background:url( '/abs.png')}",
+    'a{background:url( data:image/png;base64,AA)}' => 'a{background:url( data:image/png;base64,AA)}',
+    'a{background:url( "img/x.png")}' => 'a{background:url("' . $folder . 'img/x.png")}',
 ];
 foreach ($cases as $in => $want) {
     $got = bl_css_relative_urls($in, $folder);
