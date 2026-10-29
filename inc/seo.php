@@ -32,7 +32,7 @@ function bl_structured_data(array $route): array
     }
     if ($route['type'] === 'article') {
         $a = $route['record'];
-        $graph[] = ['@type' => 'Article', 'headline' => $a['title'], 'description' => $a['excerpt'], 'image' => bl_absolute_asset($a['image']), 'datePublished' => $a['date'], 'author' => ['@id' => $organization['@id']], 'publisher' => ['@id' => $organization['@id']], 'mainEntityOfPage' => ['@id' => $base . $route['path'] . '#webpage'], 'citation' => $a['source'] ?: null];
+        $graph[] = ['@type' => 'Article', 'headline' => $a['title'], 'description' => $a['excerpt'], 'image' => bl_absolute_asset($a['image']), 'datePublished' => $a['date'], 'dateModified' => $a['updated'] ?? null, 'author' => bl_article_author($a, $organization['@id']), 'publisher' => ['@id' => $organization['@id']], 'mainEntityOfPage' => ['@id' => $base . $route['path'] . '#webpage'], 'citation' => $a['source'] ?: null];
         $graph[count($graph) - 1] = array_filter($graph[count($graph) - 1], static fn($value) => $value !== null);
         foreach (bl_article_videos((string) ($a['content_html'] ?? '')) as $video) $graph[] = $video;
         if (!empty($a['event']['start'])) {
@@ -57,6 +57,17 @@ function bl_structured_data(array $route): array
         $graph[] = ['@type' => 'FAQPage', 'mainEntity' => $questions, 'isPartOf' => ['@id' => $base . '/#website']];
     }
     return ['@context' => 'https://schema.org', '@graph' => $graph];
+}
+
+/**
+ * Who wrote a story, for its Article node: the WordPress author shown in the byline, as a Person working for BOB-LIFT,
+ * or the organisation itself for stories imported without one (the byline then reads BOB-LIFT too).
+ */
+function bl_article_author(array $article, string $organizationId): array
+{
+    $author = $article['author'] ?? [];
+    if (empty($author['name'])) return ['@id' => $organizationId];
+    return array_filter(['@type' => 'Person', 'name' => $author['name'], 'jobTitle' => ($author['title'] ?? '') ?: null, 'image' => !empty($author['avatar']) ? bl_absolute_asset($author['avatar']) : null, 'worksFor' => ['@id' => $organizationId]], static fn($value) => $value !== null);
 }
 
 /**
