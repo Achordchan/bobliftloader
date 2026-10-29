@@ -48,7 +48,7 @@ return [
                 'name' => ['label' => '名称', 'type' => 'text'], 'text' => ['label' => '介绍', 'type' => 'textarea'],
                 'url' => ['label' => '地址', 'type' => 'url', 'help' => '留空表示当前站点。'],
                 'domain' => ['label' => '显示域名', 'type' => 'text', 'help' => '地址留空表示当前站点，域名统一读取公司信息中的本站域名。'], 'mark' => ['label' => '简称', 'type' => 'text', 'help' => '没有图片时显示在方块里的字母。'],
-                'image' => ['label' => '小图', 'type' => 'image', 'help' => '真实照片，正方形，至少 96×96 像素，前台按 48 像素显示。留空时三个 BOB-LIFT 网站用主题自带的实拍小图，其他网站显示简称字母。'],
+                'image' => ['label' => '小图', 'type' => 'image', 'help' => '真实照片或 Logo，正方形，至少 96×96 像素，前台按 48 像素显示。留空时三个 BOB-LIFT 网站用主题自带的实拍小图，其他网站显示简称字母。'],
             ]],
         ]],
     ],
