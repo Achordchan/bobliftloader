@@ -48,8 +48,8 @@ add_action('wp_enqueue_scripts', static function (): void {
     if (is_rtl()) return;
     $styles = wp_styles();
     $plugins = trailingslashit(plugins_url());
-    foreach ($styles->queue as $handle) {
-        $style = $styles->registered[$handle] ?? null;
+    // Registered, not only queued: a handle pulled in as another style's dependency is printed too.
+    foreach ($styles->registered as $style) {
         // Inline-only handles carry src false; strtok('') is false too, and strict types reject false below (2026-10-29 fatal).
         $src = is_object($style) && is_string($style->src) ? (string) strtok($style->src, '?') : '';
         if (!str_starts_with($src, $plugins . 'gravatar-enhanced/') && !str_starts_with($src, $plugins . 'contact-form-7/')) continue;
@@ -57,11 +57,9 @@ add_action('wp_enqueue_scripts', static function (): void {
         if (!empty($style->extra['conditional']) || !is_file($file)) continue;
         $folder = dirname($src) . '/';
         $css = bl_css_relative_urls((string) file_get_contents($file), $folder);
-        $inline = implode("\n", (array) ($style->extra['after'] ?? []));
-        wp_dequeue_style($handle);
-        wp_register_style('bl-inline-' . $handle, false, [], null);
-        wp_enqueue_style('bl-inline-' . $handle);
-        wp_add_inline_style('bl-inline-' . $handle, $css . ($inline !== '' ? "\n" . $inline : ''));
+        // The handle itself becomes inline-only (src false): dependants, queue position and its own inline additions stay.
+        $style->src = false;
+        $style->extra['after'] = array_merge([$css], (array) ($style->extra['after'] ?? []));
     }
 }, 100);
 // index.php renders one icon set; honor an administrator's site icon before theme defaults.
