@@ -40,6 +40,22 @@ add_action('wp_enqueue_scripts', static function (): void {
     if (!is_front_page()) return;
     foreach (['wp-block-library', 'wp-block-library-theme', 'classic-theme-styles', 'global-styles', 'jetpack-global-styles-frontend-style'] as $handle) wp_dequeue_style($handle);
 }, 100);
+// The theme's own styles are inline (bl_inline_stylesheet), so plugin stylesheets were the one file the first frame still
+// waited on. Gravatar's block-pattern styles (editor ones among them) style nothing the theme prints; Contact Form 7's small
+// stylesheet hides its screen-reader messages and spinner, so it moves inline instead of going.
+add_action('wp_enqueue_scripts', static function (): void {
+    $styles = wp_styles();
+    foreach ($styles->queue as $handle) {
+        if (str_contains((string) ($styles->registered[$handle]->src ?? ''), '/gravatar-enhanced/build/patterns-')) wp_dequeue_style($handle);
+    }
+    $cf7 = defined('WPCF7_PLUGIN_DIR') ? WPCF7_PLUGIN_DIR . '/includes/css/styles.css' : '';
+    if (wp_style_is('contact-form-7') && is_file($cf7) && !is_rtl()) {
+        wp_dequeue_style('contact-form-7');
+        wp_register_style('bl-contact-form-7', false, [], null);
+        wp_enqueue_style('bl-contact-form-7');
+        wp_add_inline_style('bl-contact-form-7', (string) file_get_contents($cf7));
+    }
+}, 100);
 // index.php renders one icon set; honor an administrator's site icon before theme defaults.
 remove_action('wp_head', 'wp_site_icon', 99);
 add_filter('get_site_icon_url', static fn($url, $size = 512) => get_option('site_icon') ? $url : bl_content_asset('global', 'brand.icon', (int) $size >= 180 ? 'images/icons/icon-192.png' : 'images/icons/icon-32.png'), 99, 2);

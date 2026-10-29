@@ -44,6 +44,21 @@ function bl_asset_versioned(string $path): string
 }
 
 /*
+ * A theme stylesheet written into the page instead of linked. With eight linked files the first frame waited on their
+ * download, and on PageSpeed's phone test that wait sometimes crossed the point where the test browser holds the frame
+ * back a full second; the H1 then counted as painted after the Google tags and LCP read about 7 s (2026-10-29). Inline,
+ * the page paints as soon as its HTML is parsed. Addresses inside the file are relative to assets/css/, so they are
+ * rewritten against the assets folder.
+ */
+function bl_inline_stylesheet(string $name): string
+{
+    $file = __DIR__ . '/../assets/css/' . $name . '.css';
+    if (!is_file($file)) return '';
+    $css = preg_replace('#url\((["\']?)\.\./#', 'url($1' . bl_asset(''), (string) file_get_contents($file));
+    return '<style id="bl-css-' . bl_escape($name) . '" data-ver="' . filemtime($file) . '">' . str_ireplace('</style', '<\/style', $css) . '</style>';
+}
+
+/*
  * A site picture (a theme image or a media-library upload) resized to $width pixels wide by WordPress.com's image CDN,
  * which also serves it as WebP or AVIF where the browser takes them. A card or thumbnail then downloads a picture its own
  * size rather than the full photograph. The address is returned unchanged off WordPress, on a site served on its own
