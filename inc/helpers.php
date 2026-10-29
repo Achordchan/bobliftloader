@@ -43,27 +43,6 @@ function bl_asset_versioned(string $path): string
     return bl_asset($path) . (is_file($file) ? '?ver=' . filemtime($file) : '');
 }
 
-/* Prefix the relative url()s of a stylesheet with $folder; data:, scheme, root-relative and #fragment addresses stay as they are. Leading space and the quote are matched possessively so an absolute address cannot backtrack into a match that skips them. */
-function bl_css_relative_urls(string $css, string $folder): string
-{
-    return (string) preg_replace('#url\(\s*+(["\']?+)(?![a-z][a-z0-9+.-]*:|/|\#)#i', 'url($1' . $folder, $css);
-}
-
-/*
- * A theme stylesheet written into the page instead of linked. With eight linked files the first frame waited on their
- * download, and on PageSpeed's phone test that wait sometimes crossed the point where the test browser holds the frame
- * back a full second; the H1 then counted as painted after the Google tags and LCP read about 7 s (2026-10-29). Inline,
- * the page paints as soon as its HTML is parsed. Addresses inside the file are relative to assets/css/, so they are
- * rewritten against the assets folder.
- */
-function bl_inline_stylesheet(string $name): string
-{
-    $file = __DIR__ . '/../assets/css/' . $name . '.css';
-    if (!is_file($file)) return '';
-    $css = preg_replace('#url\((["\']?)\.\./#', 'url($1' . bl_asset(''), (string) file_get_contents($file));
-    return '<style id="bl-css-' . bl_escape($name) . '" data-ver="' . filemtime($file) . '">' . str_ireplace('</style', '<\/style', $css) . '</style>';
-}
-
 /*
  * A site picture (a theme image or a media-library upload) resized to $width pixels wide by WordPress.com's image CDN,
  * which also serves it as WebP or AVIF where the browser takes them. A card or thumbnail then downloads a picture its own
