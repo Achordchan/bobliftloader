@@ -41,19 +41,26 @@ add_action('wp_enqueue_scripts', static function (): void {
     foreach (['wp-block-library', 'wp-block-library-theme', 'classic-theme-styles', 'global-styles', 'jetpack-global-styles-frontend-style'] as $handle) wp_dequeue_style($handle);
 }, 100);
 // The theme's own styles are inline (bl_inline_stylesheet), so plugin stylesheets were the one file the first frame still
-// waited on. Gravatar's block-pattern styles (editor ones among them) style nothing the theme prints; Contact Form 7's small
-// stylesheet hides its screen-reader messages and spinner, so it moves inline instead of going.
+// waited on: Gravatar Enhanced's block-pattern styles and Contact Form 7's (it hides the form's screen-reader messages and
+// spinner). Patterns already saved in posts still need Gravatar's styles, so both are kept, only printed inline instead of
+// linked; relative addresses inside them are rewritten against the file's own folder.
 add_action('wp_enqueue_scripts', static function (): void {
+    if (is_rtl()) return;
     $styles = wp_styles();
+    $plugins = trailingslashit(plugins_url());
     foreach ($styles->queue as $handle) {
-        if (str_contains((string) ($styles->registered[$handle]->src ?? ''), '/gravatar-enhanced/build/patterns-')) wp_dequeue_style($handle);
-    }
-    $cf7 = defined('WPCF7_PLUGIN_DIR') ? WPCF7_PLUGIN_DIR . '/includes/css/styles.css' : '';
-    if (wp_style_is('contact-form-7') && is_file($cf7) && !is_rtl()) {
-        wp_dequeue_style('contact-form-7');
-        wp_register_style('bl-contact-form-7', false, [], null);
-        wp_enqueue_style('bl-contact-form-7');
-        wp_add_inline_style('bl-contact-form-7', (string) file_get_contents($cf7));
+        $style = $styles->registered[$handle] ?? null;
+        $src = is_object($style) ? strtok((string) $style->src, '?') : '';
+        if (!str_starts_with($src, $plugins . 'gravatar-enhanced/') && !str_starts_with($src, $plugins . 'contact-form-7/')) continue;
+        $file = WP_PLUGIN_DIR . '/' . substr($src, strlen($plugins));
+        if (!empty($style->extra['conditional']) || !is_file($file)) continue;
+        $folder = dirname($src) . '/';
+        $css = preg_replace('#url\((["\']?)(?![a-z]+:|/|\#)#i', 'url($1' . $folder, (string) file_get_contents($file));
+        $inline = implode("\n", (array) ($style->extra['after'] ?? []));
+        wp_dequeue_style($handle);
+        wp_register_style('bl-inline-' . $handle, false, [], null);
+        wp_enqueue_style('bl-inline-' . $handle);
+        wp_add_inline_style('bl-inline-' . $handle, $css . ($inline !== '' ? "\n" . $inline : ''));
     }
 }, 100);
 // index.php renders one icon set; honor an administrator's site icon before theme defaults.
