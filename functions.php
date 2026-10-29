@@ -50,7 +50,8 @@ add_action('wp_enqueue_scripts', static function (): void {
     $plugins = trailingslashit(plugins_url());
     foreach ($styles->queue as $handle) {
         $style = $styles->registered[$handle] ?? null;
-        $src = is_object($style) ? strtok((string) $style->src, '?') : '';
+        // Inline-only handles carry src false; strtok('') is false too, and strict types reject false below (2026-10-29 fatal).
+        $src = is_object($style) && is_string($style->src) ? (string) strtok($style->src, '?') : '';
         if (!str_starts_with($src, $plugins . 'gravatar-enhanced/') && !str_starts_with($src, $plugins . 'contact-form-7/')) continue;
         $file = WP_PLUGIN_DIR . '/' . substr($src, strlen($plugins));
         if (!empty($style->extra['conditional']) || !is_file($file)) continue;
