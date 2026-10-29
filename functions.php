@@ -40,28 +40,6 @@ add_action('wp_enqueue_scripts', static function (): void {
     if (!is_front_page()) return;
     foreach (['wp-block-library', 'wp-block-library-theme', 'classic-theme-styles', 'global-styles', 'jetpack-global-styles-frontend-style'] as $handle) wp_dequeue_style($handle);
 }, 100);
-// The theme's own styles are inline (bl_inline_stylesheet), so plugin stylesheets were the one file the first frame still
-// waited on: Gravatar Enhanced's block-pattern styles and Contact Form 7's (it hides the form's screen-reader messages and
-// spinner). Patterns already saved in posts still need Gravatar's styles, so both are kept, only printed inline instead of
-// linked; relative addresses inside them are rewritten against the file's own folder.
-add_action('wp_enqueue_scripts', static function (): void {
-    if (is_rtl()) return;
-    $styles = wp_styles();
-    $plugins = trailingslashit(plugins_url());
-    // Registered, not only queued: a handle pulled in as another style's dependency is printed too.
-    foreach ($styles->registered as $style) {
-        // Inline-only handles carry src false; strtok('') is false too, and strict types reject false below (2026-10-29 fatal).
-        $src = is_object($style) && is_string($style->src) ? (string) strtok($style->src, '?') : '';
-        if (!str_starts_with($src, $plugins . 'gravatar-enhanced/') && !str_starts_with($src, $plugins . 'contact-form-7/')) continue;
-        $file = WP_PLUGIN_DIR . '/' . substr($src, strlen($plugins));
-        if (!empty($style->extra['conditional']) || !is_file($file)) continue;
-        $folder = dirname($src) . '/';
-        $css = bl_css_relative_urls((string) file_get_contents($file), $folder);
-        // The handle itself becomes inline-only (src false): dependants, queue position and its own inline additions stay.
-        $style->src = false;
-        $style->extra['after'] = array_merge([$css], (array) ($style->extra['after'] ?? []));
-    }
-}, 100);
 // index.php renders one icon set; honor an administrator's site icon before theme defaults.
 remove_action('wp_head', 'wp_site_icon', 99);
 add_filter('get_site_icon_url', static fn($url, $size = 512) => get_option('site_icon') ? $url : bl_content_asset('global', 'brand.icon', (int) $size >= 180 ? 'images/icons/icon-192.png' : 'images/icons/icon-32.png'), 99, 2);
