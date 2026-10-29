@@ -43,6 +43,12 @@ function bl_asset_versioned(string $path): string
     return bl_asset($path) . (is_file($file) ? '?ver=' . filemtime($file) : '');
 }
 
+/* Prefix the relative url()s of a stylesheet with $folder; data:, scheme, root-relative and #fragment addresses stay as they are. The quote is matched possessively so a quoted absolute address cannot backtrack into a match with no quote. */
+function bl_css_relative_urls(string $css, string $folder): string
+{
+    return (string) preg_replace('#url\(\s*(["\']?+)(?![a-z][a-z0-9+.-]*:|/|\#)#i', 'url($1' . $folder, $css);
+}
+
 /*
  * A theme stylesheet written into the page instead of linked. With eight linked files the first frame waited on their
  * download, and on PageSpeed's phone test that wait sometimes crossed the point where the test browser holds the frame

@@ -55,7 +55,7 @@ add_action('wp_enqueue_scripts', static function (): void {
         $file = WP_PLUGIN_DIR . '/' . substr($src, strlen($plugins));
         if (!empty($style->extra['conditional']) || !is_file($file)) continue;
         $folder = dirname($src) . '/';
-        $css = preg_replace('#url\((["\']?)(?![a-z]+:|/|\#)#i', 'url($1' . $folder, (string) file_get_contents($file));
+        $css = bl_css_relative_urls((string) file_get_contents($file), $folder);
         $inline = implode("\n", (array) ($style->extra['after'] ?? []));
         wp_dequeue_style($handle);
         wp_register_style('bl-inline-' . $handle, false, [], null);
