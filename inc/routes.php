@@ -70,7 +70,8 @@ function bl_resolve_route(?string $requestPath = null): array
         $post = get_queried_object();
         $route = array_replace($route, ['type' => 'page', 'title' => bl_plain_title(get_the_title($post)), 'description' => $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35), 'status' => 200]);
     }
-    if (bl_is_wordpress() && is_404()) $route['status'] = 404;
+    // WordPress finds no post at the showcase address (the page is the theme's own, not a WordPress page), so its 404 does not apply there.
+    if (bl_is_wordpress() && is_404() && $route['type'] !== 'showcase') $route['status'] = 404;
     if ($route['status'] === 404) $route['type'] = '404';
     return $route;
 }
