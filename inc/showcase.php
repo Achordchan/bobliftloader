@@ -120,6 +120,8 @@ function bl_showcase_markup(string $file, array $products = []): string
         // The wordmark leads back to the site (the chapter links stay in the header).
         '<a class="exp-brand" href="#overview" aria-label="BOB-LIFT, back to the start">' => '<a class="exp-brand" href="' . bl_escape(bl_url('/')) . '" aria-label="BOB-LIFT Loader home">',
         '{{IMPORTMAP}}' => '<script type="importmap">' . json_encode(['imports' => $imports + $siteMap], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) . '</script>',
+        // The site's privacy notice, and the control that reopens the cookie choices (as in the site footer).
+        '</footer>' => '<nav class="exp-footer-links" aria-label="Site"><a href="' . bl_escape(bl_application_link(bl_content_value('global', 'footer.privacy_url'))) . '">' . bl_content_text('global', 'footer.privacy_label') . '</a>' . (bl_consent_categories() ? '<button type="button" data-bl-consent-open hidden>' . bl_content_text('global', 'consent.settings') . '</button>' : '') . '</nav></footer>',
         '{{SPECS}}' => $products ? bl_showcase_specs_html($products) : '',
         '{{CONTACT}}' => $products ? bl_showcase_contact_html($products) : '',
     ]);

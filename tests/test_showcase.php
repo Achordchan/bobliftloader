@@ -32,6 +32,7 @@ $check(!preg_match('/[一-鿿]/u', (string) preg_replace('~<script\b[^>]*>.*?</s
 $check(!str_contains($body . $head, '{{'), 'a placeholder is left in the markup');
 $check(!str_contains($body, 'id="lang"'), 'the language menu is still there');
 $check(!preg_match('~(src|href|srcset)="assets/~', $body . $head), 'an asset address is not from the theme folder');
+$check(str_contains($body, 'class="exp-footer-links"') && str_contains($body, '/privacy/') && (bl_consent_categories() ? str_contains($body, 'data-bl-consent-open') : true), 'footer links (privacy, cookie choices)');
 $check(str_contains($body, 'id="specs"') && str_contains($body, 'id="contact"'), 'specs or contact section missing');
 $check(str_contains($head, '"three":"/assets/bl360/assets/vendor/three/three.module.js"'), 'import map: three.js');
 $check(substr_count($body . $head, '<script type="importmap">') === 1, 'more than one import map');
