@@ -34,15 +34,22 @@ function bl_is_showcase_product(array $product): bool
  */
 function bl_showcase_spec_rows(array $products): array
 {
-    $rows = [];
-    foreach ($products as $i => $product) {
-        foreach (bl_spec_groups($product['specs'] ?? []) as $group => $specs) {
-            foreach ($specs as $label => $value) $rows[$group][$label][$i] = trim((string) $value);
-        }
+    $labels = [];
+    foreach ($products as $product) {
+        foreach (bl_spec_groups($product['specs'] ?? []) as $group => $specs) foreach (array_keys($specs) as $label) $labels[$group][$label] = true;
     }
     // Groups in product-page order, whichever model introduced them.
     $order = array_flip(['Performance', 'Engine', 'Dimensions', 'Build', 'Details']);
-    uksort($rows, static fn($a, $b) => ($order[$a] ?? 99) <=> ($order[$b] ?? 99));
+    uksort($labels, static fn($a, $b) => ($order[$a] ?? 99) <=> ($order[$b] ?? 99));
+    // One row per figure: names that mean the same figure (Travel speed / Max travel speed, bl_spec_synonyms) share it, as on the comparison pages.
+    $rows = $seen = [];
+    foreach ($labels as $group => $names) {
+        foreach (array_keys($names) as $label) {
+            if (isset($seen[$label])) continue;
+            foreach (bl_spec_synonyms($label, $products) as $name) $seen[$name] = true;
+            foreach ($products as $i => $product) $rows[$group][$label][$i] = trim((string) bl_spec_value($product, $label, $products));
+        }
+    }
     return $rows;
 }
 

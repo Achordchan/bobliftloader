@@ -31,6 +31,12 @@ $specs = bl_showcase_specs_html($changed);
 $check(str_contains($specs, '<th scope="row">Track width</th><td>180 mm</td><td>—</td>'), 'a new figure on a record is not in the table');
 foreach ($products as $product) foreach ($product['specs'] as $label => $value) $check(str_contains(bl_showcase_specs_html($products), '<th scope="row">' . bl_escape($label) . '</th>'), 'missing row: ' . $label);
 $check(str_contains(bl_showcase_compare($changed), "1,234\u{00A0}mm wide") && str_contains(bl_showcase_compare($products), 'The BL-T360-H: single-cylinder'), 'comparison line: ' . bl_showcase_compare($changed));
+// The same figure under its two names (Travel speed / Max travel speed) is one row, not two half-empty ones.
+$renamed = $products;
+$renamed[1]['specs'] = ['Max travel speed' => $renamed[1]['specs']['Travel speed']] + $renamed[1]['specs'];
+unset($renamed[1]['specs']['Travel speed']);
+$specs = bl_showcase_specs_html($renamed);
+$check(substr_count($specs, 'travel speed</th>') + substr_count($specs, 'Travel speed</th>') === 1 && str_contains($specs, '<td colspan="2">' . bl_escape($products[0]['specs']['Travel speed']) . '</td>'), 'travel speed under two names is not one row');
 $contact = bl_showcase_contact_html($products);
 $check(str_contains($contact, '/contact/?product=bl-t360-h-mini-skid-steer-loader#enquiry') && str_contains($contact, bl_company('email')), 'contact section');
 
