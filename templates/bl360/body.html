@@ -1,0 +1,147 @@
+<a class="exp-skip" href="#explode">Skip to product details</a>
+  <header class="exp-header">
+    <a class="exp-brand" href="#overview" aria-label="BOB-LIFT, back to the start"><picture><source srcset="{{BASE}}assets/brand/logo.webp" type="image/webp"><img src="{{BASE}}assets/brand/logo.png" alt="BOB-LIFT" width="224" height="91"></picture></a>
+    <nav aria-label="Product chapters">
+      <a href="#explode">Exploded view</a><a href="#parts">Components</a><a href="#motion">Motion</a><a href="#scenes">Applications</a><a href="#specs">Specifications</a><a href="#contact">Contact</a>
+      <button class="exp-play" id="play" type="button" aria-pressed="false"><span class="exp-play-symbol" aria-hidden="true"></span><span>Guided tour</span></button>
+      
+    </nav>
+    <span class="exp-reading-progress" aria-hidden="true"></span>
+  </header>
+  <main>
+    <section class="exp-hero" id="overview" aria-labelledby="hero-title">
+      <div class="exp-hero-stage">
+        <div class="exp-hero-glow" aria-hidden="true"></div>
+        <div class="exp-hero-heading"><h1 id="hero-title">Small machine.<br><span>Serious results.</span></h1><p>BL-T360-H / BL-T460-H stand-on mini skid steer loaders</p></div>
+        <div class="exp-3d exp-hero-3d" id="hero-3d" role="img" aria-label="Real-time 3D model of the loader; drag to rotate"></div>
+        <div class="exp-hero-product">
+          <img class="exp-hero-line" src="{{BASE}}assets/details/hero-line.webp" width="2200" height="1800" alt="" fetchpriority="high">
+          <img src="{{BASE}}assets/details/hero.webp" width="2200" height="1800" alt="Red stand-on tracked loader, full view" fetchpriority="high">
+          <span class="exp-hero-sweep" aria-hidden="true"></span>
+          <p class="exp-hero-meter" aria-hidden="true"><i></i><span>Loading the 3D model 0%</span></p>
+          <div class="exp-hero-frame" aria-hidden="true"></div>
+          <div class="exp-3d-hint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"></path><path d="M18 3v4h-4M6 21v-4h4"></path></svg>Drag to rotate · Real-time 3D</div>
+        </div>
+        <div class="exp-hero-caption"><p>More than looks.<br>Scroll down into every detail.</p><a class="exp-scroll-link" href="#intro">Start exploring<span aria-hidden="true">↓</span></a></div>
+        <span class="exp-hero-index" aria-hidden="true">Scroll to explore</span>
+      </div>
+    </section>
+
+    <section class="exp-intro" id="intro" aria-labelledby="intro-title">
+      <div class="exp-intro-copy">
+        <span class="exp-section-number">Model × Photos</span>
+        <h2 id="intro-title"><span>Demanding work,</span><br><span>in a compact frame.</span></h2>
+        <p>The 3D model is built from factory drawings;<br>the photos show the same machine.</p>
+        <div class="exp-intro-meta">
+          <span class="exp-slide-count" aria-hidden="true"><b id="slide-number">01</b><i>/ 11</i></span>
+          <div><b id="slide-label">Front</b><p>Same machine · On-site photos</p></div>
+        </div>
+      </div>
+      <div class="exp-slides-wrap">
+        <div class="exp-slides" id="slides" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Photos of the loader; use the left and right arrow keys to browse">
+          <div class="exp-slides-track">
+            <figure class="exp-slide is-active"><img src="{{BASE}}assets/turn/IMG_2724.webp" width="1600" height="1067" alt="Loader photo · Front" loading="lazy" decoding="async"></figure>
+          </div>
+          <button type="button" class="exp-slide-nav" data-slide-step="-1" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m15 5-7 7 7 7"></path></svg></button>
+          <button type="button" class="exp-slide-nav exp-slide-nav-next" data-slide-step="1" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 5 7 7-7 7"></path></svg></button>
+        </div>
+        <div class="exp-slides-dots"></div>
+      </div>
+      <span class="exp-intro-rule" aria-hidden="true"></span>
+    </section>
+
+    <section class="exp-explode" id="explode" aria-labelledby="explode-title">
+      <div class="exp-explode-stage">
+        <div class="exp-3d exp-explode-3d" id="explode-3d" role="img" aria-label="Exploded 3D view of the loader; drag to rotate"></div>
+        <div class="exp-explode-fallback" aria-hidden="true"><img src="{{BASE}}assets/details/hero.webp" alt=""></div>
+        <div class="exp-explode-copy"><span class="exp-section-number">00 / Exploded view</span><h2 id="explode-title"><span>Take it apart.</span><br><span>Every assembly.</span></h2><p>Scroll down and thirteen assembly groups separate along their factory assembly directions.<br>Click a part label to compare it with photos of the same spot.</p></div>
+        <div class="exp-explode-tip" aria-hidden="true">Drag to rotate<br>Click a part for photos</div>
+        <div class="exp-explode-status" id="explode-status" role="status">Loading the 3D model</div>
+        <div class="exp-explode-tools"><label for="explode-range">Explode</label><input id="explode-range" type="range" min="0" max="1000" value="0" step="1" disabled=""><button type="button" id="explode-open">Explode all</button><button type="button" id="explode-reset">Reassemble</button></div>
+      </div>
+    </section>
+
+    <section class="exp-parts" id="parts" aria-labelledby="parts-title">
+      <div class="exp-parts-heading"><span class="exp-section-number">Parts × Photos</span><h2 id="parts-title">Part by part,<br>model against the real thing.</h2><p>Scroll to a part on the left and the model on the right focuses on it, fading the rest; thumbnails open photos of that part.</p></div>
+      <ol class="exp-parts-list">
+          <li class="exp-part-card" data-part="bucket"><span class="exp-section-number">01 / 08</span><h3>Bucket</h3><p>Welded steel bucket, joined to the lift arms through the quick-attach plate and tilted by the front cylinders.</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="View Bucket photo 1"><img src="{{BASE}}assets/site/thumb/IMG_2810.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="View Bucket photo 2"><img src="{{BASE}}assets/site/thumb/IMG_2836.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="View Bucket photo 3"><img src="{{BASE}}assets/site/thumb/IMG_2850.webp" width="88" height="66" alt="" loading="lazy"></button></div></li>
+          <li class="exp-part-card" data-part="quickattach"><span class="exp-section-number">02 / 08</span><h3>Quick-attach &amp; hydraulic couplers</h3><p>The quick-attach plate locks the bucket to the front of the arms; hydraulic quick couplers beside it make changing attachments easy.</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="View Quick-attach &amp; hydraulic couplers photo 1"><img src="{{BASE}}assets/site/thumb/IMG_2812.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="View Quick-attach &amp; hydraulic couplers photo 2"><img src="{{BASE}}assets/site/thumb/IMG_2840.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="View Quick-attach &amp; hydraulic couplers photo 3"><img src="{{BASE}}assets/site/thumb/IMG_2962.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="3" aria-label="View Quick-attach &amp; hydraulic couplers photo 4"><img src="{{BASE}}assets/site/thumb/IMG_2999.webp" width="88" height="66" alt="" loading="lazy"></button></div></li>
+          <li class="exp-part-card" data-part="arm"><span class="exp-section-number">03 / 08</span><h3>Lift arms &amp; cylinders</h3><p>The arms pivot up about the rear frame pins, the lift cylinders on both sides extend with them, and the hoses run along the arms.</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="View Lift arms &amp; cylinders photo 1"><img src="{{BASE}}assets/site/thumb/IMG_2787.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="View Lift arms &amp; cylinders photo 2"><img src="{{BASE}}assets/site/thumb/IMG_2789.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="View Lift arms &amp; cylinders photo 3"><img src="{{BASE}}assets/site/thumb/IMG_2791.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="3" aria-label="View Lift arms &amp; cylinders photo 4"><img src="{{BASE}}assets/site/thumb/IMG_2806.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" class="exp-part-more" data-photo-index="4">+2 more</button></div></li>
+          <li class="exp-part-card" data-part="controls"><span class="exp-section-number">04 / 08</span><h3>Control panel</h3><p>Twin joysticks, one on each side, with a clear grip position; the gauge, key and battery isolator sit within the standing operator’s view, and a loop handrail runs around the controls.</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="View Control panel photo 1"><img src="{{BASE}}assets/site/thumb/IMG_2768.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="View Control panel photo 2"><img src="{{BASE}}assets/site/thumb/IMG_2767.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="View Control panel photo 3"><img src="{{BASE}}assets/site/thumb/IMG_2804.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="3" aria-label="View Control panel photo 4"><img src="{{BASE}}assets/site/thumb/IMG_2824.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" class="exp-part-more" data-photo-index="4">+3 more</button></div></li>
+          <li class="exp-part-card" data-part="engine"><span class="exp-section-number">05 / 08</span><h3>Engine &amp; cooling</h3><p>The engine sits at the rear, with its fan shroud, air filter and oil cooler under the hood.</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="View Engine &amp; cooling photo 1"><img src="{{BASE}}assets/site/thumb/IMG_2771.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="View Engine &amp; cooling photo 2"><img src="{{BASE}}assets/site/thumb/IMG_2775.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="View Engine &amp; cooling photo 3"><img src="{{BASE}}assets/site/thumb/IMG_2830.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="3" aria-label="View Engine &amp; cooling photo 4"><img src="{{BASE}}assets/site/thumb/IMG_2863.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" class="exp-part-more" data-photo-index="4">+4 more</button></div></li>
+          <li class="exp-part-card" data-part="tanks"><span class="exp-section-number">06 / 08</span><h3>Tanks &amp; battery</h3><p>The fuel tank, hydraulic tank and battery are mounted inside the frame; the hydraulic tank has a sight glass on its side.</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="View Tanks &amp; battery photo 1"><img src="{{BASE}}assets/site/thumb/IMG_2814.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="View Tanks &amp; battery photo 2"><img src="{{BASE}}assets/site/thumb/IMG_2779.webp" width="88" height="66" alt="" loading="lazy"></button></div></li>
+          <li class="exp-part-card" data-part="frame"><span class="exp-section-number">07 / 08</span><h3>Frame, hood &amp; platform</h3><p>The welded frame carries every assembly and the slotted hood lifts for service; the rear standing platform has a raised anti-slip pattern, designed from its surface to its edges for all-day standing.</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="View Frame, hood &amp; platform photo 1"><img src="{{BASE}}assets/site/thumb/IMG_2808.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="View Frame, hood &amp; platform photo 2"><img src="{{BASE}}assets/site/thumb/IMG_2838.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="View Frame, hood &amp; platform photo 3"><img src="{{BASE}}assets/site/thumb/IMG_2834.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="3" aria-label="View Frame, hood &amp; platform photo 4"><img src="{{BASE}}assets/site/thumb/IMG_2860.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" class="exp-part-more" data-photo-index="4">+2 more</button></div></li>
+          <li class="exp-part-card" data-part="tracks"><span class="exp-section-number">08 / 08</span><h3>Track undercarriage</h3><p>Steel track frames are mounted under the main frame, with rubber tracks wrapped around the drive sprockets and rollers.</p><div class="exp-part-photos"><button type="button" data-photo-index="0" aria-label="View Track undercarriage photo 1"><img src="{{BASE}}assets/site/thumb/IMG_2797.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="1" aria-label="View Track undercarriage photo 2"><img src="{{BASE}}assets/site/thumb/IMG_2842.webp" width="88" height="66" alt="" loading="lazy"></button><button type="button" data-photo-index="2" aria-label="View Track undercarriage photo 3"><img src="{{BASE}}assets/site/thumb/IMG_2740.webp" width="88" height="66" alt="" loading="lazy"></button></div></li>
+      </ol>
+      <div class="exp-parts-viewer">
+        <div class="exp-3d exp-parts-3d" id="parts-3d" role="img" aria-label="3D model focused on the current part; drag to rotate"></div>
+        <div class="exp-parts-viewer-head"><span>In focus: <b id="parts-current">Whole machine</b></span><button type="button" id="parts-all">Show whole machine</button></div>
+        <div class="exp-parts-viewer-foot">Drag to rotate · 3D model from factory STEP drawings</div>
+      </div>
+    </section>
+
+    <section class="exp-motion" id="motion" aria-labelledby="motion-title">
+      <div class="exp-motion-stage">
+        <div class="exp-3d exp-motion-3d" id="motion-3d" role="img" aria-label="Real-time 3D lift and tilt motion; drag to rotate"></div>
+        <div class="exp-motion-side"><div class="exp-motion-copy"><span class="exp-section-number">03 / Motion</span><h2 id="motion-title">Power,<br>delivered to the front.</h2><p>The arms pivot up about the rear pins, the cylinders extend and retract with them,<br>and the bucket tilts at the front. Scroll or drag the slider to watch a full cycle.</p></div>
+        <ol class="exp-motion-points"><li><span>01</span><div><h3>Lift</h3><p>The arms rise as the lift cylinders extend.</p></div></li><li><span>02</span><div><h3>Dump</h3><p>The tilt cylinders push out and the bucket tips about its front pivot.</p></div></li><li><span>03</span><div><h3>Return</h3><p>The bucket curls back and the arms return to the start.</p></div></li></ol></div>
+        <div class="exp-motion-tools"><button type="button" id="motion-play" aria-pressed="false"><span class="exp-play-symbol" aria-hidden="true"></span><span>Play motion</span></button><label class="exp-sr" for="motion-range">Lift and tilt progress</label><input id="motion-range" type="range" min="0" max="1000" value="0" step="1" disabled=""><span class="exp-motion-tag">Real-time 3D · Drag to change the view</span></div>
+        <div class="exp-motion-real"><span>Real machine</span><button type="button" data-real="lift">Lift &amp; lower ↗</button><button type="button" data-real="bucket">Bucket tilt ↗</button><button type="button" data-real="drive">Drive &amp; turn ↗</button></div>
+      </div>
+    </section>
+
+    <section class="exp-scenes" id="scenes" aria-labelledby="scenes-title">
+      <div class="exp-scenes-stage" data-scene="garden">
+        <div class="exp-scenes-wash" aria-hidden="true"></div>
+        <div class="exp-scene-plate" data-plate="garden" aria-hidden="true"></div><div class="exp-scene-plate" data-plate="site" aria-hidden="true"></div><div class="exp-scene-plate" data-plate="farm" aria-hidden="true"></div>
+        <div class="exp-scenes-heading"><span class="exp-section-number">04 / Applications</span><h2 id="scenes-title">Go where the work is.</h2></div>
+        <video class="exp-scene-video" muted="" playsinline="" loop="" preload="none" aria-label="Looping demonstrations of the loader at work in landscaping, construction and farming"></video>
+        <div class="exp-scene-veil" aria-hidden="true"></div>
+        <div class="exp-3d exp-scenes-3d" id="scenes-3d" aria-hidden="true"></div><div class="exp-scenes-grain" aria-hidden="true"></div>
+        <div class="exp-scene-cards">
+          <article class="exp-scene-card is-active" data-scene="garden"><span class="exp-scene-index">01</span><h3>Landscaping &amp; gardens</h3><p>A compact body fits down side passages and into yards,<br>grading, backfilling and moving paving materials close to the ground.</p><ul><li>Short hauls of soil and gravel</li><li>Base grading and backfill</li><li>Moving stone and blocks</li><li>Rubber tracks leave fewer marks on lawns</li></ul></article>
+          <article class="exp-scene-card" data-scene="site"><span class="exp-scene-index">02</span><h3>Construction &amp; renovation</h3><p>Between buildings, in basements and behind hoardings,<br>it loads bulk material and debris onto trucks.</p><ul><li>Loading construction debris for removal</li><li>Handling sand, gravel and aggregate</li><li>Working alongside mini dumpers</li><li>Stand-on: quick to step on and off</li></ul><button class="exp-scene-photo" type="button" data-scene-photo="scene-earthwork" aria-label="View photo: earthwork"><img src="{{BASE}}assets/site/scene-earthwork.webp" width="800" height="800" alt="" loading="lazy"><span>Photo · Earthwork ↗</span></button></article>
+          <article class="exp-scene-card" data-scene="farm"><span class="exp-scene-index">03</span><h3>Farms &amp; ranches</h3><p>Around barns, pens and yards,<br>bucket curled, it brings feed and bedding where they’re needed.</p><ul><li>Clearing manure and bedding from barns</li><li>Moving feed and bales</li><li>Levelling yards and lanes</li><li>Stable travel on soft ground</li></ul></article>
+        </div>
+        <div class="exp-scene-tabs" role="tablist" aria-label="Choose an application"><button class="exp-scene-tab" role="tab" type="button" aria-selected="true">Landscaping &amp; gardens</button><button class="exp-scene-tab" role="tab" type="button" aria-selected="false">Construction &amp; renovation</button><button class="exp-scene-tab" role="tab" type="button" aria-selected="false">Farms &amp; ranches</button></div>
+        <p class="exp-scenes-note">Scenes and tasks reflect typical uses of compact stand-on tracked loaders, not specific customer projects; poses are illustrative.</p>
+      </div>
+    </section>
+
+    {{SPECS}}
+
+    <section class="exp-finale" id="finale" aria-labelledby="finale-title">
+      <div class="exp-finale-track">
+        <div class="exp-finale-stage">
+          <div class="exp-finale-heading"><p>After the details, the whole machine.</p><h2 id="finale-title">BL-T360 / BL-T460</h2></div>
+          <div class="exp-finale-product">
+            <img src="{{BASE}}assets/details/hero.webp" width="2200" height="1800" alt="BOB-LIFT BL-T360-H / BL-T460-H stand-on mini skid steer loader" loading="lazy">
+            <div class="exp-finale-frame" aria-hidden="true"></div>
+            <div class="exp-3d-hint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"></path><path d="M18 3v4h-4M6 21v-4h4"></path></svg>Drag to rotate</div>
+          </div>
+          <div class="exp-finale-paint" role="group" aria-label="Body color" hidden="">
+            <button type="button" data-paint="b8220f" aria-pressed="true" style="--swatch:#c42a14"><span class="exp-sr">Vermilion</span></button><button type="button" data-paint="ffbe00" aria-pressed="false" style="--swatch:#f5b800"><span class="exp-sr">Construction yellow</span></button><button type="button" data-paint="1b4f94" aria-pressed="false" style="--swatch:#1f5aa6"><span class="exp-sr">Ocean blue</span></button><button type="button" data-paint="141517" aria-pressed="false" style="--swatch:#18191b"><span class="exp-sr">Obsidian black</span></button>
+            <b id="finale-paint-name" aria-live="polite">Vermilion</b>
+            <p class="exp-finale-paint-note">Custom colors available on request</p>
+          </div>
+          <div class="exp-3d exp-finale-3d" id="finale-3d" role="img" aria-label="3D model of the loader; drag to rotate and change the body color"></div>
+        </div>
+      </div>
+      <div class="exp-finale-bottom"><div><h3>One design. Two power levels.</h3><p>The BL-T360-H: single-cylinder, narrower and lighter. The BL-T460-H: twin-cylinder, wider, carries more.</p></div><div class="exp-actions"><button class="exp-primary" id="photos-open" type="button" data-lightbox="overview">View real photos<span aria-hidden="true">↗</span></button><a class="exp-text-link" href="#overview">Back to top ↑</a></div></div>
+    </section>
+
+    {{CONTACT}}
+  </main>
+  <footer class="exp-page-footer"><span>BOB-LIFT · BL-T360-H / BL-T460-H</span><p>Appearance showcase. The 3D model is based on factory STEP drawings, with exterior parts completed from photos; explode directions and motion travel are illustrative, not measured machine data.</p></footer>
+  <dialog class="exp-lightbox" id="lightbox" aria-labelledby="lightbox-title">
+    <div class="exp-lightbox-head"><div><h2 id="lightbox-title">Photos</h2><p id="lightbox-count">1 / 1</p></div><button class="exp-close" type="button" aria-label="Close photos"><svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button></div>
+    <div class="exp-lightbox-stage"><img src="" alt="" decoding="async"><button class="exp-lightbox-nav" type="button" data-prev="" aria-label="Previous">‹</button><button class="exp-lightbox-nav" type="button" data-next="" aria-label="Next">›</button></div>
+    <div class="exp-lightbox-thumbs" role="group" aria-label="Choose a photo"></div>
+  </dialog>
+  <dialog class="exp-gallery exp-real-dialog" id="real-dialog" aria-labelledby="real-title">
+    <div class="exp-gallery-head"><div><h2 id="real-title">The real machine, in motion.</h2><p id="real-caption">Footage of the machine at work</p></div><button class="exp-close" id="real-close" type="button" aria-label="Close video">×</button></div>
+    <video class="exp-real-video" id="real-video" controls="" playsinline="" preload="none" aria-label="Video of the machine in operation"></video>
+    <div class="exp-gallery-tabs" role="group" aria-label="Choose a motion"><button type="button" data-real-choice="drive" aria-pressed="false">Drive &amp; turn</button><button type="button" data-real-choice="lift" aria-pressed="false">Lift &amp; lower</button><button type="button" data-real-choice="bucket" aria-pressed="false">Bucket tilt</button></div>
+    <p class="exp-gallery-note">Real footage for reference; travel, speed ratios and hose deformation in the 3D demo are not yet engineering-calibrated.</p>
+  </dialog>
+  <script>I18N.apply();</script>

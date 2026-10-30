@@ -469,3 +469,14 @@ PLAYWRIGHT_CORE=<playwright-core 目录> node loader-experience/scripts/capture_
 
 修后同样的扫描（桌面 1440 × 900）：首屏每帧渲染都在 8 ms 内，唯一的长帧移到 1.91 屏（行驶结束后、唤醒结构拆解时）。手机上这几次编译原本各要数百毫秒，这是卡顿的主要来源；未在真机上复测，iOS Safari 的 `compileAsync` 可能不是并行编译。`viewer.js` v35、`logo-tow.js` v4、`explore.js` v83。
 
+
+## 装进主站：bobliftloader.com/bl-t360-t460/（2026-10-30）
+
+原先单独托管在 EdgeOne（bl360.bobliftloader.com），现在作为装载站主题的一个页面上线，旧子域上线后 301 到新网址。
+
+- 构建：在仓库根目录运行 `node loader-experience/scripts/build_wp.mjs`，生成主题里的 `assets/bl360/`（压缩后的脚本、样式和素材）和 `templates/bl360/`（页面标记）。改了本目录的页面、文案或素材后都要重跑并一起提交；`index.html` 仍是源文件。
+- 语言跟主站：主站目前只有英文，所以主题版的 HTML 直接是英文（构建时用无头浏览器只跑翻译，把英文结果存下来），去掉了页内中/英/俄/西切换，i18n.js 固定英文、只带中→英对照给脚本用。主站以后开小语种，这页跟着主站的语言方案走。型号按主站写 BL-T360-H / BL-T460-H，收尾大字保留原样。
+- 素材共用：三段实机视频直接用主题 `assets/videos/`（产品页同一份，540p），不再另带 `real-motion/`；没用到的 `orbit/`、`motion/` 不打包。其余素材（三维模型、渲染图、场景视频、实拍）只有这页用，放在 `assets/bl360/assets/`。实拍与产品页图库逐张比过，没有重复。
+- 主题负责的部分（`inc/showcase.php`、`templates/bl360.php`）：标题/描述/规范链接/结构化数据/分享图、谷歌标签和 Cookie 提示、询盘来源记录；参数表和联系区按两款产品后台记录和公司设置生成，产品参数改了这页自动跟着变；Logo 回主站首页。
+- 入口：两款产品页图库下方（手机在询价按钮下方）各有一条「Explore the … in 3D」。
+- 测试：`php tests/test_showcase.php`。

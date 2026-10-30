@@ -7,6 +7,7 @@ $pages = [
     ['label' => bl_content_value('global', 'sitemap.home_label'), 'url' => '/'],
     ['label' => bl_content_value('global', 'footer.loaders_label'), 'url' => '/products/skid-steer-loaders/'],
     ['label' => bl_content_value('global', 'footer.dumpers_label'), 'url' => '/products/mini-dumpers/'],
+    ...(($showcase = bl_showcase_products()) ? [['label' => implode(' & ', array_column($showcase, 'model')) . ' in 3D', 'url' => BL_SHOWCASE_PATH]] : []),
     ['label' => bl_content_value('global', 'footer.applications_label'), 'url' => '/applications/'],
     ['label' => bl_content_value('global', 'footer.support_label'), 'url' => '/support/'],
     ['label' => bl_content_value('global', 'footer.about_label'), 'url' => '/about/'],

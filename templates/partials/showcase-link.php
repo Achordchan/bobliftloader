@@ -1,0 +1,3 @@
+<?php /* Product pages of the BL-T360-H and BL-T460-H: the way into the 3D showcase (inc/showcase.php). Written twice: under
+the gallery on wider screens, and under the quote button on phones, where the gallery's foot holds its dots. */ ?>
+<a class="bl-product-3d bl-product-3d-<?= $showcasePlace ?>" href="<?= bl_escape(bl_url(BL_SHOWCASE_PATH)) ?>"><img src="<?= bl_escape(bl_asset('images/showcase/bl-t360-t460-3d.webp')) ?>" alt="" width="160" height="144" loading="lazy" decoding="async"><span><b>Explore the <?= bl_escape($product['model']) ?> in 3D</b><small>Exploded view, components, hydraulics in motion and the <?= bl_escape(implode(' / ', array_column(bl_showcase_products(), 'model'))) ?> side by side</small></span><?= bl_icon('arrow-up-right') ?></a>

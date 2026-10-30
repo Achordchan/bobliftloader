@@ -110,6 +110,7 @@ function bl_absolute_asset(string $url): string
 function bl_share_image(array $route): string
 {
     if (!empty($route['record']['image'])) return $route['record']['image'];
+    if ($route['type'] === 'showcase') return bl_asset('bl360/assets/details/share.jpg');
     $page = bl_seo_content_page($route);
     foreach (array_unique([$page, 'home']) as $key) {
         $custom = (string) (bl_editable($key)['seo']['image'] ?? '');

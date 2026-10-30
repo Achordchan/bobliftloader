@@ -1,0 +1,132 @@
+{
+ "groups": {
+  "frame": {
+   "parts": 146,
+   "polys": 65200,
+   "ao": "frame.png",
+   "ao_size": 2048
+  },
+  "arm": {
+   "parts": 63,
+   "polys": 25078,
+   "ao": "arm.png",
+   "ao_size": 2048
+  },
+  "fueltank": {
+   "parts": 5,
+   "polys": 6264,
+   "ao": "fueltank.png",
+   "ao_size": 1024
+  },
+  "trackframe": {
+   "parts": 34,
+   "polys": 16272,
+   "ao": "trackframe.png",
+   "ao_size": 2048
+  },
+  "bucket": {
+   "parts": 18,
+   "polys": 6592,
+   "ao": "bucket.png",
+   "ao_size": 1024
+  },
+  "quickattach": {
+   "parts": 16,
+   "polys": 9664,
+   "ao": "quickattach.png",
+   "ao_size": 1024
+  },
+  "hydtank": {
+   "parts": 8,
+   "polys": 19200,
+   "ao": "hydtank.png",
+   "ao_size": 2048
+  },
+  "battery": {
+   "parts": 12,
+   "polys": 32178,
+   "ao": "battery.png",
+   "ao_size": 2048
+  },
+  "trackL": {
+   "parts": 229,
+   "polys": 34050,
+   "ao": "trackL.png",
+   "ao_size": 2048
+  },
+  "trackR": {
+   "parts": 229,
+   "polys": 34050,
+   "ao": "trackR.png",
+   "ao_size": 2048
+  },
+  "liftBarrel": {
+   "parts": 22,
+   "polys": 6516,
+   "ao": "liftBarrel.png",
+   "ao_size": 1024
+  },
+  "liftRod": {
+   "parts": 4,
+   "polys": 968,
+   "ao": "liftRod.png",
+   "ao_size": 1024
+  },
+  "tiltBarrel": {
+   "parts": 9,
+   "polys": 2538,
+   "ao": "tiltBarrel.png",
+   "ao_size": 1024
+  },
+  "tiltRod": {
+   "parts": 1,
+   "polys": 338,
+   "ao": "tiltRod.png",
+   "ao_size": 1024
+  },
+  "controls": {
+   "parts": 65,
+   "polys": 15590,
+   "ao": "controls.png",
+   "ao_size": 2048
+  },
+  "engine": {
+   "parts": 78,
+   "polys": 7652,
+   "ao": "engine.png",
+   "ao_size": 1024
+  }
+ },
+ "pins": {
+  "armPivot": [
+   0.0,
+   1.036,
+   0.245
+  ],
+  "liftBase": [
+   0.0,
+   0.631,
+   0.405
+  ],
+  "liftRodEnd": [
+   0.0,
+   0.54208,
+   -0.31235
+  ],
+  "tiltBase": [
+   0.0,
+   0.79007,
+   -0.53061
+  ],
+  "bucketPivot": [
+   0.0,
+   0.14145,
+   -0.59888
+  ],
+  "tiltRodEnd": [
+   0.0,
+   0.28746,
+   -0.67716
+  ]
+ }
+}
