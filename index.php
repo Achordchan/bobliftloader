@@ -17,6 +17,11 @@ if (!bl_is_wordpress() && $route['status'] === 200) {
 }
 // WordPress has already sent its own status (200 for a post it found, even one this theme will not show); status_header() replaces it.
 if (bl_is_wordpress()) status_header($route['status']); else http_response_code($route['status']);
+// The 3D showcase is a page of its own (its own header, chapters and styles), not inside the site's header and footer.
+if ($route['type'] === 'showcase') {
+    require __DIR__ . '/templates/bl360.php';
+    return;
+}
 ?>
 <!doctype html>
 <html lang="en">

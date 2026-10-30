@@ -13,6 +13,22 @@
 .bl-site .bl-gallery-step{display:none}
 .bl-site .bl-product-main-image #product-photo{cursor:zoom-in}
 
+/* BL-T360-H / BL-T460-H: the way into the 3D showcase, a dark strip under the gallery in the showcase's own colours. */
+.bl-site .bl-product-3d{grid-column:1/-1;display:grid;grid-template-columns:80px minmax(0,1fr) auto;align-items:center;gap:16px;padding:10px 18px 10px 10px;background:#121314;color:#fff;transition:background .2s}
+.bl-site .bl-product-3d img{width:80px;height:72px;object-fit:contain}
+.bl-site .bl-product-3d b{display:block;font-family:var(--display);font-size:20px;line-height:1.1;letter-spacing:.3px;text-transform:uppercase}
+.bl-site .bl-product-3d small{display:block;margin-top:4px;font-size:13px;line-height:1.4;color:#b4b4ba}
+.bl-site .bl-product-3d .bl-icon{width:20px;height:20px;filter:invert(1)}
+@media(hover:hover){.bl-site .bl-product-3d:hover{background:#26282b}}
+.bl-site .bl-product-3d-intro{display:none}
+@media(max-width:600px){
+  .bl-site .bl-product-3d-gallery{display:none}
+  .bl-site .bl-product-3d-intro{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;margin-top:16px;padding:8px 14px 8px 8px}
+  .bl-site .bl-product-3d-intro img{width:56px;height:50px}
+  .bl-site .bl-product-3d-intro b{font-size:17px}
+  .bl-site .bl-product-3d-intro small{font-size:12px}
+}
+
 /* The on-page bar: pinned under the header, with the quote button at its end. */
 .bl-site .bl-product-section-nav{display:block;min-height:0;padding:0;gap:0}
 .bl-site .bl-product-section-nav>.bl-shell{display:flex;align-items:center;gap:clamp(20px,2vw,48px);min-height:clamp(64px,3.4vw,86px)}
