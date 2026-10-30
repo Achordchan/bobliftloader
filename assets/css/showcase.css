@@ -1,0 +1,19 @@
+/* The 3D showcase at /bl-t360-t460/ (templates/bl360.php): the site parts it adds to the page built from loader-experience/.
+   The site header sits in the page flow above the page's own chapter bar and scrolls away with the first screen; the
+   chapter bar then holds the top, laid over the page as before (its height stays --header-h for the sticky chapters). */
+.bl-showcase-site{background:none}
+.bl-showcase-site .bl-header{z-index:40} /* the phone menu opens below the header, over the chapter bar */
+.experience .exp-header{position:sticky;top:0;margin-bottom:calc(-1 * var(--header-h));
+  /* lined up with the site header above it (its --gutter and frame width) */
+  padding-inline:max(clamp(24px,4.2vw,108px),calc((100% - 2240px) / 2 + clamp(24px,4.2vw,108px)))}
+.exp-brand-title{font-size:15px;font-weight:650;letter-spacing:-.01em;color:#fff;white-space:nowrap}
+@media(max-width:600px){.exp-brand-title{font-size:13px}}
+/* The models' names in the specifications and contact sections lead to their product pages. */
+.exp-contact-copy p a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.exp-specs-table thead a{color:inherit}
+.exp-specs-table thead a:hover{color:var(--accent)}
+/* Footer: the privacy notice and the cookie choices, as in the site footer. */
+.exp-page-footer>span{flex:none;white-space:nowrap}
+.exp-footer-links{display:flex;flex-wrap:wrap;gap:6px 18px;flex:none}
+.exp-footer-links a,.exp-footer-links button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.exp-footer-links [hidden]{display:none}

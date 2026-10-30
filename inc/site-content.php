@@ -176,7 +176,7 @@ function bl_seo_content_page(array $route): string
 /** Preserve active states independently of menu order. */
 function bl_header_active(string $id, string $type): bool
 {
-    $types = ['equipment' => ['products', 'product'], 'applications' => ['applications', 'application', 'application_case'], 'support' => ['support'], 'about' => ['about'], 'news' => ['news', 'article']];
+    $types = ['equipment' => ['products', 'product', 'showcase'], 'applications' => ['applications', 'application', 'application_case'], 'support' => ['support'], 'about' => ['about'], 'news' => ['news', 'article']];
     return in_array($type, $types[$id] ?? [], true);
 }
 
