@@ -10,7 +10,7 @@ declare(strict_types=1);
 const BL_SHOWCASE_PATH = '/bl-t360-t460/';
 const BL_SHOWCASE_SLUGS = ['bl-t360-h-mini-skid-steer-loader', 'bl-t460-h-mini-skid-steer-loader'];
 
-/** The two machines the page is about, in page order; empty when either record is missing (the page then 404s). */
+/** The two machines the page is about, in page order (found by slug or an earlier slug); empty when either is missing (the page then 404s). */
 function bl_showcase_products(): array
 {
     $products = [];
@@ -22,9 +22,10 @@ function bl_showcase_products(): array
     return $products;
 }
 
+/** Whether a product page leads to the showcase; matched on the records' current slugs, so a renamed model still does. */
 function bl_is_showcase_product(array $product): bool
 {
-    return in_array($product['slug'] ?? '', BL_SHOWCASE_SLUGS, true);
+    return in_array($product['slug'] ?? '', array_column(bl_showcase_products(), 'slug'), true);
 }
 
 /** Specification groups of the comparison table: label shown => record keys tried in turn. */

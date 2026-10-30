@@ -10,6 +10,8 @@ $check = static function (bool $ok, string $message) use (&$failures): void { if
 $route = bl_resolve_route('/bl-t360-t460/');
 $check($route['type'] === 'showcase' && $route['status'] === 200, 'route: ' . $route['type'] . ' ' . $route['status']);
 $check(in_array('/bl-t360-t460/', bl_sitemap_paths(), true), 'the showcase is not in the sitemap');
+ob_start(); require __DIR__ . '/../templates/pages/sitemap.php'; $sitemapHtml = (string) ob_get_clean();
+$check(str_contains($sitemapHtml, 'BL-T360-H &amp; BL-T460-H in 3D') || str_contains($sitemapHtml, 'BL-T360-H & BL-T460-H in 3D'), 'the showcase is not in the HTML sitemap');
 $check(str_ends_with(bl_share_image($route), 'bl360/assets/details/share.jpg'), 'share image: ' . bl_share_image($route));
 
 $products = bl_showcase_products();
