@@ -24,10 +24,25 @@ $specs = bl_showcase_specs_html($changed);
 $check(str_contains($specs, '<td>1,234 mm</td>'), 'the table does not follow the product record');
 $check(str_contains($specs, '<td colspan="2">' . bl_escape($products[0]['specs']['Bucket capacity']) . '</td>'), 'equal values do not span both columns');
 $check(str_contains($specs, 'href="/product/bl-t360-h-mini-skid-steer-loader/"') && str_contains($specs, 'href="/product/bl-t460-h-mini-skid-steer-loader/"'), 'the table heads do not link the product pages');
+// Every published figure of either record is in the table (a figure added to a product page shows here), and the
+// comparison lines are written from the records.
+$changed[0]['specs']['Track width'] = '180 mm';
+$specs = bl_showcase_specs_html($changed);
+$check(str_contains($specs, '<th scope="row">Track width</th><td>180 mm</td><td>—</td>'), 'a new figure on a record is not in the table');
+foreach ($products as $product) foreach ($product['specs'] as $label => $value) $check(str_contains(bl_showcase_specs_html($products), '<th scope="row">' . bl_escape($label) . '</th>'), 'missing row: ' . $label);
+$check(str_contains(bl_showcase_compare($changed), "1,234\u{00A0}mm wide") && str_contains(bl_showcase_compare($products), 'The BL-T360-H: single-cylinder'), 'comparison line: ' . bl_showcase_compare($changed));
+// The same figure under its two names (Travel speed / Max travel speed) is one row, not two half-empty ones.
+$renamed = $products;
+$renamed[1]['specs'] = ['Max travel speed' => $renamed[1]['specs']['Travel speed']] + $renamed[1]['specs'];
+unset($renamed[1]['specs']['Travel speed']);
+$specs = bl_showcase_specs_html($renamed);
+$check(substr_count($specs, 'travel speed</th>') + substr_count($specs, 'Travel speed</th>') === 1 && str_contains($specs, '<td colspan="2">' . bl_escape($products[0]['specs']['Travel speed']) . '</td>'), 'travel speed under two names is not one row');
 $contact = bl_showcase_contact_html($products);
 $check(str_contains($contact, '/contact/?product=bl-t360-h-mini-skid-steer-loader#enquiry') && str_contains($contact, bl_company('email')), 'contact section');
 
 // The built markup: English, every asset from the theme folder, no language menu, the two theme sections filled in.
+$route = bl_resolve_route('/bl-t360-t460/');
+ob_start(); require __DIR__ . '/../templates/bl360.php'; $page = (string) ob_get_clean();
 $body = bl_showcase_markup('body.html', $products);
 $head = bl_showcase_markup('head.html');
 $check(!preg_match('/[一-鿿]/u', (string) preg_replace('~<script\b[^>]*>.*?</script>~s', '', $body)), 'Chinese text in the page');
@@ -38,7 +53,12 @@ $check(str_contains($body, 'class="exp-footer-links"') && str_contains($body, '/
 $check(str_contains($body, 'id="specs"') && str_contains($body, 'id="contact"'), 'specs or contact section missing');
 $check(str_contains($head, '"three":"/assets/bl360/assets/vendor/three/three.module.js"'), 'import map: three.js');
 $check(substr_count($body . $head, '<script type="importmap">') === 1, 'more than one import map');
-foreach (['assets/model/loader.glb.gz', 'assets/env/sky.hdr.gz', 'app.js', 'explore.js', 'i18n/i18n.js', 'site.css'] as $file) $check(is_file(__DIR__ . '/../assets/bl360/' . $file), 'missing assets/bl360/' . $file);
+// The whole page: the site header (main navigation, search, cookie banner) in its own .bl-site box above the chapter bar.
+$check(strpos($page, 'class="bl-site bl-showcase-site"') < strpos($page, '<header class="exp-header">') && str_contains($page, 'id="main-navigation"') && str_contains($page, 'id="site-search"'), 'site header above the chapter bar');
+$check(!str_contains($page, '<body class="experience bl-site"') && str_contains($page, 'css/showcase.css') && str_contains($page, 'js/main.js'), 'page styles or scripts');
+$check(str_contains($page, 'aria-current="page"'), 'Equipment is not marked current');
+$check(substr_count($page, '<script type="importmap">') === 1 && !str_contains($page, '{{'), 'whole page: import map or placeholder');
+foreach (['assets/model/loader.glb.gz', 'assets/env/sky.hdr.gz', 'app.js', 'explore.js', 'i18n/i18n.js'] as $file) $check(is_file(__DIR__ . '/../assets/bl360/' . $file), 'missing assets/bl360/' . $file);
 $check(!is_dir(__DIR__ . '/../assets/bl360/assets/real-motion'), 'the real-machine clips are copied again (the page uses assets/videos/)');
 
 // The two product pages lead to the showcase; other products do not.
