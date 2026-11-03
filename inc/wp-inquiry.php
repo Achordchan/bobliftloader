@@ -14,8 +14,49 @@ const BL_ENQUIRY_FAMILIES_ZH = ['Skid steer loader' => '滑移装载机', 'Mini 
 // The equipment choices of the form: the page's key => the value sent.
 const BL_ENQUIRY_FAMILIES = ['loader' => 'Skid steer loader', 'dumper' => 'Mini dumper', 'help' => 'Help me choose', 'service' => 'Parts & service'];
 
+/**
+ * What the Contact Form 7 form did that the inquiry plugin does not: a confirmation mail to the customer (Mail (2)) and
+ * copies to Cc or Bcc addresses. Empty when there is no such form or it did neither.
+ */
+function bl_wp_inquiry_legacy_extras(): array
+{
+    $form = (int) get_option('bl_inquiry_form');
+    if ($form <= 0) return [];
+    $extras = [];
+    $mail = get_post_meta($form, '_mail', true);
+    if (is_array($mail) && preg_match('/^\s*(Cc|Bcc)\s*:\s*(.+)$/mi', (string) ($mail['additional_headers'] ?? ''), $match)) $extras[] = '通知邮件还抄送给 ' . trim($match[2]) . '（' . $match[1] . '），新插件不会抄送';
+    $reply = get_post_meta($form, '_mail_2', true);
+    if (is_array($reply) && !empty($reply['active'])) $extras[] = '给客户的自动回复邮件（Mail (2)）已开启，新插件不发自动回复';
+    return $extras;
+}
+
+/**
+ * Whether the theme hands enquiries to the plugin now. A site whose CF7 form did something the plugin does not (above)
+ * waits until an administrator confirms the switch (bl_inquiry_switch_confirmed), so nothing stops silently; until then
+ * the front shows the theme's email-draft form.
+ */
+function bl_wp_inquiry_switch_allowed(): bool
+{
+    return get_option('bl_inquiry_switch_confirmed') === '1' || !bl_wp_inquiry_legacy_extras();
+}
+
+add_action('admin_notices', static function (): void {
+    if (!current_user_can('manage_options') || bl_wp_inquiry_switch_allowed() || !function_exists('achord_inquiry_active')) return;
+    $items = implode('', array_map(static fn(string $text): string => '<li>' . esc_html($text) . '</li>', bl_wp_inquiry_legacy_extras()));
+    $url = wp_nonce_url(admin_url('admin-post.php?action=bl_inquiry_switch'), 'bl_inquiry_switch');
+    echo '<div class="notice notice-warning"><p><strong>询盘插件还没接管表单</strong>（前台暂时是邮件草稿表单）。原来的 Contact Form 7 表单有新插件不做的设置：</p><ul style="list-style:disc;margin-left:20px">' . $items . '</ul><p>确认不再需要后再切换（切换后表单交给询盘插件）。<a class="button button-primary" href="' . esc_url($url) . '">确认切换到询盘插件</a></p></div>';
+});
+add_action('admin_post_bl_inquiry_switch', static function (): void {
+    if (!current_user_can('manage_options')) wp_die('', '', ['response' => 403]);
+    check_admin_referer('bl_inquiry_switch');
+    update_option('bl_inquiry_switch_confirmed', '1', false);
+    wp_safe_redirect(admin_url('edit.php?post_type=bl_inquiry'));
+    exit;
+});
+
 /** Hand enquiries to the plugin. Its posted names keep this theme's bl_ prefix, which assets/js/attribution.js fills in. */
 add_action('after_setup_theme', static function (): void {
+    if (!bl_wp_inquiry_switch_allowed()) return;
     add_theme_support('achord-inquiry', [
         'site_label' => '装载设备站',
         'dingtalk_emoji' => '📩',

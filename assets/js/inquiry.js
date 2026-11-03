@@ -62,19 +62,20 @@ function initializeTurnstile(form) {
 }
 
 // Send the form to the inquiry plugin and read its JSON answer; a page the cache kept past its form key gets a fresh key
-// (wp-inquiry.php, bl_wp_inquiry_fresh_nonce) and is sent once more.
-async function post(form, retried = false) {
+// (wp-inquiry.php, bl_wp_inquiry_fresh_nonce) and the same values, read when Send was pressed, are sent once more.
+async function post(form, body = new FormData(form), retried = false) {
   // getAttribute: the plugin's hidden field named "action" hides the form's own action property.
-  const response = await fetch(form.getAttribute('action'), { method: 'POST', body: new FormData(form), credentials: 'same-origin', headers: { Accept: 'application/json' } });
+  const response = await fetch(form.getAttribute('action'), { method: 'POST', body, credentials: 'same-origin', headers: { Accept: 'application/json' } });
   let answer = null;
   try { answer = await response.json(); } catch { /* not JSON: a server error page */ }
   if (response.status === 403 && !retried && form.dataset.nonceUrl) {
     try {
       const fresh = await (await fetch(form.dataset.nonceUrl, { credentials: 'same-origin', cache: 'no-store' })).json();
       const field = form.querySelector('input[name="bl_inquiry_nonce"]');
-      if (fresh?.data?.nonce && field) {
-        field.value = fresh.data.nonce;
-        return post(form, true);
+      if (fresh?.data?.nonce) {
+        if (field) field.value = fresh.data.nonce;
+        body.set('bl_inquiry_nonce', fresh.data.nonce);
+        return post(form, body, true);
       }
     } catch { /* falls through to the message below */ }
   }

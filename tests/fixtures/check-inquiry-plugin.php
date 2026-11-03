@@ -81,4 +81,12 @@ if (apply('achord_inquiry_default_options', $defaults) !== ['store_ip' => '1'] +
 $GLOBALS['options']['wpcf7'] = ['turnstile' => ['site-k' => 'secret-k']];
 $given = apply('achord_inquiry_default_options', $defaults);
 if ($given['turnstile_site_key'] !== 'site-k' || $given['turnstile_secret_key'] !== 'secret-k' || $given['turnstile_enabled'] !== '1') $fail(13, 'cf7 turnstile keys');
+// A CF7 form that copied the mail elsewhere or answered the customer waits for an administrator to confirm the switch.
+$GLOBALS['meta'][18]['_mail'] = ['recipient' => 'a@example.test', 'additional_headers' => "Reply-To: [name] <[email]>"];
+if (bl_wp_inquiry_legacy_extras() !== [] || !bl_wp_inquiry_switch_allowed()) $fail(21, 'plain form held back');
+$GLOBALS['meta'][18]['_mail']['additional_headers'] .= "\nBcc: boss@example.test";
+$GLOBALS['meta'][18]['_mail_2'] = ['active' => true];
+if (count(bl_wp_inquiry_legacy_extras()) !== 2 || bl_wp_inquiry_switch_allowed()) $fail(22, 'cc or autoresponder not held back');
+$GLOBALS['options']['bl_inquiry_switch_confirmed'] = '1';
+if (!bl_wp_inquiry_switch_allowed()) $fail(23, 'confirmed switch held back');
 echo "inquiry plugin integration ok\n";
