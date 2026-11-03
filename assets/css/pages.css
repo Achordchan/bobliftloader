@@ -937,7 +937,7 @@
    up; scrolling back up reaches the close button). With the keyboard up quick.js
    sizes .bl-quick to the visible area and the panel follows with height:100%. */
 @media(max-width:800px),(max-width:1000px) and (max-height:500px){
-  .bl-site .bl-quick.bl-quick-full.bl-quick-open{top:0;bottom:0;z-index:40}
+  .bl-site .bl-quick.bl-quick-full.bl-quick-open{top:0;right:0;bottom:0;left:0;width:auto;z-index:40}
   .bl-site .bl-quick-full.bl-quick-open::before{display:none}
   .bl-site .bl-quick-full .bl-quick-panel{height:100%;max-height:none;border:0;box-shadow:none;padding-top:env(safe-area-inset-top,0px);animation:bl-quick-full-in .18s ease-out}
   .bl-site .bl-quick-full .bl-quick-form{padding-bottom:max(24px,env(safe-area-inset-bottom,0px))}
