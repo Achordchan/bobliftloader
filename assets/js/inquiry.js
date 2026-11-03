@@ -18,31 +18,44 @@ const TURNSTILE = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=
 const NETWORK_ERROR = 'The enquiry could not be sent. Please check your connection and try again, or email us directly.';
 let turnstileScript = null;
 
-// Cloudflare's script, loaded once, the first time a form with a check comes into view.
+// Cloudflare's script, loaded once; a load that failed is forgotten, so the next try loads it again.
 function loadTurnstile() {
   turnstileScript ??= new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = TURNSTILE;
     script.async = true;
     script.onload = () => (window.turnstile ? resolve(window.turnstile) : reject(new Error('turnstile')));
-    script.onerror = reject;
+    script.onerror = () => { script.remove(); reject(new Error('turnstile')); };
     document.head.append(script);
+  }).catch((error) => {
+    turnstileScript = null;
+    throw error;
   });
   return turnstileScript;
 }
 
 // The check (when 设置 → 询盘设置 turns it on) is drawn when its form is first seen: the quick enquiry's stays unloaded
-// until its panel opens.
+// until its panel opens. If Cloudflare could not be reached then, the next send tries again (draw()), keeping what was typed.
 function initializeTurnstile(form) {
   const box = form.querySelector('[data-turnstile-widget]');
-  if (!box || !('IntersectionObserver' in window)) return null;
-  const state = { id: null };
+  if (!box) return null;
+  const state = { id: null, drawing: null };
+  state.draw = () => {
+    if (state.id != null) return Promise.resolve(state.id);
+    state.drawing ??= loadTurnstile().then((turnstile) => {
+      if (state.id == null) state.id = turnstile.render(box, { sitekey: box.dataset.sitekey, theme: box.dataset.theme || 'light' });
+      return state.id;
+    }).finally(() => { state.drawing = null; });
+    return state.drawing;
+  };
+  if (!('IntersectionObserver' in window)) {
+    state.draw().catch(() => {});
+    return state;
+  }
   const observer = new IntersectionObserver((entries) => {
     if (!entries.some((entry) => entry.isIntersecting)) return;
     observer.disconnect();
-    loadTurnstile().then((turnstile) => {
-      state.id = turnstile.render(box, { sitekey: box.dataset.sitekey, theme: box.dataset.theme || 'light' });
-    }).catch(() => { /* the server says so if the check is missing */ });
+    state.draw().catch(() => { /* drawn on the next send */ });
   });
   observer.observe(box);
   return state;
@@ -112,6 +125,16 @@ function initializeSentInquiry(wrap) {
     form.setAttribute('aria-busy', 'true');
     if (button) button.disabled = true;
     say('', '');
+    // A check that never appeared (Cloudflare unreachable when the form came into view) is drawn now; the visitor
+    // completes it and sends again.
+    if (check && check.id == null) {
+      try { await check.draw(); } catch { /* the message below */ }
+      say(check.id == null ? NETWORK_ERROR : 'Please complete the verification and send again.', 'error');
+      delete form.dataset.sending;
+      form.removeAttribute('aria-busy');
+      if (button) button.disabled = false;
+      return;
+    }
     let result = { ok: false, data: {} };
     try { result = await post(form); } catch { /* network: the message below */ }
     if (result.ok) {

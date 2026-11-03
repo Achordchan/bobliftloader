@@ -15,6 +15,8 @@ function esc_html($v) { return htmlspecialchars((string) $v, ENT_QUOTES); }
 function esc_textarea($v) { return htmlspecialchars((string) $v, ENT_QUOTES); }
 function esc_url($v) { return (string) $v; }
 function wp_make_link_relative($v) { return (string) preg_replace('#^https?://[^/]+#', '', (string) $v); }
+function is_email($v) { return (bool) filter_var($v, FILTER_VALIDATE_EMAIL); }
+function get_post_meta($id, $key, $single = false) { return $GLOBALS['meta'][$id][$key] ?? ''; }
 function current_theme_supports($name) { return $name === 'achord-inquiry'; }
 // The plugin's side, as far as the theme calls it.
 function bl_wp_products() { return [['model' => 'BL-T360', 'name' => 'BL-T360 Mini Skid Steer', 'slug' => 'bl-t360', 'url' => 'https://example.test/product/bl-t360/', 'image' => '', 'category' => 'skid-steer-loaders']]; }
@@ -52,9 +54,16 @@ if (str_contains($html, 'data-turnstile-widget')) $fail(9, 'turnstile drawn whil
 $GLOBALS['turnstile'] = true;
 if (!str_contains(bl_wp_inquiry_form([]), 'data-turnstile-widget') || !str_contains(bl_wp_inquiry_form([]), 'value="Skid steer loader" checked')) $fail(10, 'turnstile or default family');
 
-// Notifications go to the site's sales email; the IP is kept by default and Contact Form 7's Turnstile keys carry over.
+// Notifications go where the Contact Form 7 form sent them until a sales email is set in 全站设置, then there.
+$GLOBALS['options']['bl_inquiry_form'] = 18;
+$GLOBALS['meta'][18]['_mail'] = ['recipient' => 'inbox@example.test'];
+if (apply('achord_inquiry_recipient', '') !== 'inbox@example.test') $fail(14, 'legacy recipient');
+$GLOBALS['meta'][18]['_mail'] = ['recipient' => '[_site_admin_email]'];
+if (apply('achord_inquiry_recipient', '') !== 'info@boblift.com') $fail(15, 'unusable legacy recipient');
+$GLOBALS['meta'][18]['_mail'] = ['recipient' => 'inbox@example.test'];
+// (bl_company() keeps what it read first in this process, so the address itself is not compared here.)
 $GLOBALS['options']['bl_content_global'] = ['company' => ['email' => 'sales@example.test']];
-if (apply('achord_inquiry_recipient', '') !== 'sales@example.test') $fail(11, 'recipient');
+if (apply('achord_inquiry_recipient', '') !== bl_company('email')) $fail(11, 'recipient');
 $defaults = ['store_ip' => '0', 'turnstile_enabled' => '0', 'turnstile_site_key' => '', 'turnstile_secret_key' => ''];
 if (apply('achord_inquiry_default_options', $defaults) !== ['store_ip' => '1'] + $defaults) $fail(12, 'defaults without cf7');
 $GLOBALS['options']['wpcf7'] = ['turnstile' => ['site-k' => 'secret-k']];

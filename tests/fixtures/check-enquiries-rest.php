@@ -28,4 +28,18 @@ $GLOBALS['can'] = false;
 if (!($c->get_items_permissions_check(null) instanceof WP_Error) || !($c->get_item_permissions_check(null) instanceof WP_Error) || $c->check_read_permission(null) !== false) exit(5);
 $GLOBALS['can'] = true;
 if ($c->get_items_permissions_check(null) !== true || $c->get_item_permissions_check(null) !== true || $c->check_read_permission(null) !== true) exit(6);
+// Flamingo's history keeps its ad attribution; the plugin's records answer in the same shape, to administrators only.
+$attribution = bl_enquiry_attribution(['bl_attr_gclid' => 'Cj0-abc', 'bl_attr_utm_source' => ['google'], 'bl_attr_landing' => '', 'name' => 'x']);
+if ($attribution !== ['gclid' => 'Cj0-abc', 'utm_source' => 'google']) exit(7);
+function achord_inquiry_can_read() { return $GLOBALS['admin']; }
+function achord_inquiry_record($id) { return ['product' => '迷你翻斗车', 'model' => 'FY20', 'name' => 'Ann', 'email' => 'a@x.test', 'attr_gclid' => 'Cj0', 'source_page' => 'https://x.test/p/', 'ip' => '203.0.113.7', 'mail_sent' => '0', 'blocked' => '黑名单邮箱']; }
+$GLOBALS['admin'] = false;
+if (bl_inquiry_legacy_record(5) !== []) exit(8);
+$GLOBALS['admin'] = true;
+$legacy = bl_inquiry_legacy_record(5);
+if ($legacy['subject'] !== '迷你翻斗车 FY20' || $legacy['from_email'] !== 'a@x.test' || $legacy['attribution'] !== ['gclid' => 'Cj0'] || $legacy['meta']['remote_ip'] !== '203.0.113.7') exit(9);
+if ($legacy['submission_status'] !== 'mail_failed' || $legacy['spam'] !== true || $legacy['fields']['name'] !== 'Ann') exit(10);
+// While the plugin takes enquiries, Flamingo no longer claims the old address.
+if (true) { function bl_wp_inquiry_ready() { return true; } }
+if (bl_enquiries_post_type_args(['show_in_rest' => false], 'flamingo_inbound') !== ['show_in_rest' => false]) exit(11);
 echo "enquiries rest ok\n";

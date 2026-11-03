@@ -21,7 +21,8 @@ add_action('after_setup_theme', static function (): void {
         'dingtalk_emoji' => '📩',
         'prefix' => 'bl_',
         'post_type' => 'bl_inquiry',
-        'rest_base' => 'bl_inquiries',
+        // The address Flamingo's enquiries had (wp-enquiries-rest.php), so tools reading it get the new ones.
+        'rest_base' => 'bl_enquiries',
         'rest_record' => 'bl_inquiry',
         'required' => ['name', 'email'],
         'form_selector' => '.bl-inquiry-form',
@@ -82,8 +83,22 @@ add_filter('achord_inquiry_submission_fields', 'bl_wp_inquiry_submission_fields'
 // The mail's 产品信息: the model's photo, name and link when the sender wrote from a product page, else the equipment type.
 add_filter('achord_inquiry_mail_products_html', static fn($html, array $fields): string => bl_wp_inquiry_product_card((string) ($fields['product'] ?? ''), (string) ($fields['model'] ?? '')), 10, 2);
 
-// Notifications go to the sales email of 网站内容 → 全站设置 unless 设置 → 询盘设置 names another address.
-add_filter('achord_inquiry_recipient', static fn(): string => (string) bl_company('email'));
+/**
+ * Where notifications go unless 设置 → 询盘设置 names an address: the sales email of 网站内容 → 全站设置 once it was set there,
+ * else the address the Contact Form 7 form sent to (an inbox someone chose there stays the inbox), else the site's email.
+ */
+function bl_wp_inquiry_default_recipient(): string
+{
+    $saved = get_option('bl_content_global', []);
+    $explicit = is_array($saved) && (!empty($saved['_bl_email_explicit']) || (is_array($saved['company'] ?? null) && array_key_exists('email', $saved['company'])));
+    if (!$explicit && ($form = (int) get_option('bl_inquiry_form')) > 0) {
+        $mail = get_post_meta($form, '_mail', true);
+        $legacy = is_array($mail) ? trim((string) ($mail['recipient'] ?? '')) : '';
+        if ($legacy !== '' && is_email($legacy)) return $legacy;
+    }
+    return (string) bl_company('email');
+}
+add_filter('achord_inquiry_recipient', 'bl_wp_inquiry_default_recipient');
 add_filter('achord_inquiry_page_language', static fn(): string => 'en');
 
 /**

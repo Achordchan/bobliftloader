@@ -8,6 +8,9 @@ defined('ABSPATH') || exit;
  * manage Flamingo (administrators) can read them. Nothing can be created, changed or deleted through the API: that
  * stays in Flamingo's own screens.
  *
+ * Once the inquiry plugin takes enquiries (wp-inquiry.php), /wp/v2/bl_enquiries lists its records instead, Flamingo's
+ * history copied in, and meta._bl_enquiry keeps the shape below (bl_inquiry_legacy_record).
+ *
  * List: /wp/v2/bl_enquiries (newest first; title = the equipment chosen, status "flamingo-spam" for spam, which the
  * default list includes). One enquiry with context=edit carries meta._bl_enquiry: sender, every posted field, the page,
  * IP, browser, time and the spam verdict (why it was spam, Akismet's answer), and meta._bl_enquiry.attribution: the Google click ID
@@ -71,7 +74,8 @@ function bl_enquiries_read_only(): WP_Error
 /** Flamingo's own registration, plus the REST route; its capabilities (edit_users) are kept as they are. */
 function bl_enquiries_post_type_args(array $args, string $type): array
 {
-    if ($type !== 'flamingo_inbound' || !class_exists('BL_Enquiries_REST_Controller')) return $args;
+    // Once the inquiry plugin takes enquiries, /wp/v2/bl_enquiries is its list (wp-inquiry.php), history included.
+    if ($type !== 'flamingo_inbound' || !class_exists('BL_Enquiries_REST_Controller') || (function_exists('bl_wp_inquiry_ready') && bl_wp_inquiry_ready())) return $args;
     $args['show_in_rest'] = true;
     $args['rest_base'] = 'bl_enquiries';
     $args['rest_controller_class'] = 'BL_Enquiries_REST_Controller';
@@ -80,6 +84,23 @@ function bl_enquiries_post_type_args(array $args, string $type): array
     return $args;
 }
 add_filter('register_post_type_args', 'bl_enquiries_post_type_args', 10, 2);
+
+/**
+ * The ad attribution a Flamingo entry was sent with (bl_attr_* fields), without the prefix. Read here for the history only:
+ * new enquiries keep theirs as attr_* in the inquiry plugin.
+ */
+function bl_enquiry_attribution(array $fields): array
+{
+    $found = [];
+    foreach (['gclid', 'gbraid', 'wbraid', 'gad_source', 'gad_campaignid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'landing', 'first_seen', 'referrer'] as $name) {
+        $value = $fields['bl_attr_' . $name] ?? '';
+        $value = is_array($value) ? implode(', ', array_filter($value, 'is_scalar')) : $value;
+        if (!is_scalar($value)) continue;
+        $value = function_exists('achord_inquiry_attribution_clean') ? achord_inquiry_attribution_clean($name, $value) : trim((string) preg_replace('/[\x00-\x1f\x7f<>]/u', ' ', (string) $value));
+        if ($value !== '') $found[$name] = $value;
+    }
+    return $found;
+}
 
 /** One enquiry as Flamingo holds it, in the shape meta._bl_enquiry reads. */
 function bl_enquiry_record(int $postId): array
@@ -92,7 +113,7 @@ function bl_enquiry_record(int $postId): array
         'from_email' => (string) $message->from_email,
         'fields' => (array) $message->fields,
         // The advertisement the sender came from (Google click ID, campaign tags, landing page), when they agreed to advertising storage.
-        'attribution' => function_exists('bl_enquiry_attribution') ? bl_enquiry_attribution((array) $message->fields) : [],
+        'attribution' => bl_enquiry_attribution((array) $message->fields),
         'meta' => (array) $message->meta,
         'channel' => (string) $message->channel,
         'submission_status' => (string) $message->submission_status,
@@ -123,3 +144,46 @@ add_filter('rest_flamingo_inbound_query', static function (array $args, $request
     if (!array_key_exists('status', $request->get_query_params())) $args['post_status'] = ['publish', 'flamingo-spam'];
     return $args;
 }, 10, 2);
+
+/**
+ * The same meta._bl_enquiry for an enquiry the inquiry plugin keeps, so tools that read the old shape keep working after the
+ * move: the sender, every saved field, the ad attribution, the page and IP, whether the mail went out and, for a blocked
+ * one, why. Administrators only, like the plugin's own record (meta.bl_inquiry).
+ */
+function bl_inquiry_legacy_record(int $postId): array
+{
+    if (!function_exists('achord_inquiry_record') || !function_exists('achord_inquiry_can_read') || !achord_inquiry_can_read()) return [];
+    $record = achord_inquiry_record($postId);
+    $attribution = [];
+    foreach ($record as $key => $value) if (str_starts_with((string) $key, 'attr_') && $value !== '') $attribution[substr((string) $key, 5)] = $value;
+    $blocked = (string) ($record['blocked'] ?? '');
+    return [
+        'subject' => trim(($record['product'] ?? '') . ' ' . ($record['model'] ?? '')),
+        'from_name' => (string) ($record['name'] ?? ''),
+        'from_email' => (string) ($record['email'] ?? ''),
+        'fields' => $record,
+        'attribution' => $attribution,
+        'meta' => ['url' => (string) ($record['source_page'] ?? ''), 'post_title' => (string) ($record['source_title'] ?? ''), 'remote_ip' => (string) ($record['ip'] ?? ''), 'device' => (string) ($record['device'] ?? '')],
+        'channel' => (string) ($record['channel'] ?? ''),
+        'submission_status' => ($record['mail_sent'] ?? '') === '0' ? 'mail_failed' : 'mail_sent',
+        'spam' => $blocked !== '',
+        'spam_log' => $blocked !== '' ? [['agent' => 'blocklist', 'reason' => $blocked]] : [],
+        'akismet' => [],
+    ];
+}
+
+add_action('init', static function (): void {
+    if (!function_exists('bl_wp_inquiry_ready') || !bl_wp_inquiry_ready()) return;
+    register_post_meta('bl_inquiry', '_bl_enquiry', [
+        'type' => 'object',
+        'single' => true,
+        'description' => 'The enquiry in the shape Flamingo enquiries had: sender, fields, attribution, page, IP and block reason.',
+        'show_in_rest' => ['schema' => ['type' => 'object', 'context' => ['edit'], 'additionalProperties' => true]],
+        'auth_callback' => '__return_false',
+    ]);
+}, 20);
+
+add_filter('get_post_metadata', static function ($value, $postId, $key) {
+    if ($key !== '_bl_enquiry' || get_post_type((int) $postId) !== 'bl_inquiry') return $value;
+    return [bl_inquiry_legacy_record((int) $postId)];
+}, 10, 3);
