@@ -19,7 +19,7 @@ function is_email($v) { return (bool) filter_var($v, FILTER_VALIDATE_EMAIL); }
 function get_post_meta($id, $key, $single = false) { return $GLOBALS['meta'][$id][$key] ?? ''; }
 function current_theme_supports($name) { return $name === 'achord-inquiry'; }
 // The plugin's side, as far as the theme calls it.
-function bl_wp_products() { return [['model' => 'BL-T360', 'name' => 'BL-T360 Mini Skid Steer', 'slug' => 'bl-t360', 'url' => 'https://example.test/product/bl-t360/', 'image' => '', 'category' => 'skid-steer-loaders']]; }
+function bl_wp_products() { $GLOBALS['catalogue_loads'] = ($GLOBALS['catalogue_loads'] ?? 0) + 1; return [['model' => 'BL-T360', 'name' => 'BL-T360 Mini Skid Steer', 'slug' => 'bl-t360', 'url' => 'https://example.test/product/bl-t360/', 'image' => '', 'category' => 'skid-steer-loaders']]; }
 function achord_inquiry_active() { return $GLOBALS['plugin_on'] ?? true; }
 function achord_inquiry_hidden_fields(array $args = []) { return '<input type="hidden" name="action" value="bl_submit_inquiry"><input type="hidden" name="source_entry" value="' . esc_attr($args['source'] ?? '') . '">'; }
 function achord_inquiry_action_url() { return 'https://example.test/?bl_inquiry_submit=1'; }
@@ -145,10 +145,16 @@ function add_shortcode($name, $callback) { $GLOBALS['shortcodes'][$name] = $call
 foreach ($GLOBALS['filters']['init'] ?? [] as $callback) if ($callback instanceof Closure && str_ends_with((new ReflectionFunction($callback))->getFileName(), '/inc/wp-inquiry.php')) $callback();
 if (array_keys($GLOBALS['shortcodes']) !== ['contact-form-7', 'contact-form'] || ($GLOBALS['shortcodes']['contact-form-7'])(['id' => '99']) !== '') $fail(39, 'fallback shortcodes');
 // Without the plugin the old shortcode draws no second email-draft form, only a mail button.
-// With the plugin, the saved shortcode's product, model and message carry over.
+// With the plugin, the saved shortcode's product, model and message carry over, read without loading the catalogue
+// (the shortcode may sit in a product's own text, which loading the catalogue renders).
+function get_posts($args) { return ($args['post_type'] ?? '') === 'bl_product' ? [101, 102] : []; }
+$GLOBALS['meta'][101]['_bl_record'] = ['model' => 'BL-T200'];
+$GLOBALS['meta'][102]['_bl_record'] = ['model' => $model];
+$GLOBALS['catalogue_loads'] = 0;
 $saved = bl_wp_inquiry_legacy_shortcode_form(['product' => 'Mini dumper', 'model' => strtolower($model), 'message' => 'Price <for 2>']);
 if (!str_contains($saved, 'value="Mini dumper" checked') || !str_contains($saved, 'data-model="' . $model . '"') || !str_contains($saved, 'data-model-family="dumper"') || !str_contains($saved, 'Price &lt;for 2&gt;</textarea>')) $fail(42, 'shortcode prefill lost');
 if (!str_contains(bl_wp_inquiry_legacy_shortcode_form(['product' => 'nonsense']), 'value="Skid steer loader" checked')) $fail(43, 'unknown family');
+if ($GLOBALS['catalogue_loads'] !== 0 || bl_wp_inquiry_known_model('nope') !== '') $fail(44, 'shortcode loaded the catalogue or kept an unknown model');
 $GLOBALS['plugin_on'] = false;
 $button = bl_wp_inquiry_legacy_shortcode_form();
 if (str_contains($button, '<form') || !str_contains($button, 'mailto:')) $fail(41, 'second draft form drawn');

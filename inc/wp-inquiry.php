@@ -106,6 +106,22 @@ function bl_wp_inquiry_is_legacy_shortcode(array $atts): bool
 }
 
 /**
+ * A model the site sells, as written on its product (case aside), or ''. Read from the products' saved records only: the
+ * shortcode can sit inside a product's own text, and loading the catalogue (bl_products) renders those texts again.
+ */
+function bl_wp_inquiry_known_model(string $model): string
+{
+    $model = trim($model);
+    if ($model === '') return '';
+    foreach (get_posts(['post_type' => 'bl_product', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'suppress_filters' => true]) as $id) {
+        $record = get_post_meta((int) $id, '_bl_record', true);
+        $known = is_array($record) ? trim((string) ($record['model'] ?? '')) : '';
+        if ($known !== '' && strcasecmp($known, $model) === 0) return $known;
+    }
+    return '';
+}
+
+/**
  * The theme's form in place of the old CF7 one, with what the saved shortcode chose for it (the old form's product, model
  * and message took their defaults from the shortcode): the plugin's form (any number of them work on one page). Without
  * the plugin the page's own email-draft form is the one the script prepares (it is unique by id), so a second one is not
@@ -118,10 +134,7 @@ function bl_wp_inquiry_legacy_shortcode_form(array $atts = []): string
     }
     $product = trim((string) ($atts['product'] ?? ''));
     $family = isset(BL_ENQUIRY_FAMILIES[$product]) ? $product : (array_search(strtolower($product), array_map('strtolower', BL_ENQUIRY_FAMILIES), true) ?: 'loader');
-    $model = '';
-    foreach (bl_products() as $record) {
-        if (strcasecmp((string) ($record['model'] ?? ''), trim((string) ($atts['model'] ?? ''))) === 0) $model = (string) $record['model'];
-    }
+    $model = bl_wp_inquiry_known_model((string) ($atts['model'] ?? ''));
     $form = bl_wp_inquiry_form(['product' => $family, 'model' => $model, 'message' => (string) ($atts['message'] ?? ''), 'source' => $model !== '' ? 'Product page form' : 'Enquiry form']);
     return '<div class="bl-inquiry-live" data-thanks="' . esc_attr(bl_url('/thank-you/')) . '" data-model="' . esc_attr($model) . '" data-model-family="' . esc_attr($family) . '">' . $form . '</div>';
 }
