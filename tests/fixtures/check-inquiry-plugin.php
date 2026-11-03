@@ -121,11 +121,11 @@ $result = apply('wpcf7_validate', new WPCF7_Validation(), [$tag('product'), $tag
 if (count($result->errors) !== 1 || $result->errors[0][0] !== 'email' || !str_contains($result->errors[0][1], 'reload')) $fail(30, 'legacy cf7 submission not turned back');
 $GLOBALS['cf7_form'] = $form(99);
 if (apply('wpcf7_validate', new WPCF7_Validation(), [$tag('email')])->errors !== []) $fail(31, 'another cf7 form turned back');
-// A saved [contact-form-7] shortcode of the old form is recognised by number, hash or title; another form's is not.
-function wpcf7_get_contact_form_by_hash($hash) { return $hash === 'a1b2c3d' ? $GLOBALS['cf7_form'] : null; }
-function wpcf7_get_contact_form_by_title($title) { return $title === 'Old enquiry' ? $GLOBALS['cf7_form'] : null; }
-$GLOBALS['cf7_form'] = $form(18);
+// A saved [contact-form-7] shortcode of the old form is recognised by number, hash or title (without CF7); another form's is not.
+function get_post_field($field, $id) { return $id === 18 ? 'Old enquiry' : ''; }
+$GLOBALS['meta'][18]['_hash'] = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0';
 if (!bl_wp_inquiry_is_legacy_shortcode(['id' => '18']) || !bl_wp_inquiry_is_legacy_shortcode(['id' => 'a1b2c3d']) || !bl_wp_inquiry_is_legacy_shortcode(['title' => 'Old enquiry'])) $fail(32, 'legacy shortcode not recognised');
+if (bl_wp_inquiry_is_legacy_shortcode(['id' => 'a1b']) || bl_wp_inquiry_is_legacy_shortcode(['title' => 'Other'])) $fail(38, 'short hash or other title taken');
 if (bl_wp_inquiry_is_legacy_shortcode(['id' => '99']) || bl_wp_inquiry_is_legacy_shortcode(['id' => 'zzz'])) $fail(33, 'other shortcode taken over');
 if (apply('pre_do_shortcode_tag', false, 'gallery', ['id' => '18']) !== false || apply('pre_do_shortcode_tag', false, 'contact-form-7', ['id' => '99']) !== false) $fail(34, 'other shortcode replaced');
 // The email-draft form addresses the same inbox the notifications would go to.
@@ -135,4 +135,10 @@ if (function_exists('bl_is_wordpress') && bl_is_wordpress()) {
     $GLOBALS['meta'][18]['_mail'] = ['recipient' => 'Sales <legacy@example.test>'];
     if (bl_inquiry_fallback_email() !== 'legacy@example.test') $fail(36, 'fallback email ignores the cf7 inbox');
 } else $fail(37, 'not running as WordPress');
+// Without CF7 the theme registers the shortcode names: the old form's renders the theme form, another's renders nothing.
+$GLOBALS['shortcodes'] = [];
+function shortcode_exists($name) { return isset($GLOBALS['shortcodes'][$name]); }
+function add_shortcode($name, $callback) { $GLOBALS['shortcodes'][$name] = $callback; }
+foreach ($GLOBALS['filters']['init'] ?? [] as $callback) if ($callback instanceof Closure && str_ends_with((new ReflectionFunction($callback))->getFileName(), '/inc/wp-inquiry.php')) $callback();
+if (array_keys($GLOBALS['shortcodes']) !== ['contact-form-7', 'contact-form'] || ($GLOBALS['shortcodes']['contact-form-7'])(['id' => '99']) !== '') $fail(39, 'fallback shortcodes');
 echo "inquiry plugin integration ok\n";

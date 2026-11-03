@@ -86,7 +86,10 @@ add_filter('wpcf7_validate', static function ($result, $tags = []) {
 /**
  * A page or post whose saved content still holds the old form's CF7 shortcode ([contact-form-7 id="…"]) shows the theme's
  * form instead (the plugin's, or the email-draft form without it), so a reload after the message above really brings the
- * current form. Shortcodes of other CF7 forms render as CF7 draws them.
+ * current form. With CF7 active its other forms render as CF7 draws them; with CF7 switched off (the plan) the theme
+ * registers the two shortcode names itself, so the old form still becomes the theme's form and another form's leftover
+ * shortcode shows nothing rather than its raw text. The form is recognised from its own post (number, CF7's hash, title),
+ * without CF7's functions.
  */
 function bl_wp_inquiry_is_legacy_shortcode(array $atts): bool
 {
@@ -94,18 +97,33 @@ function bl_wp_inquiry_is_legacy_shortcode(array $atts): bool
     if ($id <= 0) return false;
     $ref = trim((string) ($atts['id'] ?? ''));
     if ($ref !== '' && ctype_digit($ref)) return (int) $ref === $id;
-    $form = null;
-    if ($ref !== '' && function_exists('wpcf7_get_contact_form_by_hash')) $form = wpcf7_get_contact_form_by_hash($ref);
-    if (!$form && ($title = trim((string) ($atts['title'] ?? ''))) !== '' && function_exists('wpcf7_get_contact_form_by_title')) $form = wpcf7_get_contact_form_by_title($title);
-    return $form && (int) $form->id() === $id;
+    // CF7 writes the first 7 characters of the form's _hash into the shortcode.
+    $hash = (string) get_post_meta($id, '_hash', true);
+    if ($ref !== '' && strlen($ref) >= 7 && $hash !== '' && str_starts_with($hash, $ref)) return true;
+    $title = trim((string) ($atts['title'] ?? ''));
+    return $ref === '' && $title !== '' && $title === trim((string) get_post_field('post_title', $id));
 }
-add_filter('pre_do_shortcode_tag', static function ($output, string $tag, $atts) {
-    if (!in_array($tag, ['contact-form-7', 'contact-form'], true) || !bl_wp_inquiry_is_legacy_shortcode((array) $atts)) return $output;
+
+/** The theme's form in place of the old CF7 one. */
+function bl_wp_inquiry_legacy_shortcode_form(): string
+{
     $selectedFamily = 'loader';
     ob_start();
     require get_template_directory() . '/templates/partials/inquiry-form.php';
     return (string) ob_get_clean();
+}
+
+add_filter('pre_do_shortcode_tag', static function ($output, string $tag, $atts) {
+    if (!in_array($tag, ['contact-form-7', 'contact-form'], true) || !bl_wp_inquiry_is_legacy_shortcode((array) $atts)) return $output;
+    return bl_wp_inquiry_legacy_shortcode_form();
 }, 10, 3);
+
+// Without CF7 the names are not registered, and WordPress would print the saved shortcode as text.
+add_action('init', static function (): void {
+    foreach (['contact-form-7', 'contact-form'] as $name) {
+        if (!shortcode_exists($name)) add_shortcode($name, static fn($atts = []): string => bl_wp_inquiry_is_legacy_shortcode((array) $atts) ? bl_wp_inquiry_legacy_shortcode_form() : '');
+    }
+}, 99);
 
 /** Hand enquiries to the plugin. Its posted names keep this theme's bl_ prefix, which assets/js/attribution.js fills in. */
 add_action('after_setup_theme', static function (): void {
