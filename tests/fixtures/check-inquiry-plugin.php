@@ -110,6 +110,12 @@ if (bl_wp_inquiry_legacy_extras() !== []) $fail(26, 'theme form read as an edit'
 $GLOBALS['meta'][18]['_form'] = str_replace('href="/privacy/"', 'href="/site/privacy/"', $themeForm);
 if (bl_wp_inquiry_legacy_extras() !== []) $fail(25, 'subdirectory privacy link read as an edit');
 $GLOBALS['meta'][18]['_form'] = '<label>Order number [text* order]</label>';
+$GLOBALS['meta'][18]['_form'] = $themeForm;
+$GLOBALS['meta'][18]['_mail'] = ['recipient' => 'sales@example.test, [email]'];
+if (count(bl_wp_inquiry_legacy_extras()) !== 1 || !str_contains(bl_wp_inquiry_legacy_extras()[0], '[email]') || bl_wp_inquiry_switch_allowed()) $fail(47, 'form-tag recipient not held back');
+$GLOBALS['meta'][18]['_mail'] = ['recipient' => 'Sales <sales@example.test>, [_site_admin_email]'];
+if (bl_wp_inquiry_legacy_extras() !== []) $fail(48, 'plain recipients held back');
+$GLOBALS['meta'][18]['_form'] = '<label>Order number [text* order]</label>';
 $GLOBALS['options']['bl_inquiry_switch_confirmed'] = '1';
 if (!bl_wp_inquiry_switch_allowed()) $fail(23, 'confirmed switch held back');
 // A cached page still posting the old CF7 form is turned back with a reload request; other CF7 forms are left alone.

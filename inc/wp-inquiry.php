@@ -33,6 +33,14 @@ function bl_wp_inquiry_legacy_extras(): array
     // The theme wrote the privacy link from home_url(), so a site under a subdirectory has its own path there.
     $saved = (string) preg_replace('#<a href="[^"]*">privacy information</a>#', '<a href="/privacy/">privacy information</a>', $saved);
     if ($saved !== '' && !in_array(md5($saved), BL_INQUIRY_THEME_FORMS, true)) $extras[] = 'CF7 表单的字段在后台改过（新表单是主题固定的字段：设备、姓名、邮箱、WhatsApp、公司、留言），改动的字段不会带过来';
+    // A recipient the plugin cannot send to (a form tag such as [email], which CF7 filled per submission) stops being mailed.
+    $odd = [];
+    foreach (explode(',', is_array($mail) ? (string) ($mail['recipient'] ?? '') : '') as $part) {
+        $part = trim($part);
+        $address = preg_match('/<([^<>]+)>\s*$/', $part, $found) ? trim($found[1]) : $part;
+        if ($part !== '' && $address !== '[_site_admin_email]' && !is_email($address)) $odd[] = $part;
+    }
+    if ($odd) $extras[] = '通知邮件的收件人里有 ' . implode('、', $odd) . '（按提交内容填的地址），新插件不会发给它';
     $reply = get_post_meta($form, '_mail_2', true);
     if (is_array($reply) && !empty($reply['active'])) $extras[] = '给客户的自动回复邮件（Mail (2)）已开启，新插件不发自动回复';
     return $extras;
