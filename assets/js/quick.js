@@ -5,9 +5,9 @@
 const SHEET = '(max-width: 800px), (max-width: 1000px) and (max-height: 500px)'; // as in page-responsive.css and pages.css
 
 // Phones get the enquiry as a full-screen page instead of a sheet over the bottom bar (the sheet fought the iOS keyboard).
-// Trial switch for now: ?fs=1 turns it on for this browser, ?fs=0 turns it off; ordinary visitors keep the sheet until
-// it is switched on for everyone here. Same form, same fields, same submit and tracking either way.
-const FULLSCREEN_FOR_EVERYONE = false;
+// On for every phone visitor since 2026-11-03 (set back to false to return to the sheet; ?fs=1 then works as a
+// per-browser trial again). Same form, same fields, same submit and tracking either way.
+const FULLSCREEN_FOR_EVERYONE = true;
 const fullscreenWanted = () => {
   if (FULLSCREEN_FOR_EVERYONE) return true;
   const flag = new URLSearchParams(location.search).get('fs');
