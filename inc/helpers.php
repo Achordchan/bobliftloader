@@ -791,10 +791,20 @@ function bl_news_card(array $article, string $heading = 'h2'): void
     require __DIR__ . '/../templates/partials/news-card.php';
 }
 
-/** The enquiry form's id when the site sends enquiries through Contact Form 7; 0 for the theme's own email-draft form. */
-function bl_inquiry_form_id(): int
+/**
+ * Where the email-draft form addresses an enquiry: the sales email of 全站设置 once it was set there, else the first inbox
+ * the old Contact Form 7 form sent to (as the plugin's notifications do), else the company email.
+ */
+function bl_inquiry_fallback_email(): string
 {
-    return bl_is_wordpress() ? bl_wp_inquiry_form_id() : 0;
+    $legacy = bl_is_wordpress() && function_exists('bl_wp_inquiry_legacy_recipients') && !bl_wp_inquiry_global_email_set() ? bl_wp_inquiry_legacy_recipients() : [];
+    return $legacy[0] ?? (string) bl_company('email');
+}
+
+/** Whether enquiries are sent through the inquiry plugin; false shows the theme's own email-draft form. */
+function bl_inquiry_live(): bool
+{
+    return bl_is_wordpress() && bl_wp_inquiry_ready();
 }
 
 /** The application cases, newest first; only $hub's own when one is named. Empty where there is no database (standalone preview). */

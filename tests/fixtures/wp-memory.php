@@ -136,5 +136,5 @@ function submit_button($text, ...$args) { echo '<button type="submit">' . esc_ht
 function wp_strip_all_tags($value) { return strip_tags($value); }
 function wp_html_excerpt($value, $count, $more = '') { return mb_substr($value, 0, $count) . (mb_strlen($value) > $count ? $more : ''); }
 function wp_basename($value) { return basename($value); }
-function bl_wp_inquiry_form_id() { return $GLOBALS['inquiry_form_id'] ?? 0; }
+if (!function_exists('bl_wp_inquiry_ready')) { function bl_wp_inquiry_ready() { return !empty($GLOBALS['inquiry_form_id']); } }
 function get_site_icon_url($size = 512) { return get_option('site_icon') ? 'https://example.test/native-icon.png' : ''; }

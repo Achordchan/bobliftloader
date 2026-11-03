@@ -483,7 +483,7 @@ class WebsiteTests(unittest.TestCase):
         self.assertNotIn('href="/products/"', page)
         with open('inc/seo.php') as source: self.assertIn("$route['type'] !== 'thanks'", source.read())
         with open('assets/js/inquiry.js') as source: script = source.read()
-        self.assertIn("'wpcf7mailsent'", script)
+        self.assertIn('sessionStorage.setItem(SENT_KEY', script)
         self.assertIn("event: 'generate_lead'", script)
 
     def test_news_has_sources_and_dates(self):

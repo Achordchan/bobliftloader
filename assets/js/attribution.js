@@ -1,6 +1,6 @@
 // Which advertisement brought an enquiry. A visit that lands with a Google Ads click ID (gclid, or gbraid / wbraid on iOS) or
 // campaign tags (utm_*) keeps them in this browser for 90 days, and an enquiry sent from any page carries them in hidden
-// fields (read in inc/wp-inquiry.php, then kept by Flamingo and shown in the notification email). The visitor often looks at
+// fields (read by the inquiry plugin, kept with the enquiry and shown in the notification email). The visitor often looks at
 // other pages before writing, so the landing page is kept with them.
 // It follows the cookie banner exactly as the Google tag does: nothing is kept, and nothing is sent, unless advertising
 // storage is agreed to. That is the banner's cookie when the visitor has chosen; before a choice it is Google's own
@@ -30,13 +30,13 @@ function externalReferrer() {
   }
 }
 
-// Same limits as the server (bl_enquiry_attribution_clean): printable characters only, one line, short.
+// Same limits as the server (achord_inquiry_attribution_clean): printable characters only, one line, short.
 function clean(value, length) {
   return String(value ?? '').replace(/[\u0000-\u001f\u007f<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, length);
 }
 
 // A click ID that is too long or has other characters is dropped, never shortened: a cut ID matches nothing in Google Ads, and a
-// malformed one must not count as a new click (the server applies the same rule in bl_enquiry_attribution_clean).
+// malformed one must not count as a new click (the server applies the same rule in achord_inquiry_attribution_clean).
 function cleanParams(source) {
   const found = {};
   PARAMS.forEach((name) => {
@@ -137,7 +137,7 @@ function currentValues() {
   return { ...record.params, landing: clean(record.landing, 300), first_seen: clean(record.first_seen, 40), referrer: bareHost(clean(record.referrer, 120)) };
 }
 
-// The fields sent with every enquiry (read by bl_enquiry_context in inc/wp-enquiry-attribution.php).
+// The fields sent with every enquiry (read by the inquiry plugin, achord_inquiry_collect_context).
 function fillContext(form) {
   const agreed = advertisingAgreed();
   const values = {
@@ -199,7 +199,7 @@ export function initializeAttribution() {
     ask();
     window.addEventListener('pagehide', settle);
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') settle(); });
-    // The form is filled in when it is sent, so a choice made on this page counts; the capture phase runs before Contact Form 7 reads the form.
+    // The form is filled in when it is sent, so a choice made on this page counts; the capture phase runs before inquiry.js sends the form.
     document.addEventListener('submit', (event) => {
       const form = event.target;
       if (!(form instanceof HTMLFormElement) || !form.classList.contains('bl-inquiry-form')) return;

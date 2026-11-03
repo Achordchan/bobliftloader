@@ -896,8 +896,8 @@
 /* The same form, shortened: no step headings, no company line (unless the saved form makes it required), a smaller message box, the button across the panel. */
 .bl-site .bl-quick-form .bl-inquiry-form legend,.bl-site .bl-quick-form .bl-form-grid label:has([name="company"]):not(:has([aria-required="true"])){display:none}
 .bl-site .bl-quick-form .bl-inquiry-form fieldset{margin:0 0 14px}
-.bl-site .bl-quick-form .wpcf7-radio{gap:6px}
-.bl-site .bl-quick-form .wpcf7-list-item-label{padding:8px 10px;font-size:var(--fs-micro)}
+.bl-site .bl-quick-form .bl-radio{gap:6px}
+.bl-site .bl-quick-form .bl-radio-label{padding:8px 10px;font-size:var(--fs-micro)}
 .bl-site .bl-quick-form .bl-form-grid{display:grid;grid-template-columns:1fr;gap:4px;margin-top:6px}
 .bl-site .bl-quick-form .bl-form-grid label,.bl-site .bl-quick-form .bl-message-label{font-size:var(--fs-micro)}
 .bl-site .bl-quick-form .bl-inquiry-form input:not([type=radio]),.bl-site .bl-quick-form .bl-inquiry-form textarea{padding:9px 0;font-size:16px}
@@ -905,7 +905,7 @@
 .bl-site .bl-quick-form .bl-form-bottom{display:flex;flex-direction:column-reverse;align-items:stretch;gap:12px}
 .bl-site .bl-quick-form .bl-form-bottom p{font-size:var(--fs-micro);line-height:1.5;color:var(--muted)}
 .bl-site .bl-quick-form .bl-form-bottom p br{display:none}
-.bl-site .bl-quick-form form.bl-inquiry-form input.wpcf7-submit{width:100%;min-height:52px;padding:14px 56px 14px 22px}
+.bl-site .bl-quick-form form.bl-inquiry-form input.bl-inquiry-submit{width:100%;min-height:52px;padding:14px 56px 14px 22px}
 .bl-site .bl-quick-fallback{display:grid;gap:16px;justify-items:start}
 .bl-site .bl-quick-wa svg{display:none}
 /* Wherever the contact rail is a bottom bar (page-responsive.css, quick.js) the panel is a sheet above it. */
