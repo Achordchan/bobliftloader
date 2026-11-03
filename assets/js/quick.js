@@ -4,9 +4,27 @@
 // held still, and Tab stays inside the sheet until it closes.
 const SHEET = '(max-width: 800px), (max-width: 1000px) and (max-height: 500px)'; // as in page-responsive.css and pages.css
 
+// Phones get the enquiry as a full-screen page instead of a sheet over the bottom bar (the sheet fought the iOS keyboard).
+// Trial switch for now: ?fs=1 turns it on for this browser, ?fs=0 turns it off; ordinary visitors keep the sheet until
+// it is switched on for everyone here. Same form, same fields, same submit and tracking either way.
+const FULLSCREEN_FOR_EVERYONE = false;
+const fullscreenWanted = () => {
+  if (FULLSCREEN_FOR_EVERYONE) return true;
+  const flag = new URLSearchParams(location.search).get('fs');
+  try {
+    if (flag === '1') localStorage.setItem('boblift_inquiry_fs', '1');
+    if (flag === '0') localStorage.removeItem('boblift_inquiry_fs');
+    return localStorage.getItem('boblift_inquiry_fs') === '1';
+  } catch {
+    return flag === '1';
+  }
+};
+
 export function initializeQuick() {
   const quick = document.querySelector('.bl-quick');
   if (!quick) return;
+  quick.classList.toggle('bl-quick-full', fullscreenWanted());
+  const full = quick.classList.contains('bl-quick-full');
   const toggle = quick.querySelector('.bl-quick-toggle');
   const panel = quick.querySelector('.bl-quick-panel');
   const sheet = window.matchMedia(SHEET);
@@ -99,7 +117,7 @@ export function initializeQuick() {
   // inside it, and the focused field is brought into view there.
   let viewportFrame = 0;
   const clearViewport = () => {
-    quick.style.removeProperty('bottom');
+    ['top', 'bottom', 'height'].forEach((property) => quick.style.removeProperty(property));
     panel.style.removeProperty('max-height');
   };
   const syncViewport = () => {
@@ -109,6 +127,12 @@ export function initializeQuick() {
       if (!viewport || panel.hidden || !sheet.matches) { clearViewport(); return; }
       const covered = innerHeight - viewport.offsetTop - viewport.height;
       if (covered < 80 && viewport.offsetTop < 1) { clearViewport(); return; } // no keyboard: the stylesheet's place
+      if (full) { // the full-screen page takes exactly the visible area
+        quick.style.top = `${Math.round(viewport.offsetTop)}px`;
+        quick.style.bottom = 'auto';
+        quick.style.height = `${Math.round(viewport.height)}px`;
+        return;
+      }
       quick.style.bottom = `${Math.round(Math.max(covered, 0))}px`;
       panel.style.maxHeight = `${Math.round(viewport.height - 8)}px`;
     });
