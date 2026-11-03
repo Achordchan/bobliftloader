@@ -50,12 +50,44 @@ export function initializeQuick() {
     else { panel.removeAttribute('role'); panel.removeAttribute('aria-modal'); }
     mute(on);
   };
+  // Full-screen (bl-quick-full) on a phone: the panel is not laid over the page at all. Everything else on the page is
+  // hidden and the panel sits in the normal page flow, so the phone treats it as an ordinary page with a form and moves
+  // it for the keyboard like any page, with no fixed layer to shift or cut off. Closing puts the page back where it was.
+  let page = null;
+  const enterPage = () => {
+    if (page) return;
+    const y = scrollY; // before hiding anything: the shorter page would already have scrolled back to the top
+    const hidden = [];
+    for (let node = quick; node.parentElement && node !== document.body; node = node.parentElement) {
+      for (const sibling of node.parentElement.children) {
+        if (sibling === node || ['SCRIPT', 'STYLE', 'LINK', 'TEMPLATE'].includes(sibling.tagName) || sibling.classList.contains('bl-quick-page-hidden')) continue;
+        sibling.classList.add('bl-quick-page-hidden');
+        hidden.push(sibling);
+      }
+    }
+    page = { y, hidden };
+    document.documentElement.classList.add('bl-quick-page');
+    scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  };
+  const leavePage = () => {
+    if (!page) return;
+    const { y, hidden } = page;
+    page = null;
+    hidden.forEach((element) => element.classList.remove('bl-quick-page-hidden'));
+    document.documentElement.classList.remove('bl-quick-page');
+    const restore = () => scrollTo({ top: y, left: 0, behavior: 'instant' });
+    restore();
+    requestAnimationFrame(restore); // again once the page has laid out in full
+  };
   const setOpen = (open, from = toggle) => {
+    const asPage = open && full && sheet.matches;
+    if (asPage) enterPage();
     panel.hidden = !open;
     setModal(open && sheet.matches);
     toggle.setAttribute('aria-expanded', String(open));
     quick.classList.toggle('bl-quick-open', open);
     document.documentElement.classList.toggle('bl-quick-on', open);
+    if (!asPage) leavePage(); // after the sheet classes are gone, so the page is back at full height to scroll in
     if (open) {
       opener = from;
       // Phones would pop the keyboard up over the form, so there the close button takes focus instead of the name field.
@@ -117,22 +149,16 @@ export function initializeQuick() {
   // inside it, and the focused field is brought into view there.
   let viewportFrame = 0;
   const clearViewport = () => {
-    ['top', 'bottom', 'height'].forEach((property) => quick.style.removeProperty(property));
+    quick.style.removeProperty('bottom');
     panel.style.removeProperty('max-height');
   };
   const syncViewport = () => {
     cancelAnimationFrame(viewportFrame);
     viewportFrame = requestAnimationFrame(() => {
       const viewport = window.visualViewport;
-      if (!viewport || panel.hidden || !sheet.matches) { clearViewport(); return; }
+      if (!viewport || panel.hidden || !sheet.matches || page) { clearViewport(); return; }
       const covered = innerHeight - viewport.offsetTop - viewport.height;
       if (covered < 80 && viewport.offsetTop < 1) { clearViewport(); return; } // no keyboard: the stylesheet's place
-      if (full) { // the full-screen page takes exactly the visible area
-        quick.style.top = `${Math.round(viewport.offsetTop)}px`;
-        quick.style.bottom = 'auto';
-        quick.style.height = `${Math.round(viewport.height)}px`;
-        return;
-      }
       quick.style.bottom = `${Math.round(Math.max(covered, 0))}px`;
       panel.style.maxHeight = `${Math.round(viewport.height - 8)}px`;
     });
