@@ -498,7 +498,9 @@
 .bl-site .bl-side-contact{position:fixed;right:clamp(16px,1.2vw,32px);top:50%;transform:translateY(-50%);z-index:15;display:flex;flex-direction:column;gap:6px}
 .bl-site .bl-side-contact a{position:relative;display:grid;place-items:center;width:clamp(48px,2.4vw,60px);height:clamp(48px,2.4vw,60px);background:var(--ink);color:#e6edf2;border:1px solid #ffffff1f;box-shadow:0 8px 24px #081c2b33;transition:background .2s,color .2s,transform .2s}
 @media(hover:hover){.bl-site .bl-side-contact a:hover{background:var(--blue);color:white;transform:translateX(-2px)}}
-@media(hover:hover){.bl-site .bl-side-contact a:first-child:hover{background:#25d366;color:#04130a}}
+/* WhatsApp keeps its brand green (#25D366) and white glyph so visitors recognise it at a glance. */
+.bl-site .bl-side-contact .bl-side-wa{background:#25d366;color:#fff}
+@media(hover:hover){.bl-site .bl-side-contact .bl-side-wa:hover{background:#1da851;color:#fff}}
 .bl-site .bl-side-contact svg{width:clamp(20px,1.05vw,26px);height:clamp(20px,1.05vw,26px)}
 .bl-site .bl-side-contact span{position:absolute;right:calc(100% + 10px);top:50%;transform:translate(6px,-50%);white-space:nowrap;background:var(--ink);color:white;font-size:var(--fs-label);font-weight:600;padding:8px 12px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
 .bl-site .bl-side-contact a:focus-visible span{opacity:1;transform:translate(0,-50%)}
