@@ -145,6 +145,10 @@ function add_shortcode($name, $callback) { $GLOBALS['shortcodes'][$name] = $call
 foreach ($GLOBALS['filters']['init'] ?? [] as $callback) if ($callback instanceof Closure && str_ends_with((new ReflectionFunction($callback))->getFileName(), '/inc/wp-inquiry.php')) $callback();
 if (array_keys($GLOBALS['shortcodes']) !== ['contact-form-7', 'contact-form'] || ($GLOBALS['shortcodes']['contact-form-7'])(['id' => '99']) !== '') $fail(39, 'fallback shortcodes');
 // Without the plugin the old shortcode draws no second email-draft form, only a mail button.
+// With the plugin, the saved shortcode's product, model and message carry over.
+$saved = bl_wp_inquiry_legacy_shortcode_form(['product' => 'Mini dumper', 'model' => strtolower($model), 'message' => 'Price <for 2>']);
+if (!str_contains($saved, 'value="Mini dumper" checked') || !str_contains($saved, 'data-model="' . $model . '"') || !str_contains($saved, 'data-model-family="dumper"') || !str_contains($saved, 'Price &lt;for 2&gt;</textarea>')) $fail(42, 'shortcode prefill lost');
+if (!str_contains(bl_wp_inquiry_legacy_shortcode_form(['product' => 'nonsense']), 'value="Skid steer loader" checked')) $fail(43, 'unknown family');
 $GLOBALS['plugin_on'] = false;
 $button = bl_wp_inquiry_legacy_shortcode_form();
 if (str_contains($button, '<form') || !str_contains($button, 'mailto:')) $fail(41, 'second draft form drawn');

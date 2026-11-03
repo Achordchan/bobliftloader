@@ -106,30 +106,35 @@ function bl_wp_inquiry_is_legacy_shortcode(array $atts): bool
 }
 
 /**
- * The theme's form in place of the old CF7 one: the plugin's form (any number of them work on one page). Without the plugin
- * the page's own email-draft form is the one the script prepares (it is unique by id), so a second one is not drawn: a
- * button opens the visitor's email app addressed as that form would.
+ * The theme's form in place of the old CF7 one, with what the saved shortcode chose for it (the old form's product, model
+ * and message took their defaults from the shortcode): the plugin's form (any number of them work on one page). Without
+ * the plugin the page's own email-draft form is the one the script prepares (it is unique by id), so a second one is not
+ * drawn: a button opens the visitor's email app addressed as that form would.
  */
-function bl_wp_inquiry_legacy_shortcode_form(): string
+function bl_wp_inquiry_legacy_shortcode_form(array $atts = []): string
 {
     if (!bl_inquiry_live()) {
         return '<p class="bl-legacy-enquiry"><a class="bl-button bl-button-blue" href="' . esc_url(bl_mailto(bl_inquiry_fallback_email())) . '">Email your enquiry</a></p>';
     }
-    $selectedFamily = 'loader';
-    ob_start();
-    require get_template_directory() . '/templates/partials/inquiry-form.php';
-    return (string) ob_get_clean();
+    $product = trim((string) ($atts['product'] ?? ''));
+    $family = isset(BL_ENQUIRY_FAMILIES[$product]) ? $product : (array_search(strtolower($product), array_map('strtolower', BL_ENQUIRY_FAMILIES), true) ?: 'loader');
+    $model = '';
+    foreach (bl_products() as $record) {
+        if (strcasecmp((string) ($record['model'] ?? ''), trim((string) ($atts['model'] ?? ''))) === 0) $model = (string) $record['model'];
+    }
+    $form = bl_wp_inquiry_form(['product' => $family, 'model' => $model, 'message' => (string) ($atts['message'] ?? ''), 'source' => $model !== '' ? 'Product page form' : 'Enquiry form']);
+    return '<div class="bl-inquiry-live" data-thanks="' . esc_attr(bl_url('/thank-you/')) . '" data-model="' . esc_attr($model) . '" data-model-family="' . esc_attr($family) . '">' . $form . '</div>';
 }
 
 add_filter('pre_do_shortcode_tag', static function ($output, string $tag, $atts) {
     if (!in_array($tag, ['contact-form-7', 'contact-form'], true) || !bl_wp_inquiry_is_legacy_shortcode((array) $atts)) return $output;
-    return bl_wp_inquiry_legacy_shortcode_form();
+    return bl_wp_inquiry_legacy_shortcode_form((array) $atts);
 }, 10, 3);
 
 // Without CF7 the names are not registered, and WordPress would print the saved shortcode as text.
 add_action('init', static function (): void {
     foreach (['contact-form-7', 'contact-form'] as $name) {
-        if (!shortcode_exists($name)) add_shortcode($name, static fn($atts = []): string => bl_wp_inquiry_is_legacy_shortcode((array) $atts) ? bl_wp_inquiry_legacy_shortcode_form() : '');
+        if (!shortcode_exists($name)) add_shortcode($name, static fn($atts = []): string => bl_wp_inquiry_is_legacy_shortcode((array) $atts) ? bl_wp_inquiry_legacy_shortcode_form((array) $atts) : '');
     }
 }, 99);
 
