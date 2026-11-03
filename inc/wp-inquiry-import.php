@@ -31,17 +31,32 @@ function bl_flamingo_inquiry_fields(WP_Post $entry): array
     $meta = get_post_meta($id, '_meta', true);
     $meta = is_array($meta) ? $meta : [];
     $field = static fn(string $name): string => bl_flamingo_field($id, $name);
+    // The theme's field names first, then CF7's default form (your-name …), for an entry another form sent.
+    $first = static function (string ...$names) use ($field): string {
+        foreach ($names as $name) if (($value = $field($name)) !== '') return $value;
+        return '';
+    };
     $family = $field('product');
+    $used = ['product', 'model', 'name', 'your-name', 'email', 'your-email', 'company', 'country', 'message', 'your-message', 'your-subject', 'bl_website', 'bl_page_referrer', 'bl_ad_consent', 'bl_touch'];
+    $message = $first('message', 'your-message');
+    // Anything else the entry holds stays with it, under the message, so no field of an older or other form is lost.
+    $other = [];
+    foreach (bl_flamingo_fields($id) as $name => $_) {
+        if (in_array($name, $used, true) || str_starts_with($name, 'bl_attr_') || str_starts_with($name, '_')) continue;
+        if (($value = $field($name)) !== '') $other[] = $name . ': ' . $value;
+    }
+    if ($field('your-subject') !== '') array_unshift($other, 'your-subject: ' . $field('your-subject'));
+    if ($other) $message = trim($message . "\n\n—— 旧表单其他字段 ——\n" . implode("\n", $other));
     $fields = [
         'product' => BL_ENQUIRY_FAMILIES_ZH[$family] ?? $family,
         'model' => $field('model'),
-        'name' => $field('name') !== '' ? $field('name') : trim((string) get_post_meta($id, '_from_name', true)),
-        'email' => $field('email') !== '' ? $field('email') : trim((string) get_post_meta($id, '_from_email', true)),
+        'name' => $first('name', 'your-name') !== '' ? $first('name', 'your-name') : trim((string) get_post_meta($id, '_from_name', true)),
+        'email' => $first('email', 'your-email') !== '' ? $first('email', 'your-email') : trim((string) get_post_meta($id, '_from_email', true)),
         'phone' => '',
         'company' => $field('company'),
         // The form asked for a country until October 2026; later entries have none.
         'country' => $field('country'),
-        'message' => $field('message'),
+        'message' => $message,
         'source_entry' => '',
         'source_page' => (string) ($meta['url'] ?? ''),
         'source_title' => trim((string) ($meta['post_title'] ?? '')),

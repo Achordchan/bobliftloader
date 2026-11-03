@@ -127,7 +127,8 @@ function bl_enquiry_record(int $postId): array
     $fields = bl_flamingo_fields($postId);
     $channel = function_exists('wp_get_object_terms') ? wp_get_object_terms($postId, 'flamingo_inbound_channel', ['fields' => 'slugs']) : [];
     return [
-        'subject' => (string) $meta('_subject'),
+        // Flamingo keeps the subject as the post's title (and, in some versions, in _subject too).
+        'subject' => (string) ($meta('_subject') ?: get_post_field('post_title', $postId)),
         'from_name' => (string) $meta('_from_name'),
         'from_email' => (string) $meta('_from_email'),
         'fields' => $fields,
