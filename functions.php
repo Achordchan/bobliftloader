@@ -21,6 +21,7 @@ require_once __DIR__ . '/inc/wp-content-editor.php';
 require_once __DIR__ . '/inc/wp-admin-ui.php';
 require_once __DIR__ . '/inc/wp-inquiry.php';
 require_once __DIR__ . '/inc/wp-inquiry-import.php';
+require_once __DIR__ . '/inc/wp-inquiry-legacy-mail.php';
 require_once __DIR__ . '/inc/wp-rest.php';
 require_once __DIR__ . '/inc/wp-enquiries-rest.php';
 require_once __DIR__ . '/inc/wp-tracking.php';

@@ -112,4 +112,16 @@ if (bl_wp_inquiry_legacy_extras() !== []) $fail(25, 'subdirectory privacy link r
 $GLOBALS['meta'][18]['_form'] = '<label>Order number [text* order]</label>';
 $GLOBALS['options']['bl_inquiry_switch_confirmed'] = '1';
 if (!bl_wp_inquiry_switch_allowed()) $fail(23, 'confirmed switch held back');
+// The old CF7 mail's [bl_…] tags still fill in while a cached page posts the old form.
+function wp_parse_url($url, $part = -1) { return parse_url($url, $part); }
+function wp_date($format, $ts) { return gmdate($format, $ts); }
+function bl_enquiry_attribution(array $fields) { return isset($fields['bl_attr_gclid']) ? ['gclid' => $fields['bl_attr_gclid']] : []; }
+function achord_inquiry_channel(array $fields) { return isset($fields['attr_gclid']) ? ['Google Ads 广告', ''] : ['直接访问', '']; }
+function achord_inquiry_device($agent, $touch = false) { return $agent === '' ? '' : '电脑 · Windows · Chrome'; }
+require dirname(__DIR__, 2) . '/inc/wp-inquiry-legacy-mail.php';
+$posted = ['product' => ['Mini dumper'], 'model' => $model, 'bl_attr_gclid' => 'abc'];
+$meta = ['url' => 'https://example.test/product/bl-t360/', 'timestamp' => 0, 'remote_ip' => '203.0.113.7', 'user_agent' => 'Mozilla'];
+if (bl_legacy_mail_tag('bl_channel', false, $posted, $meta) !== 'Google Ads 广告' || bl_legacy_mail_tag('bl_ip_country', false, $posted, $meta) !== '加拿大') $fail(30, 'legacy channel or country');
+if (bl_legacy_mail_tag('bl_device', false, $posted, $meta) !== '电脑 · Windows · Chrome' || bl_legacy_mail_tag('bl_enquiry_kind', false, $posted, $meta) !== '产品询盘') $fail(31, 'legacy device or kind');
+if (bl_legacy_mail_tag('bl_product_card', false, $posted, $meta) !== 'Mini dumper ' . $model || bl_legacy_mail_tag('name', false, $posted, $meta) !== null) $fail(32, 'legacy product or foreign tag');
 echo "inquiry plugin integration ok\n";
