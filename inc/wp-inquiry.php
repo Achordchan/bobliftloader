@@ -96,7 +96,8 @@ function bl_wp_inquiry_is_legacy_shortcode(array $atts): bool
     $id = (int) get_option('bl_inquiry_form');
     if ($id <= 0) return false;
     $ref = trim((string) ($atts['id'] ?? ''));
-    if ($ref !== '' && ctype_digit($ref)) return (int) $ref === $id;
+    // A post number; a CF7 hash can be all digits too, so a number that is not this form's is checked as a hash below.
+    if ($ref !== '' && ctype_digit($ref) && (int) $ref === $id) return true;
     // CF7 writes the first 7 characters of the form's _hash into the shortcode.
     $hash = (string) get_post_meta($id, '_hash', true);
     if ($ref !== '' && strlen($ref) >= 7 && $hash !== '' && str_starts_with($hash, $ref)) return true;
@@ -104,9 +105,16 @@ function bl_wp_inquiry_is_legacy_shortcode(array $atts): bool
     return $ref === '' && $title !== '' && $title === trim((string) get_post_field('post_title', $id));
 }
 
-/** The theme's form in place of the old CF7 one. */
+/**
+ * The theme's form in place of the old CF7 one: the plugin's form (any number of them work on one page). Without the plugin
+ * the page's own email-draft form is the one the script prepares (it is unique by id), so a second one is not drawn: a
+ * button opens the visitor's email app addressed as that form would.
+ */
 function bl_wp_inquiry_legacy_shortcode_form(): string
 {
+    if (!bl_inquiry_live()) {
+        return '<p class="bl-legacy-enquiry"><a class="bl-button bl-button-blue" href="' . esc_url(bl_mailto(bl_inquiry_fallback_email())) . '">Email your enquiry</a></p>';
+    }
     $selectedFamily = 'loader';
     ob_start();
     require get_template_directory() . '/templates/partials/inquiry-form.php';

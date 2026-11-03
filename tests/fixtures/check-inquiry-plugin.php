@@ -20,7 +20,7 @@ function get_post_meta($id, $key, $single = false) { return $GLOBALS['meta'][$id
 function current_theme_supports($name) { return $name === 'achord-inquiry'; }
 // The plugin's side, as far as the theme calls it.
 function bl_wp_products() { return [['model' => 'BL-T360', 'name' => 'BL-T360 Mini Skid Steer', 'slug' => 'bl-t360', 'url' => 'https://example.test/product/bl-t360/', 'image' => '', 'category' => 'skid-steer-loaders']]; }
-function achord_inquiry_active() { return true; }
+function achord_inquiry_active() { return $GLOBALS['plugin_on'] ?? true; }
 function achord_inquiry_hidden_fields(array $args = []) { return '<input type="hidden" name="action" value="bl_submit_inquiry"><input type="hidden" name="source_entry" value="' . esc_attr($args['source'] ?? '') . '">'; }
 function achord_inquiry_action_url() { return 'https://example.test/?bl_inquiry_submit=1'; }
 function achord_inquiry_turnstile_widget($class = '', $lazy = false) { return $GLOBALS['turnstile'] ? '<div class="achord-inquiry-turnstile ' . $class . '"><div data-turnstile-widget data-sitekey="k"></div></div>' : ''; }
@@ -125,6 +125,9 @@ if (apply('wpcf7_validate', new WPCF7_Validation(), [$tag('email')])->errors !==
 function get_post_field($field, $id) { return $id === 18 ? 'Old enquiry' : ''; }
 $GLOBALS['meta'][18]['_hash'] = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0';
 if (!bl_wp_inquiry_is_legacy_shortcode(['id' => '18']) || !bl_wp_inquiry_is_legacy_shortcode(['id' => 'a1b2c3d']) || !bl_wp_inquiry_is_legacy_shortcode(['title' => 'Old enquiry'])) $fail(32, 'legacy shortcode not recognised');
+$GLOBALS['meta'][18]['_hash'] = '1234567abc';
+if (!bl_wp_inquiry_is_legacy_shortcode(['id' => '1234567'])) $fail(40, 'all-digit hash not recognised');
+$GLOBALS['meta'][18]['_hash'] = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0';
 if (bl_wp_inquiry_is_legacy_shortcode(['id' => 'a1b']) || bl_wp_inquiry_is_legacy_shortcode(['title' => 'Other'])) $fail(38, 'short hash or other title taken');
 if (bl_wp_inquiry_is_legacy_shortcode(['id' => '99']) || bl_wp_inquiry_is_legacy_shortcode(['id' => 'zzz'])) $fail(33, 'other shortcode taken over');
 if (apply('pre_do_shortcode_tag', false, 'gallery', ['id' => '18']) !== false || apply('pre_do_shortcode_tag', false, 'contact-form-7', ['id' => '99']) !== false) $fail(34, 'other shortcode replaced');
@@ -141,4 +144,8 @@ function shortcode_exists($name) { return isset($GLOBALS['shortcodes'][$name]); 
 function add_shortcode($name, $callback) { $GLOBALS['shortcodes'][$name] = $callback; }
 foreach ($GLOBALS['filters']['init'] ?? [] as $callback) if ($callback instanceof Closure && str_ends_with((new ReflectionFunction($callback))->getFileName(), '/inc/wp-inquiry.php')) $callback();
 if (array_keys($GLOBALS['shortcodes']) !== ['contact-form-7', 'contact-form'] || ($GLOBALS['shortcodes']['contact-form-7'])(['id' => '99']) !== '') $fail(39, 'fallback shortcodes');
+// Without the plugin the old shortcode draws no second email-draft form, only a mail button.
+$GLOBALS['plugin_on'] = false;
+$button = bl_wp_inquiry_legacy_shortcode_form();
+if (str_contains($button, '<form') || !str_contains($button, 'mailto:')) $fail(41, 'second draft form drawn');
 echo "inquiry plugin integration ok\n";
