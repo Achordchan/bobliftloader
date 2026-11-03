@@ -83,6 +83,30 @@ add_filter('wpcf7_validate', static function ($result, $tags = []) {
     return $result;
 }, 99, 2);
 
+/**
+ * A page or post whose saved content still holds the old form's CF7 shortcode ([contact-form-7 id="…"]) shows the theme's
+ * form instead (the plugin's, or the email-draft form without it), so a reload after the message above really brings the
+ * current form. Shortcodes of other CF7 forms render as CF7 draws them.
+ */
+function bl_wp_inquiry_is_legacy_shortcode(array $atts): bool
+{
+    $id = (int) get_option('bl_inquiry_form');
+    if ($id <= 0) return false;
+    $ref = trim((string) ($atts['id'] ?? ''));
+    if ($ref !== '' && ctype_digit($ref)) return (int) $ref === $id;
+    $form = null;
+    if ($ref !== '' && function_exists('wpcf7_get_contact_form_by_hash')) $form = wpcf7_get_contact_form_by_hash($ref);
+    if (!$form && ($title = trim((string) ($atts['title'] ?? ''))) !== '' && function_exists('wpcf7_get_contact_form_by_title')) $form = wpcf7_get_contact_form_by_title($title);
+    return $form && (int) $form->id() === $id;
+}
+add_filter('pre_do_shortcode_tag', static function ($output, string $tag, $atts) {
+    if (!in_array($tag, ['contact-form-7', 'contact-form'], true) || !bl_wp_inquiry_is_legacy_shortcode((array) $atts)) return $output;
+    $selectedFamily = 'loader';
+    ob_start();
+    require get_template_directory() . '/templates/partials/inquiry-form.php';
+    return (string) ob_get_clean();
+}, 10, 3);
+
 /** Hand enquiries to the plugin. Its posted names keep this theme's bl_ prefix, which assets/js/attribution.js fills in. */
 add_action('after_setup_theme', static function (): void {
     if (!bl_wp_inquiry_switch_allowed()) return;
