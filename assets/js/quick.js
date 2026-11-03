@@ -93,6 +93,38 @@ export function initializeQuick() {
   // Turning the phone past the sheet's limits leaves a dimmed, locked page behind: close it instead.
   sheet.addEventListener('change', () => { if (!panel.hidden) setOpen(false); });
 
+  // iOS does not shrink the fixed sheet when the keyboard opens: it pans the visible area instead, so the sheet sits half
+  // under the keyboard and jumps from field to field. While the sheet is open it follows the visible area
+  // (visualViewport): with the keyboard up it stands on the keyboard and is no taller than what is left, the form scrolls
+  // inside it, and the focused field is brought into view there.
+  let viewportFrame = 0;
+  const clearViewport = () => {
+    quick.style.removeProperty('bottom');
+    panel.style.removeProperty('max-height');
+  };
+  const syncViewport = () => {
+    cancelAnimationFrame(viewportFrame);
+    viewportFrame = requestAnimationFrame(() => {
+      const viewport = window.visualViewport;
+      if (!viewport || panel.hidden || !sheet.matches) { clearViewport(); return; }
+      const covered = innerHeight - viewport.offsetTop - viewport.height;
+      if (covered < 80 && viewport.offsetTop < 1) { clearViewport(); return; } // no keyboard: the stylesheet's place
+      quick.style.bottom = `${Math.round(Math.max(covered, 0))}px`;
+      panel.style.maxHeight = `${Math.round(viewport.height - 8)}px`;
+    });
+  };
+  window.visualViewport?.addEventListener('resize', syncViewport);
+  window.visualViewport?.addEventListener('scroll', syncViewport);
+  new MutationObserver(syncViewport).observe(panel, { attributes: true, attributeFilter: ['hidden'] });
+  panel.addEventListener('focusin', (event) => {
+    const field = event.target;
+    if (!field.matches?.('input:not([type=radio]), textarea, select')) return;
+    setTimeout(() => {
+      syncViewport();
+      requestAnimationFrame(() => { if (document.activeElement === field) field.scrollIntoView({ block: 'nearest', inline: 'nearest' }); });
+    }, 320);
+  });
+
   // A product page opens with its section bar along the bottom of the screen; the button rises above it until it scrolls up.
   const bar = document.querySelector('.bl-product-section-nav');
   if (bar) {
