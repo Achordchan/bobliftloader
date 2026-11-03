@@ -21,8 +21,8 @@ add_action('after_setup_theme', static function (): void {
         'dingtalk_emoji' => '📩',
         'prefix' => 'bl_',
         'post_type' => 'bl_inquiry',
-        // The address Flamingo's enquiries had (wp-enquiries-rest.php), so tools reading it get the new ones.
-        'rest_base' => 'bl_enquiries',
+        // Flamingo's history keeps its own /wp/v2/bl_enquiries (wp-enquiries-rest.php); copies of it are in this list too.
+        'rest_base' => 'bl_inquiries',
         'rest_record' => 'bl_inquiry',
         'required' => ['name', 'email'],
         'form_selector' => '.bl-inquiry-form',

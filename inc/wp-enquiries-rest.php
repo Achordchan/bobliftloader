@@ -8,8 +8,9 @@ defined('ABSPATH') || exit;
  * manage Flamingo (administrators) can read them. Nothing can be created, changed or deleted through the API: that
  * stays in Flamingo's own screens.
  *
- * Once the inquiry plugin takes enquiries (wp-inquiry.php), /wp/v2/bl_enquiries lists its records instead, Flamingo's
- * history copied in, and meta._bl_enquiry keeps the shape below (bl_inquiry_legacy_record).
+ * The site now takes enquiries through the inquiry plugin (wp-inquiry.php: /wp/v2/bl_inquiries, history copied in). This
+ * old route stays as it was for Flamingo's own entries, same IDs and same shape, also once Flamingo is switched off: the
+ * theme then registers the type itself, read-only and out of the admin menus, and reads the entries from the database.
  *
  * List: /wp/v2/bl_enquiries (newest first; title = the equipment chosen, status "flamingo-spam" for spam, which the
  * default list includes). One enquiry with context=edit carries meta._bl_enquiry: sender, every posted field, the page,
@@ -58,7 +59,8 @@ if (class_exists('WP_REST_Posts_Controller')) {
 
 function bl_enquiries_can_read(): bool
 {
-    return current_user_can('flamingo_edit_inbound_messages');
+    // Flamingo maps its capability to administrators; without Flamingo the same people are its administrators.
+    return current_user_can('flamingo_edit_inbound_messages') || (!class_exists('Flamingo_Inbound_Message') && current_user_can('manage_options'));
 }
 
 function bl_enquiries_forbidden(): WP_Error
@@ -74,8 +76,7 @@ function bl_enquiries_read_only(): WP_Error
 /** Flamingo's own registration, plus the REST route; its capabilities (edit_users) are kept as they are. */
 function bl_enquiries_post_type_args(array $args, string $type): array
 {
-    // Once the inquiry plugin takes enquiries, /wp/v2/bl_enquiries is its list (wp-inquiry.php), history included.
-    if ($type !== 'flamingo_inbound' || !class_exists('BL_Enquiries_REST_Controller') || (function_exists('bl_wp_inquiry_ready') && bl_wp_inquiry_ready())) return $args;
+    if ($type !== 'flamingo_inbound' || !class_exists('BL_Enquiries_REST_Controller')) return $args;
     $args['show_in_rest'] = true;
     $args['rest_base'] = 'bl_enquiries';
     $args['rest_controller_class'] = 'BL_Enquiries_REST_Controller';
@@ -102,26 +103,40 @@ function bl_enquiry_attribution(array $fields): array
     return $found;
 }
 
-/** One enquiry as Flamingo holds it, in the shape meta._bl_enquiry reads. */
+/**
+ * One enquiry as Flamingo holds it, in the shape meta._bl_enquiry reads. Read from Flamingo's own post meta (_subject,
+ * _from_name, _from_email, _fields with one _field_<name> each, _meta, _submission_status, _spam_log, _akismet), so it
+ * works with Flamingo switched off too.
+ */
 function bl_enquiry_record(int $postId): array
 {
-    if (!class_exists('Flamingo_Inbound_Message') || get_post_type($postId) !== 'flamingo_inbound') return [];
-    $message = new Flamingo_Inbound_Message($postId);
+    if (get_post_type($postId) !== 'flamingo_inbound') return [];
+    $meta = static fn(string $key) => get_post_meta($postId, $key, true);
+    $fields = [];
+    foreach (array_keys(is_array($meta('_fields')) ? $meta('_fields') : []) as $name) $fields[(string) $name] = $meta('_field_' . $name);
+    $channel = function_exists('wp_get_object_terms') ? wp_get_object_terms($postId, 'flamingo_inbound_channel', ['fields' => 'slugs']) : [];
     return [
-        'subject' => (string) $message->subject,
-        'from_name' => (string) $message->from_name,
-        'from_email' => (string) $message->from_email,
-        'fields' => (array) $message->fields,
+        'subject' => (string) $meta('_subject'),
+        'from_name' => (string) $meta('_from_name'),
+        'from_email' => (string) $meta('_from_email'),
+        'fields' => $fields,
         // The advertisement the sender came from (Google click ID, campaign tags, landing page), when they agreed to advertising storage.
-        'attribution' => bl_enquiry_attribution((array) $message->fields),
-        'meta' => (array) $message->meta,
-        'channel' => (string) $message->channel,
-        'submission_status' => (string) $message->submission_status,
-        'spam' => (bool) $message->spam,
-        'spam_log' => (array) $message->spam_log,
-        'akismet' => (array) $message->akismet,
+        'attribution' => bl_enquiry_attribution($fields),
+        'meta' => is_array($meta('_meta')) ? $meta('_meta') : [],
+        'channel' => is_array($channel) && $channel ? (string) $channel[0] : '',
+        'submission_status' => (string) $meta('_submission_status'),
+        'spam' => get_post_status($postId) === 'flamingo-spam',
+        'spam_log' => is_array($meta('_spam_log')) ? $meta('_spam_log') : [],
+        'akismet' => is_array($meta('_akismet')) ? $meta('_akismet') : [],
     ];
 }
+
+/** With Flamingo switched off, its entries stay readable here: the type and its spam status, without any admin screen. */
+add_action('init', static function (): void {
+    if (post_type_exists('flamingo_inbound')) return;
+    register_post_type('flamingo_inbound', ['public' => false, 'show_ui' => false, 'show_in_menu' => false, 'capability_type' => 'post', 'map_meta_cap' => true, 'capabilities' => ['create_posts' => 'do_not_allow']]);
+    if (!get_post_status_object('flamingo-spam')) register_post_status('flamingo-spam', ['internal' => true, 'label' => 'Spam']);
+}, 30);
 
 add_action('init', static function (): void {
     register_post_meta('flamingo_inbound', '_bl_enquiry', [
@@ -144,46 +159,3 @@ add_filter('rest_flamingo_inbound_query', static function (array $args, $request
     if (!array_key_exists('status', $request->get_query_params())) $args['post_status'] = ['publish', 'flamingo-spam'];
     return $args;
 }, 10, 2);
-
-/**
- * The same meta._bl_enquiry for an enquiry the inquiry plugin keeps, so tools that read the old shape keep working after the
- * move: the sender, every saved field, the ad attribution, the page and IP, whether the mail went out and, for a blocked
- * one, why. Administrators only, like the plugin's own record (meta.bl_inquiry).
- */
-function bl_inquiry_legacy_record(int $postId): array
-{
-    if (!function_exists('achord_inquiry_record') || !function_exists('achord_inquiry_can_read') || !achord_inquiry_can_read()) return [];
-    $record = achord_inquiry_record($postId);
-    $attribution = [];
-    foreach ($record as $key => $value) if (str_starts_with((string) $key, 'attr_') && $value !== '') $attribution[substr((string) $key, 5)] = $value;
-    $blocked = (string) ($record['blocked'] ?? '');
-    return [
-        'subject' => trim(($record['product'] ?? '') . ' ' . ($record['model'] ?? '')),
-        'from_name' => (string) ($record['name'] ?? ''),
-        'from_email' => (string) ($record['email'] ?? ''),
-        'fields' => $record,
-        'attribution' => $attribution,
-        'meta' => ['url' => (string) ($record['source_page'] ?? ''), 'post_title' => (string) ($record['source_title'] ?? ''), 'remote_ip' => (string) ($record['ip'] ?? ''), 'device' => (string) ($record['device'] ?? '')],
-        'channel' => (string) ($record['channel'] ?? ''),
-        'submission_status' => ($record['mail_sent'] ?? '') === '0' ? 'mail_failed' : 'mail_sent',
-        'spam' => $blocked !== '',
-        'spam_log' => $blocked !== '' ? [['agent' => 'blocklist', 'reason' => $blocked]] : [],
-        'akismet' => [],
-    ];
-}
-
-add_action('init', static function (): void {
-    if (!function_exists('bl_wp_inquiry_ready') || !bl_wp_inquiry_ready()) return;
-    register_post_meta('bl_inquiry', '_bl_enquiry', [
-        'type' => 'object',
-        'single' => true,
-        'description' => 'The enquiry in the shape Flamingo enquiries had: sender, fields, attribution, page, IP and block reason.',
-        'show_in_rest' => ['schema' => ['type' => 'object', 'context' => ['edit'], 'additionalProperties' => true]],
-        'auth_callback' => '__return_false',
-    ]);
-}, 20);
-
-add_filter('get_post_metadata', static function ($value, $postId, $key) {
-    if ($key !== '_bl_enquiry' || get_post_type((int) $postId) !== 'bl_inquiry') return $value;
-    return [bl_inquiry_legacy_record((int) $postId)];
-}, 10, 3);

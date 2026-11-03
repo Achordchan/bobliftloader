@@ -54,8 +54,10 @@ function bl_flamingo_inquiry_fields(WP_Post $entry): array
     $fields['channel'] = implode(' · ', array_filter(achord_inquiry_channel($fields), 'strlen'));
     $fields['ip'] = filter_var((string) ($meta['remote_ip'] ?? ''), FILTER_VALIDATE_IP) ? (string) $meta['remote_ip'] : '';
     $fields['language'] = 'en';
+    // What happened to it then, as CF7 said (mail_sent, mail_failed, spam …); whether a mail went is recorded only when known.
     $status = (string) get_post_meta($id, '_submission_status', true);
-    $fields['mail_sent'] = $status === 'mail_failed' ? '0' : '1';
+    $fields['flamingo_status'] = $status;
+    $fields['mail_sent'] = ['mail_sent' => '1', 'mail_failed' => '0'][$status] ?? '';
     $fields['flamingo_id'] = (string) $id;
     return $fields;
 }
