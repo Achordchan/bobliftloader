@@ -66,6 +66,23 @@ add_action('admin_post_bl_inquiry_switch', static function (): void {
     exit;
 });
 
+/**
+ * The theme no longer handles Contact Form 7 (no mail tags, honeypot, Akismet options or recipient override), so a page
+ * cached before the switch that still posts the old CF7 form is turned back with a request to reload: nothing is mailed
+ * or stored through that path, and the reloaded page carries the current form. Other CF7 forms are not affected.
+ */
+add_filter('wpcf7_validate', static function ($result, $tags = []) {
+    $form = class_exists('WPCF7_ContactForm') ? WPCF7_ContactForm::get_current() : ($GLOBALS['cf7_form'] ?? null);
+    $id = (int) get_option('bl_inquiry_form');
+    if (!$form || $id <= 0 || (int) $form->id() !== $id || !is_object($result) || !method_exists($result, 'invalidate')) return $result;
+    $target = null;
+    foreach ((array) $tags as $tag) {
+        if (is_object($tag) && ($target === null || ($tag->name ?? '') === 'email')) $target = $tag;
+    }
+    if ($target) $result->invalidate($target, 'This form has been updated. Please reload the page and send your enquiry again.');
+    return $result;
+}, 99, 2);
+
 /** Hand enquiries to the plugin. Its posted names keep this theme's bl_ prefix, which assets/js/attribution.js fills in. */
 add_action('after_setup_theme', static function (): void {
     if (!bl_wp_inquiry_switch_allowed()) return;
