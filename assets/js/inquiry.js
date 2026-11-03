@@ -108,6 +108,18 @@ function initializeSentInquiry(wrap) {
   };
   const requiredText = [...form.querySelectorAll('input[required]:not([type="email"])')];
   requiredText.forEach((input) => input.addEventListener('input', () => input.setCustomValidity('')));
+  const ready = () => {
+    delete form.dataset.sending;
+    form.removeAttribute('aria-busy');
+    if (button) button.disabled = false;
+  };
+  // Back from the thank-you page, a browser may show this page as it was left: ready to send again, with a fresh check.
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted || !form.dataset.sending) return;
+    ready();
+    say('', '');
+    if (check?.id != null) { try { window.turnstile?.reset(check.id); } catch { /* drawn again on the next try */ } }
+  });
 
   // The ad source fields are added in the capture phase (attribution.js); this runs after, as the form is sent.
   form.addEventListener('submit', async (event) => {
@@ -131,9 +143,7 @@ function initializeSentInquiry(wrap) {
     if (check && check.id == null) {
       try { await check.draw(); } catch { /* the message below */ }
       say(check.id == null ? NETWORK_ERROR : 'Please complete the verification and send again.', 'error');
-      delete form.dataset.sending;
-      form.removeAttribute('aria-busy');
-      if (button) button.disabled = false;
+      ready();
       return;
     }
     let result = { ok: false, data: {} };
@@ -149,9 +159,7 @@ function initializeSentInquiry(wrap) {
       return;
     }
     say(result.data.message || NETWORK_ERROR, 'error');
-    delete form.dataset.sending;
-    form.removeAttribute('aria-busy');
-    if (button) button.disabled = false;
+    ready();
     if (check?.id != null) { try { window.turnstile?.reset(check.id); } catch { /* drawn again on the next try */ } }
   });
 }

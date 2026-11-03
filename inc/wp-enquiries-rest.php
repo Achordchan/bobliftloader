@@ -131,10 +131,16 @@ function bl_enquiry_record(int $postId): array
     ];
 }
 
-/** With Flamingo switched off, its entries stay readable here: the type and its spam status, without any admin screen. */
+/**
+ * With Flamingo switched off, its entries stay readable here, by administrators only: the type, its channel taxonomy and its
+ * spam status, without any admin screen.
+ */
 add_action('init', static function (): void {
     if (post_type_exists('flamingo_inbound')) return;
-    register_post_type('flamingo_inbound', ['public' => false, 'show_ui' => false, 'show_in_menu' => false, 'capability_type' => 'post', 'map_meta_cap' => true, 'capabilities' => ['create_posts' => 'do_not_allow']]);
+    // Administrators only, through every door (XML-RPC included): no capability of ordinary posts carries over.
+    $admin = ['edit_post' => 'manage_options', 'read_post' => 'manage_options', 'delete_post' => 'do_not_allow', 'edit_posts' => 'manage_options', 'edit_others_posts' => 'manage_options', 'delete_posts' => 'do_not_allow', 'publish_posts' => 'do_not_allow', 'read_private_posts' => 'manage_options', 'create_posts' => 'do_not_allow', 'delete_others_posts' => 'do_not_allow', 'delete_private_posts' => 'do_not_allow', 'delete_published_posts' => 'do_not_allow', 'edit_private_posts' => 'manage_options', 'edit_published_posts' => 'manage_options', 'read' => 'manage_options'];
+    register_post_type('flamingo_inbound', ['public' => false, 'show_ui' => false, 'show_in_menu' => false, 'show_in_nav_menus' => false, 'exclude_from_search' => true, 'publicly_queryable' => false, 'map_meta_cap' => false, 'capability_type' => 'flamingo_inbound', 'capabilities' => $admin]);
+    if (!taxonomy_exists('flamingo_inbound_channel')) register_taxonomy('flamingo_inbound_channel', 'flamingo_inbound', ['public' => false, 'show_ui' => false, 'show_in_rest' => false, 'rewrite' => false, 'hierarchical' => true, 'capabilities' => ['manage_terms' => 'manage_options', 'edit_terms' => 'manage_options', 'delete_terms' => 'do_not_allow', 'assign_terms' => 'manage_options']]);
     if (!get_post_status_object('flamingo-spam')) register_post_status('flamingo-spam', ['internal' => true, 'label' => 'Spam']);
 }, 30);
 
