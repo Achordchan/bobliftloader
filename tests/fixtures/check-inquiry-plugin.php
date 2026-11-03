@@ -58,8 +58,20 @@ if (!str_contains(bl_wp_inquiry_form([]), 'data-turnstile-widget') || !str_conta
 $GLOBALS['options']['bl_inquiry_form'] = 18;
 $GLOBALS['meta'][18]['_mail'] = ['recipient' => 'inbox@example.test'];
 if (apply('achord_inquiry_recipient', '') !== 'inbox@example.test') $fail(14, 'legacy recipient');
+$GLOBALS['options']['admin_email'] = 'admin@example.test';
 $GLOBALS['meta'][18]['_mail'] = ['recipient' => '[_site_admin_email]'];
-if (apply('achord_inquiry_recipient', '') !== 'info@boblift.com') $fail(15, 'unusable legacy recipient');
+if (apply('achord_inquiry_recipient', '') !== 'admin@example.test') $fail(15, 'admin email tag');
+$GLOBALS['meta'][18]['_mail'] = ['recipient' => 'Sales <sales@example.test>, [_site_admin_email], [unknown], not-an-address'];
+if (bl_wp_inquiry_legacy_recipients() !== ['sales@example.test', 'admin@example.test'] || apply('achord_inquiry_recipient', '') !== 'sales@example.test') $fail(16, 'recipient list');
+// The notification goes to all of them; another mail, or one the admin sent elsewhere, is left as it is.
+apply('achord_inquiry_before_mail', null);
+if (apply('wp_mail', ['to' => 'sales@example.test'])['to'] !== ['sales@example.test', 'admin@example.test']) $fail(17, 'extra inboxes');
+if (apply('wp_mail', ['to' => 'sales@example.test'])['to'] !== 'sales@example.test') $fail(18, 'extra inboxes added to another mail');
+apply('achord_inquiry_before_mail', null);
+if (apply('wp_mail', ['to' => 'boss@example.test'])['to'] !== 'boss@example.test') $fail(19, 'admin recipient overridden');
+$GLOBALS['meta'][18]['_mail'] = ['recipient' => '[_site_admin_email]'];
+$GLOBALS['options']['admin_email'] = 'broken';
+if (apply('achord_inquiry_recipient', '') !== 'info@boblift.com') $fail(20, 'unusable legacy recipient');
 $GLOBALS['meta'][18]['_mail'] = ['recipient' => 'inbox@example.test'];
 // (bl_company() keeps what it read first in this process, so the address itself is not compared here.)
 $GLOBALS['options']['bl_content_global'] = ['company' => ['email' => 'sales@example.test']];

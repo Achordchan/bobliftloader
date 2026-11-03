@@ -84,21 +84,56 @@ add_filter('achord_inquiry_submission_fields', 'bl_wp_inquiry_submission_fields'
 add_filter('achord_inquiry_mail_products_html', static fn($html, array $fields): string => bl_wp_inquiry_product_card((string) ($fields['product'] ?? ''), (string) ($fields['model'] ?? '')), 10, 2);
 
 /**
- * Where notifications go unless 设置 → 询盘设置 names an address: the sales email of 网站内容 → 全站设置 once it was set there,
- * else the address the Contact Form 7 form sent to (an inbox someone chose there stays the inbox), else the site's email.
+ * The inboxes the Contact Form 7 form sent to, as CF7 read its recipient: a comma-separated list of addresses, each bare or
+ * with a display name ("Sales <sales@x>"), and the [_site_admin_email] tag. Empty when no form was made or none is usable.
+ */
+function bl_wp_inquiry_legacy_recipients(): array
+{
+    $form = (int) get_option('bl_inquiry_form');
+    $mail = $form > 0 ? get_post_meta($form, '_mail', true) : '';
+    $text = is_array($mail) ? (string) ($mail['recipient'] ?? '') : '';
+    $text = str_replace('[_site_admin_email]', (string) get_option('admin_email'), $text);
+    $found = [];
+    foreach (explode(',', $text) as $part) {
+        $part = trim($part);
+        if (preg_match('/<([^<>]+)>\s*$/', $part, $match)) $part = trim($match[1]);
+        if ($part !== '' && is_email($part) && !in_array($part, $found, true)) $found[] = $part;
+    }
+    return $found;
+}
+
+/** Whether the sales email of 网站内容 → 全站设置 was set there (rather than left at the theme's default). */
+function bl_wp_inquiry_global_email_set(): bool
+{
+    $saved = get_option('bl_content_global', []);
+    return is_array($saved) && (!empty($saved['_bl_email_explicit']) || (is_array($saved['company'] ?? null) && array_key_exists('email', $saved['company'])));
+}
+
+/**
+ * Where notifications go unless 设置 → 询盘设置 names an address: the sales email of 全站设置 once it was set there, else the
+ * inboxes the Contact Form 7 form sent to (the plugin takes one address; the others are added as the mail goes, below),
+ * else the site's email.
  */
 function bl_wp_inquiry_default_recipient(): string
 {
-    $saved = get_option('bl_content_global', []);
-    $explicit = is_array($saved) && (!empty($saved['_bl_email_explicit']) || (is_array($saved['company'] ?? null) && array_key_exists('email', $saved['company'])));
-    if (!$explicit && ($form = (int) get_option('bl_inquiry_form')) > 0) {
-        $mail = get_post_meta($form, '_mail', true);
-        $legacy = is_array($mail) ? trim((string) ($mail['recipient'] ?? '')) : '';
-        if ($legacy !== '' && is_email($legacy)) return $legacy;
-    }
-    return (string) bl_company('email');
+    $legacy = bl_wp_inquiry_global_email_set() ? [] : bl_wp_inquiry_legacy_recipients();
+    return $legacy[0] ?? (string) bl_company('email');
 }
 add_filter('achord_inquiry_recipient', 'bl_wp_inquiry_default_recipient');
+
+// The rest of the CF7 form's inboxes ride along with the plugin's notification, only when it goes to the first of them.
+add_action('achord_inquiry_before_mail', static function (): void {
+    $GLOBALS['bl_inquiry_mail_pending'] = true;
+});
+function bl_wp_inquiry_mail_recipients(array $args): array
+{
+    if (empty($GLOBALS['bl_inquiry_mail_pending'])) return $args;
+    $GLOBALS['bl_inquiry_mail_pending'] = false;
+    $legacy = bl_wp_inquiry_global_email_set() ? [] : bl_wp_inquiry_legacy_recipients();
+    if (count($legacy) > 1 && ($args['to'] ?? null) === $legacy[0]) $args['to'] = $legacy;
+    return $args;
+}
+add_filter('wp_mail', 'bl_wp_inquiry_mail_recipients');
 add_filter('achord_inquiry_page_language', static fn(): string => 'en');
 
 /**

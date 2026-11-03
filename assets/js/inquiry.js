@@ -64,7 +64,8 @@ function initializeTurnstile(form) {
 // Send the form to the inquiry plugin and read its JSON answer; a page the cache kept past its form key gets a fresh key
 // (wp-inquiry.php, bl_wp_inquiry_fresh_nonce) and is sent once more.
 async function post(form, retried = false) {
-  const response = await fetch(form.action, { method: 'POST', body: new FormData(form), credentials: 'same-origin', headers: { Accept: 'application/json' } });
+  // getAttribute: the plugin's hidden field named "action" hides the form's own action property.
+  const response = await fetch(form.getAttribute('action'), { method: 'POST', body: new FormData(form), credentials: 'same-origin', headers: { Accept: 'application/json' } });
   let answer = null;
   try { answer = await response.json(); } catch { /* not JSON: a server error page */ }
   if (response.status === 403 && !retried && form.dataset.nonceUrl) {

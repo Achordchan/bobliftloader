@@ -96,6 +96,8 @@ function bl_flamingo_import_batch(): int
         global $wpdb;
         return $where . $wpdb->prepare(" AND {$wpdb->posts}.ID > %d", $after);
     };
+    // With Flamingo switched off its spam status is unknown to WordPress, which would leave those entries out of the query.
+    if (!get_post_status_object('flamingo-spam')) register_post_status('flamingo-spam', ['internal' => true, 'label' => 'Spam']);
     add_filter('posts_where', $filter);
     $entries = get_posts(['post_type' => 'flamingo_inbound', 'post_status' => ['publish', 'flamingo-spam'], 'orderby' => 'ID', 'order' => 'ASC', 'numberposts' => BL_FLAMINGO_IMPORT_BATCH, 'suppress_filters' => false]);
     remove_filter('posts_where', $filter);
