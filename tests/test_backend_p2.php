@@ -123,20 +123,18 @@ $check(str_contains($capture(static fn() => bl_news_event_box($GLOBALS['posts'][
 
 // Parent slug and callbacks survive menu reordering; raw scripts remain separately permission-gated.
 $GLOBALS['pagenow'] = 'admin.php';
-add_action('admin_menu', static fn() => add_submenu_page('bl-content-home', '询盘邮件', '询盘邮件', 'edit_pages', 'bl-inquiry-mail', 'mail'), 21);
 run_hook('admin_menu');
-$expectedOrder = ['bl-content-global', 'bl-content-home', 'bl-content-loaders', 'bl-content-dumpers', 'bl-content-applications', 'bl-content-support', 'bl-content-about', 'bl-content-news', 'bl-content-contact', 'bl-content-thanks', 'bl-content-privacy', 'bl-content-404', 'bl-downloads', 'bl-inquiry-mail', 'bl-content-tracking'];
+$expectedOrder = ['bl-content-global', 'bl-content-home', 'bl-content-loaders', 'bl-content-dumpers', 'bl-content-applications', 'bl-content-support', 'bl-content-about', 'bl-content-news', 'bl-content-contact', 'bl-content-thanks', 'bl-content-privacy', 'bl-content-404', 'bl-downloads', 'bl-content-tracking'];
 $check(BL_CONTENT_MENU_ORDER === $expectedOrder, 'content menu order omits or misplaces a screen');
 $check($GLOBALS['menu_slug'] === 'bl-content-home' && array_column($GLOBALS['submenu']['bl-content-home'], 2) === $expectedOrder, 'menu order or parent slug changed');
 $dashboard = $capture('bl_dashboard_widget');
 preg_match_all('/admin\.php\?page=([^"]+)/', $dashboard, $links);
 $check($links[1] === $expectedOrder, 'dashboard content links do not follow menu order');
-foreach (['bl-content-home', 'bl-content-thanks', 'bl-content-tracking', 'bl-downloads', 'bl-inquiry-mail'] as $screen) {
+foreach (['bl-content-home', 'bl-content-thanks', 'bl-content-tracking', 'bl-downloads'] as $screen) {
     $GLOBALS['scripts'] = $GLOBALS['styles'] = [];
     run_hook('admin_enqueue_scripts', 'website_page_' . $screen);
     $check(isset($GLOBALS['scripts']['bl-content-editor']), "$screen lacks shared unsaved-change handler");
     if ($screen === 'bl-downloads') $check(isset($GLOBALS['styles']['bl-content-editor']), 'downloads lacks shared list layout styles');
-    if ($screen === 'bl-inquiry-mail') $check(!isset($GLOBALS['styles']['bl-content-editor']), "$screen unexpectedly loads content layout styles");
 }
 // 首页 is served by the top-level menu page; every other screen keeps its own callback.
 foreach (BL_CONTENT_PAGES as $page => $_) if ($page !== 'home') $check(is_callable($GLOBALS['screens']['bl-content-' . $page]), "$page original URL has no callback");

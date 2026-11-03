@@ -45,6 +45,6 @@ $quick = static function (string $category): string {
 };
 foreach (['skid-steer-loaders' => 'loader', 'mini-dumpers' => 'dumper'] as $category => $family) {
     $html = $quick($category);
-    $check(!bl_inquiry_form_id() && str_contains($html, '/contact/?equipment=' . $family . '#enquiry">Write your enquiry'), "$category: the quick panel's contact link loses the family");
+    $check(!bl_inquiry_live() && str_contains($html, '/contact/?equipment=' . $family . '#enquiry">Write your enquiry'), "$category: the quick panel's contact link loses the family");
 }
 echo "Catalog contact: $checks checks passed\n";

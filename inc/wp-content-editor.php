@@ -568,7 +568,7 @@ add_action('admin_menu', static function (): void {
 
 add_action('admin_enqueue_scripts', static function (string $hook): void {
     $contentPage = str_contains($hook, 'bl-content-');
-    if (!$contentPage && !str_ends_with($hook, '_page_bl-downloads') && !str_ends_with($hook, '_page_bl-inquiry-mail')) return;
+    if (!$contentPage && !str_ends_with($hook, '_page_bl-downloads')) return;
     wp_enqueue_media();
     $asset = static fn(string $file): array => [get_template_directory_uri() . '/assets/admin/' . $file, (string) filemtime(get_template_directory() . '/assets/admin/' . $file)];
     [$css, $cssVersion] = $asset('content-editor.css');
@@ -601,7 +601,7 @@ function bl_content_screen(string $page): void
     if (isset($_GET['bl_reset'])) echo '<p role="status"><span class="bl-chip">已恢复为主题默认内容</span></p>';
     if ($recovery) echo '<p role="alert"><span class="bl-chip bl-chip-warn">未保存</span> ' . esc_html($recovery['message']) . ' 输入已保留 24 小时；请在新标签页打开最新内容，对照后再编辑保存。<a target="_blank" rel="noopener" href="' . esc_url(admin_url('admin.php?page=bl-content-' . $page)) . '">打开最新内容</a></p>';
     if ($page === 'global' && function_exists('bl_wp_inquiry_current_recipient') && ($recipient = bl_wp_inquiry_current_recipient()) !== '') echo '<p><span class="bl-chip">询盘通知当前发往：' . esc_html($recipient) . '</span></p>';
-    if ($page === 'privacy') echo '<p><span class="bl-chip">当前模式：' . (bl_inquiry_form_id() ? '站内提交' : '邮件草稿') . '</span> 两种模式分别编辑，前台按询盘插件的启用状态自动选择。启用统计代码后，请同步更新外部服务说明。</p>';
+    if ($page === 'privacy') echo '<p><span class="bl-chip">当前模式：' . (bl_inquiry_live() ? '站内提交' : '邮件草稿') . '</span> 两种模式分别编辑，前台按询盘插件的启用状态自动选择。启用统计代码后，请同步更新外部服务说明。</p>';
     if (in_array($page, ['home', 'support'], true)) echo '<p>采购数字引用采购与售后 → 采购条款。支持 {warranty_months}、{lead_time}、{minimum_order}；自定义文案中的固定数字不会自动替换，请复核。</p>';
     if ($page === 'privacy') bl_privacy_migration_card();
     if ($page === 'about') echo '<p>公司介绍仍在原生关于页面正文中编辑。</p>';

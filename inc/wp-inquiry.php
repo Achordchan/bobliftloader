@@ -2,279 +2,162 @@
 declare(strict_types=1);
 
 /**
- * The enquiry form as a real form: Contact Form 7 sends the mail and Flamingo keeps every entry in the WordPress admin
- * (both plugins are needed).
- * The form's HTML is the theme's own (its CSS is unchanged); the theme creates the form once, so installing the two plugins
- * is all a site needs. Without them the theme keeps its email-draft form. Spam protection: a hidden field bots fill in,
- * Akismet (below), and Cloudflare Turnstile once its keys are saved in Contact → Integration.
+ * The enquiry form, sent to the BOB-LIFT inquiry plugin (achord-wp-inquiry, shared with the crane site): it keeps every
+ * enquiry under 询盘 in the admin, sends the classic card email and the DingTalk message, and checks Turnstile, the
+ * blocklist and how often one network sends. The theme draws the form (its CSS is unchanged), names the fields and hands the
+ * plugin what only it knows: the product card in the mail, where notifications go, the site's words.
+ * Without the plugin active the theme keeps its email-draft form.
  */
 
-// Raised when the theme's form or notification email changes, so the form the theme made earlier gets the new one once
-// (2: the HTML card; 3: no country field, the card shows the country of the sender's IP address instead; 4: the card
-// redesigned in the site's colours; 5: the country in Chinese, the same text size on phones;
-// 6: the sender is the site title again; the country names come from the theme's own table; 7: the crane site's card, with
-// 来源渠道, 访问设备 and 页面语言 in the strip, and the classic card chosen once as the design sent).
-const BL_ENQUIRY_MAIL_VERSION = 7;
 // The form's enquiry types as the sales team reads them.
 const BL_ENQUIRY_FAMILIES_ZH = ['Skid steer loader' => '滑移装载机', 'Mini dumper' => '迷你翻斗车', 'Help me choose' => '帮我选型', 'Parts & service' => '配件与服务'];
-// Marks the notification card in the form's Mail body; only that layout is sent without CF7's automatic paragraphs.
-const BL_ENQUIRY_CARD_MARKER = '<!-- bl-inquiry-card -->';
+// The equipment choices of the form: the page's key => the value sent.
+const BL_ENQUIRY_FAMILIES = ['loader' => 'Skid steer loader', 'dumper' => 'Mini dumper', 'help' => 'Help me choose', 'service' => 'Parts & service'];
 
-/**
- * The form CF7 renders for the theme, or 0 when CF7 or Flamingo is not active (or the form has been deleted). Flamingo is
- * required because CF7 alone keeps nothing: an enquiry whose email failed would be lost, and the privacy page promises a copy.
- */
-function bl_wp_inquiry_form_id(): int
+/** Hand enquiries to the plugin. Its posted names keep this theme's bl_ prefix, which assets/js/attribution.js fills in. */
+add_action('after_setup_theme', static function (): void {
+    add_theme_support('achord-inquiry', [
+        'site_label' => '装载设备站',
+        'dingtalk_emoji' => '📩',
+        'prefix' => 'bl_',
+        'post_type' => 'bl_inquiry',
+        'rest_base' => 'bl_inquiries',
+        'rest_record' => 'bl_inquiry',
+        'required' => ['name', 'email'],
+        'form_selector' => '.bl-inquiry-form',
+        'attribution_key' => 'bl_attribution',
+    ]);
+});
+
+// Addresses need the site's routes, so they are worked out when the plugin asks.
+add_filter('achord_inquiry_config', static function (array $config): array {
+    if (!current_theme_supports('achord-inquiry')) return $config;
+    $config['success_url'] = home_url('/thank-you/');
+    $config['fallback_url'] = home_url('/contact/');
+    $config['logo_url'] = bl_wp_inquiry_absolute_url(bl_brand_logo());
+    return $config;
+});
+
+/** Whether enquiries are sent through the plugin; otherwise the theme's email-draft form is shown. */
+function bl_wp_inquiry_ready(): bool
 {
-    if (!class_exists('WPCF7_ContactForm') || !class_exists('Flamingo_Inbound_Message')) return 0;
-    $id = (int) get_option('bl_inquiry_form');
-    return $id && get_post_type($id) === 'wpcf7_contact_form' && get_post_status($id) === 'publish' ? $id : 0;
+    return function_exists('achord_inquiry_active') && function_exists('achord_inquiry_hidden_fields') && achord_inquiry_active();
 }
 
-/** An explicit global email override applies only to the theme's primary notification. Legacy plugin recipients remain intact until then. */
-/** Where enquiry notifications go right now: the chosen sales email once one was chosen, else the form's own recipient. */
+// The theme's own script (assets/js/attribution.js) fills in the ad source, following the site's cookie banner; the
+// plugin's script would do the same a second time.
+add_action('wp_enqueue_scripts', static fn() => wp_dequeue_script('achord-inquiry'), 20);
+
+/** The fields the form sends, as the sales team reads them (the mail, DingTalk and the 询盘 list). */
+add_filter('achord_inquiry_fields', static fn(): array => [
+    'product' => ['label' => '设备类型', 'short' => '', 'admin' => '设备类型', 'type' => 'text', 'mail' => false],
+    'model' => ['label' => '型号', 'short' => '型号', 'admin' => '型号', 'type' => 'text', 'mail' => false],
+    'name' => ['label' => '姓名', 'short' => '姓名', 'admin' => '姓名', 'type' => 'text'],
+    'email' => ['label' => '邮箱', 'short' => '邮箱', 'admin' => '邮箱', 'type' => 'email'],
+    'phone' => ['label' => 'WhatsApp', 'short' => 'WhatsApp', 'admin' => 'WhatsApp', 'type' => 'text'],
+    'company' => ['label' => '公司', 'short' => '公司', 'admin' => '公司', 'type' => 'text'],
+    // Not asked on the form: the country the sender's IP address belongs to, for the list's 国家 column.
+    'country' => ['label' => '国家（按 IP）', 'short' => '', 'admin' => '国家（按 IP）', 'type' => 'text', 'mail' => false],
+    'message' => ['label' => '留言', 'short' => '留言', 'admin' => '项目详情', 'type' => 'textarea', 'long' => true, 'mail' => false],
+]);
+
+/**
+ * What the theme works out from the form: the equipment in Chinese (one of the four choices, else nothing), the model only
+ * when it is one the site sells, and the country from the IP address (whatever was posted under that name).
+ */
+function bl_wp_inquiry_submission_fields(array $fields): array
+{
+    $family = (string) ($fields['product'] ?? '');
+    $fields['product'] = BL_ENQUIRY_FAMILIES_ZH[$family] ?? (in_array($family, BL_ENQUIRY_FAMILIES_ZH, true) ? $family : '');
+    $model = trim((string) ($fields['model'] ?? ''));
+    $fields['model'] = '';
+    if ($model !== '') foreach (bl_products() as $record) if (strcasecmp((string) $record['model'], $model) === 0) { $fields['model'] = (string) $record['model']; break; }
+    $ip = function_exists('achord_inquiry_client_ip') ? achord_inquiry_client_ip() : '';
+    $fields['country'] = $ip !== '' && function_exists('achord_inquiry_ip_country') ? achord_inquiry_ip_country($ip) : '';
+    if (($fields['language'] ?? '') === '') $fields['language'] = 'en';
+    return $fields;
+}
+add_filter('achord_inquiry_submission_fields', 'bl_wp_inquiry_submission_fields');
+
+// The mail's 产品信息: the model's photo, name and link when the sender wrote from a product page, else the equipment type.
+add_filter('achord_inquiry_mail_products_html', static fn($html, array $fields): string => bl_wp_inquiry_product_card((string) ($fields['product'] ?? ''), (string) ($fields['model'] ?? '')), 10, 2);
+
+// Notifications go to the sales email of 网站内容 → 全站设置 unless 设置 → 询盘设置 names another address.
+add_filter('achord_inquiry_recipient', static fn(): string => (string) bl_company('email'));
+add_filter('achord_inquiry_page_language', static fn(): string => 'en');
+
+/**
+ * Until 设置 → 询盘设置 is saved: the IP is kept with each enquiry (Flamingo kept it too, and the privacy page says so), and
+ * Turnstile keys already saved in Contact Form 7's integration are used.
+ */
+add_filter('achord_inquiry_default_options', static function (array $defaults): array {
+    $defaults['store_ip'] = '1';
+    $cf7 = get_option('wpcf7');
+    $turnstile = is_array($cf7) && is_array($cf7['turnstile'] ?? null) ? $cf7['turnstile'] : [];
+    foreach ($turnstile as $site => $secret) {
+        if (is_string($site) && is_string($secret) && $site !== '' && $secret !== '') {
+            $defaults['turnstile_site_key'] = $site;
+            $defaults['turnstile_secret_key'] = $secret;
+            $defaults['turnstile_enabled'] = '1';
+            break;
+        }
+    }
+    return $defaults;
+});
+
+/** Where notifications go right now (shown in 网站内容 → 全站设置). */
 function bl_wp_inquiry_current_recipient(): string
 {
-    $saved = get_option('bl_content_global', []);
-    if (is_array($saved) && (!empty($saved['_bl_email_explicit']) || (is_array($saved['company'] ?? null) && array_key_exists('email', $saved['company'])))) return bl_content_resolve('global', $saved)['company']['email'];
-    $form = class_exists('WPCF7_ContactForm') && bl_inquiry_form_id() ? WPCF7_ContactForm::get_instance(bl_inquiry_form_id()) : null;
-    return $form ? (string) ($form->prop('mail')['recipient'] ?? '') : '';
+    return bl_wp_inquiry_ready() && function_exists('achord_inquiry_recipient') ? achord_inquiry_recipient() : '';
 }
 
-function bl_wp_inquiry_recipient(array $components, $form, $mail): array
+/**
+ * A fresh form key for a page the cache kept longer than the key lasts (a day): the form asks for one and sends again
+ * once when the plugin turns the old one away.
+ */
+function bl_wp_inquiry_fresh_nonce(): void
 {
-    if (!$form || !$mail || (int) $form->id() !== (int) get_option('bl_inquiry_form') || $mail->name() !== 'mail') return $components;
-    $saved = get_option('bl_content_global', []);
-    if (is_array($saved) && (!empty($saved['_bl_email_explicit']) || (is_array($saved['company'] ?? null) && array_key_exists('email', $saved['company'])))) $components['recipient'] = bl_content_resolve('global', $saved)['company']['email'];
-    return $components;
+    nocache_headers();
+    wp_send_json_success(['nonce' => bl_wp_inquiry_ready() ? wp_create_nonce(achord_inquiry_name('submit_inquiry')) : '']);
 }
-add_filter('wpcf7_mail_components', 'bl_wp_inquiry_recipient', 10, 3);
+add_action('wp_ajax_bl_inquiry_nonce', 'bl_wp_inquiry_fresh_nonce');
+add_action('wp_ajax_nopriv_bl_inquiry_nonce', 'bl_wp_inquiry_fresh_nonce');
 
-/** The form for one page: $atts carry the choices the page already made (product family, model, message). */
+/**
+ * The form for one page. $atts: product (loader, dumper, help or service: the choice made for the visitor), model (the
+ * product page's model), message (a first line written for them) and source (which form it is, for the sales team).
+ */
 function bl_wp_inquiry_form(array $atts): string
 {
-    $atts['product'] = ['loader' => 'Skid steer loader', 'dumper' => 'Mini dumper', 'help' => 'Help me choose', 'service' => 'Parts & service'][$atts['product'] ?? 'loader'] ?? 'Skid steer loader';
-    $form = ($id = bl_wp_inquiry_form_id()) ? WPCF7_ContactForm::get_instance($id) : null;
-    return $form ? $form->form_html($atts + ['html_class' => 'bl-inquiry-form']) : '';
-}
-
-/** The form's fields. Until version 3 the sender also typed a country; $withCountry gives that form, to recognise it. */
-function bl_wp_inquiry_template(bool $withCountry = false): string
-{
-    $country = $withCountry ? "\n" . '<label>Country / region <span>*</span>[text* country autocomplete:country-name maxlength:100 placeholder "Where will you use the equipment?"]</label>' : '';
+    if (!bl_wp_inquiry_ready()) return '';
+    $chosen = BL_ENQUIRY_FAMILIES[$atts['product'] ?? 'loader'] ?? BL_ENQUIRY_FAMILIES['loader'];
+    $choices = '';
+    foreach (BL_ENQUIRY_FAMILIES as $label) {
+        $choices .= '<span class="bl-radio-item"><label><input type="radio" name="product" value="' . esc_attr($label) . '"' . ($label === $chosen ? ' checked' : '') . '><span class="bl-radio-label">' . esc_html($label) . '</span></label></span>';
+    }
     $privacy = esc_url(wp_make_link_relative(home_url('/privacy/')));
-    return <<<HTML
-<fieldset><legend>01 / YOUR EQUIPMENT</legend>
-[radio product use_label_element default:shortcode_attr "Skid steer loader" "Mini dumper" "Help me choose" "Parts & service"]
-[hidden model default:shortcode_attr]</fieldset>
-<fieldset><legend>02 / A LITTLE ABOUT YOU</legend><div class="bl-form-grid">
-<label>Your name <span>*</span>[text* name autocomplete:name maxlength:100 placeholder "Full name"]</label>
-<label>Business email <span>*</span>[email* email autocomplete:email maxlength:200 placeholder "you@company.com"]</label>{$country}
-<label>Company[text company autocomplete:organization maxlength:150 placeholder "Company name"]</label>
-</div>
-<label class="bl-message-label">Your project[textarea message rows:3 maxlength:2000 default:shortcode_attr placeholder "What work do you need to get done?"]</label>
-<div class="bl-hp" aria-hidden="true"><label>Leave this field empty[text bl_website tabindex:-1 autocomplete:off]</label></div></fieldset>
-<div class="bl-form-bottom"><p>Your details are used only to answer this enquiry. <br>See our <a href="{$privacy}">privacy information</a>.</p>[submit class:bl-button class:bl-button-blue "Send enquiry"]</div>
-HTML;
+    $field = static fn(string $label, string $input): string => '<label>' . $label . $input . '</label>';
+    $hidden = achord_inquiry_hidden_fields(['source' => (string) ($atts['source'] ?? ''), 'language' => 'en']);
+    $turnstile = achord_inquiry_turnstile_widget('bl-turnstile', true);
+    return '<form class="bl-inquiry-form" method="post" action="' . esc_url(achord_inquiry_action_url()) . '" data-nonce-url="' . esc_url(admin_url('admin-ajax.php?action=bl_inquiry_nonce')) . '">'
+        . '<fieldset><legend>01 / YOUR EQUIPMENT</legend><span class="bl-radio">' . $choices . '</span>'
+        . '<input type="hidden" name="model" value="' . esc_attr((string) ($atts['model'] ?? '')) . '"></fieldset>'
+        . '<fieldset><legend>02 / A LITTLE ABOUT YOU</legend><div class="bl-form-grid">'
+        . $field('Your name <span>*</span>', '<input name="name" required maxlength="100" autocomplete="name" placeholder="Full name">')
+        . $field('Business email <span>*</span>', '<input type="email" name="email" required maxlength="200" autocomplete="email" placeholder="you@company.com">')
+        . $field('WhatsApp', '<input type="tel" name="phone" maxlength="40" autocomplete="tel" inputmode="tel" placeholder="+ country code and number">')
+        . $field('Company', '<input name="company" maxlength="150" autocomplete="organization" placeholder="Company name">')
+        . '</div><label class="bl-message-label">Your project<textarea name="message" rows="3" maxlength="2000" placeholder="What work do you need to get done?">' . esc_textarea((string) ($atts['message'] ?? '')) . '</textarea></label>'
+        . $hidden . '</fieldset>' . $turnstile
+        . '<div class="bl-form-bottom"><p>Your details are used only to answer this enquiry. <br>See our <a href="' . $privacy . '">privacy information</a>.</p><input class="bl-inquiry-submit bl-button bl-button-blue" type="submit" value="Send enquiry"></div>'
+        . '<p class="bl-form-status" role="status" aria-live="polite" hidden></p></form>';
 }
-
-/** Create the form the first time an administrator opens the admin with CF7 active. An edited form is never overwritten. */
-add_action('admin_init', static function (): void {
-    if (!class_exists('WPCF7_ContactForm') || !class_exists('Flamingo_Inbound_Message') || bl_wp_inquiry_form_id() || !current_user_can('manage_options')) return;
-    $known = get_posts(['post_type' => 'wpcf7_contact_form', 'post_status' => 'publish', 'meta_key' => '_bl_inquiry', 'meta_value' => '1', 'numberposts' => 1, 'fields' => 'ids']);
-    if ($known) {
-        update_option('bl_inquiry_form', (int) $known[0]);
-        return;
-    }
-    $form = WPCF7_ContactForm::get_template(['locale' => 'en_US', 'title' => 'BOB-LIFT enquiry']);
-    $messages = $form->prop('messages');
-    $messages['mail_sent_ok'] = 'Thank you. Your enquiry has been sent to the BOB-LIFT team.';
-    $host = (string) wp_parse_url(home_url(), PHP_URL_HOST);
-    $form->set_properties([
-        'form' => bl_wp_inquiry_template(),
-        'mail' => [
-            'active' => true,
-            'sender' => bl_wp_inquiry_sender(),
-            'recipient' => bl_company('email'),
-            'additional_headers' => 'Reply-To: [name] <[email]>',
-            'attachments' => '',
-        ] + bl_wp_inquiry_mail(),
-        'messages' => $messages,
-        // Flamingo lists entries by these; the default field names of CF7's sample form do not exist here.
-        'additional_settings' => "flamingo_name: \"[name]\"\nflamingo_email: \"[email]\"\nflamingo_subject: \"[_raw_product]\"",
-    ]);
-    $id = $form->save();
-    if ($id) {
-        update_post_meta($id, '_bl_inquiry', '1');
-        update_option('bl_inquiry_form', (int) $id);
-        update_option('bl_inquiry_mail_version', BL_ENQUIRY_MAIL_VERSION);
-    }
-});
-
-// The theme lays out its own form and its notification card, so CF7 must not wrap their markup in paragraphs. Other
-// forms, an edited mail and the autoresponder keep CF7's setting.
-add_filter('wpcf7_autop_or_not', static function (bool $autop, $options = []): bool {
-    $for = $options['for'] ?? 'form';
-    if ($for === 'mail') return bl_wp_inquiry_card_mail() ? false : $autop;
-    if ($for !== 'form') return $autop;
-    $form = WPCF7_ContactForm::get_current();
-    return $form && $form->id() === bl_wp_inquiry_form_id() ? false : $autop;
-}, 10, 2);
-
-// A field only a script fills in: anything in it means a bot filled every box.
-add_filter('wpcf7_spam', static fn(bool $spam): bool => $spam || trim((string) ($_POST['bl_website'] ?? '')) !== '');
-
-/**
- * Akismet checks the theme's form too. CF7 asks Akismet only about forms whose fields carry an akismet: option, and the
- * form saved on the site has none, so the name and email fields get theirs here, as CF7 reads the form. A field an editor
- * already marked is left as it is. Akismet's verdict files spam under Flamingo → Spam: no mail, no thank-you page.
- */
-function bl_wp_inquiry_akismet_tag($tag)
-{
-    // CF7 6.2 hands over an array; a WPCF7_FormTag (ArrayAccess, read by value) is handled too, so the options are
-    // read out and written back whole rather than appended in place.
-    $role = ['name' => 'author', 'email' => 'author_email'][(string) ($tag['name'] ?? '')] ?? '';
-    $options = $tag['options'] ?? null;
-    if ($role === '' || !is_array($options) || preg_grep('/^akismet:/i', $options)) return $tag;
-    $form = class_exists('WPCF7_ContactForm') ? WPCF7_ContactForm::get_current() : null;
-    if (!$form || (int) $form->id() !== bl_wp_inquiry_form_id()) return $tag;
-    $options[] = 'akismet:' . $role;
-    $tag['options'] = $options;
-    return $tag;
-}
-add_filter('wpcf7_form_tag', 'bl_wp_inquiry_akismet_tag');
-
-/**
- * The notification the team receives: the BOB-LIFT logo, the page the enquiry came from, the product (photo, name,
- * model), the sender's details and message, where the sender is (IP country), and a button that starts the reply. The
- * card is a fixed 660 px: phones shrink it to fit the screen instead of reflowing it. Subject and body stay editable in
- * the form's Mail tab; the [bl_…] tags below fill in what CF7 cannot.
- */
-function bl_wp_inquiry_mail(): array
-{
-    $font = "font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei','Helvetica Neue',Arial,sans-serif;";
-    // The message's heading shares its line with the message, so both go when the sender wrote none.
-    $heading = static fn(string $text): string => '<tr><td style="padding:28px 36px 12px;font-size:13px;font-weight:bold;letter-spacing:1px;color:#64748b;">' . $text . '</td></tr>';
-    $row = static fn(string $name, string $tag): string => '<tr><td width="130" style="width:130px;padding:13px 12px 13px 0;border-bottom:1px solid #edf0f4;font-size:14px;color:#64748b;vertical-align:top;">' . $name . '</td><td style="padding:13px 0;border-bottom:1px solid #edf0f4;font-size:16px;color:#0b1f33;line-height:1.6;vertical-align:top;word-break:break-word;">' . $tag . '</td></tr>';
-    $meta = static fn(string $name, string $tag): string => '<td width="33%" style="width:33%;padding:16px 18px;vertical-align:top;"><div style="font-size:12px;color:#64748b;padding-bottom:4px;">' . $name . '</div><div style="font-size:15px;font-weight:bold;color:#0b1f33;line-height:1.4;word-break:break-word;">' . $tag . '</div></td>';
-    // Phones such as iOS Mail enlarge long blocks of text by themselves, which made the message larger than the rows;
-    // the outer table turns that off. Each table row (and each cell of the strip) is one line: with "exclude blank" on, CF7 drops the line of a field
-    // the sender left empty.
-    $rows = implode("\n", [
-        $row('姓名', '[name]'),
-        $row('邮箱', '<a href="mailto:[email]" style="color:#215bdb;text-decoration:none;">[email]</a>'),
-        $row('公司', '[company]'),
-    ]);
-    // Two rows of three, as on the crane site: how the visitor came, on what and from where; then the page's language, when and the IP.
-    $strip = implode("\n", [$meta('来源渠道', '[bl_channel]'), $meta('访问设备', '[bl_device]'), $meta('来源国家', '[bl_ip_country]')]) . "\n</tr><tr>\n"
-        . implode("\n", [$meta('页面语言', '[bl_language]'), $meta('提交时间', '[bl_time]'), $meta('IP 地址', '[_remote_ip]')]);
-    $body = BL_ENQUIRY_CARD_MARKER . "\n" . <<<HTML
-<table width="100%" cellspacing="0" cellpadding="0" style="width:100%;background:#eef1f5;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;text-size-adjust:100%;{$font}"><tr><td align="center" style="padding:32px 0;">
-<table width="660" cellspacing="0" cellpadding="0" style="width:660px;background:#ffffff;border:1px solid #e3e8ef;border-radius:4px;border-collapse:separate;overflow:hidden;text-align:left;">
-<tr><td height="6" style="height:6px;background:#215bdb;font-size:0;line-height:0;">&nbsp;</td></tr>
-<tr><td style="padding:22px 36px;border-bottom:1px solid #edf0f4;"><table width="100%" cellspacing="0" cellpadding="0"><tr><td style="vertical-align:middle;">[bl_logo]</td><td align="right" style="vertical-align:middle;font-size:13px;color:#64748b;">[bl_time]</td></tr></table></td></tr>
-<tr><td style="padding:30px 36px 0;"><div style="font-size:26px;line-height:1.3;font-weight:bold;color:#0b1f33;">新询盘通知</div><div style="padding-top:10px;font-size:15px;line-height:1.7;color:#475569;">装载设备站收到一条新询盘，内容如下，请及时跟进。</div></td></tr>
-<tr><td style="padding:20px 36px 0;"><table width="100%" cellspacing="0" cellpadding="0" style="background:#f5f7fa;border-radius:4px;"><tr><td style="padding:14px 18px;"><div style="font-size:12px;color:#64748b;padding-bottom:6px;">来源页面 &nbsp;<span style="display:inline-block;padding:2px 8px;border-radius:2px;background:#e3ebfc;color:#215bdb;font-size:12px;font-weight:bold;">[bl_enquiry_kind]</span></div><div style="font-size:14px;line-height:1.6;word-break:break-all;">[bl_page_url]</div></td></tr></table></td></tr>
-{$heading('产品信息')}
-<tr><td style="padding:0 36px;">[bl_product_card]</td></tr>
-{$heading('客户信息')}
-<tr><td style="padding:0 36px;"><table width="100%" cellspacing="0" cellpadding="0" style="border-top:1px solid #edf0f4;">
-{$rows}
-</table></td></tr>
-{$heading('留言')}<tr><td style="padding:0 36px;"><div style="padding:16px 20px;background:#f5f7fa;border-radius:4px;font-size:16px;line-height:1.75;color:#0b1f33;word-break:break-word;">[message]</div></td></tr>
-<tr><td style="padding:24px 36px 0;"><table width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #edf0f4;border-radius:4px;border-collapse:separate;"><tr>
-{$strip}
-</tr></table></td></tr>
-<tr><td align="center" style="padding:32px 36px 12px;"><table cellspacing="0" cellpadding="0"><tr><td align="center" style="background:#215bdb;border-radius:2px;"><a href="mailto:[email]" style="display:inline-block;width:260px;line-height:50px;font-size:17px;font-weight:bold;color:#ffffff;text-decoration:none;text-align:center;letter-spacing:1px;">立即回复客户</a></td></tr></table></td></tr>
-<tr><td align="center" style="padding:0 36px 32px;font-size:13px;line-height:1.6;color:#64748b;">也可以直接回复这封邮件，回信会发到 [email]</td></tr>
-</table>
-<table width="660" cellspacing="0" cellpadding="0" style="width:660px;"><tr><td align="center" style="padding:18px 36px 0;font-size:12px;line-height:1.7;color:#94a3b8;">此邮件由 [bl_site] 询盘表单自动发送 · 副本见网站后台「Flamingo → 收到的消息」</td></tr></table>
-</td></tr></table>
-HTML;
-    return [
-        'active' => true,
-        'subject' => '【装载设备站】询盘飞奔而来，请及时跟进：[email]',
-        'body' => $body,
-        'use_html' => true,
-        'exclude_blank' => true,
-    ];
-}
-
-/** The plain-text mail the theme gave its form before version 2, to tell an untouched form from one an editor changed. */
-const BL_ENQUIRY_MAIL_V1 = [
-    'subject' => 'Website enquiry — [_raw_product]',
-    'body' => "Equipment: [_raw_product]\nModel: [model]\nName: [name]\nEmail: [email]\nCountry: [country]\nCompany: [company]\n\nProject:\n[message]\n\n-- \nSent from [_site_url] on [_date] at [_time]",
-];
-
-// The HTML bodies the theme gave its form before (md5 of the trimmed body): version 2 with a country row, 3, 4 and 6.
-const BL_ENQUIRY_MAIL_EARLIER = ['7c345410a541a4ed5e5c6272d3971e19', '2c56857cde1a7dbe0e2e46d2db972231', '09a877efb12c5f681d0e55a193888211', 'd23a5a775b5904d6f6b0e130add395cd'];
-
-/** Who the notification comes from: the site title, at the site's own domain so mail servers accept it. */
-function bl_wp_inquiry_sender(): string
-{
-    return '[_site_title] <wordpress@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>';
-}
-
-/**
- * Bring the form the theme made earlier up to date, once. Only what still is one of the theme's earlier defaults is
- * replaced: a form, body or subject an editor changed is kept (the new version can then be pasted in by hand), and who
- * receives the mail is never touched.
- */
-add_action('init', static function (): void {
-    if ((int) get_option('bl_inquiry_mail_version') >= BL_ENQUIRY_MAIL_VERSION || !($id = bl_wp_inquiry_form_id())) return;
-    $form = WPCF7_ContactForm::get_instance($id);
-    if (!$form) return;
-    $same = static fn($saved, string $default): bool => trim(str_replace("\r\n", "\n", (string) $saved)) === trim($default);
-    $mail = (array) $form->prop('mail');
-    $new = bl_wp_inquiry_mail();
-    $changes = [];
-    $body = trim(str_replace("\r\n", "\n", (string) ($mail['body'] ?? '')));
-    if (($body === BL_ENQUIRY_MAIL_V1['body'] && empty($mail['use_html'])) || in_array(md5($body), BL_ENQUIRY_MAIL_EARLIER, true)) {
-        $changes += ['body' => $new['body'], 'use_html' => true];
-    }
-    if ($same($mail['subject'] ?? '', BL_ENQUIRY_MAIL_V1['subject'])) $changes['subject'] = $new['subject'];
-    // Version 5 named the sender in Chinese for a while; that name goes back to the site title.
-    if ($same($mail['sender'] ?? '', 'BOB-LIFT 询盘通知 <wordpress@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>')) $changes['sender'] = bl_wp_inquiry_sender();
-    $properties = $changes ? ['mail' => array_replace($mail, $changes)] : [];
-    // The country field goes only when no mail that stays (an edited body or subject, the autoresponder) still uses it.
-    $kept = [$properties['mail'] ?? $mail, (array) $form->prop('mail_2')];
-    $usesCountry = (bool) array_filter($kept, static fn(array $m): bool => !empty($m['active']) && (bool) preg_match('/\[_?(?:raw_|format_)?country\b/', implode("\n", array_map('strval', array_filter($m, 'is_scalar')))));
-    if (!$usesCountry && $same($form->prop('form'), bl_wp_inquiry_template(true))) $properties['form'] = bl_wp_inquiry_template();
-    if ($properties) {
-        $form->set_properties($properties);
-        $form->save();
-    }
-    // Version 7: the crane site's card is the one sent (the owner asked for both sites to match on 2026-10-27). It is chosen once;
-    // 网站内容 → 询盘邮件 can pick another design again afterwards.
-    if ((int) get_option('bl_inquiry_mail_version') < 7) update_option('bl_inquiry_mail_template', 'classic');
-    update_option('bl_inquiry_mail_version', BL_ENQUIRY_MAIL_VERSION);
-});
 
 /** The page an enquiry came from, for a mail: its title in bold (when known) above its address as a link. */
 function bl_wp_inquiry_page_html(array $page, string $color, string $titleColor = '#0b1f33'): string
 {
     $link = '<a href="' . esc_url($page['url']) . '" target="_blank" style="color:' . $color . ';text-decoration:none;word-break:break-all;">' . esc_html($page['url']) . '</a>';
     return ($page['title'] !== '' ? '<b style="color:' . $titleColor . ';">' . esc_html($page['title']) . '</b><br>' : '') . $link;
-}
-
-/** The page language the card shows. The site is in English only; a translated site would say which language here. */
-function bl_wp_inquiry_language(): string
-{
-    return '英语';
-}
-
-/** One cell of the card's strip as on the crane site: the kind in the cell's bold type, the details under it in small grey. */
-function bl_wp_inquiry_strip_value(string $main, string $detail = ''): string
-{
-    return esc_html($main) . ($detail !== '' ? '<div style="padding-top:2px;font-size:12px;font-weight:normal;color:#64748b;">' . esc_html($detail) . '</div>' : '');
-}
-
-/** Whether CF7 is composing the theme's notification card: the form's main mail, whose body still carries the marker. */
-function bl_wp_inquiry_card_mail(): bool
-{
-    $form = class_exists('WPCF7_ContactForm') ? WPCF7_ContactForm::get_current() : null;
-    if (!$form || $form->id() !== bl_wp_inquiry_form_id() || WPCF7_Mail::get_current_template_name() !== 'mail') return false;
-    return str_contains((string) (((array) $form->prop('mail'))['body'] ?? ''), BL_ENQUIRY_CARD_MARKER);
 }
 
 /** The product the sender chose: the model's photo, name and link when they wrote from a product page, else the family. */
@@ -349,25 +232,6 @@ function bl_wp_inquiry_thumbnail(array $product): string
     return trailingslashit($uploads['baseurl']) . $name;
 }
 
-/** The country the sender's IP address points to, in Chinese (e.g. "加拿大"); empty when it cannot be told. */
-function bl_wp_ip_country(string $ip): string
-{
-    if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) return '';
-    $key = 'bl_ip_country_' . md5($ip);
-    $code = get_transient($key);
-    if ($code === false) {
-        $response = wp_remote_get('https://ipinfo.io/' . rawurlencode($ip) . '/country', ['timeout' => 3]);
-        $text = strtoupper(trim((string) wp_remote_retrieve_body($response)));
-        $code = !is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200 && preg_match('/^[A-Z]{2}$/', $text) ? $text : '';
-        set_transient($key, $code, $code ? WEEK_IN_SECONDS : HOUR_IN_SECONDS);
-    }
-    if ($code === '') return '';
-    // The theme's own table: the server's intl may lack Chinese names and fall back to English. Unknown codes show as is.
-    static $names = null;
-    $names ??= require __DIR__ . '/country-names-zh.php';
-    return $names[$code] ?? $code;
-}
-
 // Ad and analytics tracking parameters. They are left out of the page an enquiry came from (the attribution block lists the
 // advert by itself), so the address says which page it was.
 const BL_ENQUIRY_TRACKING = '/^(utm_[a-z_]+|gclid|gclsrc|gbraid|wbraid|dclid|gad_[a-z_]+|fbclid|msclkid|ttclid|twclid|li_fat_id|srsltid|_gl)$/i';
@@ -425,66 +289,6 @@ function bl_wp_inquiry_page(string $url): array
 // The DingTalk plugin heads each message with the site, and names the page an enquiry came from the way this theme does.
 add_filter('achord_dingtalk_site_name', static fn($name) => trim((string) $name) !== '' ? $name : '装载设备站');
 add_filter('achord_dingtalk_page_title', static fn($title, $url) => trim((string) $title) !== '' ? $title : bl_wp_inquiry_page((string) $url)['title'], 10, 2);
-
-// The notification's own tags. CF7 asks for them only when the mail names them, so other forms are not affected.
-add_filter('wpcf7_special_mail_tags', static function ($output, string $name, bool $html) {
-    if (!in_array($name, ['bl_page_link', 'bl_page_url', 'bl_enquiry_kind', 'bl_logo', 'bl_site', 'bl_time', 'bl_product_card', 'bl_ip_country', 'bl_channel', 'bl_device', 'bl_language'], true)) return $output;
-    if ($name === 'bl_language') return bl_wp_inquiry_language();
-    if ($name === 'bl_site') return (string) wp_parse_url(home_url(), PHP_URL_HOST);
-    if ($name === 'bl_logo') {
-        // Mail clients have no page to resolve a root-relative address against, so it gets the site's own origin.
-        $src = bl_brand_logo();
-        if (str_starts_with($src, '//')) $src = (wp_parse_url(home_url(), PHP_URL_SCHEME) ?: 'https') . ':' . $src;
-        elseif (str_starts_with($src, '/')) {
-            $home = wp_parse_url(home_url());
-            $src = ($home['scheme'] ?? 'https') . '://' . ($home['host'] ?? '') . (isset($home['port']) ? ':' . $home['port'] : '') . $src;
-        }
-        $logo = '<img src="' . esc_url($src) . '" width="112" height="45" alt="BOB-LIFT" style="display:block;width:112px;height:45px;border:0;">';
-        return $html ? $logo : 'BOB-LIFT';
-    }
-    $submission = WPCF7_Submission::get_instance();
-    if (!$submission) return '';
-    // In the site's time zone, written the same way whatever the admin's date format.
-    if ($name === 'bl_time') return wp_date('Y-m-d H:i', (int) ($submission->get_meta('timestamp') ?: time()));
-    if ($name === 'bl_ip_country') {
-        $ip = (string) $submission->get_meta('remote_ip');
-        $country = $ip === '' ? '' : (bl_wp_ip_country($ip) ?: '未能识别');
-        return $html ? esc_html($country) : $country;
-    }
-    if ($name === 'bl_channel' || $name === 'bl_device') {
-        $posted = (array) $submission->get_posted_data();
-        $context = bl_enquiry_context($posted);
-        if ($name === 'bl_channel') {
-            $parts = bl_wp_inquiry_channel_parts(bl_enquiry_attribution($posted), $context);
-            return $html ? bl_wp_inquiry_strip_value($parts[0], $parts[1]) : implode(' · ', array_filter($parts, 'strlen'));
-        }
-        $device = bl_wp_inquiry_device((string) $submission->get_meta('user_agent'), $context['touch'] === '1');
-        if (!$html) return $device !== '' ? $device : '未能识别';
-        $parts = explode(' · ', $device, 2);
-        return $device !== '' ? bl_wp_inquiry_strip_value($parts[0], $parts[1] ?? '') : '未能识别';
-    }
-    $model = trim((string) $submission->get_posted_string('model'));
-    if ($name === 'bl_enquiry_kind') return $model !== '' ? '产品询盘' : '询盘表单';
-    if ($name === 'bl_page_url') {
-        $page = bl_wp_inquiry_page((string) $submission->get_meta('url'));
-        if (!$html) return trim($page['title'] . ' ' . $page['url']);
-        return bl_wp_inquiry_page_html($page, '#215bdb');
-    }
-    // Kept for a Mail body an editor built on the version 2 card.
-    if ($name === 'bl_page_link') {
-        $url = (string) $submission->get_meta('url');
-        $kind = $model !== '' ? '（产品询盘）' : '（询盘表单）';
-        if (!$html) return $url . $kind;
-        return '<a href="' . esc_url($url) . '" target="_blank" style="color:#1995f6;">' . esc_html($url) . '</a>' . $kind;
-    }
-    $family = trim((string) $submission->get_posted_string('product'));
-    return $html ? bl_wp_inquiry_product_card($family, $model) : trim($family . ' ' . $model);
-}, 10, 3);
-
-// Keep the line breaks of the sender's message in the HTML email.
-add_filter('wpcf7_mail_tag_replaced_textarea', static function ($replaced, $submitted, bool $html) {
-    return $html && is_string($replaced) && bl_wp_inquiry_card_mail() ? str_replace(["\r", "\n"], '', nl2br($replaced, false)) : $replaced;
-}, 10, 3);
 
 /**
  * The thank-you page the form leads to once the enquiry is sent (/thank-you/; words in 网站内容 → 询盘成功页). WordPress

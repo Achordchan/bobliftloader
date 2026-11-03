@@ -152,7 +152,7 @@ function bl_privacy_body(string $section): string
 /** Native page content replaces the general policy; the inquiry mode remains centrally maintained. */
 function bl_privacy_content(): string
 {
-    $mode = bl_privacy_body(bl_inquiry_form_id() ? 'submitted' : 'draft');
+    $mode = bl_privacy_body(bl_inquiry_live() ? 'submitted' : 'draft');
     if (function_exists('bl_page_editor_content') && function_exists('get_queried_object')) {
         $post = get_queried_object();
         if ($post instanceof WP_Post && $post->post_type === 'page' && trim($post->post_content) !== '') {

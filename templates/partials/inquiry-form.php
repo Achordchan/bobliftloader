@@ -1,12 +1,12 @@
 <?php
-// With Contact Form 7 active the enquiry is sent and stored by the site; otherwise the form below prepares an email draft.
-if (bl_inquiry_form_id()):
+// With the inquiry plugin active the enquiry is sent and stored by the site; otherwise the form below prepares an email draft.
+if (bl_inquiry_live()):
     $inquiryModel = !empty($selectedRecord) ? (string) $selectedRecord['model'] : '';
     $inquiryFamily = $selectedFamily ?? 'loader';
 ?>
-    <div class="bl-inquiry-cf7" data-thanks="<?= bl_escape(bl_url('/thank-you/')) ?>" data-model="<?= bl_escape($inquiryModel) ?>" data-model-family="<?= bl_escape($inquiryFamily) ?>">
+    <div class="bl-inquiry-live" data-thanks="<?= bl_escape(bl_url('/thank-you/')) ?>" data-model="<?= bl_escape($inquiryModel) ?>" data-model-family="<?= bl_escape($inquiryFamily) ?>">
       <?php if (!empty($selectedRecord)): ?><p class="bl-selected-model">Enquiring about: <strong><?= bl_escape($selectedRecord['name']) ?></strong></p><?php endif; ?>
-      <?= bl_wp_inquiry_form(['product' => $inquiryFamily, 'model' => $inquiryModel, 'message' => $prefillMessage ?? '']) ?>
+      <?= bl_wp_inquiry_form(['product' => $inquiryFamily, 'model' => $inquiryModel, 'message' => $prefillMessage ?? '', 'source' => $inquiryModel !== '' ? 'Product page form' : 'Enquiry form']) ?>
     </div>
 <?php return; endif; ?>
     <form class="bl-inquiry-form" id="inquiry-form"<?= bl_company('email') !== 'info@boblift.com' ? ' data-email="' . bl_escape(bl_company('email')) . '"' : '' ?>>

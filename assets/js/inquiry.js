@@ -14,27 +14,121 @@ function syncPrefill(container, matches) {
   else if (matches && message.value === '') message.value = prefill;
 }
 
-// Enquiry sent through Contact Form 7: the model the visitor came from only travels with their equipment choice.
+const TURNSTILE = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+const NETWORK_ERROR = 'The enquiry could not be sent. Please check your connection and try again, or email us directly.';
+let turnstileScript = null;
+
+// Cloudflare's script, loaded once, the first time a form with a check comes into view.
+function loadTurnstile() {
+  turnstileScript ??= new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = TURNSTILE;
+    script.async = true;
+    script.onload = () => (window.turnstile ? resolve(window.turnstile) : reject(new Error('turnstile')));
+    script.onerror = reject;
+    document.head.append(script);
+  });
+  return turnstileScript;
+}
+
+// The check (when 设置 → 询盘设置 turns it on) is drawn when its form is first seen: the quick enquiry's stays unloaded
+// until its panel opens.
+function initializeTurnstile(form) {
+  const box = form.querySelector('[data-turnstile-widget]');
+  if (!box || !('IntersectionObserver' in window)) return null;
+  const state = { id: null };
+  const observer = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return;
+    observer.disconnect();
+    loadTurnstile().then((turnstile) => {
+      state.id = turnstile.render(box, { sitekey: box.dataset.sitekey, theme: box.dataset.theme || 'light' });
+    }).catch(() => { /* the server says so if the check is missing */ });
+  });
+  observer.observe(box);
+  return state;
+}
+
+// Send the form to the inquiry plugin and read its JSON answer; a page the cache kept past its form key gets a fresh key
+// (wp-inquiry.php, bl_wp_inquiry_fresh_nonce) and is sent once more.
+async function post(form, retried = false) {
+  const response = await fetch(form.action, { method: 'POST', body: new FormData(form), credentials: 'same-origin', headers: { Accept: 'application/json' } });
+  let answer = null;
+  try { answer = await response.json(); } catch { /* not JSON: a server error page */ }
+  if (response.status === 403 && !retried && form.dataset.nonceUrl) {
+    try {
+      const fresh = await (await fetch(form.dataset.nonceUrl, { credentials: 'same-origin', cache: 'no-store' })).json();
+      const field = form.querySelector('input[name="bl_inquiry_nonce"]');
+      if (fresh?.data?.nonce && field) {
+        field.value = fresh.data.nonce;
+        return post(form, true);
+      }
+    } catch { /* falls through to the message below */ }
+  }
+  return { ok: response.ok && answer?.success === true, data: answer?.data || {} };
+}
+
+// Enquiry sent to the inquiry plugin: the model the visitor came from only travels with their equipment choice.
 function initializeSentInquiry(wrap) {
   const familyLabels = { loader: 'Skid steer loader', dumper: 'Mini dumper', service: 'Parts & service' };
+  const form = wrap.querySelector('form.bl-inquiry-form');
+  if (!form) return;
   const note = wrap.querySelector('.bl-selected-model');
-  const model = wrap.querySelector('input[name="model"]');
+  const model = form.querySelector('input[name="model"]');
+  const status = form.querySelector('.bl-form-status');
+  const button = form.querySelector('[type="submit"]');
   const sync = () => {
-    const chosen = wrap.querySelector('input[name="product"]:checked')?.value;
+    const chosen = form.querySelector('input[name="product"]:checked')?.value;
     const matches = chosen === familyLabels[wrap.dataset.modelFamily];
     if (note) note.hidden = !matches;
     if (model) model.value = matches ? wrap.dataset.model : '';
     if (wrap.dataset.model) syncPrefill(wrap, matches);
   };
-  wrap.querySelectorAll('input[name="product"]').forEach((radio) => radio.addEventListener('change', sync));
-  wrap.addEventListener('wpcf7reset', () => setTimeout(sync));
+  form.querySelectorAll('input[name="product"]').forEach((radio) => radio.addEventListener('change', sync));
   sync();
-  // Once the mail has gone, the visitor goes on to the thank-you page, which reports the enquiry (see reportSentInquiry).
-  // The values come from the submission itself, not the form, which the visitor may have changed while it was sending.
-  wrap.addEventListener('wpcf7mailsent', (event) => {
-    const sent = Object.fromEntries((event.detail?.inputs || []).map(({ name, value }) => [name, value]));
-    try { sessionStorage.setItem(SENT_KEY, JSON.stringify({ product: sent.product || '', model: sent.model || '' })); } catch { /* storage blocked: the page still loads */ }
-    if (wrap.dataset.thanks) window.location.assign(wrap.dataset.thanks);
+  const check = initializeTurnstile(form);
+  const say = (text, state) => {
+    if (!status) return;
+    status.textContent = text;
+    status.dataset.state = state;
+    status.hidden = !text;
+  };
+  const requiredText = [...form.querySelectorAll('input[required]:not([type="email"])')];
+  requiredText.forEach((input) => input.addEventListener('input', () => input.setCustomValidity('')));
+
+  // The ad source fields are added in the capture phase (attribution.js); this runs after, as the form is sent.
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (form.dataset.sending) return;
+    for (const input of requiredText) {
+      if (!input.value.trim()) {
+        input.setCustomValidity('Please enter a value, not only spaces.');
+        input.reportValidity();
+        return;
+      }
+    }
+    // What was chosen, read now: the visitor may change the form while it is sending.
+    const sent = { product: form.querySelector('input[name="product"]:checked')?.value || '', model: model?.value || '' };
+    form.dataset.sending = '1';
+    form.setAttribute('aria-busy', 'true');
+    if (button) button.disabled = true;
+    say('', '');
+    let result = { ok: false, data: {} };
+    try { result = await post(form); } catch { /* network: the message below */ }
+    if (result.ok) {
+      // Once it is saved, the visitor goes on to the thank-you page, which reports the enquiry (see reportSentInquiry).
+      // A blocked or bot enquiry is answered without an ID, so it is never counted.
+      if (result.data.id) {
+        try { sessionStorage.setItem(SENT_KEY, JSON.stringify(sent)); } catch { /* storage blocked: the page still loads */ }
+      }
+      say(result.data.message || '', 'sent');
+      window.location.assign(result.data.redirect || wrap.dataset.thanks);
+      return;
+    }
+    say(result.data.message || NETWORK_ERROR, 'error');
+    delete form.dataset.sending;
+    form.removeAttribute('aria-busy');
+    if (button) button.disabled = false;
+    if (check?.id != null) { try { window.turnstile?.reset(check.id); } catch { /* drawn again on the next try */ } }
   });
 }
 
@@ -59,8 +153,8 @@ function reportSentInquiry() {
 
 export function initializeInquiry() {
   if (document.body.classList.contains('bl-page-thanks')) reportSentInquiry();
-  // The page's own form and the quick enquiry in the corner are both Contact Form 7 forms.
-  document.querySelectorAll('.bl-inquiry-cf7').forEach(initializeSentInquiry);
+  // The page's own form and the quick enquiry in the corner both go to the inquiry plugin.
+  document.querySelectorAll('.bl-inquiry-live').forEach(initializeSentInquiry);
   const form = document.querySelector('#inquiry-form');
   if (!form) return;
   const dialog = document.querySelector('#inquiry-dialog');

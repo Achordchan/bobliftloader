@@ -791,10 +791,10 @@ function bl_news_card(array $article, string $heading = 'h2'): void
     require __DIR__ . '/../templates/partials/news-card.php';
 }
 
-/** The enquiry form's id when the site sends enquiries through Contact Form 7; 0 for the theme's own email-draft form. */
-function bl_inquiry_form_id(): int
+/** Whether enquiries are sent through the inquiry plugin; false shows the theme's own email-draft form. */
+function bl_inquiry_live(): bool
 {
-    return bl_is_wordpress() ? bl_wp_inquiry_form_id() : 0;
+    return bl_is_wordpress() && bl_wp_inquiry_ready();
 }
 
 /** The application cases, newest first; only $hub's own when one is named. Empty where there is no database (standalone preview). */

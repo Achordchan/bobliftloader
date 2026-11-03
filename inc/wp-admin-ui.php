@@ -204,7 +204,6 @@ function bl_dashboard_widget(): void
             ['新闻列表', 'admin.php?page=bl-content-news', 'edit_pages', '搜索标题、描述与分享图片'],
             ['未找到页面', 'admin.php?page=bl-content-404', 'edit_pages', '404 文案与链接'],
             ['换产品画册', 'admin.php?page=bl-downloads', 'edit_pages', 'Support 页可下载的 PDF'],
-            ['询盘邮件样式', 'admin.php?page=bl-inquiry-mail', 'edit_pages', '通知邮件的模板，可随时切换'],
         ],
         '产品与新闻' => [
             ['管理设备产品', 'edit.php?post_type=bl_product', 'edit_posts', '已发布 ' . $count('bl_product') . ' 款'],
