@@ -101,8 +101,22 @@ function bl_wp_inquiry_is_legacy_shortcode(array $atts): bool
     // CF7 writes the first 7 characters of the form's _hash into the shortcode.
     $hash = (string) get_post_meta($id, '_hash', true);
     if ($ref !== '' && strlen($ref) >= 7 && $hash !== '' && str_starts_with($hash, $ref)) return true;
+    // As CF7 does: the title counts when there is no id, or when the id names no form at all (a stale one, e.g. copied
+    // from another site). An id of another existing form keeps that form.
     $title = trim((string) ($atts['title'] ?? ''));
-    return $ref === '' && $title !== '' && $title === trim((string) get_post_field('post_title', $id));
+    if ($title === '' || $title !== trim((string) get_post_field('post_title', $id))) return false;
+    return $ref === '' || !bl_wp_inquiry_cf7_form_exists($ref);
+}
+
+/** Whether a CF7 shortcode id (post number or hash prefix) names an existing form, read from the posts without CF7. */
+function bl_wp_inquiry_cf7_form_exists(string $ref): bool
+{
+    if (ctype_digit($ref) && get_post_type((int) $ref) === 'wpcf7_contact_form') return true;
+    if (strlen($ref) < 7) return false;
+    foreach (get_posts(['post_type' => 'wpcf7_contact_form', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids', 'suppress_filters' => true]) as $form) {
+        if (str_starts_with((string) get_post_meta((int) $form, '_hash', true), $ref)) return true;
+    }
+    return false;
 }
 
 /**

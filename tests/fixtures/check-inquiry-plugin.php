@@ -121,6 +121,9 @@ $result = apply('wpcf7_validate', new WPCF7_Validation(), [$tag('product'), $tag
 if (count($result->errors) !== 1 || $result->errors[0][0] !== 'email' || !str_contains($result->errors[0][1], 'reload')) $fail(30, 'legacy cf7 submission not turned back');
 $GLOBALS['cf7_form'] = $form(99);
 if (apply('wpcf7_validate', new WPCF7_Validation(), [$tag('email')])->errors !== []) $fail(31, 'another cf7 form turned back');
+function get_posts($args) { return ['bl_product' => [101, 102], 'wpcf7_contact_form' => [18, 19]][$args['post_type'] ?? ''] ?? []; }
+function get_post_type($id) { return in_array((int) $id, [18, 19], true) ? 'wpcf7_contact_form' : ''; }
+$GLOBALS['meta'][19]['_hash'] = 'ffff000aaaa';
 // A saved [contact-form-7] shortcode of the old form is recognised by number, hash or title (without CF7); another form's is not.
 function get_post_field($field, $id) { return $id === 18 ? 'Old enquiry' : ''; }
 $GLOBALS['meta'][18]['_hash'] = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0';
@@ -128,6 +131,9 @@ if (!bl_wp_inquiry_is_legacy_shortcode(['id' => '18']) || !bl_wp_inquiry_is_lega
 $GLOBALS['meta'][18]['_hash'] = '1234567abc';
 if (!bl_wp_inquiry_is_legacy_shortcode(['id' => '1234567'])) $fail(40, 'all-digit hash not recognised');
 $GLOBALS['meta'][18]['_hash'] = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0';
+// The title stands in for a stale id, not for the id of another form that exists.
+if (!bl_wp_inquiry_is_legacy_shortcode(['id' => '555', 'title' => 'Old enquiry']) || !bl_wp_inquiry_is_legacy_shortcode(['id' => 'deadbee', 'title' => 'Old enquiry'])) $fail(45, 'stale id with title not recognised');
+if (bl_wp_inquiry_is_legacy_shortcode(['id' => '19', 'title' => 'Old enquiry']) || bl_wp_inquiry_is_legacy_shortcode(['id' => 'ffff000', 'title' => 'Old enquiry'])) $fail(46, 'another form taken by title');
 if (bl_wp_inquiry_is_legacy_shortcode(['id' => 'a1b']) || bl_wp_inquiry_is_legacy_shortcode(['title' => 'Other'])) $fail(38, 'short hash or other title taken');
 if (bl_wp_inquiry_is_legacy_shortcode(['id' => '99']) || bl_wp_inquiry_is_legacy_shortcode(['id' => 'zzz'])) $fail(33, 'other shortcode taken over');
 if (apply('pre_do_shortcode_tag', false, 'gallery', ['id' => '18']) !== false || apply('pre_do_shortcode_tag', false, 'contact-form-7', ['id' => '99']) !== false) $fail(34, 'other shortcode replaced');
@@ -147,7 +153,6 @@ if (array_keys($GLOBALS['shortcodes']) !== ['contact-form-7', 'contact-form'] ||
 // Without the plugin the old shortcode draws no second email-draft form, only a mail button.
 // With the plugin, the saved shortcode's product, model and message carry over, read without loading the catalogue
 // (the shortcode may sit in a product's own text, which loading the catalogue renders).
-function get_posts($args) { return ($args['post_type'] ?? '') === 'bl_product' ? [101, 102] : []; }
 $GLOBALS['meta'][101]['_bl_record'] = ['model' => 'BL-T200'];
 $GLOBALS['meta'][102]['_bl_record'] = ['model' => $model];
 $GLOBALS['catalogue_loads'] = 0;
