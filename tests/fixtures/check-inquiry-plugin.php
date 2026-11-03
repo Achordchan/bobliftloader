@@ -87,6 +87,10 @@ if (bl_wp_inquiry_legacy_extras() !== [] || !bl_wp_inquiry_switch_allowed()) $fa
 $GLOBALS['meta'][18]['_mail']['additional_headers'] .= "\nBcc: boss@example.test";
 $GLOBALS['meta'][18]['_mail_2'] = ['active' => true];
 if (count(bl_wp_inquiry_legacy_extras()) !== 2 || bl_wp_inquiry_switch_allowed()) $fail(22, 'cc or autoresponder not held back');
+$GLOBALS['meta'][18]['_mail_2'] = ['active' => false];
+$GLOBALS['meta'][18]['_mail']['additional_headers'] = '';
+$GLOBALS['meta'][18]['_form'] = '<label>Order number [text* order]</label>';
+if (count(bl_wp_inquiry_legacy_extras()) !== 1 || bl_wp_inquiry_switch_allowed()) $fail(24, 'edited form not held back');
 $GLOBALS['options']['bl_inquiry_switch_confirmed'] = '1';
 if (!bl_wp_inquiry_switch_allowed()) $fail(23, 'confirmed switch held back');
 echo "inquiry plugin integration ok\n";

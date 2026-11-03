@@ -14,9 +14,12 @@ const BL_ENQUIRY_FAMILIES_ZH = ['Skid steer loader' => '滑移装载机', 'Mini 
 // The equipment choices of the form: the page's key => the value sent.
 const BL_ENQUIRY_FAMILIES = ['loader' => 'Skid steer loader', 'dumper' => 'Mini dumper', 'help' => 'Help me choose', 'service' => 'Parts & service'];
 
+// The CF7 form markup the theme created (md5 of the trimmed form, without and with the country field it had until version 3).
+const BL_INQUIRY_THEME_FORMS = ['8bdf283d0d601eb62cd7453c2388fa3f', 'c3c9d5d6f7fa17ef3bee2c7d68256e18'];
+
 /**
- * What the Contact Form 7 form did that the inquiry plugin does not: a confirmation mail to the customer (Mail (2)) and
- * copies to Cc or Bcc addresses. Empty when there is no such form or it did neither.
+ * What the Contact Form 7 form did that the inquiry plugin does not: fields edited in CF7, a confirmation mail to the
+ * customer (Mail (2)) and copies to Cc or Bcc addresses. Empty when there is no such form or it did none of these.
  */
 function bl_wp_inquiry_legacy_extras(): array
 {
@@ -25,6 +28,9 @@ function bl_wp_inquiry_legacy_extras(): array
     $extras = [];
     $mail = get_post_meta($form, '_mail', true);
     if (is_array($mail) && preg_match('/^\s*(Cc|Bcc)\s*:\s*(.+)$/mi', (string) ($mail['additional_headers'] ?? ''), $match)) $extras[] = '通知邮件还抄送给 ' . trim($match[2]) . '（' . $match[1] . '），新插件不会抄送';
+    // The form the theme made (with or without the country field it had until version 3), compared as saved.
+    $saved = trim(str_replace("\r\n", "\n", (string) get_post_meta($form, '_form', true)));
+    if ($saved !== '' && !in_array(md5($saved), BL_INQUIRY_THEME_FORMS, true)) $extras[] = 'CF7 表单的字段在后台改过（新表单是主题固定的字段：设备、姓名、邮箱、WhatsApp、公司、留言），改动的字段不会带过来';
     $reply = get_post_meta($form, '_mail_2', true);
     if (is_array($reply) && !empty($reply['active'])) $extras[] = '给客户的自动回复邮件（Mail (2)）已开启，新插件不发自动回复';
     return $extras;
@@ -32,8 +38,12 @@ function bl_wp_inquiry_legacy_extras(): array
 
 /**
  * Whether the theme hands enquiries to the plugin now. A site whose CF7 form did something the plugin does not (above)
- * waits until an administrator confirms the switch (bl_inquiry_switch_confirmed), so nothing stops silently; until then
- * the front shows the theme's email-draft form.
+ * waits until an administrator confirms the switch (bl_inquiry_switch_confirmed), so nothing stops silently.
+ *
+ * Boundary: this theme no longer carries the Contact Form 7 path (the owner chose on 2026-11-03 to replace it, mail designs
+ * included), so while a switch waits the front shows the theme's email-draft form, which still reaches the sales inbox
+ * through the visitor's own email. The wait lasts only from deployment until the administrator who deploys it answers the
+ * notice; a site that must keep CF7 meanwhile stays on the previous theme version until then.
  */
 function bl_wp_inquiry_switch_allowed(): bool
 {
@@ -44,7 +54,7 @@ add_action('admin_notices', static function (): void {
     if (!current_user_can('manage_options') || bl_wp_inquiry_switch_allowed() || !function_exists('achord_inquiry_active')) return;
     $items = implode('', array_map(static fn(string $text): string => '<li>' . esc_html($text) . '</li>', bl_wp_inquiry_legacy_extras()));
     $url = wp_nonce_url(admin_url('admin-post.php?action=bl_inquiry_switch'), 'bl_inquiry_switch');
-    echo '<div class="notice notice-warning"><p><strong>询盘插件还没接管表单</strong>（前台暂时是邮件草稿表单）。原来的 Contact Form 7 表单有新插件不做的设置：</p><ul style="list-style:disc;margin-left:20px">' . $items . '</ul><p>确认不再需要后再切换（切换后表单交给询盘插件）。<a class="button button-primary" href="' . esc_url($url) . '">确认切换到询盘插件</a></p></div>';
+    echo '<div class="notice notice-warning"><p><strong>询盘插件还没接管表单</strong>（前台暂时是邮件草稿表单）。原来的 Contact Form 7 表单有新插件不做的地方：</p><ul style="list-style:disc;margin-left:20px">' . $items . '</ul><p>确认不再需要后再切换（切换后表单交给询盘插件）。<a class="button button-primary" href="' . esc_url($url) . '">确认切换到询盘插件</a></p></div>';
 });
 add_action('admin_post_bl_inquiry_switch', static function (): void {
     if (!current_user_can('manage_options')) wp_die('', '', ['response' => 403]);
