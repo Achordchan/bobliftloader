@@ -14,10 +14,12 @@ defined('ABSPATH') || exit;
 
 const BL_FLAMINGO_IMPORT_BATCH = 40;
 
-/** One Flamingo field as text: a choice list (CF7 radio, checkbox) is joined. */
+/** One Flamingo field as text (either storage format, bl_flamingo_fields): a choice list (CF7 radio, checkbox) is joined. */
 function bl_flamingo_field(int $id, string $name): string
 {
-    $value = get_post_meta($id, '_field_' . $name, true);
+    static $cache = [];
+    $cache[$id] ??= bl_flamingo_fields($id);
+    $value = $cache[$id][$name] ?? '';
     if (is_array($value)) $value = implode(', ', array_filter(array_map('strval', array_filter($value, 'is_scalar')), 'strlen'));
     return is_scalar($value) ? trim((string) $value) : '';
 }

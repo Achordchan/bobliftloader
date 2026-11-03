@@ -35,10 +35,19 @@ if ($attribution !== ['gclid' => 'Cj0-abc', 'utm_source' => 'google']) exit(7);
 function get_post_type($id) { return $id === 7 ? 'flamingo_inbound' : 'post'; }
 function get_post_status($id) { return 'flamingo-spam'; }
 function get_post_meta($id, $key, $single = false) {
+    if (!empty($GLOBALS['inline']) && $key === '_fields') return ['name' => 'Bob', 'bl_attr_gclid' => 'Cj9'];
     return ['_subject' => 'Mini dumper', '_from_name' => 'Ann', '_from_email' => 'a@x.test', '_fields' => ['name' => null, 'bl_attr_gclid' => null],
         '_field_name' => 'Ann', '_field_bl_attr_gclid' => 'Cj0', '_meta' => ['user_agent' => 'UA', 'url' => 'https://x.test/'], '_submission_status' => 'spam'][$key] ?? '';
 }
 $record = bl_enquiry_record(7);
 if ($record['fields'] !== ['name' => 'Ann', 'bl_attr_gclid' => 'Cj0'] || $record['attribution'] !== ['gclid' => 'Cj0'] || $record['meta']['user_agent'] !== 'UA') exit(8);
+// Older Flamingo kept the values inside _fields.
+$GLOBALS['inline'] = true;
+if (bl_enquiry_record(7)['fields'] !== ['name' => 'Bob', 'bl_attr_gclid' => 'Cj9'] || bl_enquiry_record(7)['attribution'] !== ['gclid' => 'Cj9']) exit(10);
+// The importer reads both formats the same way.
+require dirname(__DIR__, 2) . '/inc/wp-inquiry-import.php';
+if (bl_flamingo_field(11, 'name') !== 'Bob' || bl_flamingo_field(11, 'bl_attr_gclid') !== 'Cj9') exit(12);
+$GLOBALS['inline'] = false;
+if (bl_flamingo_field(12, 'name') !== 'Ann' || bl_flamingo_field(12, 'missing') !== '') exit(13);
 if ($record['submission_status'] !== 'spam' || $record['spam'] !== true || $record['from_email'] !== 'a@x.test' || bl_enquiry_record(8) !== []) exit(9);
 echo "enquiries rest ok\n";

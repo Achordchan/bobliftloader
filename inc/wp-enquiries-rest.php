@@ -104,16 +104,27 @@ function bl_enquiry_attribution(array $fields): array
 }
 
 /**
+ * A Flamingo entry's posted fields. Older Flamingo versions kept each value inside _fields itself; newer ones keep a null
+ * there and the value in its own _field_<name> meta.
+ */
+function bl_flamingo_fields(int $postId): array
+{
+    $listed = get_post_meta($postId, '_fields', true);
+    $fields = [];
+    foreach (is_array($listed) ? $listed : [] as $name => $value) $fields[(string) $name] = $value ?? get_post_meta($postId, '_field_' . $name, true);
+    return $fields;
+}
+
+/**
  * One enquiry as Flamingo holds it, in the shape meta._bl_enquiry reads. Read from Flamingo's own post meta (_subject,
- * _from_name, _from_email, _fields with one _field_<name> each, _meta, _submission_status, _spam_log, _akismet), so it
+ * _from_name, _from_email, _fields (values inline or in _field_<name>), _meta, _submission_status, _spam_log, _akismet), so it
  * works with Flamingo switched off too.
  */
 function bl_enquiry_record(int $postId): array
 {
     if (get_post_type($postId) !== 'flamingo_inbound') return [];
     $meta = static fn(string $key) => get_post_meta($postId, $key, true);
-    $fields = [];
-    foreach (array_keys(is_array($meta('_fields')) ? $meta('_fields') : []) as $name) $fields[(string) $name] = $meta('_field_' . $name);
+    $fields = bl_flamingo_fields($postId);
     $channel = function_exists('wp_get_object_terms') ? wp_get_object_terms($postId, 'flamingo_inbound_channel', ['fields' => 'slugs']) : [];
     return [
         'subject' => (string) $meta('_subject'),
