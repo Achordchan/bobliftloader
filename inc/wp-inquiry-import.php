@@ -9,7 +9,8 @@ defined('ABSPATH') || exit;
  * left as they are. Each copy remembers which entry it came from (_flamingo_id), so nothing is copied twice; spam is copied
  * as a blocked draft, as the plugin keeps a blocked enquiry.
  *
- * Progress: option bl_flamingo_import = ['last' => highest Flamingo ID done, 'done' => true once nothing is left, 'count'].
+ * Progress: option bl_flamingo_import = ['last' => highest Flamingo ID done, 'done' => true once nothing was left, 'count'].
+ * While Flamingo is still active, entries saved after that are picked up too (the query always starts after 'last').
  */
 
 const BL_FLAMINGO_IMPORT_BATCH = 40;
@@ -109,7 +110,6 @@ function bl_flamingo_import_batch(): int
 {
     $state = get_option('bl_flamingo_import', []);
     $state = is_array($state) ? $state + ['last' => 0, 'done' => false, 'count' => 0] : ['last' => 0, 'done' => false, 'count' => 0];
-    if ($state['done']) return 0;
     $after = (int) $state['last'];
     $filter = static function (string $where) use ($after): string {
         global $wpdb;
@@ -134,8 +134,10 @@ function bl_flamingo_import_batch(): int
 
 add_action('admin_init', static function (): void {
     if (!bl_wp_inquiry_ready() || !current_user_can('manage_options') || wp_doing_ajax()) return;
+    // Once the history is copied, entries can still arrive while Flamingo is active (a cached CF7 form, a rollout in
+    // progress): each admin visit then looks once for entries after the last one copied. With Flamingo off none can.
     $state = get_option('bl_flamingo_import', []);
-    if (is_array($state) && !empty($state['done'])) return;
+    if (is_array($state) && !empty($state['done']) && !class_exists('Flamingo_Inbound_Message')) return;
     if (!($token = bl_lock_acquire('flamingo_import', 1))) return;
     try {
         bl_flamingo_import_batch();

@@ -91,6 +91,25 @@ $GLOBALS['meta'][18]['_mail_2'] = ['active' => false];
 $GLOBALS['meta'][18]['_mail']['additional_headers'] = '';
 $GLOBALS['meta'][18]['_form'] = '<label>Order number [text* order]</label>';
 if (count(bl_wp_inquiry_legacy_extras()) !== 1 || bl_wp_inquiry_switch_allowed()) $fail(24, 'edited form not held back');
+// The theme's own form on a site under a subdirectory is not an edited one.
+$themeForm = <<<'FORM'
+<fieldset><legend>01 / YOUR EQUIPMENT</legend>
+[radio product use_label_element default:shortcode_attr "Skid steer loader" "Mini dumper" "Help me choose" "Parts & service"]
+[hidden model default:shortcode_attr]</fieldset>
+<fieldset><legend>02 / A LITTLE ABOUT YOU</legend><div class="bl-form-grid">
+<label>Your name <span>*</span>[text* name autocomplete:name maxlength:100 placeholder "Full name"]</label>
+<label>Business email <span>*</span>[email* email autocomplete:email maxlength:200 placeholder "you@company.com"]</label>
+<label>Company[text company autocomplete:organization maxlength:150 placeholder "Company name"]</label>
+</div>
+<label class="bl-message-label">Your project[textarea message rows:3 maxlength:2000 default:shortcode_attr placeholder "What work do you need to get done?"]</label>
+<div class="bl-hp" aria-hidden="true"><label>Leave this field empty[text bl_website tabindex:-1 autocomplete:off]</label></div></fieldset>
+<div class="bl-form-bottom"><p>Your details are used only to answer this enquiry. <br>See our <a href="/privacy/">privacy information</a>.</p>[submit class:bl-button class:bl-button-blue "Send enquiry"]</div>
+FORM;
+$GLOBALS['meta'][18]['_form'] = $themeForm;
+if (bl_wp_inquiry_legacy_extras() !== []) $fail(26, 'theme form read as an edit');
+$GLOBALS['meta'][18]['_form'] = str_replace('href="/privacy/"', 'href="/site/privacy/"', $themeForm);
+if (bl_wp_inquiry_legacy_extras() !== []) $fail(25, 'subdirectory privacy link read as an edit');
+$GLOBALS['meta'][18]['_form'] = '<label>Order number [text* order]</label>';
 $GLOBALS['options']['bl_inquiry_switch_confirmed'] = '1';
 if (!bl_wp_inquiry_switch_allowed()) $fail(23, 'confirmed switch held back');
 echo "inquiry plugin integration ok\n";

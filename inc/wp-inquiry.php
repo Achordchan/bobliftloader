@@ -30,6 +30,8 @@ function bl_wp_inquiry_legacy_extras(): array
     if (is_array($mail) && preg_match('/^\s*(Cc|Bcc)\s*:\s*(.+)$/mi', (string) ($mail['additional_headers'] ?? ''), $match)) $extras[] = '通知邮件还抄送给 ' . trim($match[2]) . '（' . $match[1] . '），新插件不会抄送';
     // The form the theme made (with or without the country field it had until version 3), compared as saved.
     $saved = trim(str_replace("\r\n", "\n", (string) get_post_meta($form, '_form', true)));
+    // The theme wrote the privacy link from home_url(), so a site under a subdirectory has its own path there.
+    $saved = (string) preg_replace('#<a href="[^"]*">privacy information</a>#', '<a href="/privacy/">privacy information</a>', $saved);
     if ($saved !== '' && !in_array(md5($saved), BL_INQUIRY_THEME_FORMS, true)) $extras[] = 'CF7 表单的字段在后台改过（新表单是主题固定的字段：设备、姓名、邮箱、WhatsApp、公司、留言），改动的字段不会带过来';
     $reply = get_post_meta($form, '_mail_2', true);
     if (is_array($reply) && !empty($reply['active'])) $extras[] = '给客户的自动回复邮件（Mail (2)）已开启，新插件不发自动回复';
