@@ -123,6 +123,7 @@
      shown once the page has scrolled a screen or so (main.js marks the root), and out of the way of the quick enquiry. */
   .bl-site .bl-side-contact .bl-side-wa{background:var(--ink);color:#e6edf2}
   .bl-site .bl-side-contact .bl-side-wa svg{color:#25d366}
+  .bl-site .bl-side-contact .bl-side-wechat svg{color:#07c160}
   .bl-site .bl-side-contact .bl-side-enquiry{flex:1.4;flex-direction:row;gap:9px;background:var(--blue);color:#fff;border-right:0;font-size:13px}
   .bl-site .bl-side-contact .bl-side-enquiry span{font-size:13px}
   .bl-quick-on .bl-site .bl-side-contact .bl-side-enquiry{background:#1746ad}

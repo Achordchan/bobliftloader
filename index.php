@@ -56,6 +56,7 @@ if ($route['type'] === 'showcase') {
   <?php require __DIR__ . '/templates/partials/quick-enquiry.php'; ?>
   <?php require __DIR__ . '/templates/dialogs.php'; ?>
   <?php require __DIR__ . '/templates/partials/leave-site.php'; ?>
+  <?php require __DIR__ . '/templates/partials/wechat.php'; ?>
   <?php if (bl_is_wordpress()) wp_footer(); ?>
 </body>
 </html>

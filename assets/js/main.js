@@ -17,6 +17,7 @@ import { initializeCatalog } from './catalog.js';
 import { initializeSearch } from './search.js';
 import { initializeSectionNav } from './section-nav.js';
 import { initializeQuick } from './quick.js';
+import { initializeWeChat } from './wechat.js';
 
 initializeAttachmentLoops();
 initializeAttribution();
@@ -28,6 +29,7 @@ initializeHero();
 initializeInquiry();
 initializeLeaveSite();
 initializeLightbox();
+initializeWeChat();
 initializeMaking();
 initializeNewsContents();
 initializeNewsView();
