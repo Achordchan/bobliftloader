@@ -47,6 +47,15 @@
 .bl-site .bl-inquiry-dialog h2{font-family:var(--display);font-size:var(--fs-h2);line-height:.9;font-weight:600;margin-top:18px;margin-bottom:22px}
 .bl-site .bl-inquiry-dialog>p:not(.bl-eyebrow){font-size:var(--fs-small);color:var(--muted);line-height:1.9}
 /* Notice before one of our other websites opens (templates/partials/leave-site.php): green tick, name, domain, Continue / Stay. */
+.bl-site .bl-wechat-dialog{width:400px;padding:clamp(28px,3vw,44px);text-align:center}
+.bl-site .bl-wechat-mark{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 18px;border-radius:50%;background:#07c160;color:#fff}
+.bl-site .bl-wechat-mark svg{width:28px;height:28px}
+.bl-site .bl-wechat-dialog h2{margin:0;font-family:var(--display);font-size:clamp(28px,2vw,40px);font-weight:600;line-height:1;text-transform:uppercase}
+.bl-site .bl-wechat-text{margin:12px 0 0;font-size:var(--fs-small);line-height:1.7;color:var(--muted)}
+.bl-site .bl-wechat-qr{display:block;width:220px;max-width:100%;height:auto;margin:22px auto 0;padding:10px;background:#fff;border:1px solid #d5dde2}
+.bl-site .bl-wechat-id{margin:16px 0 0;font-size:var(--fs-small);line-height:1.4}
+.bl-site .bl-wechat-id small{display:block;font-size:var(--fs-label);color:var(--muted)}
+.bl-site .bl-wechat-id b{font-weight:700;letter-spacing:.3px}
 .bl-site .bl-leave-dialog{width:520px;padding:clamp(28px,3.2vw,48px)}
 .bl-site .bl-leave-check{display:grid;place-items:center;width:56px;height:56px;margin-bottom:22px;border-radius:50%;background:#1f9d55;color:#fff;box-shadow:0 0 0 8px #1f9d5524}
 .bl-site .bl-leave-check svg{width:30px;height:30px}

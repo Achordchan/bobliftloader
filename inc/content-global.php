@@ -7,6 +7,7 @@ return [
             'business_email' => 'business@boblift.com',
             'phone' => '+86 158 5249 9415',
             'sales_whatsapp' => '8615852499415',
+            'wechat_id' => '15852499415',
             'name' => 'Xuzhou BOB-LIFT Construction Machinery Co., Ltd.',
             'name_zh' => '徐州巴布工程机械有限公司',
             'domain' => 'bobliftloader.com',
@@ -24,7 +25,7 @@ return [
             'timezone' => 'China Standard Time (UTC+8)',
             'map_address' => 'No. 79, Zone B, Jinluotuo Industrial Park, Yunlong District, Xuzhou, Jiangsu, China',
         ],
-        'brand' => ['logo' => '', 'icon' => ''],
+        'brand' => ['logo' => '', 'icon' => '', 'wechat_qr' => ''],
         'footer' => [
             'tagline1' => 'One BOB-LIFT.',
             'tagline2' => 'A world of possibilities.',
@@ -82,7 +83,7 @@ return [
         ],
         // Empty until a notice is written: the bar shows only with words in it and inside its dates.
         'event_bar' => ['badge' => '', 'text' => '', 'short' => '', 'link' => '', 'url' => '', 'starts' => '', 'ends' => ''],
-        'side' => ['whatsapp' => 'WhatsApp', 'email' => 'Email', 'enquiry' => 'Enquiry', 'top' => 'Top', 'enquiry_url' => '/contact/#enquiry'],
+        'side' => ['whatsapp' => 'WhatsApp', 'email' => 'Email', 'wechat' => 'WeChat', 'wechat_title' => 'Chat with us on WeChat', 'wechat_text' => 'Scan the QR code with WeChat, or add us by our WeChat ID.', 'enquiry' => 'Enquiry', 'top' => 'Top', 'enquiry_url' => '/contact/#enquiry'],
         'llms' => ['intro' => ''],
         'consent' => [
             'title' => 'Cookies and your choices',
@@ -109,6 +110,7 @@ return [
                 ['key' => 'company.business_email', 'label' => '商务合作邮箱', 'type' => 'email', 'help' => ''],
                 ['key' => 'company.phone', 'label' => '电话（含国家码）', 'type' => 'text', 'help' => ''],
                 ['key' => 'company.sales_whatsapp', 'label' => '销售 WhatsApp 号码', 'type' => 'digits', 'help' => '必填。带国家区号，只写数字，例如 8615852499415；全站销售 WhatsApp 按钮使用此号码；售后号码在“采购与售后”单独设置。'],
+                ['key' => 'company.wechat_id', 'label' => '微信号', 'type' => 'text', 'help' => '悬浮联系按钮的微信弹窗和联系页显示这个微信号；和下面“品牌图片”里的微信二维码一起用。留空则不显示微信。'],
                 ['key' => 'company.name', 'label' => '公司名称', 'type' => 'text', 'help' => ''],
                 ['key' => 'company.name_zh', 'label' => '公司中文名称', 'type' => 'text', 'help' => '显示在页脚、关于页和联系页的英文公司名下面，也写入结构化数据的 alternateName 和 llms.txt，让搜索引擎和 AI 把中英文名对应成同一家公司。留空则不显示。'],
                 ['key' => 'company.domain', 'label' => '本站域名', 'type' => 'text', 'help' => ''],
@@ -131,6 +133,7 @@ return [
             'title' => '品牌图片',
             'fields' => [
                 ['key' => 'brand.logo', 'label' => '品牌标志', 'type' => 'image', 'preview' => 'images/logo.png', 'help' => '页眉、页脚与公司结构化信息共用。留空使用主题标志。'],
+                ['key' => 'brand.wechat_qr', 'label' => '微信二维码', 'type' => 'image', 'preview' => 'images/wechat-qr.png', 'help' => '悬浮联系按钮和联系页的微信弹窗用这张二维码，与起重机站同一个微信。留空使用主题自带的二维码。'],
             ],
         ],
         [
@@ -223,6 +226,9 @@ return [
             'fields' => [
                 ['key' => 'side.whatsapp', 'label' => 'WhatsApp 名称', 'type' => 'text'],
                 ['key' => 'side.email', 'label' => '邮箱名称', 'type' => 'text'],
+                ['key' => 'side.wechat', 'label' => '微信名称', 'type' => 'text'],
+                ['key' => 'side.wechat_title', 'label' => '微信弹窗标题', 'type' => 'text'],
+                ['key' => 'side.wechat_text', 'label' => '微信弹窗说明', 'type' => 'text'],
                 ['key' => 'side.enquiry', 'label' => '询盘名称', 'type' => 'text'],
                 ['key' => 'side.top', 'label' => '回顶部名称', 'type' => 'text'],
                 ['key' => 'side.enquiry_url', 'label' => '询盘链接', 'type' => 'url'],
