@@ -28,4 +28,41 @@ $GLOBALS['can'] = false;
 if (!($c->get_items_permissions_check(null) instanceof WP_Error) || !($c->get_item_permissions_check(null) instanceof WP_Error) || $c->check_read_permission(null) !== false) exit(5);
 $GLOBALS['can'] = true;
 if ($c->get_items_permissions_check(null) !== true || $c->get_item_permissions_check(null) !== true || $c->check_read_permission(null) !== true) exit(6);
+// Flamingo's history keeps its ad attribution; the plugin's records answer in the same shape, to administrators only.
+$attribution = bl_enquiry_attribution(['bl_attr_gclid' => 'Cj0-abc', 'bl_attr_utm_source' => ['google'], 'bl_attr_landing' => '', 'name' => 'x']);
+if ($attribution !== ['gclid' => 'Cj0-abc', 'utm_source' => 'google']) exit(7);
+// An entry is read from Flamingo's own meta, so it reads the same with Flamingo switched off.
+function get_post_type($id) { return $id === 7 ? 'flamingo_inbound' : 'post'; }
+function get_post_status($id) { return 'flamingo-spam'; }
+function get_post_field($field, $id) { return $field === 'post_title' ? 'Mini dumper' : ''; }
+function get_post_meta($id, $key, $single = false) {
+    if (!empty($GLOBALS['cf7default'])) return ['_fields' => ['your-name' => 'Cleo', 'your-email' => 'c@x.test', 'your-subject' => 'Parts', 'your-message' => 'Need a seal kit', 'order-no' => 'A-17', 'bl_attr_gclid' => 'Cj1'], '_meta' => ['url' => 'https://x.test/contact/', 'remote_ip' => '203.0.113.9'], '_submission_status' => 'mail_sent'][$key] ?? '';
+    if (!empty($GLOBALS['inline']) && $key === '_fields') return ['name' => 'Bob', 'bl_attr_gclid' => 'Cj9'];
+    return ['_from_name' => 'Ann', '_from_email' => 'a@x.test', '_fields' => ['name' => null, 'bl_attr_gclid' => null],
+        '_field_name' => 'Ann', '_field_bl_attr_gclid' => 'Cj0', '_meta' => ['user_agent' => 'UA', 'url' => 'https://x.test/'], '_submission_status' => 'spam'][$key] ?? '';
+}
+$record = bl_enquiry_record(7);
+if ($record['fields'] !== ['name' => 'Ann', 'bl_attr_gclid' => 'Cj0'] || $record['attribution'] !== ['gclid' => 'Cj0'] || $record['meta']['user_agent'] !== 'UA') exit(8);
+// Older Flamingo kept the values inside _fields.
+$GLOBALS['inline'] = true;
+if (bl_enquiry_record(7)['fields'] !== ['name' => 'Bob', 'bl_attr_gclid' => 'Cj9'] || bl_enquiry_record(7)['attribution'] !== ['gclid' => 'Cj9']) exit(10);
+// The importer reads both formats the same way.
+require dirname(__DIR__, 2) . '/inc/wp-inquiry-import.php';
+if (bl_flamingo_field(11, 'name') !== 'Bob' || bl_flamingo_field(11, 'bl_attr_gclid') !== 'Cj9') exit(12);
+$GLOBALS['inline'] = false;
+if (bl_flamingo_field(12, 'name') !== 'Ann' || bl_flamingo_field(12, 'missing') !== '') exit(13);
+// An entry from CF7's default form keeps its message and every other field.
+const ACHORD_INQUIRY_ATTRIBUTION = ['gclid' => 255];
+const BL_ENQUIRY_FAMILIES_ZH = ['Mini dumper' => '迷你翻斗车'];
+function achord_inquiry_attribution_clean($name, $value) { return (string) $value; }
+function achord_inquiry_referrer_host($value) { return (string) $value; }
+function achord_inquiry_device($agent, $touch = false) { return ''; }
+function achord_inquiry_channel($fields) { return [isset($fields['attr_gclid']) ? 'Google Ads 广告' : '直接访问', '']; }
+class WP_Post { public function __construct(public int $ID = 0) {} }
+$GLOBALS['cf7default'] = true;
+$copy = bl_flamingo_inquiry_fields(new WP_Post(21));
+$GLOBALS['cf7default'] = false;
+if ($copy['name'] !== 'Cleo' || $copy['email'] !== 'c@x.test' || $copy['attr_gclid'] !== 'Cj1' || $copy['mail_sent'] !== '1' || $copy['ip'] !== '203.0.113.9') exit(14);
+if ($copy['message'] !== "Need a seal kit\n\n—— 旧表单其他字段 ——\nyour-subject: Parts\norder-no: A-17") exit(15);
+if ($record['subject'] !== 'Mini dumper' || $record['submission_status'] !== 'spam' || $record['spam'] !== true || $record['from_email'] !== 'a@x.test' || bl_enquiry_record(8) !== []) exit(9);
 echo "enquiries rest ok\n";

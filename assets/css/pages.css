@@ -498,7 +498,9 @@
 .bl-site .bl-side-contact{position:fixed;right:clamp(16px,1.2vw,32px);top:50%;transform:translateY(-50%);z-index:15;display:flex;flex-direction:column;gap:6px}
 .bl-site .bl-side-contact a{position:relative;display:grid;place-items:center;width:clamp(48px,2.4vw,60px);height:clamp(48px,2.4vw,60px);background:var(--ink);color:#e6edf2;border:1px solid #ffffff1f;box-shadow:0 8px 24px #081c2b33;transition:background .2s,color .2s,transform .2s}
 @media(hover:hover){.bl-site .bl-side-contact a:hover{background:var(--blue);color:white;transform:translateX(-2px)}}
-@media(hover:hover){.bl-site .bl-side-contact a:first-child:hover{background:#25d366;color:#04130a}}
+/* WhatsApp keeps its brand green (#25D366) and white glyph so visitors recognise it at a glance. */
+.bl-site .bl-side-contact .bl-side-wa{background:#25d366;color:#fff}
+@media(hover:hover){.bl-site .bl-side-contact .bl-side-wa:hover{background:#1da851;color:#fff}}
 .bl-site .bl-side-contact svg{width:clamp(20px,1.05vw,26px);height:clamp(20px,1.05vw,26px)}
 .bl-site .bl-side-contact span{position:absolute;right:calc(100% + 10px);top:50%;transform:translate(6px,-50%);white-space:nowrap;background:var(--ink);color:white;font-size:var(--fs-label);font-weight:600;padding:8px 12px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
 .bl-site .bl-side-contact a:focus-visible span{opacity:1;transform:translate(0,-50%)}
@@ -896,8 +898,8 @@
 /* The same form, shortened: no step headings, no company line (unless the saved form makes it required), a smaller message box, the button across the panel. */
 .bl-site .bl-quick-form .bl-inquiry-form legend,.bl-site .bl-quick-form .bl-form-grid label:has([name="company"]):not(:has([aria-required="true"])){display:none}
 .bl-site .bl-quick-form .bl-inquiry-form fieldset{margin:0 0 14px}
-.bl-site .bl-quick-form .wpcf7-radio{gap:6px}
-.bl-site .bl-quick-form .wpcf7-list-item-label{padding:8px 10px;font-size:var(--fs-micro)}
+.bl-site .bl-quick-form .bl-radio{gap:6px}
+.bl-site .bl-quick-form .bl-radio-label{padding:8px 10px;font-size:var(--fs-micro)}
 .bl-site .bl-quick-form .bl-form-grid{display:grid;grid-template-columns:1fr;gap:4px;margin-top:6px}
 .bl-site .bl-quick-form .bl-form-grid label,.bl-site .bl-quick-form .bl-message-label{font-size:var(--fs-micro)}
 .bl-site .bl-quick-form .bl-inquiry-form input:not([type=radio]),.bl-site .bl-quick-form .bl-inquiry-form textarea{padding:9px 0;font-size:16px}
@@ -905,7 +907,7 @@
 .bl-site .bl-quick-form .bl-form-bottom{display:flex;flex-direction:column-reverse;align-items:stretch;gap:12px}
 .bl-site .bl-quick-form .bl-form-bottom p{font-size:var(--fs-micro);line-height:1.5;color:var(--muted)}
 .bl-site .bl-quick-form .bl-form-bottom p br{display:none}
-.bl-site .bl-quick-form form.bl-inquiry-form input.wpcf7-submit{width:100%;min-height:52px;padding:14px 56px 14px 22px}
+.bl-site .bl-quick-form form.bl-inquiry-form input.bl-inquiry-submit{width:100%;min-height:52px;padding:14px 56px 14px 22px}
 .bl-site .bl-quick-fallback{display:grid;gap:16px;justify-items:start}
 .bl-site .bl-quick-wa svg{display:none}
 /* Wherever the contact rail is a bottom bar (page-responsive.css, quick.js) the panel is a sheet above it. */
@@ -930,6 +932,20 @@
   .bl-site .bl-quick-wa>span>span{display:block;margin-top:2px;font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
   .bl-site .bl-quick-fallback>.bl-quick-wa:active{transform:scale(.97);background:#effbf3}
 }
+/* Full-screen enquiry (bl-quick-full, quick.js trial switch): on a phone the rest of the page is hidden (quick.js
+   enterPage) and the panel is an ordinary page in the document flow, scrolled by the page itself. Nothing is fixed,
+   so the iOS keyboard has nothing to shift or cut off. */
+.bl-quick-page-hidden{display:none!important}
+@media(max-width:800px),(max-width:1000px) and (max-height:500px){
+  .bl-quick-page,.bl-quick-page body{background:var(--white)}
+  .bl-quick-page .bl-site{overflow:visible}
+  .bl-site .bl-quick.bl-quick-full.bl-quick-open{position:relative;top:auto;right:auto;bottom:auto;left:auto;width:auto;min-height:100dvh;z-index:auto}
+  .bl-site .bl-quick-full.bl-quick-open::before{display:none}
+  .bl-site .bl-quick-full .bl-quick-panel{position:relative;height:auto;min-height:100dvh;max-height:none;overflow:visible;border:0;box-shadow:none;padding-top:env(safe-area-inset-top,0px);animation:bl-quick-full-in .18s ease-out}
+  .bl-site .bl-quick-full .bl-quick-form{padding-bottom:max(24px,env(safe-area-inset-bottom,0px))}
+  .bl-site .bl-quick-full .bl-quick-form :is(input,textarea,select){scroll-margin-block:16px}
+}
+@keyframes bl-quick-full-in{from{opacity:0}}
 /* Phones turned sideways: the sheet keeps to the right half, under a slimmer header. */
 @media(min-width:801px) and (max-width:1000px) and (max-height:500px){
   .bl-site .bl-quick{left:auto;width:min(480px,100%)}
@@ -983,4 +999,23 @@
   .bl-site .bl-catalog-actions .bl-text-link{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:10px 16px;background:#fff;border:1px solid var(--line)}
   .bl-site .bl-catalog-actions .bl-text-link .bl-icon{flex:none}
   .bl-site .bl-catalog-contact{margin-top:20px}
+}
+
+/* Home event card between the company-stories heading and the story cards (templates/partials/event-card.php). */
+.bl-site .bl-event-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);margin-bottom:clamp(36px,calc(27.6px + 1.2vw),58px);background:var(--ink);color:var(--paper)}
+.bl-site .bl-event-card-plain{grid-template-columns:minmax(0,1fr)}
+.bl-site .bl-event-card-media{min-height:clamp(300px,24vw,460px);background:#d9dcd8}
+.bl-site .bl-event-card-media img{width:100%;height:100%;object-fit:cover;display:block}
+.bl-site .bl-event-card-body{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:clamp(16px,1.1vw,24px);padding:clamp(32px,3.2vw,72px)}
+.bl-site .bl-event-card-body .bl-eyebrow{color:#8fb0ff}
+.bl-site .bl-event-card h3{font:600 clamp(34px,calc(29px + 1.2vw),60px)/.98 var(--display);text-transform:uppercase}
+.bl-site .bl-event-card-text{max-width:34em;color:#c6d0d7;font-size:var(--fs-body);line-height:1.6}
+.bl-site .bl-event-card-facts{display:flex;flex-wrap:wrap;gap:14px clamp(28px,2.2vw,48px)}
+.bl-site .bl-event-card-facts dt{font-size:var(--fs-micro);letter-spacing:1.2px;text-transform:uppercase;color:#8d9ba5}
+.bl-site .bl-event-card-facts dd{margin:4px 0 0;font-size:var(--fs-lead);font-weight:600;color:white}
+@media(max-width:800px){
+  .bl-site .bl-event-card{grid-template-columns:minmax(0,1fr)}
+  .bl-site .bl-event-card-media{min-height:0;aspect-ratio:3/2}
+  .bl-site .bl-event-card-body{padding:28px 22px 32px}
+  .bl-site .bl-event-card-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
 }

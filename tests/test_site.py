@@ -400,6 +400,8 @@ class WebsiteTests(unittest.TestCase):
         self.assertNotIn('target=', switch)
         self.assertIn('aria-current="true"', switch)
         self.assertIn('bobliftloader.com', switch)
+        # Each website shows its real photo in the square, not a letter.
+        self.assertEqual([re.sub(r'\?.*', '', src).rsplit('/', 1)[-1] for src in re.findall(r'<i class="bl-site-photo" aria-hidden="true"><img src="([^"]+)" alt=""', switch)], ['switch-boblift.webp', 'switch-cranes.webp', 'switch-loader.webp'])
         # The logo still goes home on its own.
         self.assertIn('<a class="bl-brand" href="/" aria-label="BOB-LIFT home">', html)
 
@@ -481,7 +483,7 @@ class WebsiteTests(unittest.TestCase):
         self.assertNotIn('href="/products/"', page)
         with open('inc/seo.php') as source: self.assertIn("$route['type'] !== 'thanks'", source.read())
         with open('assets/js/inquiry.js') as source: script = source.read()
-        self.assertIn("'wpcf7mailsent'", script)
+        self.assertIn('sessionStorage.setItem(SENT_KEY', script)
         self.assertIn("event: 'generate_lead'", script)
 
     def test_news_has_sources_and_dates(self):

@@ -29,7 +29,7 @@ function bl_home_defaults(): array
             'link' => 'Talk to our team',
             'image' => '',
             'image_mobile' => '',
-            'alt' => 'Illustrative stone-quarry scene at dusk based on BOB-LIFT BL-T1000-H product photography',
+            'alt' => 'Illustration: a BOB-LIFT BL-T360-H tracked stand-on mini skid steer loader in a stone quarry at dusk, based on product photography',
         ],
         // The second hero slide; the switch above the picture names both slides after the family cards below.
         'hero_dumper' => [
@@ -100,6 +100,13 @@ function bl_home_defaults(): array
                 ['title' => 'Checked before it ships.', 'text' => 'We check the tank and pipework, then run the engine. We operate every movement, drive the machine and look for oil leaks.'],
                 ['title' => 'Visit our factory.', 'text' => 'Send us your dates to visit our factory in Xuzhou, Jiangsu. <a href="' . bl_escape(bl_url('/contact/') . '#enquiry') . '">Plan a visit</a>'],
             ],
+        ],
+        // A dated promotion above the company stories (a trade show); it shows only with a title and inside its dates.
+        'event' => [
+            'eyebrow' => '', 'title' => '', 'text' => '',
+            'facts' => [],
+            'button' => '', 'url' => '', 'image' => '', 'alt' => '',
+            'starts' => '', 'ends' => '',
         ],
         'journal' => [
             'eyebrow' => 'FROM THE COMPANY',

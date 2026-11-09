@@ -4,9 +4,27 @@
 // held still, and Tab stays inside the sheet until it closes.
 const SHEET = '(max-width: 800px), (max-width: 1000px) and (max-height: 500px)'; // as in page-responsive.css and pages.css
 
+// Phones get the enquiry as a full-screen page instead of a sheet over the bottom bar (the sheet fought the iOS keyboard).
+// On for every phone visitor since 2026-11-03 (set back to false to return to the sheet; ?fs=1 then works as a
+// per-browser trial again). Same form, same fields, same submit and tracking either way.
+const FULLSCREEN_FOR_EVERYONE = true;
+const fullscreenWanted = () => {
+  if (FULLSCREEN_FOR_EVERYONE) return true;
+  const flag = new URLSearchParams(location.search).get('fs');
+  try {
+    if (flag === '1') localStorage.setItem('boblift_inquiry_fs', '1');
+    if (flag === '0') localStorage.removeItem('boblift_inquiry_fs');
+    return localStorage.getItem('boblift_inquiry_fs') === '1';
+  } catch {
+    return flag === '1';
+  }
+};
+
 export function initializeQuick() {
   const quick = document.querySelector('.bl-quick');
   if (!quick) return;
+  quick.classList.toggle('bl-quick-full', fullscreenWanted());
+  const full = quick.classList.contains('bl-quick-full');
   const toggle = quick.querySelector('.bl-quick-toggle');
   const panel = quick.querySelector('.bl-quick-panel');
   const sheet = window.matchMedia(SHEET);
@@ -32,12 +50,44 @@ export function initializeQuick() {
     else { panel.removeAttribute('role'); panel.removeAttribute('aria-modal'); }
     mute(on);
   };
+  // Full-screen (bl-quick-full) on a phone: the panel is not laid over the page at all. Everything else on the page is
+  // hidden and the panel sits in the normal page flow, so the phone treats it as an ordinary page with a form and moves
+  // it for the keyboard like any page, with no fixed layer to shift or cut off. Closing puts the page back where it was.
+  let page = null;
+  const enterPage = () => {
+    if (page) return;
+    const y = scrollY; // before hiding anything: the shorter page would already have scrolled back to the top
+    const hidden = [];
+    for (let node = quick; node.parentElement && node !== document.body; node = node.parentElement) {
+      for (const sibling of node.parentElement.children) {
+        if (sibling === node || ['SCRIPT', 'STYLE', 'LINK', 'TEMPLATE'].includes(sibling.tagName) || sibling.classList.contains('bl-quick-page-hidden')) continue;
+        sibling.classList.add('bl-quick-page-hidden');
+        hidden.push(sibling);
+      }
+    }
+    page = { y, hidden };
+    document.documentElement.classList.add('bl-quick-page');
+    scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  };
+  const leavePage = () => {
+    if (!page) return;
+    const { y, hidden } = page;
+    page = null;
+    hidden.forEach((element) => element.classList.remove('bl-quick-page-hidden'));
+    document.documentElement.classList.remove('bl-quick-page');
+    const restore = () => scrollTo({ top: y, left: 0, behavior: 'instant' });
+    restore();
+    requestAnimationFrame(restore); // again once the page has laid out in full
+  };
   const setOpen = (open, from = toggle) => {
+    const asPage = open && full && sheet.matches;
+    if (asPage) enterPage();
     panel.hidden = !open;
     setModal(open && sheet.matches);
     toggle.setAttribute('aria-expanded', String(open));
     quick.classList.toggle('bl-quick-open', open);
     document.documentElement.classList.toggle('bl-quick-on', open);
+    if (!asPage) leavePage(); // after the sheet classes are gone, so the page is back at full height to scroll in
     if (open) {
       opener = from;
       // Phones would pop the keyboard up over the form, so there the close button takes focus instead of the name field.
@@ -92,6 +142,38 @@ export function initializeQuick() {
   }));
   // Turning the phone past the sheet's limits leaves a dimmed, locked page behind: close it instead.
   sheet.addEventListener('change', () => { if (!panel.hidden) setOpen(false); });
+
+  // iOS does not shrink the fixed sheet when the keyboard opens: it pans the visible area instead, so the sheet sits half
+  // under the keyboard and jumps from field to field. While the sheet is open it follows the visible area
+  // (visualViewport): with the keyboard up it stands on the keyboard and is no taller than what is left, the form scrolls
+  // inside it, and the focused field is brought into view there.
+  let viewportFrame = 0;
+  const clearViewport = () => {
+    quick.style.removeProperty('bottom');
+    panel.style.removeProperty('max-height');
+  };
+  const syncViewport = () => {
+    cancelAnimationFrame(viewportFrame);
+    viewportFrame = requestAnimationFrame(() => {
+      const viewport = window.visualViewport;
+      if (!viewport || panel.hidden || !sheet.matches || page) { clearViewport(); return; }
+      const covered = innerHeight - viewport.offsetTop - viewport.height;
+      if (covered < 80 && viewport.offsetTop < 1) { clearViewport(); return; } // no keyboard: the stylesheet's place
+      quick.style.bottom = `${Math.round(Math.max(covered, 0))}px`;
+      panel.style.maxHeight = `${Math.round(viewport.height - 8)}px`;
+    });
+  };
+  window.visualViewport?.addEventListener('resize', syncViewport);
+  window.visualViewport?.addEventListener('scroll', syncViewport);
+  new MutationObserver(syncViewport).observe(panel, { attributes: true, attributeFilter: ['hidden'] });
+  panel.addEventListener('focusin', (event) => {
+    const field = event.target;
+    if (!field.matches?.('input:not([type=radio]), textarea, select')) return;
+    setTimeout(() => {
+      syncViewport();
+      requestAnimationFrame(() => { if (document.activeElement === field) field.scrollIntoView({ block: 'nearest', inline: 'nearest' }); });
+    }, 320);
+  });
 
   // A product page opens with its section bar along the bottom of the screen; the button rises above it until it scrolls up.
   const bar = document.querySelector('.bl-product-section-nav');

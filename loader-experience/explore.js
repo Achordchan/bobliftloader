@@ -90,6 +90,13 @@ const endLoad = ok => {
   setTimeout(() => document.documentElement.classList.remove('hero-loading'), ok ? 900 : 0); // after the poster has faded; at once if there is no model
 };
 
+// Each part card's photographs open whether or not the model loads: without WebGL the cards and their photographs
+// are what the chapter still has to show.
+document.querySelectorAll('.exp-part-card').forEach(card => {
+  const part = PARTS.find(p => p.id === card.dataset.part);
+  card.querySelectorAll('[data-photo-index]').forEach(btn => btn.addEventListener('click', () => openLightbox(part.title, part.photos, +btn.dataset.photoIndex, btn)));
+});
+
 if (!webglAvailable()) {
   endLoad(false);
   document.body.classList.add('no-webgl');
@@ -482,7 +489,6 @@ function bindParts(viewer) {
   };
   cards.forEach(card => {
     const part = PARTS.find(p => p.id === card.dataset.part);
-    card.querySelectorAll('[data-photo-index]').forEach(btn => btn.addEventListener('click', () => openLightbox(part.title, part.photos, +btn.dataset.photoIndex, btn)));
     card.addEventListener('click', e => { if (!e.target.closest('button')) activate(part); });
     if (ScrollTrigger && !reduced.matches) ScrollTrigger.create({ trigger: card, start: () => `top ${line()}px`, end: () => `bottom+=${parseFloat(getComputedStyle(card.parentNode).rowGap) || 0} ${line()}px`, onToggle: self => { if (self.isActive) activate(part); } });
   });

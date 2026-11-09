@@ -121,7 +121,9 @@
   .bl-site .bl-side-contact a:hover{transform:none}
   /* Three cells, Enquiry the widest and always blue; Top leaves the bar for a small round button above its right end,
      shown once the page has scrolled a screen or so (main.js marks the root), and out of the way of the quick enquiry. */
+  .bl-site .bl-side-contact .bl-side-wa{background:var(--ink);color:#e6edf2}
   .bl-site .bl-side-contact .bl-side-wa svg{color:#25d366}
+  .bl-site .bl-side-contact .bl-side-wechat svg{color:#07c160}
   .bl-site .bl-side-contact .bl-side-enquiry{flex:1.4;flex-direction:row;gap:9px;background:var(--blue);color:#fff;border-right:0;font-size:13px}
   .bl-site .bl-side-contact .bl-side-enquiry span{font-size:13px}
   .bl-quick-on .bl-site .bl-side-contact .bl-side-enquiry{background:#1746ad}
@@ -194,3 +196,7 @@
 /* With the WordPress toolbar showing: on phones WordPress lets the toolbar scroll away with the page (absolute there,
    not fixed), so the header pins to the very top instead of hanging 46px below an empty strip (pages.css sets 46px). */
 @media(max-width:600px){.bl-site.bl-wp-admin-bar .bl-header{top:0}}
+
+/* iOS Safari zooms the page when a focused field's text is under 16px (phone body text here is 15px).
+   On touch screens keep every typable field at 16px; pinch-zoom stays on for accessibility. */
+@media (pointer:coarse){.bl-site input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]):not([type=file]):not([type=color]),.bl-site select,.bl-site textarea{font-size:16px!important}}

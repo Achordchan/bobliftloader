@@ -57,6 +57,18 @@ function bl_content_asset(string $page, string $path, string $fallback): string
     return bl_content_value($page, $path) ?: bl_asset($fallback);
 }
 
+/** The WeChat QR code (Global settings → brand.wechat_qr, else the theme copy); the same WeChat account as bobliftcrane.com. */
+function bl_wechat_qr(): string
+{
+    return bl_content_asset('global', 'brand.wechat_qr', 'images/wechat-qr.png');
+}
+
+/** The official WeChat glyph (Simple Icons, CC0), drawn in the current text colour. */
+function bl_wechat_icon(): string
+{
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/></svg>';
+}
+
 function bl_brand_logo(): string
 {
     return bl_content_asset('global', 'brand.logo', 'images/logo.png');
@@ -152,7 +164,7 @@ function bl_privacy_body(string $section): string
 /** Native page content replaces the general policy; the inquiry mode remains centrally maintained. */
 function bl_privacy_content(): string
 {
-    $mode = bl_privacy_body(bl_inquiry_form_id() ? 'submitted' : 'draft');
+    $mode = bl_privacy_body(bl_inquiry_live() ? 'submitted' : 'draft');
     if (function_exists('bl_page_editor_content') && function_exists('get_queried_object')) {
         $post = get_queried_object();
         if ($post instanceof WP_Post && $post->post_type === 'page' && trim($post->post_content) !== '') {
@@ -176,14 +188,20 @@ function bl_seo_content_page(array $route): string
 /** Preserve active states independently of menu order. */
 function bl_header_active(string $id, string $type): bool
 {
-    $types = ['equipment' => ['products', 'product'], 'applications' => ['applications', 'application', 'application_case'], 'support' => ['support'], 'about' => ['about'], 'news' => ['news', 'article']];
+    $types = ['equipment' => ['products', 'product', 'showcase'], 'applications' => ['applications', 'application', 'application_case'], 'support' => ['support'], 'about' => ['about'], 'news' => ['news', 'article']];
     return in_array($type, $types[$id] ?? [], true);
 }
 
 function bl_site_switch_items(): array
 {
+    // Each site's real photo in its square: the one saved in the back office, else the theme's own for our three websites, else none (the letter shows).
+    $photos = ['boblift.com' => 'images/sister/switch-boblift.webp', 'bobliftcrane.com' => 'images/sister/switch-cranes.webp', 'bobliftloader.com' => 'images/sister/switch-loader.webp'];
     $items = bl_editable('global')['switcher']['sites'];
-    foreach ($items as &$item) if ($item['url'] === '') $item['domain'] = bl_company('domain');
+    foreach ($items as &$item) {
+        if ($item['url'] === '') $item['domain'] = bl_company('domain');
+        $domain = preg_replace('/^www\./', '', strtolower((string) $item['domain']));
+        $item['image'] = (string) ($item['image'] ?? '') ?: (isset($photos[$domain]) ? bl_asset($photos[$domain]) : '');
+    }
     unset($item);
     return $items;
 }

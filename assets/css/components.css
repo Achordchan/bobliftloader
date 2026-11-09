@@ -47,6 +47,15 @@
 .bl-site .bl-inquiry-dialog h2{font-family:var(--display);font-size:var(--fs-h2);line-height:.9;font-weight:600;margin-top:18px;margin-bottom:22px}
 .bl-site .bl-inquiry-dialog>p:not(.bl-eyebrow){font-size:var(--fs-small);color:var(--muted);line-height:1.9}
 /* Notice before one of our other websites opens (templates/partials/leave-site.php): green tick, name, domain, Continue / Stay. */
+.bl-site .bl-wechat-dialog{width:400px;padding:clamp(28px,3vw,44px);text-align:center}
+.bl-site .bl-wechat-mark{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 18px;border-radius:50%;background:#07c160;color:#fff}
+.bl-site .bl-wechat-mark svg{width:28px;height:28px}
+.bl-site .bl-wechat-dialog h2{margin:0;font-family:var(--display);font-size:clamp(28px,2vw,40px);font-weight:600;line-height:1;text-transform:uppercase}
+.bl-site .bl-wechat-text{margin:12px 0 0;font-size:var(--fs-small);line-height:1.7;color:var(--muted)}
+.bl-site .bl-wechat-qr{display:block;width:220px;max-width:100%;height:auto;margin:22px auto 0;padding:10px;background:#fff;border:1px solid #d5dde2}
+.bl-site .bl-wechat-id{margin:16px 0 0;font-size:var(--fs-small);line-height:1.4}
+.bl-site .bl-wechat-id small{display:block;font-size:var(--fs-label);color:var(--muted)}
+.bl-site .bl-wechat-id b{font-weight:700;letter-spacing:.3px}
 .bl-site .bl-leave-dialog{width:520px;padding:clamp(28px,3.2vw,48px)}
 .bl-site .bl-leave-check{display:grid;place-items:center;width:56px;height:56px;margin-bottom:22px;border-radius:50%;background:#1f9d55;color:#fff;box-shadow:0 0 0 8px #1f9d5524}
 .bl-site .bl-leave-check svg{width:30px;height:30px}
@@ -191,6 +200,11 @@
 .bl-site .bl-site-panel .bl-site-guide::after{content:'→';opacity:.6;transition:opacity .2s,transform .2s}
 @media(hover:hover){.bl-site .bl-site-panel .bl-site-guide:hover::after{opacity:1;transform:translateX(3px)}}
 .bl-site .bl-site-current>i{background:var(--blue);border-color:var(--blue)!important;color:#fff!important}
+/* A site's real photo fills its square (48 px, a little larger than the letter); this site's own gets a blue frame drawn over the photo's edge. */
+.bl-site .bl-site-panel li>*:has(>.bl-site-photo){grid-template-columns:48px minmax(0,1fr) auto}
+.bl-site .bl-site-panel li>*>.bl-site-photo{width:48px;height:48px;overflow:hidden;background:#f3f5f7}
+.bl-site .bl-site-photo>img{display:block;width:100%;height:100%;object-fit:cover}
+.bl-site .bl-site-current>.bl-site-photo{outline:2px solid var(--blue);outline-offset:-1px}
 .bl-site .bl-site-current em{font-size:var(--fs-micro);font-style:normal;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#8fb0ff}
 @media(max-width:1150px){
   /* The label gives way to the nav here (as it did before the switch); the caret alone still opens it. */
@@ -274,3 +288,22 @@
   .bl-site .bl-consent-choose{min-height:44px}
 }
 @media print{.bl-site .bl-consent{display:none}}
+
+/* Event bar above the header (templates/partials/event-bar.php): one line, scrolls away with the page. */
+.bl-site .bl-event-bar{position:relative;display:flex;justify-content:center;align-items:center;gap:14px;padding:10px var(--gutter);background:#06131e;color:#c6d0d7;font-size:var(--fs-label);line-height:20px;text-align:center;border-bottom:1px solid #4257664d}
+.bl-site .bl-event-bar-badge{flex-shrink:0;padding:2px 8px;background:var(--blue);color:white;font-weight:700;letter-spacing:1.1px;text-transform:uppercase}
+.bl-site .bl-event-bar-text{min-width:0}
+.bl-site .bl-event-bar-short{display:none}
+.bl-site .bl-event-bar-link{flex-shrink:0;color:white;font-weight:700;text-decoration:underline;text-decoration-color:#ffffff80;text-underline-offset:4px;padding-block:12px;margin-block:-12px}
+@media(hover:hover){.bl-site .bl-event-bar-link:hover{text-decoration-color:white}}
+@media(max-width:600px){
+  .bl-site .bl-event-bar{gap:10px;padding-block:9px}
+  .bl-site .bl-event-bar-long{display:none}
+  .bl-site .bl-event-bar-short{display:inline}
+  .bl-site .bl-event-bar-badge{padding:1px 6px;letter-spacing:.6px}
+  .bl-site .bl-event-bar-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* No room for the link words: the whole bar is the link, marked by an arrow. */
+  .bl-site .bl-event-bar-link{font-size:0;padding:0;margin:0;text-decoration:none}
+  .bl-site .bl-event-bar-link::before{content:'';position:absolute;inset:0}
+  .bl-site .bl-event-bar-link::after{content:'→';content:'→' / '';font-size:14px;line-height:20px}
+}

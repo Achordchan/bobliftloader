@@ -17,6 +17,12 @@ if (!bl_is_wordpress() && $route['status'] === 200) {
 }
 // WordPress has already sent its own status (200 for a post it found, even one this theme will not show); status_header() replaces it.
 if (bl_is_wordpress()) status_header($route['status']); else http_response_code($route['status']);
+// The 3D showcase is a page of its own (its own header, chapters and styles), not inside the site's header and footer.
+if ($route['type'] === 'showcase') {
+    if (bl_is_wordpress()) $GLOBALS['wp_query']->is_404 = false; // the page is the theme's own: plugins hooked to wp_head should not treat it as not found
+    require __DIR__ . '/templates/bl360.php';
+    return;
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -42,6 +48,7 @@ if (bl_is_wordpress()) status_header($route['status']); else http_response_code(
   <?php if (bl_is_wordpress()) wp_body_open(); ?>
   <a class="bl-skip" href="#main">Skip to content</a>
   <?php require __DIR__ . '/templates/partials/consent.php'; ?>
+  <?php require __DIR__ . '/templates/partials/event-bar.php'; ?>
   <?php require __DIR__ . '/templates/header.php'; ?>
   <main id="main"><?php require __DIR__ . '/templates/' . ($route['type'] === 'home' ? 'home' : 'pages/' . $route['type']) . '.php'; ?></main>
   <?php require __DIR__ . '/templates/footer.php'; ?>
@@ -49,6 +56,7 @@ if (bl_is_wordpress()) status_header($route['status']); else http_response_code(
   <?php require __DIR__ . '/templates/partials/quick-enquiry.php'; ?>
   <?php require __DIR__ . '/templates/dialogs.php'; ?>
   <?php require __DIR__ . '/templates/partials/leave-site.php'; ?>
+  <?php require __DIR__ . '/templates/partials/wechat.php'; ?>
   <?php if (bl_is_wordpress()) wp_footer(); ?>
 </body>
 </html>

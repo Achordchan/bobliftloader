@@ -401,6 +401,21 @@ function bl_content_schema_fields(string $page, ?array $content = null): array
                 'text' => ['label' => '说明', 'type' => 'rich', 'help' => $rich],
             ]],
         ]],
+        ['title' => '展会卡片（公司动态上方）', 'note' => '展会、活动预告用的大卡片，放在“公司动态”标题和文章列表之间。“标题”留空或不在显示日期内就不显示，过了结束日期自动收起。', 'fields' => [
+            ['key' => 'event.eyebrow', 'label' => '小标题', 'type' => 'text'],
+            ['key' => 'event.title', 'label' => '标题', 'type' => 'text'],
+            ['key' => 'event.text', 'label' => '说明', 'type' => 'textarea', 'help' => '两三句话，控制在 200 个字符以内。'],
+            ['key' => 'event.facts', 'label' => '要点', 'type' => 'list', 'add' => '添加要点', 'summary' => ['label'], 'help' => '例如日期、场馆、展位，最多显示 3 条。', 'fields' => [
+                'label' => ['label' => '名称', 'type' => 'text'],
+                'value' => ['label' => '内容', 'type' => 'text'],
+            ]],
+            ['key' => 'event.button', 'label' => '按钮文字', 'type' => 'text'],
+            ['key' => 'event.url', 'label' => '按钮链接', 'type' => 'url', 'help' => '本站地址写 /news/... 这样的相对路径。'],
+            ['key' => 'event.image', 'label' => '图片', 'type' => 'image', 'help' => '横图，约 4:3；留空则只显示文字。'],
+            ['key' => 'event.alt', 'label' => '图片说明（alt）', 'type' => 'text'],
+            ['key' => 'event.starts', 'label' => '开始日期', 'type' => 'text', 'help' => '格式 2026-11-01（中国时间），留空表示立即显示。'],
+            ['key' => 'event.ends', 'label' => '结束日期', 'type' => 'text', 'help' => '格式 2026-11-27，当天仍显示、次日起自动收起；留空表示一直显示。'],
+        ]],
         ['title' => '公司动态', 'note' => '文章列表自动显示最新 3 篇企业新闻。', 'fields' => [
             ['key' => 'journal.eyebrow', 'label' => '小标题', 'type' => 'text'],
             ['key' => 'journal.title', 'label' => '标题', 'type' => 'text'],
@@ -553,7 +568,7 @@ add_action('admin_menu', static function (): void {
 
 add_action('admin_enqueue_scripts', static function (string $hook): void {
     $contentPage = str_contains($hook, 'bl-content-');
-    if (!$contentPage && !str_ends_with($hook, '_page_bl-downloads') && !str_ends_with($hook, '_page_bl-inquiry-mail')) return;
+    if (!$contentPage && !str_ends_with($hook, '_page_bl-downloads')) return;
     wp_enqueue_media();
     $asset = static fn(string $file): array => [get_template_directory_uri() . '/assets/admin/' . $file, (string) filemtime(get_template_directory() . '/assets/admin/' . $file)];
     [$css, $cssVersion] = $asset('content-editor.css');
@@ -586,7 +601,7 @@ function bl_content_screen(string $page): void
     if (isset($_GET['bl_reset'])) echo '<p role="status"><span class="bl-chip">已恢复为主题默认内容</span></p>';
     if ($recovery) echo '<p role="alert"><span class="bl-chip bl-chip-warn">未保存</span> ' . esc_html($recovery['message']) . ' 输入已保留 24 小时；请在新标签页打开最新内容，对照后再编辑保存。<a target="_blank" rel="noopener" href="' . esc_url(admin_url('admin.php?page=bl-content-' . $page)) . '">打开最新内容</a></p>';
     if ($page === 'global' && function_exists('bl_wp_inquiry_current_recipient') && ($recipient = bl_wp_inquiry_current_recipient()) !== '') echo '<p><span class="bl-chip">询盘通知当前发往：' . esc_html($recipient) . '</span></p>';
-    if ($page === 'privacy') echo '<p><span class="bl-chip">当前模式：' . (bl_inquiry_form_id() ? '站内提交' : '邮件草稿') . '</span> 两种模式分别编辑，前台按询盘插件的启用状态自动选择。启用统计代码后，请同步更新外部服务说明。</p>';
+    if ($page === 'privacy') echo '<p><span class="bl-chip">当前模式：' . (bl_inquiry_live() ? '站内提交' : '邮件草稿') . '</span> 两种模式分别编辑，前台按询盘插件的启用状态自动选择。启用统计代码后，请同步更新外部服务说明。</p>';
     if (in_array($page, ['home', 'support'], true)) echo '<p>采购数字引用采购与售后 → 采购条款。支持 {warranty_months}、{lead_time}、{minimum_order}；自定义文案中的固定数字不会自动替换，请复核。</p>';
     if ($page === 'privacy') bl_privacy_migration_card();
     if ($page === 'about') echo '<p>公司介绍仍在原生关于页面正文中编辑。</p>';

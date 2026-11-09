@@ -88,7 +88,7 @@ document.querySelectorAll('a[href^="#"]').forEach(link => link.addEventListener(
   if (link.classList.contains('exp-skip')) { target.tabIndex = -1; target.focus({ preventScroll: true }); }
 }));
 playButton.addEventListener('click', () => {
-  if (preference.matches) { goTo(document.querySelector('#chassis')); return; }
+  if (preference.matches) { goTo(document.querySelector('#explode')); return; }
   if (autoplay) { stopPlayback(); return; }
   navigationTween?.kill(); navigationTween = null; window.__partSteps?.cancel();
   const end = document.documentElement.scrollHeight - innerHeight;

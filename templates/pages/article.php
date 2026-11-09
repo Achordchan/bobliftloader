@@ -84,7 +84,7 @@ if ($contentHtml !== '' && $poster) {
       <section class="bl-story-box bl-story-author">
         <h2>Written by</h2>
         <div class="bl-story-author-name">
-          <?php if ($author['avatar']): ?><img src="<?= bl_escape($author['avatar']) ?>" alt="" width="64" height="64"><?php else: ?><span class="bl-story-avatar" aria-hidden="true"><?= bl_escape(mb_substr($author['name'], 0, 1)) ?></span><?php endif; ?>
+          <?php if ($author['avatar']): ?><img src="<?= bl_escape($author['avatar']) ?>" alt="<?= bl_escape($author['name']) ?>" width="64" height="64"><?php else: ?><span class="bl-story-avatar" aria-hidden="true"><?= bl_escape(mb_substr($author['name'], 0, 1)) ?></span><?php endif; ?>
           <span><b><?= bl_escape($author['name']) ?></b><?php if ($author['title']): ?><small><?= bl_escape($author['title']) ?></small><?php endif; ?></span>
         </div>
         <?php if ($author['bio'] !== ''): ?><p class="bl-story-author-bio"><?= nl2br(bl_escape($author['bio'])) ?></p><?php endif; ?>

@@ -1,0 +1,91 @@
+<link rel="preload" as="image" href="{{BASE}}assets/details/hero-line.webp">
+  <link rel="preload" as="image" href="{{BASE}}assets/details/hero.webp">
+  <script>
+  // Opening. Until the live 3D is on screen the page is held at the top (explore.js calls __heroHold.release(); 10 s at
+  // most), so the drive-out that starts on the first scroll is not missed; the machine, drawn in line, fills with
+  // colour as the model loads (__heroLoad sets --load, 0…1). Not for a link to a section or reduced motion. The poster
+  // is held back for a moment first (hero-pending): a model that is on screen by then (from the cache, on a fast machine)
+  // just fades in; otherwise the fill starts from where the download is. In-page links and the tour button let go.
+  // The model and sky downloads start here, before any page script, so the meter moves from the first moment:
+  // viewer.js picks them up from __packed (url → { promise, loaded, total, listeners }).
+  (function () {
+    var root = document.documentElement;
+    window.__packed = {};
+    if ('DecompressionStream' in window && window.ReadableStream) [window.BL360_BASE+'assets/model/loader.glb.gz', window.BL360_BASE+'assets/env/sky.hdr.gz'].forEach(function (url) {
+      var e = window.__packed[url] = { loaded: 0, total: 0, listeners: [] };
+      e.promise = fetch(url).then(function (res) {
+        if (!res.ok || !res.body) throw new Error(res.status + ' ' + url);
+        e.total = +res.headers.get('content-length') || 0;
+        var reader = res.body.getReader(), chunks = [];
+        return (function pump() {
+          return reader.read().then(function (r) {
+            if (r.done) return new Blob(chunks).arrayBuffer();
+            chunks.push(r.value); e.loaded += r.value.byteLength;
+            e.listeners.forEach(function (f) { f(); }); early();
+            return pump();
+          });
+        })();
+      });
+      e.promise.catch(function () {});
+    });
+    // Progress before viewer.js takes over, on the same scale as its report (model + sky + AO estimate, × .92).
+    function early() {
+      var m = window.__packed[window.BL360_BASE+'assets/model/loader.glb.gz'], k = window.__packed[window.BL360_BASE+'assets/env/sky.hdr.gz'];
+      var total = (m.total || 1.8e6) + (k.total || .58e6) + 1.05e6;
+      window.__heroLoad((Math.min(m.loaded, m.total || 1.8e6) + Math.min(k.loaded, k.total || .58e6)) / total * .92);
+    }
+    var shown = 0, creep = null;
+    function show(f) {
+      shown = f; root.style.setProperty('--load', f.toFixed(3));
+      var meter = document.querySelector('.exp-hero-meter span'), n = Math.round(f * 100);
+      if (meter) meter.textContent = window.I18N ? I18N.t('正在载入三维模型 {n}%', { n: n }) : 'Loading 3D model ' + n + '%';
+    }
+    window.__heroLoad = function (f) { // never backwards
+      if (f <= shown && f < 1) return; show(f);
+      // The downloads end at 92%; unpacking, parsing and the first draw report nothing, so meanwhile the meter eases on
+      // towards 99% (about 95% after 1 s, 97% after 2 s) instead of standing still. __heroLoad(1) finishes it.
+      if (f >= .919 && f < 1 && !creep) {
+        var t0 = Date.now(), from = f;
+        creep = setInterval(function () {
+          var v = from + (.99 - from) * (1 - Math.exp((t0 - Date.now()) / 1500));
+          if (v > shown) show(v);
+          if (v > .985) clearInterval(creep);
+        }, 150);
+      }
+      if (f >= 1) clearInterval(creep);
+    };
+    if (location.hash || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (/[?&]intro\b/.test(location.search)) root.classList.add('hero-loading'); // ?intro: the fill from the first moment (demos)
+    else {
+      root.classList.add('hero-pending'); // explore.js takes it off when the model draws
+      setTimeout(function () { if (root.classList.contains('hero-pending')) { root.classList.remove('hero-pending'); root.classList.add('hero-loading'); } }, 400);
+    }
+    var keys = { ' ': 1, PageDown: 1, PageUp: 1, ArrowDown: 1, ArrowUp: 1, End: 1, Home: 1 };
+    var stop = function (e) { e.preventDefault(); };
+    var key = function (e) { if (keys[e.key] && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) e.preventDefault(); };
+    var top = function () { if (scrollY) scrollTo(0, 0); };
+    var click = function (e) { if (e.target.closest && e.target.closest('a[href^="#"], #play')) release(); };
+    var opts = { passive: false };
+    addEventListener('wheel', stop, opts); addEventListener('touchmove', stop, opts); addEventListener('keydown', key); addEventListener('scroll', top);
+    document.addEventListener('click', click, true);
+    var timer = setTimeout(release, 10000);
+    addEventListener('load', function () { if (!window.__loaderViewers) { root.classList.remove('hero-pending', 'hero-loading'); release(); } }); // every script has run and the page script did not start: show the photo
+    function release() {
+      removeEventListener('wheel', stop, opts); removeEventListener('touchmove', stop, opts); removeEventListener('keydown', key); removeEventListener('scroll', top);
+      document.removeEventListener('click', click, true); clearTimeout(timer); window.__heroHold = null;
+    }
+    window.__heroHold = { release: release };
+  })();
+  </script>
+  <link rel="stylesheet" href="{{BASE}}styles.css?v=34">
+    <link rel="stylesheet" href="{{BASE}}gallery.css?v=23">
+    <link rel="stylesheet" href="{{BASE}}viewer.css?v=52">
+  <link rel="stylesheet" href="{{BASE}}specs.css?v=4">
+  <link rel="stylesheet" href="{{BASE}}responsive.css?v=36">
+  <script src="{{BASE}}i18n/strings.js?v=9"></script>
+  <script src="{{BASE}}i18n/i18n.js?v=1"></script>
+  {{IMPORTMAP}}
+  <script defer src="{{BASE}}assets/vendor/gsap.min.js"></script>
+  <script defer src="{{BASE}}assets/vendor/ScrollTrigger.min.js"></script>
+  <script type="module" src="{{BASE}}app.js?v=39"></script>
+  <script type="module" src="{{BASE}}explore.js?v=90"></script>

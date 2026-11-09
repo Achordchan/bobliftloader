@@ -136,16 +136,12 @@ exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/fixtures/regi
 $check($registrationStatus === 0 && in_array('author', json_decode(implode("\n", $registration), true) ?? [], true), 'news CPT lacks author support');
 
 $mailProbe = [];
-exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/fixtures/check-backend-p1-mail.php'), $mailProbe, $mailStatus);
-$check($mailStatus === 0, 'CF7 primary recipient or legacy compatibility failed');
+exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/fixtures/check-inquiry-plugin.php'), $mailProbe, $mailStatus);
+$check($mailStatus === 0, 'inquiry plugin integration failed: ' . implode(' ', $mailProbe));
 
 $enquiriesProbe = [];
 exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/fixtures/check-enquiries-rest.php'), $enquiriesProbe, $enquiriesStatus);
 $check($enquiriesStatus === 0, 'enquiries REST is not read-only or not admin-only');
-
-$akismetProbe = [];
-exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg(__DIR__ . '/fixtures/check-inquiry-akismet.php'), $akismetProbe, $akismetStatus);
-$check($akismetStatus === 0, 'enquiry form fields lack their Akismet options');
 
 if ($failures) { fwrite(STDERR, implode("\n", $failures) . "\n"); exit(1); }
 echo "backend P1 regression ok\n";

@@ -26,6 +26,7 @@ function bl_resolve_route(?string $requestPath = null): array
         '/contact/' => ['contact', bl_editable('contact')['seo']['title'], bl_editable('contact')['seo']['description']],
         '/thank-you/' => ['thanks', bl_editable('thanks')['seo']['title'], bl_editable('thanks')['seo']['description']],
         '/privacy/' => ['privacy', bl_editable('privacy')['seo']['title'], bl_editable('privacy')['seo']['description']],
+        BL_SHOWCASE_PATH => ['showcase', 'BL-T360-H & BL-T460-H Stand-On Skid Steers in 3D', 'Explore the BL-T360-H and BL-T460-H stand-on mini skid steer loaders in 3D: exploded view, components, hydraulics in motion and full specifications side by side.'],
         '/sitemap.html/' => ['sitemap', 'Sitemap', 'Every page of the BOB-LIFT skid steer loader and mini dumper website in one list: machines, applications, support, news and contact.'],
     ];
     $route = ['type' => '404', 'title' => 'Page not found', 'description' => 'The requested page could not be found.', 'path' => $path, 'status' => 404, 'category' => '', 'record' => null];
@@ -35,6 +36,7 @@ function bl_resolve_route(?string $requestPath = null): array
         if ($type === 'products' && $path !== '/products/') $route['category'] = explode('/', trim($path, '/'))[1];
         // The one address with a file ending: no trailing slash in the canonical link or the structured data.
         if ($type === 'sitemap') $route['path'] = '/sitemap.html';
+        if ($type === 'showcase' && !bl_showcase_products()) $route = array_replace($route, ['type' => '404', 'title' => 'Page not found', 'description' => 'The requested page could not be found.', 'status' => 404]);
     } elseif (preg_match('~^/product/([a-z0-9-]+)/$~', $path, $matches)) {
         $product = bl_find_record(bl_products(), $matches[1]);
         if ($product) $route = array_replace($route, ['type' => 'product', 'title' => bl_product_page_title($product), 'description' => bl_product_description($product), 'record' => $product, 'status' => 200]);
@@ -68,7 +70,8 @@ function bl_resolve_route(?string $requestPath = null): array
         $post = get_queried_object();
         $route = array_replace($route, ['type' => 'page', 'title' => bl_plain_title(get_the_title($post)), 'description' => $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35), 'status' => 200]);
     }
-    if (bl_is_wordpress() && is_404()) $route['status'] = 404;
+    // WordPress finds no post at the showcase address (the page is the theme's own, not a WordPress page), so its 404 does not apply there.
+    if (bl_is_wordpress() && is_404() && $route['type'] !== 'showcase') $route['status'] = 404;
     if ($route['status'] === 404) $route['type'] = '404';
     return $route;
 }
@@ -90,6 +93,7 @@ function bl_sitemap_paths(): array
     // Resolved here rather than read from the template's global: WordPress answers /sitemap.xml before any template runs.
     foreach (bl_apply_application_content($GLOBALS['bl_application_base'] ?? []) as $app) $paths[] = '/applications/' . bl_application_slug($app) . '/';
     foreach (bl_products() as $product) $paths[] = '/product/' . $product['slug'] . '/';
+    if (bl_showcase_products()) $paths[] = BL_SHOWCASE_PATH;
     foreach (bl_application_cases() as $case) $paths[] = '/application/' . $case['slug'] . '/';
     foreach (bl_articles() as $article) $paths[] = '/news/' . $article['slug'] . '/';
     return $paths;

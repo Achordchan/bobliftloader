@@ -434,6 +434,7 @@ export class LoaderViewer {
       const el = document.createElement('button'); el.type = 'button'; el.className = 'exp-3d-label'; el.dataset.group = group.key;
       el.innerHTML = `<i></i><span>${t(group.label)}</span>`;
       el.addEventListener('click', () => this.onSelect?.(group.key));
+      el.inert = true; el.tabIndex = -1; // until shown (updateLabels): a faded label is not a keyboard stop
       layer.appendChild(el); this.labelElements.set(group.key, el);
     }
   }
@@ -798,7 +799,8 @@ export class LoaderViewer {
       const x = (v.x * .5 + .5) * w, y = (-v.y * .5 + .5) * h;
       const behind = v.z > 1 || x < 0 || x > w || y < 0 || y > h;
       el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
-      el.classList.toggle('is-visible', this.explodeValue > .55 && !behind && !group.ghost);
+      const visible = this.explodeValue > .55 && !behind && !group.ghost;
+      if (el.classList.contains('is-visible') !== visible) { el.classList.toggle('is-visible', visible); el.inert = !visible; el.tabIndex = visible ? 0 : -1; }
     }
   }
 

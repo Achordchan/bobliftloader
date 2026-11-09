@@ -2,7 +2,7 @@
 declare(strict_types=1);
 defined('ABSPATH') || exit;
 
-const BL_CONTENT_MENU_ORDER = ['bl-content-global', 'bl-content-home', 'bl-content-loaders', 'bl-content-dumpers', 'bl-content-applications', 'bl-content-support', 'bl-content-about', 'bl-content-news', 'bl-content-contact', 'bl-content-thanks', 'bl-content-privacy', 'bl-content-404', 'bl-downloads', 'bl-inquiry-mail', 'bl-content-tracking'];
+const BL_CONTENT_MENU_ORDER = ['bl-content-global', 'bl-content-home', 'bl-content-loaders', 'bl-content-dumpers', 'bl-content-applications', 'bl-content-support', 'bl-content-about', 'bl-content-news', 'bl-content-contact', 'bl-content-thanks', 'bl-content-privacy', 'bl-content-404', 'bl-downloads', 'bl-content-tracking'];
 
 add_action('admin_menu', static function (): void {
     if (bl_can_manage_tracking()) add_submenu_page('bl-content-home', '统计代码', '统计代码', 'manage_options', 'bl-content-tracking', static function (): void {
@@ -106,7 +106,7 @@ function bl_content_visual_fields(string $page, array $sections): array
             'factory.eyebrow factory.line1 factory.line2 factory.text factory.link_label factory.link_url factory.assembly_small factory.assembly factory.image_alt_3 factory.welding factory.image_alt_4 factory.painting factory.image_alt_5',
         ],
         'contact' => [
-            'hero.breadcrumb hero.eyebrow hero.line1 hero.line2 hero.text channels.whatsapp channels.email form.prepare_title form.eyebrow form.line1 form.line2',
+            'hero.breadcrumb hero.eyebrow hero.line1 hero.line2 hero.text channels.whatsapp channels.email channels.wechat form.prepare_title form.eyebrow form.line1 form.line2',
             'visit.eyebrow visit.line1 visit.line2 visit.image_small visit.image hero.image_alt visit.caption visit.caption_detail visit.plan_title visit.plan_line1 visit.plan_line2 visit.text visit.address_label visit.hours_label visit.button mail.subject mail.body visit.map_label',
         ],
     ];

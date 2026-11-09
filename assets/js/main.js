@@ -11,11 +11,13 @@ import { initializeLightbox } from './lightbox.js';
 import { initializeMaking } from './making.js';
 import { initializeNewsContents } from './news-contents.js';
 import { initializeNewsView } from './news-view.js';
+import { initializeNewTabLinks } from './new-tab.js';
 import { initializeRuler } from './ruler.js';
 import { initializeCatalog } from './catalog.js';
 import { initializeSearch } from './search.js';
 import { initializeSectionNav } from './section-nav.js';
 import { initializeQuick } from './quick.js';
+import { initializeWeChat } from './wechat.js';
 
 initializeAttachmentLoops();
 initializeAttribution();
@@ -27,9 +29,11 @@ initializeHero();
 initializeInquiry();
 initializeLeaveSite();
 initializeLightbox();
+initializeWeChat();
 initializeMaking();
 initializeNewsContents();
 initializeNewsView();
+initializeNewTabLinks();
 initializeRuler();
 initializeCatalog();
 initializeSearch();
@@ -65,6 +69,8 @@ menuToggle.addEventListener('click', () => {
   const open = menuToggle.getAttribute('aria-expanded') !== 'true';
   menuToggle.setAttribute('aria-expanded', String(open));
   menuToggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+  // The open menu fills the screen below the header, which sits lower while the event bar above it is in view.
+  if (open) navigation.style.setProperty('--bl-nav-top', `${Math.max(0, Math.round(header.getBoundingClientRect().bottom))}px`);
   navigation.classList.toggle('bl-open', open);
   document.documentElement.classList.toggle('bl-menu-on', open);
 });
@@ -267,17 +273,17 @@ if (!CSS.supports('field-sizing', 'content')) {
 }
 
 // On phones the equipment choices swipe in one row: a choice made beforehand (Parts & service, say) is brought into view
-// inside its row, and so is a chip tapped while partly cut off. Only the row scrolls, never the page. A Contact Form 7
-// list without label elements has its .wpcf7-list-item as the chip. Nothing here may stop the rest of this script: each
+// inside its row, and so is a chip tapped while partly cut off. Only the row scrolls, never the page. The enquiry
+// form's choices sit in .bl-radio-item wrappers, which are the chips. Nothing here may stop the rest of this script: each
 // step is guarded, and a row it cannot measure is simply left as it is.
 const guarded = (step) => (...args) => {
   try { step(...args); } catch { /* a layout this does not know: the row keeps its own scroll */ }
 };
 const uprightPhone = window.matchMedia('(max-width: 600px) and (orientation: portrait)');
-document.querySelectorAll('.bl-product-choices, .bl-inquiry-form .wpcf7-radio').forEach(guarded((row) => {
+document.querySelectorAll('.bl-product-choices, .bl-inquiry-form .bl-radio').forEach(guarded((row) => {
   const reveal = guarded((input) => {
     if (!input || row.scrollWidth <= row.clientWidth) return;
-    const item = input.closest('label, .wpcf7-list-item');
+    const item = input.closest('.bl-radio-item, label');
     if (!item || !row.contains(item)) return;
     const chip = item.getBoundingClientRect();
     const view = row.getBoundingClientRect();
