@@ -9,7 +9,7 @@ $send = $content['send'];
     <div class="bl-apps-hero-grid">
       <div>
         <p class="bl-eyebrow"><span class="bl-status-dot"></span> APPLICATIONS / <?= count($applications) ?> JOBS</p>
-        <h1 id="applications-title"><span><?= bl_escape($hero['line1']) ?></span><span class="bl-outline-text"><?= bl_escape($hero['line2']) ?></span><span class="bl-blue-text"><?= bl_escape($hero['line3']) ?></span></h1>
+        <h1 id="applications-title"><span><?= bl_escape($hero['line1']) ?></span> <span class="bl-outline-text"><?= bl_escape($hero['line2']) ?></span> <span class="bl-blue-text"><?= bl_escape($hero['line3']) ?></span></h1>
       </div>
       <div class="bl-apps-hero-side">
         <p><?= bl_escape($hero['text']) ?></p>

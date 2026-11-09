@@ -110,6 +110,13 @@ export function initializeEquipment() {
         tiles.forEach((item) => item.setAttribute('aria-pressed', String(item === tile)));
         video.scrollIntoView({ behavior: scrollBehavior(), block: 'nearest' });
       });
+      // The tiles are links announced as buttons (role="button", so they still open the file without the script);
+      // Space selects them as it would a real button instead of scrolling the page. Enter already clicks a link.
+      tile.addEventListener('keydown', (event) => {
+        if (event.key !== ' ' && event.key !== 'Spacebar') return;
+        event.preventDefault();
+        tile.click();
+      });
     });
     video.addEventListener('play', () => caption?.setAttribute('hidden', ''));
   }

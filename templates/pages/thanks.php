@@ -13,7 +13,7 @@ $more = array_filter([
   <div class="bl-thanks-grid">
     <div class="bl-thanks-intro">
       <p class="bl-eyebrow"><?= bl_escape($thanks['hero']['eyebrow']) ?></p>
-      <h1><?= str_replace('</span><span', '</span> <span', bl_heading_lines($thanks['hero']['title'])) /* a space between the lines for screen readers and copying */ ?></h1>
+      <h1><?= bl_heading_lines($thanks['hero']['title']) ?></h1>
       <p class="bl-thanks-lede"><?= bl_escape($thanks['hero']['text']) ?></p>
       <?php if ($more): ?><p class="bl-eyebrow bl-thanks-more"><?= bl_escape($thanks['more']['eyebrow']) ?></p>
       <ul class="bl-contact-channels" aria-label="<?= bl_escape(ucfirst(strtolower($thanks['more']['eyebrow']))) ?>">
