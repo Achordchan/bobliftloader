@@ -13,7 +13,7 @@ foreach (bl_editable('about')['group']['product_links'] as $item) {
     <div class="bl-about-hero-grid">
       <div>
         <p class="bl-eyebrow"><span class="bl-status-dot"></span><?= bl_content_text('about', 'hero.eyebrow') ?></p>
-        <h1 id="about-title"><span><?= bl_content_text('about', 'hero.line1') ?></span><span class="bl-outline-text"><?= bl_content_text('about', 'hero.line2') ?></span><span class="bl-blue-text"><?= bl_content_text('about', 'hero.line3') ?></span></h1>
+        <h1 id="about-title"><span><?= bl_content_text('about', 'hero.line1') ?></span> <span class="bl-outline-text"><?= bl_content_text('about', 'hero.line2') ?></span> <span class="bl-blue-text"><?= bl_content_text('about', 'hero.line3') ?></span></h1>
       </div>
       <div class="bl-about-hero-side">
         <p><?= bl_company_text('about', 'hero.text') ?></p>

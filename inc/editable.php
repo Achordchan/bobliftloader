@@ -627,6 +627,7 @@ function bl_heading_lines(string $text, bool $period = false): string
     $lines = array_values(array_filter(array_map('trim', preg_split('/\R/', $text)), 'strlen'));
     $html = '';
     foreach ($lines as $i => $line) {
+        if ($html !== '') $html .= ' '; // the lines are block spans: the space is invisible, but without it search engines and screen readers read "SERIOUSCAPABILITY"
         $accent = preg_match('/^\*(.+)\*$/s', $line, $match) === 1;
         $inner = bl_escape($accent ? $match[1] : $line);
         if ($period && $i === count($lines) - 1 && str_ends_with($inner, '.')) $inner = substr($inner, 0, -1) . '<span class="bl-period">.</span>';
