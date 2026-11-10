@@ -1,0 +1,81 @@
+# 表单报警：由报警服务（monitor/worker.js）触发，开 Issue 或在已开的 Issue 下补评论。
+# 由 github-actions 机器人开，被指派的人才收得到 GitHub 通知（自己的令牌开的 Issue，GitHub 不通知自己）。
+# 这份文件放进每个站点仓库的 .github/workflows/form-alert.yml（插件仓库 monitor/form-alert.yml 是母版）。
+name: Form alert
+# 报警服务按这个标题找回这次运行，核对 Issue 开成没有。
+run-name: 表单报警 ${{ inputs.fp }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      fp:
+        description: 问题指纹（同一个问题同一个值）
+        required: true
+      payload:
+        description: 报警内容（JSON，由报警服务发来）
+        required: true
+
+permissions:
+  issues: write
+
+# 同一个问题（同一个指纹）排队处理，免得开出两个 Issue；不同问题各走各的，互不顶掉。
+# GitHub 每组只留一个排队中的运行，再来一条同指纹的会顶掉排队那条：内容是同一个问题、更新的那条，丢了不要紧。
+concurrency:
+  group: form-alert-${{ inputs.fp }}
+  cancel-in-progress: false
+
+jobs:
+  issue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          PAYLOAD: ${{ inputs.payload }}
+        with:
+          script: |
+            const LABEL = '表单报警';
+            const data = JSON.parse(process.env.PAYLOAD || '{}');
+            const fp = String(data.fp || '').replace(/[^0-9a-f]/g, '').slice(0, 12);
+            if (fp !== String(context.payload.inputs?.fp || '')) throw new Error('指纹和报警内容对不上');
+            if (!fp || !data.title || !data.body) throw new Error('报警内容不完整');
+            const marker = `<!-- form-alert:${fp} -->`;
+            const { owner, repo } = context.repo;
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: LABEL });
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              try {
+                await github.rest.issues.createLabel({ owner, repo, name: LABEL, color: 'd73a4a', description: '询盘表单提交失败，由报警服务自动开的' });
+              } catch (createError) {
+                if (createError.status !== 422) throw createError; // 另一个问题的运行刚好先建了
+              }
+            }
+            const find = async (state) => {
+              const issues = await github.paginate(github.rest.issues.listForRepo, { owner, repo, labels: LABEL, state, per_page: 100 });
+              return issues.find((issue) => !issue.pull_request && String(issue.body || '').includes(marker));
+            };
+            const open = await find('open');
+            if (open) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: open.number, body: String(data.comment || data.body).slice(0, 60000) });
+              core.info(`补评论到 #${open.number}`);
+              return;
+            }
+            const closed = await find('closed');
+            const again = closed ? `\n\n> 之前的 #${closed.number} 已关闭，同一个问题又出现了。\n` : '';
+            const issue = {
+              owner,
+              repo,
+              title: String(data.title).slice(0, 200),
+              body: `${String(data.body).slice(0, 60000)}${again}\n\n${marker}`,
+              labels: [LABEL],
+            };
+            let created;
+            try {
+              created = await github.rest.issues.create({ ...issue, assignees: [String(data.assignee || owner)] });
+            } catch (error) {
+              // 指派的人没有仓库权限之类：先不指派，Issue 照样开出来。
+              if (error.status !== 422) throw error;
+              created = await github.rest.issues.create(issue);
+            }
+            core.info(`开了 #${created.data.number}`);
