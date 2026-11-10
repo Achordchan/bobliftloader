@@ -119,10 +119,24 @@ function bl_share_image(array $route): string
     return bl_asset('images/share-default.jpg');
 }
 
+/**
+ * The page's <title>, also used for og:title and twitter:title. A news story or case may carry its own search title
+ * (_bl_seo_title, as record['seo_title']) so the result line can differ from the H1; empty, the H1 is used. A search title
+ * that already ends in the brand ("| BOB-LIFT", "– BOB-LIFT Loader"…) is used as written, so the brand is never doubled.
+ * The home page carries the site name Google shows above results (BOB-LIFT Loader, as in the WebSite node and og:site_name);
+ * other pages keep the shorter brand.
+ */
+function bl_seo_title(array $route): string
+{
+    $brand = $route['type'] === 'home' ? 'BOB-LIFT Loader' : 'BOB-LIFT';
+    $custom = in_array($route['type'], ['article', 'application_case'], true) ? trim((string) ($route['record']['seo_title'] ?? '')) : '';
+    if ($custom === '') return $route['title'] . ' | ' . $brand;
+    return preg_match('/[|\-–—:]\s*BOB-LIFT(?:\s+Loader)?\s*$/iu', $custom) ? $custom : $custom . ' | ' . $brand;
+}
+
 function bl_render_seo(array $route): void
 {
-    // The home page carries the site name Google shows above results (BOB-LIFT Loader, as in the WebSite node and og:site_name); other pages keep the shorter brand.
-    $title = $route['title'] . ' | ' . ($route['type'] === 'home' ? 'BOB-LIFT Loader' : 'BOB-LIFT');
+    $title = bl_seo_title($route);
     $canonical = bl_public_base() . $route['path'];
     $filtered = (bool) array_filter(['q', 's', 'load', 'gear', 'operator', 'opening', 'payload', 'category', 'product'], static fn($key) => bl_query($key) !== '');
     $robots = $route['status'] === 200 && bl_indexable() && !$filtered && empty($route['preview']) && $route['type'] !== 'thanks' ? 'index, follow, max-image-preview:large' : 'noindex, follow';
@@ -133,6 +147,7 @@ function bl_render_seo(array $route): void
     if ($route['status'] === 200 && empty($route['preview'])) echo '<link rel="canonical" href="' . bl_escape($canonical) . '">';
     foreach (['og:type' => in_array($route['type'], ['article', 'application_case'], true) ? 'article' : 'website', 'og:title' => $title, 'og:description' => $route['description'], 'og:url' => $canonical, 'og:image' => $image, 'og:site_name' => 'BOB-LIFT Loader', 'og:locale' => 'en_US'] as $key => $value) echo '<meta property="' . $key . '" content="' . bl_escape($value) . '">';
     echo '<meta name="twitter:card" content="summary_large_image">';
+    echo '<meta name="twitter:title" content="' . bl_escape($title) . '">';
     if ($route['status'] === 200 && empty($route['preview'])) echo '<script type="application/ld+json">' . json_encode(bl_structured_data($route), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>';
 }
 
