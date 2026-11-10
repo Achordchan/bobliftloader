@@ -2,6 +2,8 @@
 # 由 github-actions 机器人开，被指派的人才收得到 GitHub 通知（自己的令牌开的 Issue，GitHub 不通知自己）。
 # 这份文件放进每个站点仓库的 .github/workflows/form-alert.yml（插件仓库 monitor/form-alert.yml 是母版）。
 name: Form alert
+# 报警服务按这个标题找回这次运行，核对 Issue 开成没有。
+run-name: 表单报警 ${{ inputs.fp }}
 
 on:
   workflow_dispatch:
@@ -61,12 +63,19 @@ jobs:
             }
             const closed = await find('closed');
             const again = closed ? `\n\n> 之前的 #${closed.number} 已关闭，同一个问题又出现了。\n` : '';
-            const created = await github.rest.issues.create({
+            const issue = {
               owner,
               repo,
               title: String(data.title).slice(0, 200),
               body: `${String(data.body).slice(0, 60000)}${again}\n\n${marker}`,
               labels: [LABEL],
-              assignees: [String(data.assignee || owner)],
-            });
+            };
+            let created;
+            try {
+              created = await github.rest.issues.create({ ...issue, assignees: [String(data.assignee || owner)] });
+            } catch (error) {
+              // 指派的人没有仓库权限之类：先不指派，Issue 照样开出来。
+              if (error.status !== 422) throw error;
+              created = await github.rest.issues.create(issue);
+            }
             core.info(`开了 #${created.data.number}`);
