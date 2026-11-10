@@ -36,6 +36,19 @@ add_action('init', static function (): void {
 });
 
 add_action('init', static function (): void {
+    // A search-result title for news and cases, separate from the H1 (the post title). The theme adds " | BOB-LIFT" unless
+    // the value already ends in the brand; empty, the page uses the post title as before.
+    foreach (['bl_news', 'bl_application'] as $type) {
+        register_post_meta($type, '_bl_seo_title', [
+            'type' => 'string', 'single' => true, 'default' => '', 'show_in_rest' => true,
+            'description' => '搜索结果标题（网页 <title>、og:title、twitter:title），可与页面大标题 H1 不同。主题会自动补「 | BOB-LIFT」，已带品牌后缀时不再重复；留空则用文章标题。',
+            'sanitize_callback' => static fn($value): string => trim(sanitize_text_field(is_scalar($value) ? (string) $value : '')),
+            'auth_callback' => static fn(bool $allowed, string $key, int $postId): bool => current_user_can('edit_post', $postId),
+        ]);
+    }
+});
+
+add_action('init', static function (): void {
     register_meta('user', 'bl_title', [
         'type' => 'string', 'single' => true, 'show_in_rest' => true,
         'description' => '新闻作者职位，显示在文章署名中。',

@@ -108,6 +108,8 @@ function bl_wp_article_record(WP_Post $post): array
     }
     $record['slug'] = $post->post_name;
     $record['title'] = bl_plain_title(get_the_title($post));
+    // The search-result title (<title>, og:title), when it differs from the H1; empty means the H1 is used.
+    $record['seo_title'] = trim((string) get_post_meta($post->ID, '_bl_seo_title', true));
     $record['url'] = get_permalink($post);
     $record['date'] = get_the_date('Y-m-d', $post);
     $record['excerpt'] = $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35);
@@ -149,6 +151,7 @@ function bl_wp_application_record(WP_Post $post): array
     $record['id'] = $post->ID;
     $record['slug'] = $post->post_name;
     $record['title'] = bl_plain_title(get_the_title($post));
+    $record['seo_title'] = trim((string) get_post_meta($post->ID, '_bl_seo_title', true));
     $record['url'] = get_permalink($post);
     $record['date'] = get_the_date('Y-m-d', $post);
     // The list carries no rendered body (every page reads it for cards and search); the case page renders its own.

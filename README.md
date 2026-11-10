@@ -96,6 +96,7 @@ python3 tests/test_site.py http://127.0.0.1:9402
 - robots.txt 允许 AI 爬虫：主题在 `bl_allow_ai_crawlers()` 里去掉平台默认加的 GPTBot / ClaudeBot 等屏蔽段（`php tests/test_robots.php`）。
 - Jetpack 统计：新闻列表和两个产品分类页不是文章，Jetpack 默认把它们记成同一个无名归档；主题在 `bl_stats_view_data()` 里按网址路径分别上报（`php tests/test_stats_view_data.php`）。
 - Jetpack Social：新闻支持分享到已连接的社媒主页，但只有文章元数据 `_bl_social_share` 为真才会在发布时分享，默认不发；Jetpack 的 Open Graph 标签关闭，由 inc/seo.php 统一输出（`php tests/test_social_share.php`）。
+- 搜索结果标题：新闻和应用案例可以单独写元数据 `_bl_seo_title`（已开放 REST，连接器可写），用作网页 `<title>`、og:title、twitter:title，页面大标题 H1 和 Article 的 headline 仍用文章标题。留空就用文章标题；主题会补「 | BOB-LIFT」，值里已带品牌后缀时不再重复（`php tests/test_seo_title.php`）。
 - 文章内嵌视频：正文里写成 `<figure class="bl-article-video" data-upload-date="…" data-duration="PT57S"><video title="…" poster="…" src="…" controls playsinline preload="none"></video><figcaption>…</figcaption></figure>`，点了才加载；inc/seo.php 的 `bl_article_videos()` 据此输出 VideoObject，缺标题、封面、上传日期或地址的不输出（`php tests/test_article_video_schema.php`）。
 - 公司 / 产品资料来自用户指定的两个官网。装载机和两款履带翻斗车的定量参数来自供应商参数表（`滑移装载机参数表.xlsx`），见 `docs/content-verification.md`。
 - 视觉以 2560 × 1440 为设计基准、其余分辨率自适应：流体 token、2240px 内容框、全出血首屏、双机展台、三联应用图、翻斗车对比表、详情页直达联系与常驻侧栏，详见 `docs/design-2k.md`。产品详情保留官网实拍，场景图标为示意。
