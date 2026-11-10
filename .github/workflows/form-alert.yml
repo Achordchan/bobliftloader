@@ -1,0 +1,63 @@
+# 表单报警：由报警服务（monitor/worker.js）触发，开 Issue 或在已开的 Issue 下补评论。
+# 由 github-actions 机器人开，被指派的人才收得到 GitHub 通知（自己的令牌开的 Issue，GitHub 不通知自己）。
+# 母版在插件仓库 Achordchan/achord-wp-inquiry 的 monitor/form-alert.yml，改动先改那里再同步过来。
+name: Form alert
+
+on:
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: 报警内容（JSON，由报警服务发来）
+        required: true
+
+permissions:
+  issues: write
+
+# 同时来几条时排队处理，免得同一个问题开出两个 Issue。
+concurrency:
+  group: form-alert
+  cancel-in-progress: false
+
+jobs:
+  issue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          PAYLOAD: ${{ inputs.payload }}
+        with:
+          script: |
+            const LABEL = '表单报警';
+            const data = JSON.parse(process.env.PAYLOAD || '{}');
+            const fp = String(data.fp || '').replace(/[^0-9a-f]/g, '').slice(0, 12);
+            if (!fp || !data.title || !data.body) throw new Error('报警内容不完整');
+            const marker = `<!-- form-alert:${fp} -->`;
+            const { owner, repo } = context.repo;
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: LABEL });
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              await github.rest.issues.createLabel({ owner, repo, name: LABEL, color: 'd73a4a', description: '询盘表单提交失败，由报警服务自动开的' });
+            }
+            const find = async (state) => {
+              const issues = await github.paginate(github.rest.issues.listForRepo, { owner, repo, labels: LABEL, state, per_page: 100 });
+              return issues.find((issue) => !issue.pull_request && String(issue.body || '').includes(marker));
+            };
+            const open = await find('open');
+            if (open) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: open.number, body: String(data.comment || data.body).slice(0, 60000) });
+              core.info(`补评论到 #${open.number}`);
+              return;
+            }
+            const closed = await find('closed');
+            const again = closed ? `\n\n> 之前的 #${closed.number} 已关闭，同一个问题又出现了。\n` : '';
+            const created = await github.rest.issues.create({
+              owner,
+              repo,
+              title: String(data.title).slice(0, 200),
+              body: `${String(data.body).slice(0, 60000)}${again}\n\n${marker}`,
+              labels: [LABEL],
+              assignees: [String(data.assignee || owner)],
+            });
+            core.info(`开了 #${created.data.number}`);
