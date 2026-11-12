@@ -45,8 +45,9 @@ foreach (bl_editable('about')['group']['product_links'] as $item) {
           <div class="bl-tree-root-name"><span><?= bl_content_text('about', 'group.company_label') ?></span><h3><?= bl_content_text('about', 'group.company_brand') ?></h3><p><?= bl_escape(bl_company('name')) ?><?php if (bl_company('name_zh') !== ''): ?><br><span lang="zh-CN"><?= bl_escape(bl_company('name_zh')) ?></span><?php endif; ?></p></div>
           <a class="bl-tree-link" href="<?= bl_company_url('website') ?>" target="_blank" rel="noopener"><span><?= bl_content_text('about', 'group.website_label') ?></span><?= bl_content_text('about', 'group.website_domain') ?><?= bl_icon('arrow-up-right') ?></a>
         </div>
-        <ul class="bl-tree-branches">
-          <li class="bl-tree-branch"><span><?= bl_content_text('about', 'group.cranes_label') ?></span><h3><?= bl_content_text('about', 'group.cranes_title') ?></h3><p><?= bl_content_text('about', 'group.cranes_text') ?></p></li>
+        <?php $cranesBranch = trim(bl_content_value('about', 'group.cranes_title')) !== ''; /* an empty title leaves the crane branch out */ ?>
+        <ul class="bl-tree-branches<?= $cranesBranch ? '' : ' bl-tree-single' ?>">
+          <?php if ($cranesBranch): ?><li class="bl-tree-branch"><span><?= bl_content_text('about', 'group.cranes_label') ?></span><h3><?= bl_content_text('about', 'group.cranes_title') ?></h3><p><?= bl_content_text('about', 'group.cranes_text') ?></p></li><?php endif; ?>
           <li class="bl-tree-branch bl-tree-here" aria-current="page"><span><?= bl_content_text('about', 'group.loader_label') ?><small><?= bl_content_text('about', 'group.current_label') ?></small></span><h3><?= bl_content_text('about', 'group.loader_title') ?></h3><p><?= bl_content_text('about', 'group.loader_text') ?></p><div class="bl-tree-here-links"><?php foreach ($families as $family): ?><a href="<?= bl_escape($family['url']) ?>"><b><?= $family['count'] ?></b> <?= bl_escape($family['label']) ?> <?= bl_icon('arrow-up-right') ?></a><?php endforeach; ?></div></li>
         </ul>
       </li>

@@ -57,6 +57,8 @@
 /* Stem from the company down, a bar across, and one drop into each branch (centred on the 2fr / 3fr columns). */
 .bl-site .bl-tree-branches::before{content:'';position:absolute;left:50%;top:0;height:var(--stem);border-left:1px solid #476070;transform-origin:top}
 .bl-site .bl-tree-branches::after{content:'';position:absolute;top:var(--stem);left:calc((100% - var(--gap)) * .2);right:calc((100% - var(--gap)) * .3);border-top:1px solid #476070}
+.bl-site .bl-tree-branches.bl-tree-single{grid-template-columns:1fr}
+.bl-site .bl-tree-branches.bl-tree-single::after{display:none}
 .bl-site .bl-tree-branch{position:relative;display:flex;flex-direction:column;padding:clamp(26px,2.2vw,56px);border:1px solid var(--night-line);color:var(--night-text)}
 .bl-site .bl-tree-branch::before{content:'';position:absolute;left:50%;bottom:100%;height:calc(var(--stem) + 1px);border-left:1px solid #476070;transform-origin:top}
 .bl-site .bl-tree-branch h3{margin:clamp(18px,1.4vw,34px) 0 clamp(14px,1vw,24px);font:700 clamp(48px,4vw,108px)/.88 var(--display);letter-spacing:-.01em;-webkit-text-stroke:1px #5b7688;color:transparent}

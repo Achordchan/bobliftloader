@@ -10,7 +10,8 @@ function bl_structured_data(array $route): array
         // The Chinese registered name lets search engines and AI assistants match Chinese-language queries to the same company.
         'alternateName' => bl_company('name_zh') !== '' ? ['BOB-LIFT', bl_company('name_zh')] : 'BOB-LIFT',
         'url' => bl_company('website'), 'email' => bl_company('email'), 'telephone' => bl_company('phone_seo'),
-        'sameAs' => array_merge(['https://www.boblift.com/', 'https://www.bobliftcrane.com/'], array_column(bl_social_links(), 'url')),
+        // The crane website is listed only while 全站设置 → 起重机站推荐 has an address; clearing it takes cranes off this website everywhere.
+        'sameAs' => array_merge(['https://www.boblift.com/'], bl_sister_site() ? [bl_sister_site()['url']] : [], array_column(bl_social_links(), 'url')),
         'logo' => bl_absolute_asset(bl_brand_logo()),
         'address' => ['@type' => 'PostalAddress', 'streetAddress' => bl_company('street'), 'addressLocality' => bl_company('city'), 'addressRegion' => bl_company('region'), 'addressCountry' => bl_company('country_code')],
     ];
