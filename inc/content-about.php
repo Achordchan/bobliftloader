@@ -101,7 +101,7 @@ return [
                 ['key' => 'group.company_brand', 'label' => '公司简称', 'type' => 'text'],
                 ['key' => 'group.website_label', 'label' => '官网链接文字', 'type' => 'text'],
                 ['key' => 'group.cranes_label', 'label' => '起重设备标识', 'type' => 'text'],
-                ['key' => 'group.cranes_title', 'label' => '起重设备标题', 'type' => 'text'],
+                ['key' => 'group.cranes_title', 'label' => '起重设备标题', 'type' => 'text', 'help' => '留空则不显示起重设备这一支，只留装载设备。'],
                 ['key' => 'group.cranes_text', 'label' => '起重设备介绍', 'type' => 'text'],
                 ['key' => 'group.loader_label', 'label' => '紧凑设备标识', 'type' => 'text'],
                 ['key' => 'group.current_label', 'label' => '当前业务提示', 'type' => 'text'],
