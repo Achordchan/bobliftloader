@@ -15,6 +15,8 @@ function esc_html($v) { return htmlspecialchars((string) $v, ENT_QUOTES); }
 function esc_textarea($v) { return htmlspecialchars((string) $v, ENT_QUOTES); }
 function esc_url($v) { return (string) $v; }
 function wp_make_link_relative($v) { return (string) preg_replace('#^https?://[^/]+#', '', (string) $v); }
+function sanitize_key($v) { return preg_replace('/[^a-z0-9_\-]/', '', strtolower((string) $v)); }
+function wp_unslash($v) { return $v; }
 function is_email($v) { return (bool) filter_var($v, FILTER_VALIDATE_EMAIL); }
 function get_post_meta($id, $key, $single = false) { return $GLOBALS['meta'][$id][$key] ?? ''; }
 function current_theme_supports($name) { return $name === 'achord-inquiry'; }
@@ -33,7 +35,7 @@ $fail = static function (int $code, string $what): void { echo $what . "\n"; exi
 
 // The fields: WhatsApp is asked, the country is not (it comes from the IP), the product is shown in the mail's card.
 $fields = apply('achord_inquiry_fields', []);
-if (array_keys($fields) !== ['product', 'model', 'name', 'email', 'phone', 'company', 'country', 'message']) $fail(1, 'fields');
+if (array_keys($fields) !== ['product', 'model', 'name', 'email', 'phone', 'company', 'country', 'message', 'business', 'market', 'website']) $fail(1, 'fields');
 if ($fields['phone']['label'] !== 'WhatsApp' || $fields['product']['mail'] !== false || $fields['country']['mail'] !== false) $fail(2, 'field labels');
 
 // The submission: the family in Chinese, a model only if the site sells it, the country from the IP.
@@ -42,6 +44,16 @@ $clean = apply('achord_inquiry_submission_fields', ['product' => 'Mini dumper', 
 if ($clean['product'] !== '迷你翻斗车' || $clean['model'] !== $model || $clean['country'] !== '加拿大' || $clean['language'] !== 'en') $fail(3, 'submission ' . json_encode($clean, JSON_UNESCAPED_UNICODE));
 $clean = apply('achord_inquiry_submission_fields', ['product' => '<script>', 'model' => 'NOT-A-MODEL']);
 if ($clean['product'] !== '' || $clean['model'] !== '') $fail(4, 'unknown family or model kept');
+
+// The dealer application: its own lead type, the range and business in Chinese, no model; an enquiry drops the dealer fields.
+$_POST['bl_lead'] = 'dealer';
+$clean = apply('achord_inquiry_submission_fields', ['product' => 'Mini dumpers', 'business' => 'Rental company', 'model' => strtolower($model), 'market' => 'Australia']);
+if (($clean['lead_type'] ?? '') !== 'dealer' || $clean['product'] !== '迷你翻斗车' || $clean['business'] !== '设备租赁' || $clean['model'] !== '' || $clean['market'] !== 'Australia' || $clean['country'] !== '加拿大') $fail(41, 'dealer ' . json_encode($clean, JSON_UNESCAPED_UNICODE));
+unset($_POST['bl_lead']);
+$clean = apply('achord_inquiry_submission_fields', ['product' => 'Mini dumper', 'business' => 'Rental company', 'market' => 'Australia', 'website' => 'https://x.test']);
+if (isset($clean['lead_type']) || $clean['business'] !== '' || $clean['market'] !== '' || $clean['website'] !== '') $fail(42, 'dealer fields kept on an enquiry');
+$types = apply('achord_inquiry_lead_types', []);
+if (($types['dealer']['dingtalk_title'] ?? '') === '' || ($types['dealer']['kind'] ?? '') !== '经销商申请') $fail(43, 'dealer lead type');
 
 // The form: posts to the plugin, the page's choice checked, WhatsApp after the email, the source named, no Contact Form 7.
 $GLOBALS['turnstile'] = false;

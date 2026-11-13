@@ -2,7 +2,7 @@
 declare(strict_types=1);
 defined('ABSPATH') || exit;
 
-const BL_CONTENT_MENU_ORDER = ['bl-content-global', 'bl-content-home', 'bl-content-loaders', 'bl-content-dumpers', 'bl-content-applications', 'bl-content-support', 'bl-content-about', 'bl-content-news', 'bl-content-contact', 'bl-content-thanks', 'bl-content-privacy', 'bl-content-404', 'bl-downloads', 'bl-content-tracking'];
+const BL_CONTENT_MENU_ORDER = ['bl-content-global', 'bl-content-home', 'bl-content-loaders', 'bl-content-dumpers', 'bl-content-applications', 'bl-content-support', 'bl-content-dealers', 'bl-content-about', 'bl-content-news', 'bl-content-contact', 'bl-content-thanks', 'bl-content-privacy', 'bl-content-404', 'bl-downloads', 'bl-content-tracking'];
 
 add_action('admin_menu', static function (): void {
     if (bl_can_manage_tracking()) add_submenu_page('bl-content-home', '统计代码', '统计代码', 'manage_options', 'bl-content-tracking', static function (): void {

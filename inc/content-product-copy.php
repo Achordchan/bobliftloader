@@ -18,6 +18,7 @@ function bl_product_copy_fields(bool $loader): array
         'hero_eyebrow' => ['眉题', $loader ? 'MINI SKID STEER LOADER' : 'MATERIAL TRANSPORT / MINI DUMPER', '首屏与采购提示', 'text'],
         'hero_quote' => ['询价按钮', 'Request a quote', '首屏与采购提示', 'text'],
         'hero_details' => ['详情按钮', 'Explore the details', '首屏与采购提示', 'text'],
+        'hero_dealer' => ['经销商按钮（链到 /dealers/，留空不显示）', 'Become a dealer', '首屏与采购提示', 'text'],
         'hero_direct' => ['直接联系提示', 'Or message us', '首屏与采购提示', 'text'],
         'hero_warranty' => ['质保范围短句', 'whole-machine warranty', '首屏与采购提示', 'text'],
         'hero_ships' => ['交期前缀', 'Ships in', '首屏与采购提示', 'text'],

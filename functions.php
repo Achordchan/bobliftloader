@@ -7,6 +7,7 @@ require_once __DIR__ . '/inc/content.php';
 require_once __DIR__ . '/inc/editable.php';
 require_once __DIR__ . '/inc/consent.php';
 require_once __DIR__ . '/inc/support.php';
+require_once __DIR__ . '/inc/dealers.php';
 require_once __DIR__ . '/inc/product-page.php';
 require_once __DIR__ . '/inc/showcase.php';
 require_once __DIR__ . '/inc/seo.php';

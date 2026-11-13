@@ -6,7 +6,7 @@ require_once __DIR__ . '/content-family.php';
 function bl_site_content_definition(string $page): array
 {
     static $definitions = [];
-    if (!in_array($page, ['global', 'about', 'contact', 'privacy', 'news', '404', 'loaders', 'dumpers'], true)) return [];
+    if (!in_array($page, ['global', 'about', 'contact', 'privacy', 'news', '404', 'loaders', 'dumpers', 'dealers'], true)) return [];
     if (!isset($definitions[$page])) {
         $definitions[$page] = require __DIR__ . '/content-' . $page . '.php';
         if (in_array($page, ['loaders', 'dumpers'], true)) {
@@ -182,7 +182,7 @@ function bl_seo_content_page(array $route): string
     if ($route['type'] === 'products') return match ($route['category'] ?? '') {
         'skid-steer-loaders' => 'loaders', 'mini-dumpers' => 'dumpers', default => 'home',
     };
-    return in_array($route['type'], ['home', 'support', 'applications', 'about', 'contact', 'privacy', 'news'], true) ? $route['type'] : 'home';
+    return in_array($route['type'], ['home', 'support', 'applications', 'about', 'contact', 'privacy', 'news', 'dealers'], true) ? $route['type'] : 'home';
 }
 
 /** Preserve active states independently of menu order. */

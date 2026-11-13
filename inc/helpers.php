@@ -308,6 +308,52 @@ function bl_normalize_dumper_capacity(array $specs): array
     return $normalized;
 }
 
+/**
+ * A metric figure as written in the specification ("1,090 mm", "16.8 kW", "0.15 m³", "1640 mm") in imperial units, or ''
+ * when the value is not a single number and unit this knows (ranges, text, several engines). Bucket and drum volumes read
+ * in cubic feet, a dumper's larger hopper in cubic yards, as North American sheets give them.
+ */
+function bl_imperial_figure(string $value): string
+{
+    if (!preg_match('/^\s*(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*(kg|kW|mm|m³|m3|L\/min|L|MPa|km\/h)\s*$/u', $value, $m)) return '';
+    $number = (float) str_replace(',', '', $m[1]);
+    $round = static fn(float $n): string => $n >= 100 ? number_format($n) : rtrim(rtrim(number_format($n, 1), '0'), '.');
+    return match ($m[2]) {
+        'kg' => $round($number * 2.20462) . ' lb',
+        'kW' => $round($number * 1.34102) . ' hp',
+        'mm' => $round($number / 25.4) . ' in',
+        'm³', 'm3' => $number >= 0.5 ? $round($number * 1.30795) . ' yd³' : $round($number * 35.3147) . ' ft³',
+        'L' => $round($number * 0.0353147) . ' ft³',
+        'L/min' => $round($number * 0.264172) . ' gpm',
+        'MPa' => $round($number * 145.038) . ' psi',
+        'km/h' => $round($number * 0.621371) . ' mph',
+        default => '',
+    };
+}
+
+/**
+ * The figures at the top of a product page, up to six, each with its imperial equivalent: what the buyer is comparing first.
+ * Only figures the specification holds are shown (nothing is worked out from the model name); a dumper's width comes from
+ * the width in its standard dimensions (length × width × height). Auxiliary hydraulic flow shows once a product lists it.
+ */
+function bl_product_hero_figures(array $product): array
+{
+    $specs = is_array($product['specs'] ?? null) ? $product['specs'] : [];
+    if (!isset($specs['Machine width']) && preg_match('/^\s*[\d,.]+\s*×\s*([\d,.]+)\s*×\s*[\d,.]+\s*mm\s*$/u', (string) ($specs['Standard dimensions'] ?? ''), $m)) $specs['Machine width'] = $m[1] . ' mm';
+    $order = ($product['category'] ?? '') === 'mini-dumpers'
+        ? ['Rated load' => 'Rated load', 'Hopper capacity' => 'Hopper capacity', 'Drum capacity' => 'Drum capacity', 'Machine weight' => 'Machine weight', 'Engine power' => 'Engine power', 'Machine width' => 'Machine width', 'Max travel speed' => 'Travel speed', 'Dump height' => 'Dump height', 'Gradeability' => 'Gradeability']
+        : ['Rated load' => 'Rated load', 'Machine weight' => 'Machine weight', 'Engine power' => 'Engine power', 'Hydraulic flow' => 'Hydraulic flow', 'Machine width' => 'Machine width', 'Bucket capacity' => 'Bucket capacity', 'Hydraulic pressure' => 'Hydraulic pressure', 'Max travel speed' => 'Travel speed'];
+    $figures = [];
+    foreach ($order as $key => $label) {
+        $value = trim((string) ($specs[$key] ?? ''));
+        // A figure is one number and its unit (a slope in degrees too); longer wording stays in the specification table.
+        if ($value === '' || !preg_match('/^\d[\d,.]*\s*(?:°|[A-Za-z³\/]+)$/u', $value)) continue;
+        $figures[] = ['label' => $label, 'value' => $value, 'imperial' => bl_imperial_figure($value)];
+        if (count($figures) === 6) break;
+    }
+    return $figures;
+}
+
 /** Up to three headline figures, in the order buyers compare them; short labels suit the catalogue cards. */
 function bl_key_specs(array $product, bool $short = false): array
 {

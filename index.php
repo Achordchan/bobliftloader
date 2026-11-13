@@ -42,7 +42,7 @@ if ($route['type'] === 'showcase') {
   <script type="importmap"><?= bl_script_import_map() ?></script>
   <script type="module" src="<?= bl_escape(bl_asset_versioned('js/main.js')) ?>"></script>
   <?php if (bl_is_wordpress()) wp_head(); ?>
-  <?php /* Support page, and the parts of it that product and family pages share (attachments, videos, spec-sheet print). */ if (in_array($route['type'], ['support', 'products', 'product'], true)): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset_versioned('css/support.css')) ?>"><?php endif; ?>
+  <?php /* Support page, and the parts of it that product and family pages share (attachments, videos, spec-sheet print). */ if (in_array($route['type'], ['support', 'products', 'product', 'dealers'], true)): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset_versioned('css/support.css')) ?>"><?php endif; ?>
 </head>
 <body class="bl-site bl-page-<?= bl_escape($route['type']) ?><?= bl_is_wordpress() && is_admin_bar_showing() ? ' bl-wp-admin-bar' : '' ?>">
   <?php if (bl_is_wordpress()) wp_body_open(); ?>
