@@ -273,10 +273,14 @@
   .bl-site .bl-product-key-specs dd{margin-top:8px;font-size:23px}
   .bl-site .bl-product-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px 10px;margin-top:20px}
   .bl-site .bl-product-actions>.bl-text-link{grid-column:1/-1;justify-self:start}
-  /* With the dealer link the two text links share the line under the buttons: the details on the left, the dealer page on the right. */
-  .bl-site .bl-product-actions:has(.bl-product-dealer)>.bl-text-link{grid-column:1;grid-row:2}
-  .bl-site .bl-product-dealer{grid-column:1/-1;grid-row:2;justify-self:end;min-height:0;padding:0 0 7px;border:0;border-bottom:1px solid currentColor;background:none;gap:12px;line-height:1.3}
-  @media(max-width:389px){.bl-site .bl-product-dealer{grid-row:3;justify-self:start}}
+  /* With the dealer link the row wraps instead: the quote button and WhatsApp fill the first line, then the details link and
+     the dealer link share the next one, at either end. Labels too long to sit side by side put the dealer link on a line of
+     its own, so neither label can cover the other whatever is written in the editor. */
+  .bl-site .bl-product-actions:has(.bl-product-dealer){display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .bl-site .bl-product-actions:has(.bl-product-dealer)>.bl-button{flex:1 1 calc(100% - 64px);min-width:0}
+  .bl-site .bl-product-actions:has(.bl-product-dealer)>.bl-product-wa{flex:none}
+  .bl-site .bl-product-actions:has(.bl-product-dealer)>.bl-text-link{order:3;margin-right:14px}
+  .bl-site .bl-product-dealer{grid-column:1/-1;justify-self:start;order:4;min-height:0;padding:0 0 7px;border:0;border-bottom:1px solid currentColor;background:none;gap:12px;line-height:1.3}
   /* WhatsApp sits beside the quote button as a square of the same height; the line of contact links below it goes. */
   .bl-site .bl-product-wa{display:grid;place-items:center;align-self:stretch;width:54px;background:#fff;border:1px solid #b9c4c9;color:#1fb457;transition:transform .12s,background .2s}
   .bl-site .bl-product-wa svg{width:26px;height:26px}

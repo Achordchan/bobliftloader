@@ -568,15 +568,21 @@ function bl_wp_dealers_page(): void
     try {
         // Pages only: given a single type, get_page_by_path() also returns a media file whose slug is "dealers".
         $page = get_page_by_path('dealers', OBJECT, ['page']);
-        // A media file holding the slug would push a new page to /dealers-2/; an unpublished page must not be published here.
-        $holder = $page && $page->post_status !== 'publish' ? $page : (!$page ? get_page_by_path('dealers', OBJECT, ['attachment']) : null);
-        if ($holder) {
-            set_transient('bl_dealers_page_conflict', (int) $holder->ID, HOUR_IN_SECONDS);
-            return;
+        if ($page && $page->post_status !== 'publish') { set_transient('bl_dealers_page_conflict', (int) $page->ID, HOUR_IN_SECONDS); return; }
+        if (!$page) {
+            // A media file named "dealers" reserves the slug against new pages wherever it is attached, so look it up by name
+            // alone rather than by path; WordPress would otherwise give the new page /dealers-2/.
+            $media = get_posts(['name' => 'dealers', 'post_type' => 'attachment', 'post_status' => 'inherit', 'posts_per_page' => 1, 'fields' => 'ids', 'suppress_filters' => true]);
+            if ($media) { set_transient('bl_dealers_page_conflict', (int) $media[0], HOUR_IN_SECONDS); return; }
         }
         $id = $page ? $page->ID : wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Become a dealer', 'post_name' => 'dealers'], true);
         if (is_wp_error($id) || !$id) return;
-        if (get_post_field('post_name', (int) $id) !== 'dealers') { wp_delete_post((int) $id, true); $id = -1; }
+        if (get_post_field('post_name', (int) $id) !== 'dealers') {
+            // Something else still holds the slug: take the stray page away and try again later instead of giving up for good.
+            wp_delete_post((int) $id, true);
+            set_transient('bl_dealers_page_conflict', -1, HOUR_IN_SECONDS);
+            return;
+        }
         update_option('bl_dealers_page', (int) $id);
     } finally {
         bl_lock_release('dealers_page', $token);
@@ -585,6 +591,7 @@ function bl_wp_dealers_page(): void
 add_action('init', 'bl_wp_dealers_page', 20);
 add_action('admin_notices', static function (): void {
     if (!current_user_can('edit_pages') || !($id = (int) get_transient('bl_dealers_page_conflict'))) return;
+    if ($id < 0) { echo '<div class="notice notice-warning"><p>经销商页的网址 /dealers/ 已被网站里的其他内容占用，暂时建不了，网站上的「Become a dealer」链接打不开。请在页面、文章和媒体库里找到别名为 dealers 的内容，改掉别名或删除；系统每小时会再试一次。</p></div>'; return; }
     $media = get_post_type($id) === 'attachment';
     // Resolved: the page was published or deleted, or the media file was deleted or given another slug. The next load retries.
     if (!get_post_status($id) || get_post_field('post_name', $id) !== 'dealers' || (!$media && get_post_status($id) === 'publish')) { delete_transient('bl_dealers_page_conflict'); return; }

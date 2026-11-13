@@ -19,8 +19,9 @@ function bl_lock_acquire($name, $tries = 50) { return 'token'; }
 function bl_lock_release($name, $token) {}
 // As WordPress does: a single type also searches attachments; a list of types searches only those.
 function get_page_by_path($path, $output = 'OBJECT', $type = 'page') { $types = is_array($type) ? $type : [$type, 'attachment']; foreach ($GLOBALS['posts'] as $post) if ($post->post_name === $path && in_array($post->post_type ?? 'page', $types, true)) return $post; return null; }
+function get_posts($args) { $out = []; foreach ($GLOBALS['posts'] as $post) if ($post->post_name === ($args['name'] ?? null) && ($post->post_type ?? 'page') === ($args['post_type'] ?? 'post') && $post->post_status === ($args['post_status'] ?? 'publish')) $out[] = $post->ID; return $out; }
 function get_post_type($id) { return isset($GLOBALS['posts'][$id]) ? ($GLOBALS['posts'][$id]->post_type ?? 'page') : false; }
-function wp_insert_post($args, $error = false) { $id = 100 + count($GLOBALS['posts']); $GLOBALS['posts'][$id] = (object) ['ID' => $id, 'post_name' => $args['post_name'], 'post_status' => $args['post_status']]; return $id; }
+function wp_insert_post($args, $error = false) { $id = 100 + count($GLOBALS['posts']); $GLOBALS['posts'][$id] = (object) ['ID' => $id, 'post_name' => !empty($GLOBALS['taken']) ? $args['post_name'] . '-2' : $args['post_name'], 'post_status' => $args['post_status']]; return $id; }
 function get_post_field($field, $id) { return $GLOBALS['posts'][$id]->$field ?? ''; }
 function get_post_status($id) { return $GLOBALS['posts'][$id]->post_status ?? false; }
 function wp_delete_post($id, $force = false) { unset($GLOBALS['posts'][$id]); }
@@ -74,4 +75,20 @@ $GLOBALS['posts'][9]->post_name = 'dealers-photo';
 $notice();
 bl_wp_dealers_page();
 if (($id = (int) get_option('bl_dealers_page')) <= 0 || get_post_field('post_name', $id) !== 'dealers' || get_post_status($id) !== 'publish') $fail('page not made after the media file was renamed');
+
+// A media file attached to some post (so not at the root path) still holds the slug: caught by name, not by path.
+$GLOBALS['options'] = $GLOBALS['transients'] = [];
+$GLOBALS['posts'] = [11 => (object) ['ID' => 11, 'post_name' => 'dealers', 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_parent' => 5]];
+bl_wp_dealers_page();
+if (get_option('bl_dealers_page') || get_transient('bl_dealers_page_conflict') !== 11) $fail('attached media file not caught by name');
+
+// A slug WordPress would not hand out for another reason: the stray page goes, nothing is marked done, a later load retries.
+$GLOBALS['options'] = $GLOBALS['transients'] = $GLOBALS['posts'] = [];
+$GLOBALS['taken'] = true;
+bl_wp_dealers_page();
+if (get_option('bl_dealers_page') !== false || $GLOBALS['posts'] !== [] || get_transient('bl_dealers_page_conflict') !== -1 || !str_contains($notice(), '其他内容占用')) $fail('slug not obtained but marked done');
+$GLOBALS['taken'] = false;
+delete_transient('bl_dealers_page_conflict');
+bl_wp_dealers_page();
+if (($id = (int) get_option('bl_dealers_page')) <= 0 || get_post_field('post_name', $id) !== 'dealers') $fail('no retry after the slug was freed');
 echo "dealers page: ok\n";
