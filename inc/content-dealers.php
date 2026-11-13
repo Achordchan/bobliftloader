@@ -1,21 +1,21 @@
 <?php
 /**
- * /dealers/: for companies that would sell or rent the range. Only terms the factory has confirmed are written here (one
- * machine to order, T/T, the trade terms, own-logo and colour rules, warranty and parts); no prices, discounts,
+ * /dealers/: for companies that would sell or rent the range. Only terms the factory has confirmed are written here (the
+ * minimum order, T/T, the trade terms, own-logo and colour rules, warranty and parts); no prices, discounts,
  * exclusive territories or overseas branches. {tokens} are filled from the site's own data when the page is drawn:
- * {warranty} (12-month), {lead} (8–30 working days), {loader_count}, {loader_load}, {dumper_count}, {dumper_load}.
+ * {warranty} (12-month), {lead} (8–30 working days), {minimum_order_words}, {minimum_order_noun}, {minimum_order_verb}, {minimum_order_sentence} (from the Support terms), {loader_count}, {loader_load}, {dumper_count}, {dumper_load}.
  */
 return [
     'defaults' => [
         'seo' => [
             'title' => 'Become a Dealer: Mini Skid Steers & Mini Dumpers',
-            'description' => 'Sell our mini skid steer loaders and mini dumpers. Buy direct from the Xuzhou factory from one machine, add your own logo, and get warranty and parts support.',
+            'description' => 'Sell our mini skid steer loaders and mini dumpers. Buy direct from the Xuzhou factory, add your own logo, and get warranty and parts support for your customers.',
             'image' => '',
         ],
         'hero' => [
             'eyebrow' => 'DEALERS & DISTRIBUTORS',
             'title' => "SELL THE RANGE.\n*BUY FROM*\n*THE FACTORY.*",
-            'text' => 'BOB-LIFT builds mini skid steer loaders and mini dumpers in Xuzhou, China. Equipment dealers, rental companies and importers buy from us directly: one machine is enough to start, your own logo is welcome, and the team that builds the machines supports them after delivery.',
+            'text' => 'BOB-LIFT builds mini skid steer loaders and mini dumpers in Xuzhou, China. Equipment dealers, rental companies and importers buy from us directly: {minimum_order_words} {minimum_order_noun} {minimum_order_verb} enough to start, your own logo is welcome, and the team that builds the machines supports them after delivery.',
             'button' => 'Apply to become a dealer',
             'link' => 'How dealers buy',
             'image' => '',
@@ -30,7 +30,7 @@ return [
             'items' => [
                 ['title' => 'Tell us about your market', 'text' => 'Where you sell, who buys from you and which machines they ask for. Send your company website if you have one.'],
                 ['title' => 'Choose your first order', 'text' => 'We suggest models for your market, confirm the engine, running gear, colour and attachments for each, then quote on the trade terms you need: FOB, CIF, EXW, DDP, FCA or DAP.'],
-                ['title' => 'Place the order', 'text' => 'One machine is enough to order. Payment is by T/T bank transfer.'],
+                ['title' => 'Place the order', 'text' => '{minimum_order_sentence} {minimum_order_noun} {minimum_order_verb} enough to order. Payment is by T/T bank transfer.'],
                 ['title' => 'Built and shipped', 'text' => 'Loaders are built in {lead}; most mini dumpers are ready in about 10 working days. We ship by container and confirm the loading plan with your order.'],
             ],
             'link' => 'Machines per container',
@@ -38,7 +38,7 @@ return [
         'range' => [
             'eyebrow' => '02 / THE RANGE',
             'title' => "TWO FAMILIES.\n*ONE SUPPLIER.*",
-            'intro' => 'Pick the models your customers ask for. Every machine is built to order, so the first order can be as small as one.',
+            'intro' => 'Pick the models your customers ask for. Every machine is built to order, so the first order can be as small as {minimum_order_words} {minimum_order_noun}.',
             'loaders_title' => 'Mini skid steer loaders',
             'loaders_text' => 'Rated {loader_load}, on tracks or tyres, stand-on or seated. Several models offer more than one engine brand.',
             'dumpers_title' => 'Mini dumpers',
@@ -53,13 +53,13 @@ return [
             'image' => '',
             'alt' => 'Loader frames painted blue for a customer order, waiting for assembly at the BOB-LIFT factory in Xuzhou',
             'items' => [
-                ['title' => 'Your logo from one machine', 'text' => 'Any model can carry your logo, even on a single machine, and a logo alone does not change the lead time. Send it as a vector file.'],
+                ['title' => 'Your logo on any order', 'text' => 'Any model can carry your logo, whatever the order size, and a logo alone does not change the lead time. Send it as a vector file.'],
                 ['title' => 'Nameplate, manual and packaging', 'text' => 'The nameplate, the electronic manual and the packaging can carry your brand as well.'],
             ],
             'colour_title' => 'Your colour',
             'colour_note' => 'Send us the colour code when you ask for a quote.',
             'colours' => [
-                ['range' => 'Wheeled mini dumpers', 'rule' => 'Your colour from a single machine, about three days added to the build.'],
+                ['range' => 'Wheeled mini dumpers', 'rule' => 'Your colour on any order, with about three days added to the build.'],
                 ['range' => 'BL-T500-HD and BL-T200-HJ', 'rule' => 'Yellow, red or blue as standard. Another colour costs nothing extra on any quantity and takes a little longer to build.'],
                 ['range' => 'Mini skid steer loaders', 'rule' => 'Your colour on orders of four or more, about three days added. On one to three machines the standard colour is red; another colour is possible at extra cost.'],
             ],
@@ -90,8 +90,8 @@ return [
             'title' => "DEALERS\n*ASK US.*",
             'intro' => 'Not answered here? Write to us with your question.',
             'items' => [
-                ['q' => 'What is the minimum order?', 'a' => 'One machine. Payment is by T/T bank transfer, and we quote FOB, CIF, EXW, DDP, FCA or DAP.'],
-                ['q' => 'Can we sell the machines under our own brand?', 'a' => 'Yes. Any model can carry your logo from a single machine, and the nameplate, the electronic manual and the packaging can carry your brand as well. A logo alone does not change the lead time.'],
+                ['q' => 'What is the minimum order?', 'a' => '{minimum_order_sentence} {minimum_order_noun}. Payment is by T/T bank transfer, and we quote FOB, CIF, EXW, DDP, FCA or DAP.'],
+                ['q' => 'Can we sell the machines under our own brand?', 'a' => 'Yes. Any model can carry your logo on any order, and the nameplate, the electronic manual and the packaging can carry your brand as well. A logo alone does not change the lead time.'],
                 ['q' => 'How long does an order take?', 'a' => 'Mini skid steer loaders are typically built in {lead}. Most mini dumpers are ready in about 10 working days; the FJZ30 takes about 30. Quantity and configuration decide the date, which we confirm with your order.'],
                 ['q' => 'How do you support machines after we sell them?', 'a' => 'Every machine carries a {warranty} whole-machine warranty. Send us the model, the serial number and a photo or video of the problem; our team guides the fix remotely and ships the parts.'],
                 ['q' => 'Can we visit the factory?', 'a' => 'Yes. Tell us your preferred dates and the machines you want to see, and confirm the appointment with our team before you travel.'],
@@ -198,7 +198,7 @@ return [
                 ['key' => 'faq.intro', 'label' => '说明', 'type' => 'textarea'],
                 ['key' => 'faq.items', 'label' => '问答', 'type' => 'list', 'add' => '添加问答', 'summary' => ['q'], 'fields' => [
                     'q' => ['label' => '问题', 'type' => 'text'],
-                    'a' => ['label' => '回答', 'type' => 'textarea', 'help' => '可用 {lead}、{warranty}。'],
+                    'a' => ['label' => '回答', 'type' => 'textarea', 'help' => '可用 {lead}、{warranty}、{minimum_order_sentence} {minimum_order_noun}（起订量，取自采购条款）。'],
                 ]],
             ],
         ],

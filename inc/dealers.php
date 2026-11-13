@@ -19,7 +19,8 @@ function bl_dealer_tokens(): array
     $loaders = bl_family_ranges('loader');
     $dumpers = bl_family_ranges('dumper');
     $warranty = trim($terms['warranty']['value'] . "\u{2011}" . rtrim($terms['warranty']['unit'], 's'));
-    return [
+    // The minimum order comes from the same terms as Support, so a changed minimum changes every sentence that states it.
+    return bl_business_variables($terms) + [
         '{warranty}' => $warranty,
         '{lead}' => trim($terms['lead']['value'] . ' ' . $terms['lead']['unit']),
         '{loader_count}' => (string) $loaders['count'],

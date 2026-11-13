@@ -347,7 +347,7 @@ function bl_product_hero_figures(array $product): array
     foreach ($order as $key => $label) {
         $value = trim((string) ($specs[$key] ?? ''));
         // A figure is one number and its unit (a slope in degrees too); longer wording stays in the specification table.
-        if ($value === '' || !preg_match('/^\d[\d,.]*\s*(?:°|[A-Za-z³\/]+)$/u', $value)) continue;
+        if ($value === '' || !preg_match('/^\d[\d,.]*\s*(?:°|[A-Za-z³\/]+3?)$/u', $value)) continue;
         $figures[] = ['label' => $label, 'value' => $value, 'imperial' => bl_imperial_figure($value)];
         if (count($figures) === 6) break;
     }
