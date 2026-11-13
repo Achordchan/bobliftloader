@@ -558,16 +558,20 @@ add_action('init', 'bl_wp_thanks_page', 20);
 /**
  * The dealer page (/dealers/; words in 网站内容 → 经销商). WordPress needs a page at that address so the theme can answer it;
  * it is made once and, unlike the thank-you page, stays in the sitemaps. A draft or private page an editor already keeps at
- * that address is never published from here: it is left as it is, the editor is told in the dashboard, and the check runs
- * again an hour later (or as soon as that page is published or deleted and the notice is gone).
+ * that address is never published from here, and a media file holding the slug "dealers" is not touched either: it is left
+ * as it is, the editor is told in the dashboard, and the check runs again an hour later (or as soon as the page is published
+ * or deleted, or the file renamed or deleted, and the notice is gone).
  */
 function bl_wp_dealers_page(): void
 {
     if (get_option('bl_dealers_page') || get_transient('bl_dealers_page_conflict') || !($token = bl_lock_acquire('dealers_page', 1))) return;
     try {
-        $page = get_page_by_path('dealers');
-        if ($page && $page->post_status !== 'publish') {
-            set_transient('bl_dealers_page_conflict', (int) $page->ID, HOUR_IN_SECONDS);
+        // Pages only: given a single type, get_page_by_path() also returns a media file whose slug is "dealers".
+        $page = get_page_by_path('dealers', OBJECT, ['page']);
+        // A media file holding the slug would push a new page to /dealers-2/; an unpublished page must not be published here.
+        $holder = $page && $page->post_status !== 'publish' ? $page : (!$page ? get_page_by_path('dealers', OBJECT, ['attachment']) : null);
+        if ($holder) {
+            set_transient('bl_dealers_page_conflict', (int) $holder->ID, HOUR_IN_SECONDS);
             return;
         }
         $id = $page ? $page->ID : wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Become a dealer', 'post_name' => 'dealers'], true);
@@ -581,8 +585,12 @@ function bl_wp_dealers_page(): void
 add_action('init', 'bl_wp_dealers_page', 20);
 add_action('admin_notices', static function (): void {
     if (!current_user_can('edit_pages') || !($id = (int) get_transient('bl_dealers_page_conflict'))) return;
-    if (get_post_status($id) === 'publish' || !get_post_status($id)) { delete_transient('bl_dealers_page_conflict'); return; }
-    echo '<div class="notice notice-warning"><p>经销商页的网址 /dealers/ 被一个未发布的页面（草稿或私密）占用，网站上的「Become a dealer」链接现在打不开。请<a href="' . esc_url((string) get_edit_post_link($id)) . '">发布或删除这个页面</a>；删除后系统会自动建好经销商页。</p></div>';
+    $media = get_post_type($id) === 'attachment';
+    // Resolved: the page was published or deleted, or the media file was deleted or given another slug. The next load retries.
+    if (!get_post_status($id) || get_post_field('post_name', $id) !== 'dealers' || (!$media && get_post_status($id) === 'publish')) { delete_transient('bl_dealers_page_conflict'); return; }
+    $what = $media ? '媒体库里的一个文件（别名同为 dealers）' : '一个未发布的页面（草稿或私密）';
+    $fix = $media ? '把这个文件的别名改掉或删除这个文件' : '发布或删除这个页面';
+    echo '<div class="notice notice-warning"><p>经销商页的网址 /dealers/ 被' . $what . '占用，网站上的「Become a dealer」链接现在打不开。请<a href="' . esc_url((string) get_edit_post_link($id)) . '">' . $fix . '</a>，处理后系统会自动建好经销商页。</p></div>';
 });
 
 add_filter('wp_sitemaps_posts_query_args', static function (array $args, string $postType): array {

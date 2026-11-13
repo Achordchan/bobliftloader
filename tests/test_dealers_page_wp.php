@@ -6,6 +6,7 @@
 declare(strict_types=1);
 define('ABSPATH', __DIR__ . '/');
 define('HOUR_IN_SECONDS', 3600);
+define('OBJECT', 'OBJECT');
 $GLOBALS['options'] = $GLOBALS['transients'] = $GLOBALS['posts'] = $GLOBALS['hooks'] = [];
 function add_action($hook, $callback, $priority = 10, $args = 1) { $GLOBALS['hooks'][$hook][] = $callback; }
 function add_filter($hook, $callback, $priority = 10, $args = 1) { $GLOBALS['hooks'][$hook][] = $callback; }
@@ -16,7 +17,9 @@ function set_transient($key, $value, $ttl = 0) { $GLOBALS['transients'][$key] = 
 function delete_transient($key) { unset($GLOBALS['transients'][$key]); return true; }
 function bl_lock_acquire($name, $tries = 50) { return 'token'; }
 function bl_lock_release($name, $token) {}
-function get_page_by_path($path) { foreach ($GLOBALS['posts'] as $post) if ($post->post_name === $path) return $post; return null; }
+// As WordPress does: a single type also searches attachments; a list of types searches only those.
+function get_page_by_path($path, $output = 'OBJECT', $type = 'page') { $types = is_array($type) ? $type : [$type, 'attachment']; foreach ($GLOBALS['posts'] as $post) if ($post->post_name === $path && in_array($post->post_type ?? 'page', $types, true)) return $post; return null; }
+function get_post_type($id) { return isset($GLOBALS['posts'][$id]) ? ($GLOBALS['posts'][$id]->post_type ?? 'page') : false; }
 function wp_insert_post($args, $error = false) { $id = 100 + count($GLOBALS['posts']); $GLOBALS['posts'][$id] = (object) ['ID' => $id, 'post_name' => $args['post_name'], 'post_status' => $args['post_status']]; return $id; }
 function get_post_field($field, $id) { return $GLOBALS['posts'][$id]->$field ?? ''; }
 function get_post_status($id) { return $GLOBALS['posts'][$id]->post_status ?? false; }
@@ -60,4 +63,15 @@ unset($GLOBALS['posts'][7]);
 $notice();
 bl_wp_dealers_page();
 if (($id = (int) get_option('bl_dealers_page')) <= 0 || $id === 7 || get_post_status($id) !== 'publish') $fail('page not made after the private one was deleted');
+
+// A media file whose slug is "dealers": not treated as a draft page, not touched, and the editor is told to rename it.
+$GLOBALS['options'] = $GLOBALS['transients'] = [];
+$GLOBALS['posts'] = [9 => (object) ['ID' => 9, 'post_name' => 'dealers', 'post_status' => 'inherit', 'post_type' => 'attachment']];
+bl_wp_dealers_page();
+if (get_option('bl_dealers_page') || count($GLOBALS['posts']) !== 1 || get_transient('bl_dealers_page_conflict') !== 9) $fail('media file collision not held');
+if (!str_contains($notice(), '媒体库') || !str_contains($notice(), 'post=9')) $fail('media file notice');
+$GLOBALS['posts'][9]->post_name = 'dealers-photo';
+$notice();
+bl_wp_dealers_page();
+if (($id = (int) get_option('bl_dealers_page')) <= 0 || get_post_field('post_name', $id) !== 'dealers' || get_post_status($id) !== 'publish') $fail('page not made after the media file was renamed');
 echo "dealers page: ok\n";
