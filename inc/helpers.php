@@ -339,6 +339,8 @@ function bl_imperial_figure(string $value): string
 function bl_product_hero_figures(array $product): array
 {
     $specs = is_array($product['specs'] ?? null) ? $product['specs'] : [];
+    // A dumper saved before the hopper row existed keeps its capacity under "Bucket capacity"; read it as the hopper.
+    if (($product['category'] ?? '') === 'mini-dumpers') $specs = bl_normalize_dumper_capacity($specs);
     if (!isset($specs['Machine width']) && preg_match('/^\s*[\d,.]+\s*×\s*([\d,.]+)\s*×\s*[\d,.]+\s*mm\s*$/u', (string) ($specs['Standard dimensions'] ?? ''), $m)) $specs['Machine width'] = $m[1] . ' mm';
     $order = ($product['category'] ?? '') === 'mini-dumpers'
         ? ['Rated load' => 'Rated load', 'Hopper capacity' => 'Hopper capacity', 'Drum capacity' => 'Drum capacity', 'Machine weight' => 'Machine weight', 'Engine power' => 'Engine power', 'Machine width' => 'Machine width', 'Max travel speed' => 'Travel speed', 'Dump height' => 'Dump height', 'Gradeability' => 'Gradeability']

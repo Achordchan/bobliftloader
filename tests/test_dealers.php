@@ -14,6 +14,8 @@ if ($figures[0]['imperial'] !== '661 lb' || $figures[2]['imperial'] !== '22.5 hp
 $dumper = ['category' => 'mini-dumpers', 'specs' => ['Rated load' => '500 kg', 'Standard dimensions' => '1,950 × 880 × 1,200 mm', 'Hopper capacity' => '0.2 m³']];
 if (array_column(bl_product_hero_figures($dumper), 'value') !== ['500 kg', '0.2 m³', '880 mm']) $fail('dumper figures or width from dimensions');
 if (bl_product_hero_figures(['category' => 'mini-dumpers', 'specs' => []]) !== []) $fail('figures without specs');
+$legacy = bl_product_hero_figures(['category' => 'mini-dumpers', 'specs' => ['Rated load' => '1000 kg', 'Bucket capacity' => '0.5 m³']]);
+if (array_column($legacy, 'label') !== ['Rated load', 'Hopper capacity'] || $legacy[1]['imperial'] !== '0.7 yd³') $fail('legacy dumper bucket capacity ' . json_encode($legacy, JSON_UNESCAPED_UNICODE));
 
 // The dealer page states the minimum order from the Support terms, never a fixed "one machine".
 $tokens = bl_dealer_tokens();

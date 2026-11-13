@@ -557,13 +557,19 @@ add_action('init', 'bl_wp_thanks_page', 20);
 
 /**
  * The dealer page (/dealers/; words in 网站内容 → 经销商). WordPress needs a page at that address so the theme can answer it;
- * it is made once and, unlike the thank-you page, stays in the sitemaps.
+ * it is made once and, unlike the thank-you page, stays in the sitemaps. A draft or private page an editor already keeps at
+ * that address is never published from here: it is left as it is, the editor is told in the dashboard, and the check runs
+ * again an hour later (or as soon as that page is published or deleted and the notice is gone).
  */
 function bl_wp_dealers_page(): void
 {
-    if (get_option('bl_dealers_page') || !($token = bl_lock_acquire('dealers_page', 1))) return;
+    if (get_option('bl_dealers_page') || get_transient('bl_dealers_page_conflict') || !($token = bl_lock_acquire('dealers_page', 1))) return;
     try {
         $page = get_page_by_path('dealers');
+        if ($page && $page->post_status !== 'publish') {
+            set_transient('bl_dealers_page_conflict', (int) $page->ID, HOUR_IN_SECONDS);
+            return;
+        }
         $id = $page ? $page->ID : wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Become a dealer', 'post_name' => 'dealers'], true);
         if (is_wp_error($id) || !$id) return;
         if (get_post_field('post_name', (int) $id) !== 'dealers') { wp_delete_post((int) $id, true); $id = -1; }
@@ -573,6 +579,11 @@ function bl_wp_dealers_page(): void
     }
 }
 add_action('init', 'bl_wp_dealers_page', 20);
+add_action('admin_notices', static function (): void {
+    if (!current_user_can('edit_pages') || !($id = (int) get_transient('bl_dealers_page_conflict'))) return;
+    if (get_post_status($id) === 'publish' || !get_post_status($id)) { delete_transient('bl_dealers_page_conflict'); return; }
+    echo '<div class="notice notice-warning"><p>经销商页的网址 /dealers/ 被一个未发布的页面（草稿或私密）占用，网站上的「Become a dealer」链接现在打不开。请<a href="' . esc_url((string) get_edit_post_link($id)) . '">发布或删除这个页面</a>；删除后系统会自动建好经销商页。</p></div>';
+});
 
 add_filter('wp_sitemaps_posts_query_args', static function (array $args, string $postType): array {
     if ($postType === 'page' && ($id = (int) get_option('bl_thanks_page')) > 0) $args['post__not_in'] = array_merge($args['post__not_in'] ?? [], [$id]);
