@@ -2,6 +2,7 @@
  * Family page range chart: the marker is the visitor's own number (narrowest opening for loaders, load per trip for
  * dumpers). Moving the slider moves the marker and recolours the rows as templates/partials/range-story.php does.
  */
+import { t } from './i18n.js';
 export function initializeRuler() {
   const form = document.querySelector('[data-ruler-control]');
   const figure = document.querySelector('[data-ruler]');
@@ -25,7 +26,7 @@ export function initializeRuler() {
     input.style.setProperty('--p', `${((limit - input.min) / (input.max - input.min)) * 100}%`);
     figure.classList.toggle('bl-ruler-marked', marked);
     figure.style.setProperty('--marker', `${((limit - from) / (to - from)) * 100}%`);
-    form.querySelector('[data-ruler-out]').textContent = limit ? `${number(limit)} ${unit}` : 'Any';
+    form.querySelector('[data-ruler-out]').textContent = limit ? `${number(limit)} ${unit}` : t('Any');
 
     let hits = 0;
     let clean = 0;
@@ -41,7 +42,7 @@ export function initializeRuler() {
     });
     form.querySelector('[data-ruler-summary]').textContent = width
       ? `${hits} of ${rows.length} ${noun} fit through ${number(limit)} mm · ${clean} with the bucket fitted`
-      : limit ? `${hits} of ${rows.length} ${noun} are rated for ${number(limit)} kg or more` : 'Move the slider to the load you carry per trip.';
+      : limit ? t('{hits} of {total} {noun} are rated for {limit} kg or more', { hits, total: rows.length, noun: t(noun), limit: number(limit) }) : t('Move the slider to the load you carry per trip.');
 
     const params = new URLSearchParams();
     if (!width) params.set('equipment', 'dumper');

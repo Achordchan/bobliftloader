@@ -67,6 +67,19 @@ scripts/setup-local-wordpress.sh   # 首次安装；重复运行只补缺，不�
 
 线上站托管在 WordPress.com（Business，Atomic）。GitHub 部署连接用「高级」模式，工作流 `.github/workflows/wpcom.yml`，目标目录 `/wp-content/themes/bobliftloader`。工作流只打包主题文件（与 `scripts/package-theme.py` 同一清单，约 28MB），推送 main 自动部署。不要用「简单」模式，它会把整个仓库（600MB+，含设计参考和 3D 源文件）原样放到公开目录。
 
+## 多语言（西班牙语 /es/）
+
+英语是站点本身（根目录）；西班牙语在 `/es/` 子目录，按起重机站的做法：子目录 + hreflang（en / es / x-default）+ 主题硬编码文字走词典，译文一律用 DeepL（ES-419）再人工校对成「usted」敬语和统一术语（minidumper、minicargadora、obra、cucharón、tolva、sobre orugas）。
+
+默认永远是英语，不按浏览器语言跳转（页面缓存不区分语言）。浏览器首选西班牙语、本页又有西语版时，左下角弹一张可关闭的小卡片推荐西语版（反过来西语页对英语浏览器推荐英文版），和起重机站一致：`assets/js/language-suggest.js`，选择记在 localStorage `blLanguageChoice`，Cookie 提示打开时先让位，GA4 事件 `language_suggestion`（accept / dismiss），爬虫看不到。
+
+- 原理（`inc/i18n.php`）：`/es/…` 的请求在主题加载时去掉 `/es` 当作英文页处理，记下语言；页面照常按英文渲染，输出前逐段查词典替换（正文、按钮、alt / aria-label / placeholder、title / description / OG、JSON-LD 的文字和面包屑地址、WhatsApp 预填句），站内链接若该页有西语版就改成 `/es/…`。词典里没有的文字保持英文。
+- 哪些页有西语：默认 `BL_I18N_DEFAULT_PAGES`（首页、翻斗车分类、T500-HD、联系、感谢、隐私）；保存选项 `bl_i18n_es_pages`（REST `/wp/v2/settings` 可写）后以它为准。只有列出的页面有 `/es/` 网址、hreflang、站点地图条目，其余 `/es/…` 返回 404。
+- 词典：`inc/i18n/es.php`（键 = 页面上看到的英文，行内标签写 `<t0>…</t0>`、换行写 `<br>`）；线上修正可写选项 `bl_i18n_es_strings`（同样的键，覆盖主题词典，不用发版）。
+- 加新页面：先把英文页存下来，`php tools/i18n/collect.php es page.html > missing.json` 列出词典还缺的文字（`tools/i18n/keep.txt` 里是不译的型号、品牌、数字），DeepL 翻译校对后补进词典，再把路径加进页面清单。管理员访问西语页加 `?bl_i18n_audit=1`，页尾注释列出本页还没翻的文字。
+- 脚本文字：`assets/js/i18n.js` 的 `t()` 读页面里的 `#bl-i18n` JSON（`BL_I18N_SCRIPT_STRINGS` 列出的那些），英文页不输出。
+- 询盘：表单带上页面语言，西语页提交后去 `/es/thank-you/`，插件提示语走词典，钉钉第一行写「语言：西班牙语（ES）」，邮件里有「页面语言」。
+
 ## 主要交互
 
 - 产品分类、关键词搜索、载荷筛选与空结果反馈。
@@ -85,7 +98,7 @@ python3 tests/test_site.py http://127.0.0.1:4173
 python3 tests/test_site.py http://127.0.0.1:9402
 ```
 
-另外对 PHP 文件执行 `php -l`，对四个 JS 模块执行 `node --check`，并运行 `php tests/test_dumper_models.php`（翻斗车适用场景里的型号新旧写法都能找到产品）。WordPress Blueprint 会验证初始化幂等、产品保存 / 读出、新闻正文编辑读出、权限 / nonce 拒绝和草稿隐藏，最后恢复测试数据；仅在隔离实例中移除 WordPress 自带示例内容。
+另外对 PHP 文件执行 `php -l`，对四个 JS 模块执行 `node --check`，并运行 `php tests/test_dumper_models.php`（翻斗车适用场景里的型号新旧写法都能找到产品）、`php tests/test_i18n.php`（西语路径、链接、翻译器和词典占位符 / 不含价格）、`php tests/test_i18n_inquiry.php`（西语询盘的感谢页、提示语和钉钉语言行）和 `node tests/test_spanish_js.cjs`（西语页站内搜索的排序和去重音、浏览器语言推荐卡片带上询盘参数）。WordPress Blueprint 会验证初始化幂等、产品保存 / 读出、新闻正文编辑读出、权限 / nonce 拒绝和草稿隐藏，最后恢复测试数据；仅在隔离实例中移除 WordPress 自带示例内容。
 
 详见 `design-qa.md`、`docs/design-2k.md`、`docs/qa-2k/`、`docs/qa-multipage/`、`docs/content-verification.md` 和 `docs/file-changes.md`。
 

@@ -169,9 +169,11 @@ function bl_script_import_map(): string
     return (string) json_encode(['imports' => $imports], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
 }
 
+/** A page of this site; on a page in another language, that language's version where it has one (inc/i18n.php). */
 function bl_url(string $path = '/'): string
 {
-    return bl_is_wordpress() ? home_url('/' . ltrim($path, '/')) : '/' . ltrim($path, '/');
+    $url = bl_is_wordpress() ? home_url('/' . ltrim($path, '/')) : '/' . ltrim($path, '/');
+    return function_exists('bl_i18n_localize_href') ? bl_i18n_localize_href($url) : $url;
 }
 
 function bl_escape(string $text): string
@@ -515,7 +517,21 @@ function bl_product_facets(array $product, string $category): array
 /** Text the catalogue search looks through: name, model, the model without its T / S letter as older literature writes it, and any former code. */
 function bl_product_search_text(array $product): string
 {
-    return strtolower(implode(' ', [$product['name'], $product['model'], preg_replace('/^BL-[TS]/', 'BL-', $product['model']), ...(BL_FORMER_MODELS[$product['model']] ?? [])]));
+    $words = [$product['name'], $product['model'], preg_replace('/^BL-[TS]/', 'BL-', $product['model']), ...(BL_FORMER_MODELS[$product['model']] ?? [])];
+    // On a page in another language the names its cards show (inc/i18n.php) are searchable too, beside the English ones.
+    if (function_exists('bl_lang') && bl_lang() !== 'en') {
+        $line = trim((string) preg_replace('/^' . preg_quote($product['model'], '/') . '\s*/', '', $product['name'])) ?: $product['name'];
+        array_push($words, bl_t($product['name']), bl_t($line));
+    }
+    return bl_search_fold(implode(' ', $words));
+}
+
+/** Text as the catalogue compares it: lower case, accents folded (orugas, cucharón = cucharon), as assets/js/catalog.js does. */
+function bl_search_fold(string $text): string
+{
+    $text = function_exists('mb_strtolower') ? mb_strtolower($text, 'UTF-8') : strtolower($text);
+    if (class_exists('Normalizer')) return (string) preg_replace('/\p{Mn}+/u', '', (string) \Normalizer::normalize($text, \Normalizer::FORM_D));
+    return strtr($text, ['á' => 'a', 'à' => 'a', 'â' => 'a', 'ä' => 'a', 'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e', 'í' => 'i', 'ì' => 'i', 'î' => 'i', 'ï' => 'i', 'ó' => 'o', 'ò' => 'o', 'ô' => 'o', 'ö' => 'o', 'ú' => 'u', 'ù' => 'u', 'û' => 'u', 'ü' => 'u', 'ñ' => 'n', 'ç' => 'c']);
 }
 
 /** Specification rows grouped for the detail table; labels outside the known groups fall under "Details". */

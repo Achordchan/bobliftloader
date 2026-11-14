@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { openDialog } from './dialogs.js';
 
 const SENT_KEY = 'bl-enquiry-sent';
@@ -15,7 +16,7 @@ function syncPrefill(container, matches) {
 }
 
 const TURNSTILE = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-const NETWORK_ERROR = 'The enquiry could not be sent. Please check your connection and try again, or email us directly.';
+const NETWORK_ERROR = 'The enquiry could not be sent. Please check your connection and try again, or email us directly.'; // shown through t()
 let turnstileScript = null;
 
 // Cloudflare's script, loaded once; a load that failed is forgotten, so the next try loads it again.
@@ -128,7 +129,7 @@ function initializeSentInquiry(wrap) {
     if (form.dataset.sending) return;
     for (const input of requiredText) {
       if (!input.value.trim()) {
-        input.setCustomValidity('Please enter a value, not only spaces.');
+        input.setCustomValidity(t('Please enter a value, not only spaces.'));
         input.reportValidity();
         return;
       }
@@ -143,7 +144,7 @@ function initializeSentInquiry(wrap) {
     // completes it and sends again.
     if (check && check.id == null) {
       try { await check.draw(); } catch { /* the message below */ }
-      say(check.id == null ? NETWORK_ERROR : 'Please complete the verification and send again.', 'error');
+      say(t(check.id == null ? NETWORK_ERROR : 'Please complete the verification and send again.'), 'error');
       ready();
       return;
     }
@@ -159,7 +160,7 @@ function initializeSentInquiry(wrap) {
       window.location.assign(result.data.redirect || wrap.dataset.thanks);
       return;
     }
-    say(result.data.message || NETWORK_ERROR, 'error');
+    say(result.data.message || t(NETWORK_ERROR), 'error');
     ready();
     if (check?.id != null) { try { window.turnstile?.reset(check.id); } catch { /* drawn again on the next try */ } }
   });
@@ -212,7 +213,7 @@ export function initializeInquiry() {
     event.preventDefault();
     for (const input of requiredText) {
       if (!input.value.trim()) {
-        input.setCustomValidity('Please enter a value, not only spaces.');
+        input.setCustomValidity(t('Please enter a value, not only spaces.'));
         input.reportValidity();
         return;
       }
@@ -233,8 +234,9 @@ export function initializeInquiry() {
       const row = document.createElement('div');
       const term = document.createElement('dt');
       const detail = document.createElement('dd');
-      term.textContent = label;
-      detail.textContent = value;
+      // The review shows the page's language; the email itself stays in English for the sales team.
+      term.textContent = t(label);
+      detail.textContent = label === 'Equipment' ? t(value) : value;
       row.append(term, detail);
       summary.append(row);
     });
@@ -251,9 +253,9 @@ export function initializeInquiry() {
   document.querySelector('#copy-inquiry').addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(emailBody);
-      copyStatus.textContent = `Enquiry copied. Paste it into an email to ${recipient}.`;
+      copyStatus.textContent = t('Enquiry copied. Paste it into an email to {email}.', { email: recipient });
     } catch {
-      copyStatus.textContent = `Your browser could not copy automatically. Select and copy the details above, then email ${recipient}.`;
+      copyStatus.textContent = t('Your browser could not copy automatically. Select and copy the details above, then email {email}.', { email: recipient });
     }
   });
 }

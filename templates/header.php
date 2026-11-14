@@ -5,7 +5,7 @@
     <?php require __DIR__ . '/partials/site-switch.php'; ?>
   </div>
   <nav class="bl-nav" aria-label="Main navigation" id="main-navigation">
-    <?php $labels = bl_editable('global')['header']; foreach ([['equipment', '/products/skid-steer-loaders/'], ['applications', '/applications/'], ['support', '/support/'], ['about', '/about/'], ['news', '/news/']] as $i => [$id, $path]): ?>
+    <?php $labels = bl_editable('global')['header']; foreach ([['equipment', bl_has_language('/products/skid-steer-loaders/', bl_lang()) || !bl_has_language('/products/mini-dumpers/', bl_lang()) ? '/products/skid-steer-loaders/' : '/products/mini-dumpers/' /* a language that has only the dumper range opens on it */], ['applications', '/applications/'], ['support', '/support/'], ['about', '/about/'], ['news', '/news/']] as $i => [$id, $path]): ?>
     <a href="<?= bl_escape(bl_url($path)) ?>" <?= bl_header_active($id, $activeType) ? 'aria-current="page"' : '' ?>><?= bl_escape($labels['labels'][$id]) ?><span class="bl-nav-index">0<?= $i + 1 ?></span></a>
     <?php if ($id === 'equipment'): /* Equipment opens on the loaders; this panel names both families (hover or keyboard focus; a sub-list in the phone menu). */ ?>
     <div class="bl-nav-panel">

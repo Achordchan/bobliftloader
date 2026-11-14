@@ -2,6 +2,7 @@
  * Catalogue filters: refilter the rendered cards in place as chips change, update the count beside each chip, and keep
  * the address shareable. Without this script the form submits and PHP filters the same way.
  */
+import { t } from './i18n.js';
 // Phones (the same widths as the contact bar): a model name (BL-T360-H, FY20-2) or a figure and its unit (0.15 m³,
 // 1,089 mm, the 2600 × of a size) never breaks across two lines. Each is wrapped in a <bl-nowrap> element (its own tag,
 // so no span rule of the site reaches it; pages.css keeps it on one line). The words and characters are untouched, so
@@ -72,7 +73,7 @@ export function initializeCatalog() {
     button.addEventListener('click', () => {
       const open = section.classList.toggle('bl-compare-short') === false;
       button.setAttribute('aria-expanded', String(open));
-      label.textContent = open ? 'Show fewer specs' : 'Show all specs';
+      label.textContent = t(open ? 'Show fewer specs' : 'Show all specs');
       if (open) return;
       // The table's top comes back just under the header and section bar; where the eight rows and the button do not
       // both fit above the contact bar, the button (which keeps focus) stays in sight instead.
@@ -98,7 +99,8 @@ export function initializeCatalog() {
   const query = form.querySelector('[data-catalog-query]');
 
   const readState = () => {
-    const state = { q: search.value.trim().toLowerCase() };
+    // Folded as the cards' data-search is (bl_search_fold): lower case, no accents, so "oruga" and "cucharon" match.
+    const state = { q: search.value.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() };
     groups.forEach((group) => { state[group] = form.querySelector(`[name="${group}"]:checked`)?.value ?? ''; });
     return state;
   };
@@ -119,7 +121,7 @@ export function initializeCatalog() {
       visible += show;
     });
     resultCount.textContent = visible;
-    resultNoun.textContent = visible === 1 ? 'result' : 'results';
+    resultNoun.textContent = t(visible === 1 ? 'result' : 'results');
     // A family group with nothing left disappears, and its heading counts what is still shown.
     familyGroups.forEach((group) => {
       const shown = group.querySelectorAll('[data-catalog-card]:not([hidden])').length;

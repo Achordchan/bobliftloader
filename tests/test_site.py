@@ -463,14 +463,51 @@ class WebsiteTests(unittest.TestCase):
         _, css, _ = fetch('/assets/css/pages.css')
         self.assertIn('label:has([name="company"]):not(:has([aria-required="true"])){display:none}', css)
 
-    def test_header_language_switch_placeholder(self):
-        _, html, _ = fetch('/about/')
+    def test_header_language_switch(self):
+        _, html, _ = fetch('/products/mini-dumpers/')
         nav = html.split('id="main-navigation"', 1)[1].split('</nav>', 1)[0]
         self.assertLess(nav.index('bl-search-toggle'), nav.index('bl-lang-switch'))
         self.assertLess(nav.index('bl-lang-switch'), nav.index('bl-nav-contact'))
         self.assertIn('class="bl-lang-current" aria-current="true"><b>English</b>', nav)
-        self.assertIn('More languages are on the way.', nav)
-        self.assertIn('bl-lang-switch bl-lang-switch-single', nav)  # English alone: kept out of the phone menu
+        self.assertRegex(nav, r'href="[^"]*/es/products/mini-dumpers/" hreflang="es" data-bl-lang="es" data-bl-same-page><b>Español</b>')
+        self.assertNotIn('bl-lang-switch-single', nav)
+        # A page with no Spanish version offers the Spanish home page instead.
+        _, html, _ = fetch('/about/')
+        nav = html.split('id="main-navigation"', 1)[1].split('</nav>', 1)[0]
+        self.assertRegex(nav, r'href="[^"]*/es/" hreflang="es"')
+
+    def test_spanish_pages(self):
+        for path in ('/es/', '/es/products/mini-dumpers/', '/es/product/500kg-tracked-mini-dumper/', '/es/contact/', '/es/thank-you/', '/es/privacy/'):
+            status, html, _ = fetch(path)
+            self.assertEqual(status, 200, path)
+            self.assertIn('<html lang="es">', html, path)
+            english = path[3:]
+            self.assertRegex(html, r'<link rel="alternate" hreflang="en" href="[^"]*' + re.escape(english) + '"', path)
+            self.assertRegex(html, r'<link rel="alternate" hreflang="es" href="[^"]*' + re.escape(path) + '"', path)
+            self.assertRegex(html, r'<link rel="alternate" hreflang="x-default" href="[^"]*' + re.escape(english) + '"', path)
+            self.assertRegex(html, r'<link rel="canonical" href="[^"]*' + re.escape(path) + '"', path)
+            self.assertIn('id="bl-i18n"', html, path)
+            status, english_html, _ = fetch(english)
+            self.assertRegex(english_html, r'<link rel="alternate" hreflang="es" href="[^"]*' + re.escape(path) + '"', english)
+            self.assertNotIn('id="bl-i18n"', english_html, english)
+        _, html, _ = fetch('/es/products/mini-dumpers/')
+        self.assertIn('Minidumpers', html)
+        self.assertIn('Solicite una cotización', html)
+        self.assertRegex(html, r'href="[^"]*/es/product/500kg-tracked-mini-dumper/"')
+        # The catalogue finds models by their Spanish names too, with or without accents, and still by the English ones.
+        for query in ('orugas', 'ORUGAS', 'tracked'):
+            _, html, _ = fetch('/es/products/mini-dumpers/?q=' + query)
+            found = re.findall(r'data-search="([^"]*)"', ' '.join(visible_cards(html)))
+            self.assertTrue(any('sobre orugas' in text for text in found), query)
+            self.assertTrue(all(query.lower() in text for text in found), query)
+        _, html, _ = fetch('/es/products/mini-dumpers/?q=cami%C3%B3n')
+        self.assertEqual(visible_cards(html), [], 'a word no model has finds nothing')
+        # Pages not translated yet are not found under /es/, and have no Spanish alternate.
+        status, _, _ = fetch('/es/about/')
+        self.assertEqual(status, 404)
+        _, html, _ = fetch('/about/')
+        self.assertNotIn('hreflang="es"', html.split('</head>', 1)[0])
+        with open('inc/i18n/es.php') as source: self.assertIn("'Rated load' => 'Carga nominal'", source.read())
 
     def test_thank_you_page_follows_the_sent_enquiry(self):
         status, html, _ = fetch('/thank-you/')
