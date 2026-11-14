@@ -193,8 +193,9 @@ add_action('after_setup_theme', static function (): void {
 // Addresses need the site's routes, so they are worked out when the plugin asks.
 add_filter('achord_inquiry_config', static function (array $config): array {
     if (!current_theme_supports('achord-inquiry')) return $config;
-    $config['success_url'] = home_url('/thank-you/');
-    $config['fallback_url'] = home_url('/contact/');
+    // The thank-you and contact pages in the language the form was sent from, where that language has them.
+    $config['success_url'] = home_url(bl_has_language('/thank-you/', bl_lang()) ? bl_lang_path('/thank-you/', bl_lang()) : '/thank-you/');
+    $config['fallback_url'] = home_url(bl_has_language('/contact/', bl_lang()) ? bl_lang_path('/contact/', bl_lang()) : '/contact/');
     $config['logo_url'] = bl_wp_inquiry_absolute_url(bl_brand_logo());
     return $config;
 });
@@ -330,7 +331,23 @@ function bl_wp_inquiry_mail_recipients(array $args): array
     return $args;
 }
 add_filter('wp_mail', 'bl_wp_inquiry_mail_recipients');
-add_filter('achord_inquiry_page_language', static fn(): string => 'en');
+add_filter('achord_inquiry_page_language', static fn(): string => bl_lang());
+
+// An enquiry sent from a page in another language is answered in it: its language comes with the form (the plugin's
+// hidden lang field), so the replies, the thank-you page and the messages follow it.
+add_action('achord_inquiry_before_handle', static function (): void {
+    $posted = function_exists('achord_inquiry_name') ? sanitize_key((string) wp_unslash($_POST[achord_inquiry_name('lang')] ?? '')) : '';
+    if (bl_i18n_language($posted)) $GLOBALS['bl_lang'] = $posted;
+});
+add_filter('achord_inquiry_message', static fn($message) => bl_t((string) $message), 20);
+
+// DingTalk names the page's language first when it is not English, so the sales team answers in it.
+add_filter('achord_inquiry_dingtalk_rows', static function (array $rows, array $fields): array {
+    $code = (string) ($fields['language'] ?? '');
+    $language = bl_i18n_language($code);
+    if (!$language) return $rows;
+    return [['label' => '语言', 'value' => $language['zh'] . '（' . strtoupper($code) . '）', 'long' => false], ...$rows];
+}, 20, 2);
 
 /**
  * Until 设置 → 询盘设置 is saved: the IP is kept with each enquiry (Flamingo kept it too, and the privacy page says so), and
@@ -381,9 +398,9 @@ function bl_wp_inquiry_form(array $atts): string
     foreach (BL_ENQUIRY_FAMILIES as $label) {
         $choices .= '<span class="bl-radio-item"><label><input type="radio" name="product" value="' . esc_attr($label) . '"' . ($label === $chosen ? ' checked' : '') . '><span class="bl-radio-label">' . esc_html($label) . '</span></label></span>';
     }
-    $privacy = esc_url(wp_make_link_relative(home_url('/privacy/')));
+    $privacy = esc_url(wp_make_link_relative(bl_url('/privacy/')));
     $field = static fn(string $label, string $input): string => '<label>' . $label . $input . '</label>';
-    $hidden = achord_inquiry_hidden_fields(['source' => (string) ($atts['source'] ?? ''), 'language' => 'en']);
+    $hidden = achord_inquiry_hidden_fields(['source' => (string) ($atts['source'] ?? ''), 'language' => bl_lang()]);
     $turnstile = achord_inquiry_turnstile_widget('bl-turnstile', true);
     return '<form class="bl-inquiry-form" method="post" action="' . esc_url(achord_inquiry_action_url()) . '" data-nonce-url="' . esc_url(admin_url('admin-ajax.php?action=bl_inquiry_nonce')) . '">'
         . '<fieldset><legend>01 / YOUR EQUIPMENT</legend><span class="bl-radio">' . $choices . '</span>'

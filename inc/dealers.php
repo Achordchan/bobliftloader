@@ -64,7 +64,7 @@ function bl_dealer_form(): string
         return '<span class="bl-radio">' . $html . '</span>';
     };
     $field = static fn(string $label, string $input): string => '<label>' . $label . $input . '</label>';
-    $hidden = $live ? achord_inquiry_hidden_fields(['source' => 'Dealer application', 'language' => 'en']) . '<input type="hidden" name="bl_lead" value="dealer">' : '';
+    $hidden = $live ? achord_inquiry_hidden_fields(['source' => 'Dealer application', 'language' => bl_lang()]) . '<input type="hidden" name="bl_lead" value="dealer">' : '';
     $turnstile = $live ? achord_inquiry_turnstile_widget('bl-turnstile', true) : '';
     $action = $live ? ' method="post" action="' . bl_escape(achord_inquiry_action_url()) . '" data-nonce-url="' . bl_escape(admin_url('admin-ajax.php?action=bl_inquiry_nonce')) . '"' : ' action="#" onsubmit="return false"';
     return '<form class="bl-inquiry-form bl-dealer-form"' . $action . '>'

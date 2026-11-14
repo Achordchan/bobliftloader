@@ -169,9 +169,11 @@ function bl_script_import_map(): string
     return (string) json_encode(['imports' => $imports], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
 }
 
+/** A page of this site; on a page in another language, that language's version where it has one (inc/i18n.php). */
 function bl_url(string $path = '/'): string
 {
-    return bl_is_wordpress() ? home_url('/' . ltrim($path, '/')) : '/' . ltrim($path, '/');
+    $url = bl_is_wordpress() ? home_url('/' . ltrim($path, '/')) : '/' . ltrim($path, '/');
+    return function_exists('bl_i18n_localize_href') ? bl_i18n_localize_href($url) : $url;
 }
 
 function bl_escape(string $text): string

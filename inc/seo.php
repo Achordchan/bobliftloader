@@ -24,7 +24,7 @@ function bl_structured_data(array $route): array
     if ($places) $organization['location'] = $places;
     $graph = [$organization,
         ['@type' => 'WebSite', '@id' => $base . '/#website', 'url' => $base . '/', 'name' => 'BOB-LIFT Loader', 'alternateName' => 'BOB-LIFT', 'description' => 'The loader equipment business website of ' . bl_company('name'), 'publisher' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
-        ['@type' => $route['type'] === 'about' ? 'AboutPage' : ($route['type'] === 'contact' ? 'ContactPage' : 'WebPage'), '@id' => $base . $route['path'] . '#webpage', 'url' => $base . $route['path'], 'name' => $route['title'], 'description' => $route['description'], 'isPartOf' => ['@id' => $base . '/#website'], 'about' => ['@id' => $organization['@id']], 'inLanguage' => 'en'],
+        ['@type' => $route['type'] === 'about' ? 'AboutPage' : ($route['type'] === 'contact' ? 'ContactPage' : 'WebPage'), '@id' => $base . bl_lang_path($route['path'], bl_lang()) . '#webpage', 'url' => $base . bl_lang_path($route['path'], bl_lang()), 'name' => $route['title'], 'description' => $route['description'], 'isPartOf' => ['@id' => $base . '/#website'], 'about' => ['@id' => $organization['@id']], 'inLanguage' => BL_I18N_LANGUAGES[bl_lang()]['hreflang']],
     ];
     // No Product node: Google's product snippets need a price, a review or a rating, and the site states none of them.
     if ($route['type'] === 'application_case') {
@@ -141,7 +141,8 @@ function bl_seo_title(array $route): string
 function bl_render_seo(array $route): void
 {
     $title = bl_seo_title($route);
-    $canonical = bl_public_base() . $route['path'];
+    $lang = bl_lang();
+    $canonical = bl_public_base() . bl_lang_path($route['path'], $lang);
     $filtered = (bool) array_filter(['q', 's', 'load', 'gear', 'operator', 'opening', 'payload', 'category', 'product'], static fn($key) => bl_query($key) !== '');
     $robots = $route['status'] === 200 && bl_indexable() && !$filtered && empty($route['preview']) && $route['type'] !== 'thanks' ? 'index, follow, max-image-preview:large' : 'noindex, follow';
     $image = bl_absolute_asset(bl_share_image($route));
@@ -149,7 +150,14 @@ function bl_render_seo(array $route): void
     echo '<meta name="description" content="' . bl_escape($route['description']) . '">';
     echo '<meta name="robots" content="' . $robots . '">';
     if ($route['status'] === 200 && empty($route['preview'])) echo '<link rel="canonical" href="' . bl_escape($canonical) . '">';
-    foreach (['og:type' => in_array($route['type'], ['article', 'application_case'], true) ? 'article' : 'website', 'og:title' => $title, 'og:description' => $route['description'], 'og:url' => $canonical, 'og:image' => $image, 'og:site_name' => 'BOB-LIFT Loader', 'og:locale' => 'en_US'] as $key => $value) echo '<meta property="' . $key . '" content="' . bl_escape($value) . '">';
+    foreach (['og:type' => in_array($route['type'], ['article', 'application_case'], true) ? 'article' : 'website', 'og:title' => $title, 'og:description' => $route['description'], 'og:url' => $canonical, 'og:image' => $image, 'og:site_name' => 'BOB-LIFT Loader', 'og:locale' => BL_I18N_LANGUAGES[$lang]['locale']] as $key => $value) echo '<meta property="' . $key . '" content="' . bl_escape($value) . '">';
+    // The page in every language it has, both ways, English as the default (only for pages translated at least once).
+    $alternates = array_filter(bl_i18n_alternates($route['path']));
+    if ($route['status'] === 200 && empty($route['preview']) && count($alternates) > 1) {
+        foreach ($alternates as $code => $path) echo '<link rel="alternate" hreflang="' . BL_I18N_LANGUAGES[$code]['hreflang'] . '" href="' . bl_escape(bl_public_base() . $path) . '">';
+        echo '<link rel="alternate" hreflang="x-default" href="' . bl_escape(bl_public_base() . $alternates['en']) . '">';
+        foreach ($alternates as $code => $path) if ($code !== $lang) echo '<meta property="og:locale:alternate" content="' . BL_I18N_LANGUAGES[$code]['locale'] . '">';
+    }
     echo '<meta name="twitter:card" content="summary_large_image">';
     echo '<meta name="twitter:title" content="' . bl_escape($title) . '">';
     if ($route['status'] === 200 && empty($route['preview'])) echo '<script type="application/ld+json">' . json_encode(bl_structured_data($route), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>';

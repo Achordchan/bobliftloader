@@ -23,9 +23,11 @@ if ($route['type'] === 'showcase') {
     require __DIR__ . '/templates/bl360.php';
     return;
 }
+// A page in another language is drawn in English and translated on the way out (inc/i18n.php).
+if (bl_lang() !== 'en') ob_start('bl_i18n_output');
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="<?= bl_escape(BL_I18N_LANGUAGES[bl_lang()]['hreflang']) ?>">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -39,6 +41,7 @@ if ($route['type'] === 'showcase') {
   <?php if ($route['type'] === 'home'): $heroImages = bl_home_hero_images(); ?><link rel="preload" href="<?= bl_escape($heroImages['wide']) ?>" as="image" media="(min-width: 801px)" fetchpriority="high"><?php if ($heroImages['portrait']): ?><link rel="preload" href="<?= bl_escape($heroImages['portrait']) ?>" as="image" media="<?= BL_HERO_PORTRAIT_MEDIA ?>" fetchpriority="high"><?php foreach (['(min-width: 481px) and (max-width: 800px)', '(max-width: 480px) and (max-height: 500px)'] as $media): ?><link rel="preload" href="<?= bl_escape($heroImages['narrow']) ?>" as="image" media="<?= $media ?>" fetchpriority="high"><?php endforeach; ?><?php else: ?><link rel="preload" href="<?= bl_escape($heroImages['narrow']) ?>" as="image" media="(max-width: 800px)" fetchpriority="high"><?php endif; endif; ?>
   <?php if ($route['type'] === 'about'): ?><link rel="preload" as="image" imagesrcset="<?= bl_escape(bl_content_asset('about', 'hero.image_small', 'images/about/hall-1200.webp')) ?> 1200w, <?= bl_escape(bl_content_asset('about', 'hero.image', 'images/about/hall-2560.webp')) ?> 2560w" imagesizes="100vw" fetchpriority="high"><?php endif; ?>
   <?php foreach (['base', 'home', 'components', 'responsive', 'pages', 'page-responsive', ...($route['type'] === 'about' ? ['about'] : []), ...(in_array($route['type'], ['applications', 'application', 'application_case'], true) ? ['applications'] : []), ...(in_array($route['type'], ['news', 'article', 'application_case'], true) ? ['news'] : []), ...($route['type'] === 'product' ? ['product'] : [])] as $stylesheet): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset_versioned('css/' . $stylesheet . '.css')) ?>"><?php endforeach; ?>
+  <?= bl_i18n_script_dictionary() ?>
   <script type="importmap"><?= bl_script_import_map() ?></script>
   <script type="module" src="<?= bl_escape(bl_asset_versioned('js/main.js')) ?>"></script>
   <?php if (bl_is_wordpress()) wp_head(); ?>

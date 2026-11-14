@@ -73,6 +73,8 @@ function bl_resolve_route(?string $requestPath = null): array
     }
     // WordPress finds no post at the showcase address (the page is the theme's own, not a WordPress page), so its 404 does not apply there.
     if (bl_is_wordpress() && is_404() && $route['type'] !== 'showcase') $route['status'] = 404;
+    // Under a language folder only the pages translated into that language exist (inc/i18n.php).
+    if ($route['status'] === 200 && !bl_has_language($route['path'], bl_lang()) && empty($route['preview'])) $route['status'] = 404;
     if ($route['status'] === 404) $route['type'] = '404';
     return $route;
 }
@@ -97,6 +99,11 @@ function bl_sitemap_paths(): array
     if (bl_showcase_products()) $paths[] = BL_SHOWCASE_PATH;
     foreach (bl_application_cases() as $case) $paths[] = '/application/' . $case['slug'] . '/';
     foreach (bl_articles() as $article) $paths[] = '/news/' . $article['slug'] . '/';
+    // Each page translated into another language, at its address in that language's folder.
+    foreach (array_keys(BL_I18N_LANGUAGES) as $code) {
+        if ($code === 'en') continue;
+        foreach ($paths as $path) if (bl_has_language($path, $code)) $paths[] = bl_lang_path($path, $code);
+    }
     return $paths;
 }
 

@@ -4,6 +4,7 @@
  * next slide. Hovering or focusing the hero holds the line; choosing a slide or the pause button stops the turns, and
  * they never start for visitors who ask for reduced motion.
  */
+import { t } from './i18n.js';
 export function initializeHero() {
   const hero = document.querySelector('[data-hero]');
   const switchRow = hero?.querySelector('[data-hero-switch]');
@@ -36,7 +37,7 @@ export function initializeHero() {
 
   const setPlaying = (playing) => {
     hero.toggleAttribute('data-hero-playing', playing);
-    pause.setAttribute('aria-label', playing ? 'Pause the slideshow' : 'Play the slideshow');
+    pause.setAttribute('aria-label', t(playing ? 'Pause the slideshow' : 'Play the slideshow'));
   };
   const show = (next) => {
     if (next === current) return;

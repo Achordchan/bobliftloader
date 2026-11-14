@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { initializeAttachmentLoops } from './attachment-loops.js';
 import { initializeAttribution } from './attribution.js';
 import { initializeConsent } from './consent.js';
@@ -59,7 +60,7 @@ else window.addEventListener('load', panelPictures, { once: true });
 // The root carries the menu's state too, so the stylesheet can clear the contact bar without :has().
 function closeNavigation(returnFocus = false) {
   menuToggle.setAttribute('aria-expanded', 'false');
-  menuToggle.setAttribute('aria-label', 'Open navigation');
+  menuToggle.setAttribute('aria-label', t('Open navigation'));
   navigation.classList.remove('bl-open');
   document.documentElement.classList.remove('bl-menu-on');
   if (returnFocus) menuToggle.focus();
@@ -68,7 +69,7 @@ function closeNavigation(returnFocus = false) {
 menuToggle.addEventListener('click', () => {
   const open = menuToggle.getAttribute('aria-expanded') !== 'true';
   menuToggle.setAttribute('aria-expanded', String(open));
-  menuToggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+  menuToggle.setAttribute('aria-label', t(open ? 'Close navigation' : 'Open navigation'));
   // The open menu fills the screen below the header, which sits lower while the event bar above it is in view.
   if (open) navigation.style.setProperty('--bl-nav-top', `${Math.max(0, Math.round(header.getBoundingClientRect().bottom))}px`);
   navigation.classList.toggle('bl-open', open);

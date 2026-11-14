@@ -92,3 +92,22 @@
 | `docs/qa-multipage/` | 桌面、手机、WordPress、布局检查证据 |
 | `design-qa.md` | 当前多页面验收报告，上一版存于 `docs/archive/home-v1-qa.md` |
 | `dist/bobliftloader-theme.zip` | 可安装 WordPress 主题包 |
+
+## 西班牙语版（/es/，2026-11）
+
+| 文件 | 改动 |
+| --- | --- |
+| `inc/i18n.php` | 新增：语言识别（去掉 `/es` 前缀）、页面清单、链接本地化、词典、整页 HTML 翻译器（行内标签占位、属性、meta、JSON-LD、WhatsApp 预填）、脚本词典 |
+| `inc/i18n/es.php` | 新增：第一期 6 个页面的西语词典（DeepL ES-419 + 人工校对） |
+| `inc/languages.php` | 语言切换数据改为真实语言列表；注册 `bl_i18n_es_pages` / `bl_i18n_es_strings` 设置（REST 可写） |
+| `templates/partials/language-switch.php` | 显示 English / Español，链到本页的另一语言版（没有就到该语言首页） |
+| `index.php` | `<html lang>` 跟语言；非英语页输出前翻译；输出脚本词典 |
+| `inc/seo.php` | canonical、hreflang（en / es / x-default）、og:locale 跟语言 |
+| `inc/routes.php` | 没有西语版的页面在 `/es/` 下 404；站点地图加西语页 |
+| `inc/helpers.php` | `bl_url()` 按当前语言给链接 |
+| `inc/wp-inquiry.php`、`inc/dealers.php` | 表单带语言；西语感谢页 / 联系页；插件提示语翻译；钉钉语言行 |
+| `functions.php`、`inc/bootstrap.php` | 加载 i18n；WordPress 自带的跳转保留 `/es/` |
+| `templates/header.php`、`home.php`、`pages/product.php`、`pages/products.php`、`partials/related-guides.php`、`footer.php` | 没西语版的文章 / 栏目在西语页不出现；WhatsApp、邮件主题走词典；版权年份单独成段 |
+| `assets/js/i18n.js` 与 main / hero / catalog / ruler / inquiry | 脚本里显示的文字走 `t()` |
+| `tools/i18n/collect.php`、`tools/i18n/keep.txt` | 列出页面上词典还缺的文字 |
+| `tests/test_i18n.php`、`tests/test_i18n_inquiry.php`、`tests/test_site.py` | 西语路径、翻译、词典、询盘语言和整站 `/es/` 页面测试 |
