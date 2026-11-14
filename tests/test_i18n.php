@@ -54,6 +54,9 @@ $check(bl_i18n_localize_href('/about/') === '/about/', 'an untranslated page sta
 $check(bl_i18n_localize_href('https://bobliftcrane.com/') === 'https://bobliftcrane.com/', 'another site is left alone');
 $check(bl_i18n_localize_href('/es/contact/') === '/es/contact/', 'a link already in Spanish is not doubled');
 $check(bl_i18n_localize_href('/wp-content/uploads/a.pdf') === '/wp-content/uploads/a.pdf', 'files are left alone');
+$check(bl_i18n_redirect('https://example.test/contact/') === 'https://example.test/es/contact/', 'a WordPress redirect to a translated page stays in Spanish');
+$check(bl_i18n_redirect('https://example.test/about/') === false, 'a WordPress redirect to a page without Spanish is cancelled (the theme answers 404)');
+$check(bl_i18n_redirect('https://other.test/about/') === 'https://other.test/about/' && bl_i18n_redirect('https://example.test/wp-content/x.pdf') === 'https://example.test/wp-content/x.pdf', 'redirects to other sites and files are left alone');
 $check(bl_url('/thank-you/') === bl_i18n_localize_href(bl_url('/thank-you/')) && str_contains(bl_url('/thank-you/'), '/es/thank-you/'), 'bl_url localises');
 
 // The translator: text runs with inline markup, attributes, meta, structured data and links.

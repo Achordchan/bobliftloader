@@ -116,6 +116,30 @@ function bl_lang_path(string $path, string $lang): string
     return '/' . $lang . '/' . ltrim($path, '/');
 }
 
+/**
+ * WordPress's own redirect (redirect_canonical, old_slug_redirect_url) on a page in another language: kept in that
+ * language where the destination has a version in it, cancelled (false) where it is a page of this site that the
+ * language does not have, so /es/about answers 404 like /es/about/ rather than landing on the English page.
+ */
+function bl_i18n_redirect($redirect)
+{
+    $lang = bl_lang();
+    if (!is_string($redirect) || $redirect === '' || $lang === 'en') return $redirect;
+    $localized = bl_i18n_localize_href($redirect, $lang);
+    if ($localized !== $redirect) return $localized;
+    $parts = parse_url($redirect);
+    if ($parts === false) return $redirect;
+    if (isset($parts['host'])) {
+        $home = function_exists('home_url') ? (string) parse_url(home_url('/'), PHP_URL_HOST) : '';
+        if (preg_replace('/^www\./', '', strtolower((string) $parts['host'])) !== preg_replace('/^www\./', '', strtolower($home))) return $redirect; // another site
+    }
+    $path = (string) ($parts['path'] ?? '/');
+    $base = bl_i18n_base();
+    if ($base !== '' && str_starts_with($path, $base . '/')) $path = substr($path, strlen($base));
+    if (str_starts_with($path, '/wp-') || str_starts_with($path, '/' . $lang . '/')) return $redirect; // files, admin, already in the language
+    return bl_has_language($path, $lang) ? $redirect : false;
+}
+
 /** The current page's counterpart in each language: its address, or '' when that language has no such page. */
 function bl_i18n_alternates(string $path): array
 {

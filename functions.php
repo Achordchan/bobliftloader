@@ -62,8 +62,9 @@ add_filter('jetpack_enable_open_graph', '__return_false');
 add_filter('robots_txt', 'bl_allow_ai_crawlers', 99999);
 add_action('init', 'bl_register_content_types');
 // On a page in another language, WordPress's own redirects (a missing trailing slash, an old slug) keep the language folder.
-add_filter('redirect_canonical', static fn($redirect) => is_string($redirect) && bl_lang() !== 'en' ? bl_i18n_localize_href($redirect) : $redirect, 99);
-add_filter('old_slug_redirect_url', static fn($redirect) => is_string($redirect) && bl_lang() !== 'en' ? bl_i18n_localize_href($redirect) : $redirect, 99);
+// A redirect to a page that language does not have yet is dropped, so the theme answers 404 (inc/routes.php).
+add_filter('redirect_canonical', 'bl_i18n_redirect', 99);
+add_filter('old_slug_redirect_url', 'bl_i18n_redirect', 99);
 add_action('template_redirect', 'bl_wp_application_route', 0);
 add_action('template_redirect', 'bl_wp_sitemap_page', 0);
 // /llms.txt for AI assistants (inc/llms.php); its opening text is a setting editable over REST.
