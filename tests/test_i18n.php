@@ -28,7 +28,16 @@ $rows = bl_languages('/about/');
 $check(array_column($rows, 'code') === ['en', 'es', 'de'] && $rows[1]['name'] === 'Español' && $rows[2]['url'] === 'https://de.example.test/' && !$rows[2]['current'], 'saved languages the theme does not translate still show, after its own: ' . json_encode($rows));
 $check($rows[1]['url'] === 'https://elsewhere.test/', 'a saved destination on another website for a theme language is kept: ' . $rows[1]['url']);
 $GLOBALS['options']['bl_languages'][1]['url'] = 'https://example.test/es/old/';
-$check(bl_languages('/contact/')[1]['url'] === 'https://example.test/es/contact/', 'a saved destination on this site gives way to the theme pages');
+$check(bl_languages('/contact/')[1]['url'] === 'https://example.test/es/contact/', 'a saved destination in the theme\'s own /es/ section gives way to the theme pages');
+foreach (['https://example.test/', 'https://www.example.test', '/'] as $plain) {
+    $GLOBALS['options']['bl_languages'][1]['url'] = $plain;
+    $check(bl_languages('/contact/')[1]['url'] === 'https://example.test/es/contact/', 'this site\'s home page saved for Spanish gives way too: ' . $plain);
+}
+foreach (['https://example.test/latam/' => 'https://example.test/latam/', '/spanish/' => (bl_is_wordpress() ? 'https://example.test/spanish/' : '/spanish/')] as $saved => $expected) {
+    $GLOBALS['options']['bl_languages'][1]['url'] = $saved;
+    $row = bl_languages('/contact/')[1];
+    $check($row['url'] === $expected && !$row['same_page'], 'a custom Spanish section on this site is kept: ' . $saved . ' -> ' . json_encode($row));
+}
 $GLOBALS['options']['bl_languages'][2]['url'] = '/de/';
 $check(bl_languages('/about/')[2]['url'] === (bl_is_wordpress() ? 'https://example.test/de/' : '/de/'), 'a saved language at a path on this site is resolved against the site');
 unset($GLOBALS['options']['bl_languages']);

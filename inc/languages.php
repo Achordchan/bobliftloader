@@ -6,29 +6,42 @@ declare(strict_types=1);
  * the current one first, each with the address of this page in it, else that language's home page, else none (shown as
  * not yet available). Rows saved in the older option bl_languages (REST /wp/v2/settings: code, name, url) for a code the
  * theme does not translate itself still follow, as links to wherever they point (another site, say). A row for a code
- * the theme has counts only when it points to another website; otherwise the theme knows where that language's pages are.
+ * the theme has counts when it points somewhere other than the theme's own section for that language (/es/) or the home page.
  */
 function bl_languages(string $path = '/'): array
 {
     $current = bl_lang();
     $saved = function_exists('get_option') ? get_option('bl_languages') : null;
     $saved = is_array($saved) ? array_values(array_filter($saved, 'is_array')) : [];
-    // A saved row that sends one of the theme's languages to another website (a Spanish site kept elsewhere, say) still
-    // wins in the switch: someone chose that destination. A path on this site, or this site's own address, does not.
-    $elsewhere = [];
+    // A saved row that sends one of the theme's languages somewhere of its own (a Spanish site kept elsewhere, or a section
+    // such as /spanish/ on this site) still wins in the switch: someone chose that destination. Only the theme's own section
+    // for that language (/es/…) and this site's home page give way, since the theme now knows where those pages are.
+    $custom = [];
+    $siteHost = static fn(string $host): string => preg_replace('/^www\./', '', strtolower($host));
     $home = function_exists('home_url') ? (string) parse_url(home_url('/'), PHP_URL_HOST) : '';
+    $homePath = function_exists('home_url') ? rtrim((string) parse_url(home_url('/'), PHP_URL_PATH), '/') : '';
     foreach ($saved as $language) {
         $code = strtolower(trim((string) ($language['code'] ?? '')));
         $url = trim((string) ($language['url'] ?? ''));
+        if ($code === 'en' || !isset(BL_I18N_LANGUAGES[$code]) || $url === '') continue;
         $host = (string) parse_url($url, PHP_URL_HOST);
-        if ($code !== 'en' && isset(BL_I18N_LANGUAGES[$code]) && preg_match('~^https?://~i', $url) && $host !== '' && preg_replace('/^www\./', '', strtolower($host)) !== preg_replace('/^www\./', '', strtolower($home))) $elsewhere[$code] = $url;
+        if ($host !== '') {
+            if (!preg_match('~^https?://~i', $url)) continue;
+            if ($home === '' || $siteHost($host) !== $siteHost($home)) { $custom[$code] = $url; continue; }
+        } elseif (!str_starts_with($url, '/') || str_starts_with($url, '//')) {
+            continue;
+        }
+        $target = (string) parse_url($url, PHP_URL_PATH);
+        if ($homePath !== '' && ($target === $homePath || str_starts_with($target, $homePath . '/'))) $target = substr($target, strlen($homePath));
+        if (trim($target, '/') === '' || preg_match('~^/' . preg_quote($code, '~') . '(/|$)~i', $target)) continue;
+        $custom[$code] = $host === '' && bl_is_wordpress() ? home_url($url) : $url;
     }
     $rows = [];
     foreach (BL_I18N_LANGUAGES as $code => $language) {
-        $samePage = bl_has_language($path, $code) && !isset($elsewhere[$code]);
+        $samePage = bl_has_language($path, $code) && !isset($custom[$code]);
         $url = bl_has_language($path, $code) ? bl_lang_path($path, $code) . bl_i18n_switch_query() : (bl_has_language('/', $code) ? bl_lang_path('/', $code) : '');
         $url = $url === '' ? '' : (bl_is_wordpress() ? home_url($url) : $url);
-        if (isset($elsewhere[$code]) && $code !== $current) $url = $elsewhere[$code];
+        if (isset($custom[$code]) && $code !== $current) $url = $custom[$code];
         // same_page: this page in that language, so the switch may take the page's choices along (language-suggest.js).
         $row = ['code' => $code, 'name' => $language['name'], 'url' => $url, 'current' => $code === $current, 'same_page' => $samePage];
         if ($code === $current) array_unshift($rows, $row); else $rows[] = $row;
@@ -65,7 +78,7 @@ function bl_i18n_switch_query(): string
 if (function_exists('add_action')) add_action('init', static function (): void {
     register_setting('bl_languages', 'bl_languages', [
         'type' => 'array',
-        'description' => '页眉语言切换器里主题之外的语言：code（如 de）、name（显示名，如 Deutsch）、url（该语言的网址，可以是别的网站；留空显示为即将上线）。英语和西班牙语由主题自己管（inc/i18n.php），这里写了也不用。',
+        'description' => '页眉语言切换器里主题之外的语言：code（如 de）、name（显示名，如 Deutsch）、url（该语言的网址，可以是别的网站；留空显示为即将上线）。英语和西班牙语由主题自己管（inc/i18n.php）；西班牙语这里写了别的网址（别的网站或本站其他栏目，如 /spanish/）时切换器用它，写 /es/、首页或留空则用主题的 /es/ 页面。',
         'default' => [],
         'sanitize_callback' => static function ($value): array {
             $rows = [];
