@@ -64,6 +64,29 @@ const server = http.createServer((request, response) => {
     assert.equal(await tab.getAttribute('link[hreflang="es"]', 'href'), '/es/contact/', 'the hreflang link stays bare');
     await context.close();
 
+    // The catalogue changes the address as filters are used (history.replaceState): the card follows it at the click.
+    context = await browser.newContext({ locale: 'es-MX' });
+    tab = await context.newPage();
+    await tab.goto(`${origin}/contact/?payload=2000&gclid=abc`);
+    await tab.waitForSelector('.bl-lang-suggest a', { state: 'attached', timeout: 5000 });
+    assert.equal(await tab.getAttribute('.bl-lang-suggest a', 'href'), `${origin}/es/contact/?payload=2000`, 'the range load goes along, the click id does not');
+    await tab.evaluate(() => history.replaceState(null, '', '/contact/?payload=1500&running=tracked'));
+    await tab.evaluate(() => { const a = document.querySelector('.bl-lang-suggest a'); a.addEventListener('click', (event) => event.preventDefault()); a.click(); });
+    assert.equal(await tab.getAttribute('.bl-lang-suggest a', 'href'), `${origin}/es/contact/?payload=1500&running=tracked`, 'the card takes the address as it is at the click');
+    assert.equal(await tab.evaluate(() => localStorage.getItem('blLanguageChoice')), 'es');
+    await context.close();
+
+    // The quick enquiry (quick.js marks the root bl-quick-on) hides the card, opened before or after it appears.
+    context = await browser.newContext({ locale: 'es-MX' });
+    tab = await context.newPage();
+    await tab.goto(`${origin}/contact/`);
+    await tab.evaluate(() => document.documentElement.classList.add('bl-quick-on'));
+    await tab.waitForSelector('.bl-lang-suggest', { state: 'attached', timeout: 5000 });
+    assert.equal(await tab.evaluate(() => document.querySelector('.bl-lang-suggest').hidden), true, 'no card over an open quick enquiry');
+    await tab.evaluate(() => document.documentElement.classList.remove('bl-quick-on'));
+    assert.equal(await tab.evaluate(() => document.querySelector('.bl-lang-suggest').hidden), false, 'the card comes back when the enquiry closes');
+    await context.close();
+
     // No card for a browser in the page's own language.
     context = await browser.newContext({ locale: 'en-US' });
     tab = await context.newPage();

@@ -7,7 +7,7 @@ $languages = bl_languages($route['path'] ?? '/'); $current = $languages[0]; $ava
     <p>Language</p>
     <ul>
       <?php foreach ($languages as $language): $code = strtoupper($language['code']); ?>
-      <li lang="<?= bl_escape($language['code']) ?>"><?php if ($language['current']): ?><span class="bl-lang-current" aria-current="true"><b><?= bl_escape($language['name']) ?></b><small><?= bl_escape($code) ?></small></span><?php elseif ($language['url'] !== ''): ?><a href="<?= bl_escape($language['url']) ?>" hreflang="<?= bl_escape($language['code']) ?>" data-bl-lang="<?= bl_escape($language['code']) ?>"><b><?= bl_escape($language['name']) ?></b><small><?= bl_escape($code) ?></small></a><?php else: ?><span class="bl-lang-soon"><b><?= bl_escape($language['name']) ?></b><small>Soon</small></span><?php endif; ?></li>
+      <li lang="<?= bl_escape($language['code']) ?>"><?php if ($language['current']): ?><span class="bl-lang-current" aria-current="true"><b><?= bl_escape($language['name']) ?></b><small><?= bl_escape($code) ?></small></span><?php elseif ($language['url'] !== ''): ?><a href="<?= bl_escape($language['url']) ?>" hreflang="<?= bl_escape($language['code']) ?>" data-bl-lang="<?= bl_escape($language['code']) ?>"<?= !empty($language['same_page']) ? ' data-bl-same-page' : '' ?>><b><?= bl_escape($language['name']) ?></b><small><?= bl_escape($code) ?></small></a><?php else: ?><span class="bl-lang-soon"><b><?= bl_escape($language['name']) ?></b><small>Soon</small></span><?php endif; ?></li>
       <?php endforeach; ?>
     </ul>
     <?php if ($available < 2): ?><p class="bl-lang-note">More languages are on the way.</p><?php endif; ?>

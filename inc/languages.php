@@ -25,10 +25,12 @@ function bl_languages(string $path = '/'): array
     }
     $rows = [];
     foreach (BL_I18N_LANGUAGES as $code => $language) {
+        $samePage = bl_has_language($path, $code) && !isset($elsewhere[$code]);
         $url = bl_has_language($path, $code) ? bl_lang_path($path, $code) . bl_i18n_switch_query() : (bl_has_language('/', $code) ? bl_lang_path('/', $code) : '');
         $url = $url === '' ? '' : (bl_is_wordpress() ? home_url($url) : $url);
         if (isset($elsewhere[$code]) && $code !== $current) $url = $elsewhere[$code];
-        $row = ['code' => $code, 'name' => $language['name'], 'url' => $url, 'current' => $code === $current];
+        // same_page: this page in that language, so the switch may take the page's choices along (language-suggest.js).
+        $row = ['code' => $code, 'name' => $language['name'], 'url' => $url, 'current' => $code === $current, 'same_page' => $samePage];
         if ($code === $current) array_unshift($rows, $row); else $rows[] = $row;
     }
     foreach ($saved as $language) {
@@ -37,22 +39,25 @@ function bl_languages(string $path = '/'): array
         if (!preg_match('/^[a-z]{2,3}(-[a-z0-9]{2,8})?$/', $code) || $name === '' || isset(BL_I18N_LANGUAGES[$code]) || in_array($code, array_column($rows, 'code'), true)) continue;
         $url = trim((string) ($language['url'] ?? ''));
         if (str_starts_with($url, '/') && !str_starts_with($url, '//') && bl_is_wordpress()) $url = home_url($url); // a path on this site, as a subfolder install has it
-        $rows[] = ['code' => $code, 'name' => $name, 'url' => $url, 'current' => false];
+        $rows[] = ['code' => $code, 'name' => $name, 'url' => $url, 'current' => false, 'same_page' => false];
     }
     return $rows;
 }
 
 /**
- * The choices a page was opened with that its counterpart should keep: the enquiry's product and equipment, and the
- * catalogue's filters and search. Anything else (tracking tags, say) stays with the address it came on.
+ * The choices a page was opened with, for its counterpart in another language: the enquiry's product and equipment, the
+ * catalogue's filters and search, the range's load and width (assets/js/catalog.js, ruler.js) and whatever the theme adds
+ * later. Tracking tags, previews and the theme's own admin flags stay with the address they came on.
+ * assets/js/language-suggest.js keeps the same rule in the browser.
  */
+const BL_I18N_SWITCH_DROP = '~^(utm_|gad_|_gl$|gclid$|gbraid$|wbraid$|dclid$|fbclid$|msclkid$|ttclid$|yclid$|srsltid$|mc_|_ga$|bl_|preview|_wpnonce$|p$|page_id$)~i';
+
 function bl_i18n_switch_query(): string
 {
     $keep = [];
-    foreach (['product', 'equipment', 'application', 'topic', 'category', 'load', 'ground', 'width', 'q'] as $name) {
-        $value = $_GET[$name] ?? null;
-        if (is_string($value) && function_exists('wp_unslash')) $value = wp_unslash($value);
-        if (is_string($value) && $value !== '') $keep[$name] = $value;
+    foreach ($_GET as $name => $value) {
+        if (!is_string($name) || !is_string($value) || $value === '' || preg_match(BL_I18N_SWITCH_DROP, $name)) continue;
+        $keep[$name] = function_exists('wp_unslash') ? wp_unslash($value) : $value;
     }
     return $keep ? '?' . http_build_query($keep, '', '&', PHP_QUERY_RFC3986) : '';
 }

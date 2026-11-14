@@ -32,9 +32,10 @@ $check(bl_languages('/contact/')[1]['url'] === 'https://example.test/es/contact/
 $GLOBALS['options']['bl_languages'][2]['url'] = '/de/';
 $check(bl_languages('/about/')[2]['url'] === (bl_is_wordpress() ? 'https://example.test/de/' : '/de/'), 'a saved language at a path on this site is resolved against the site');
 unset($GLOBALS['options']['bl_languages']);
-$_GET = ['product' => '500kg-tracked-mini-dumper', 'utm_source' => 'google', 'equipment' => ['x']];
-$switch = array_column(bl_languages('/contact/'), 'url', 'code');
-$check(str_ends_with($switch['es'], '/es/contact/?product=500kg-tracked-mini-dumper'), 'the switch keeps the enquiry product but not tracking tags: ' . $switch['es']);
+$_GET = ['product' => '500kg-tracked-mini-dumper', 'utm_source' => 'google', 'gclid' => 'x', 'equipment' => ['x'], 'payload' => '2000', 'bl_i18n_audit' => '1'];
+$switch = bl_languages('/contact/');
+$check(str_ends_with($switch[1]['url'], '/es/contact/?product=500kg-tracked-mini-dumper&payload=2000') && $switch[1]['same_page'], 'the switch keeps the page\'s choices but not tracking tags or admin flags: ' . $switch[1]['url']);
+$check(!bl_languages('/about/')[1]['same_page'] && !str_contains(bl_languages('/about/')[1]['url'], '?'), 'a link to a language\'s home page takes no choices along');
 $_GET = [];
 
 // Pages and paths.
