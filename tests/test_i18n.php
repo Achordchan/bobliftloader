@@ -108,6 +108,9 @@ unset($_GET['bl_i18n_audit']);
 $comment = substr($audited, (int) strpos($audited, '<!-- bl-i18n-missing'));
 $check(substr_count($comment, '-->') === 1 && str_ends_with($comment, '-->') && !str_contains($comment, '--!>') && !str_contains($comment, '<img'), 'the audit comment escapes what it lists: ' . $comment);
 
+$searchText = bl_product_search_text(['name' => '500 kg Tracked Mini Dumper', 'model' => 'BL-T500-HD']);
+$check(str_contains($searchText, 'sobre orugas') && str_contains($searchText, 'tracked') && bl_search_fold('CUCHARÓN Año') === 'cucharon ano', 'the catalogue searches Spanish and English names, accents folded: ' . $searchText);
+
 $GLOBALS['bl_lang'] = 'en';
 $check(bl_i18n_script_dictionary() === '' && bl_i18n_localize_href('/contact/') === '/contact/', 'English pages are untouched');
 

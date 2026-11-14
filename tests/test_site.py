@@ -494,6 +494,14 @@ class WebsiteTests(unittest.TestCase):
         self.assertIn('Minidumpers', html)
         self.assertIn('Solicite una cotización', html)
         self.assertRegex(html, r'href="[^"]*/es/product/500kg-tracked-mini-dumper/"')
+        # The catalogue finds models by their Spanish names too, with or without accents, and still by the English ones.
+        for query in ('orugas', 'ORUGAS', 'tracked'):
+            _, html, _ = fetch('/es/products/mini-dumpers/?q=' + query)
+            found = re.findall(r'data-search="([^"]*)"', ' '.join(visible_cards(html)))
+            self.assertTrue(any('sobre orugas' in text for text in found), query)
+            self.assertTrue(all(query.lower() in text for text in found), query)
+        _, html, _ = fetch('/es/products/mini-dumpers/?q=cami%C3%B3n')
+        self.assertEqual(visible_cards(html), [], 'a word no model has finds nothing')
         # Pages not translated yet are not found under /es/, and have no Spanish alternate.
         status, _, _ = fetch('/es/about/')
         self.assertEqual(status, 404)

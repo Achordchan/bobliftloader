@@ -15,7 +15,7 @@ foreach (bl_products() as $p) {
     $scope[] = ['product' => $p, 'facets' => bl_product_facets($p, $category), 'search' => bl_product_search_text($p)];
 }
 $matches = static function (array $item, string $except = '') use ($active, $search): bool {
-    if ($search !== '' && !str_contains($item['search'], strtolower($search))) return false;
+    if ($search !== '' && !str_contains($item['search'], bl_search_fold($search))) return false;
     foreach ($active as $key => $value) if ($key !== $except && $item['facets'][$key] !== $value) return false;
     return true;
 };

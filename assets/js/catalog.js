@@ -99,7 +99,8 @@ export function initializeCatalog() {
   const query = form.querySelector('[data-catalog-query]');
 
   const readState = () => {
-    const state = { q: search.value.trim().toLowerCase() };
+    // Folded as the cards' data-search is (bl_search_fold): lower case, no accents, so "oruga" and "cucharon" match.
+    const state = { q: search.value.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() };
     groups.forEach((group) => { state[group] = form.querySelector(`[name="${group}"]:checked`)?.value ?? ''; });
     return state;
   };
