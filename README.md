@@ -71,6 +71,8 @@ scripts/setup-local-wordpress.sh   # 首次安装；重复运行只补缺，不�
 
 英语是站点本身（根目录）；西班牙语在 `/es/` 子目录，按起重机站的做法：子目录 + hreflang（en / es / x-default）+ 主题硬编码文字走词典，译文一律用 DeepL（ES-419）再人工校对成「usted」敬语和统一术语（minidumper、minicargadora、obra、cucharón、tolva、sobre orugas）。
 
+默认永远是英语，不按浏览器语言跳转（页面缓存不区分语言）。浏览器首选西班牙语、本页又有西语版时，左下角弹一张可关闭的小卡片推荐西语版（反过来西语页对英语浏览器推荐英文版），和起重机站一致：`assets/js/language-suggest.js`，选择记在 localStorage `blLanguageChoice`，Cookie 提示打开时先让位，GA4 事件 `language_suggestion`（accept / dismiss），爬虫看不到。
+
 - 原理（`inc/i18n.php`）：`/es/…` 的请求在主题加载时去掉 `/es` 当作英文页处理，记下语言；页面照常按英文渲染，输出前逐段查词典替换（正文、按钮、alt / aria-label / placeholder、title / description / OG、JSON-LD 的文字和面包屑地址、WhatsApp 预填句），站内链接若该页有西语版就改成 `/es/…`。词典里没有的文字保持英文。
 - 哪些页有西语：默认 `BL_I18N_DEFAULT_PAGES`（首页、翻斗车分类、T500-HD、联系、感谢、隐私）；保存选项 `bl_i18n_es_pages`（REST `/wp/v2/settings` 可写）后以它为准。只有列出的页面有 `/es/` 网址、hreflang、站点地图条目，其余 `/es/…` 返回 404。
 - 词典：`inc/i18n/es.php`（键 = 页面上看到的英文，行内标签写 `<t0>…</t0>`、换行写 `<br>`）；线上修正可写选项 `bl_i18n_es_strings`（同样的键，覆盖主题词典，不用发版）。

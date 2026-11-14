@@ -289,6 +289,24 @@
 }
 @media print{.bl-site .bl-consent{display:none}}
 
+/* Language suggestion (assets/js/language-suggest.js): the cookie notice's corner, once that is closed. Phones keep it
+   across the width just above the contact bar. */
+.bl-site .bl-lang-suggest{position:fixed;z-index:15;left:clamp(12px,1.4vw,32px);bottom:clamp(12px,1.4vw,32px);width:max-content;max-width:min(440px,calc(100% - 24px));padding:16px 60px 16px 18px;background:var(--white);color:var(--ink);border:1px solid var(--line);box-shadow:0 24px 48px #081c2b33;opacity:0;transform:translateY(12px);transition:opacity .3s,transform .3s}
+.bl-site .bl-lang-suggest.is-shown{opacity:1;transform:none}
+.bl-site .bl-lang-suggest[hidden]{display:none}
+.bl-site .bl-lang-suggest p{margin:0;font-size:14px;font-weight:600;line-height:1.5}
+.bl-site .bl-lang-suggest-accept{display:inline-flex;align-items:center;min-height:44px;margin-top:10px;padding:0 18px;background:var(--blue);color:#fff;font-size:14px;font-weight:700;text-decoration:none}
+@media(hover:hover){.bl-site .bl-lang-suggest-accept:hover{background:#1746ad}}
+.bl-site .bl-lang-suggest-close{position:absolute;top:6px;right:6px;display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;background:none;color:var(--muted);cursor:pointer}
+.bl-site .bl-lang-suggest-close svg{width:20px;height:20px}
+@media(hover:hover){.bl-site .bl-lang-suggest-close:hover{color:var(--ink)}}
+.bl-site .bl-lang-suggest :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+@media(max-width:800px),(max-width:1000px) and (max-height:500px){
+  .bl-site .bl-lang-suggest{left:12px;right:12px;bottom:calc(var(--bl-bar-height,58px) + env(safe-area-inset-bottom,0px) + 12px);width:auto;max-width:none}
+}
+@media(prefers-reduced-motion:reduce){.bl-site .bl-lang-suggest{transition:none}}
+@media print{.bl-site .bl-lang-suggest{display:none}}
+
 /* Event bar above the header (templates/partials/event-bar.php): one line, scrolls away with the page. */
 .bl-site .bl-event-bar{position:relative;display:flex;justify-content:center;align-items:center;gap:14px;padding:10px var(--gutter);background:#06131e;color:#c6d0d7;font-size:var(--fs-label);line-height:20px;text-align:center;border-bottom:1px solid #4257664d}
 .bl-site .bl-event-bar-badge{flex-shrink:0;padding:2px 8px;background:var(--blue);color:white;font-weight:700;letter-spacing:1.1px;text-transform:uppercase}
