@@ -140,6 +140,29 @@ function bl_showcase_contact_html(array $products): string
 }
 
 /**
+ * Corrections saved in the settings (bl_i18n_<lang>_strings) for text the page's scripts write, as English => the
+ * page's language. The scripts carry the theme dictionary as it was when the page was built (assets/bl360/i18n/strings.js),
+ * so a correction saved later reaches them only through this, keyed by the English as the scripts have it
+ * (templates/bl360/script-strings.json); templates/bl360.php hands it to them as window.BL360_I18N_SAVED.
+ */
+function bl_showcase_script_corrections(?string $lang = null): array
+{
+    $lang ??= bl_lang();
+    if ($lang === 'en' || !function_exists('get_option')) return [];
+    $saved = get_option('bl_i18n_' . $lang . '_strings');
+    if (!is_array($saved) || !$saved) return [];
+    $keys = [];
+    foreach ($saved as $original => $text) if (is_string($text) && trim($text) !== '') $keys[bl_i18n_key((string) $original)] = true;
+    $file = __DIR__ . '/../templates/bl360/script-strings.json';
+    $english = is_file($file) ? json_decode((string) file_get_contents($file), true) : null;
+    $corrections = [];
+    foreach (is_array($english) ? $english : [] as $text) {
+        if (is_string($text) && isset($keys[bl_i18n_key($text)])) $corrections[$text] = bl_t($text, $lang);
+    }
+    return $corrections;
+}
+
+/**
  * The built markup with the theme's parts filled in: the site header above the page's own chapter bar ($siteHeader),
  * and the model names, figures and contact details from the product records and company settings.
  */

@@ -121,4 +121,5 @@
 | `inc/i18n/es.php` | 词典从 752 条扩到 2,409 条（DeepL ES-419 + 人工校对 usted 和术语） |
 | `index.php`、`templates/bl360.php` | 3D 展示页 `/es/bl-t360-t460/` 也在输出前翻译，`<html lang>` 跟语言，输出脚本词典 |
 | `loader-experience/scripts/build_wp.mjs`、`assets/bl360/i18n/` | 展示页脚本按页面语言出字：带上西语行（优先取主题词典的译法，与服务端一致），重新构建 |
+| `inc/showcase.php`、`templates/bl360.php`、`templates/bl360/script-strings.json`、`tests/test_showcase_i18n.php` | 后台存的西语改译（`bl_i18n_es_strings`）也作用到展示页脚本写出的文字：构建时列出脚本行的英文，页面把其中有改译的以 `window.BL360_I18N_SAVED` 传给脚本，优先于构建时的西语 |
 | `tools/i18n/collect.php`、`tests/test_i18n.php`、`tests/test_site.py` | 收集脚本用句式模板和「无文字」判断；句式、收集回归和新增西语页测试 |
