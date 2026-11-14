@@ -89,10 +89,13 @@ const show = ({ current, language, href }) => {
 };
 
 export function initializeLanguageSuggest() {
-  // A language picked in the header switch is the visitor's answer too, even before the page has finished loading.
+  // A language picked in the header switch is the visitor's answer too, even before the page has finished loading. The
+  // switch also takes the place on the page along (#enquiry, say), which the server never sees.
   document.addEventListener('click', (event) => {
     const link = event.target instanceof Element ? event.target.closest('a[data-bl-lang]') : null;
-    if (link) remember(primary(link.dataset.blLang));
+    if (!link) return;
+    remember(primary(link.dataset.blLang));
+    if (location.hash && !link.hash) link.hash = location.hash;
   });
   // A page restored from the back/forward cache keeps its card; drop it once a choice has been saved (e.g. in another tab).
   window.addEventListener('pageshow', (event) => {
