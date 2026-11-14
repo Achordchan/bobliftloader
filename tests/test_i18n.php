@@ -24,7 +24,7 @@ $check(str_contains(bl_i18n_translate_html('<p>Read the <a href="/x/">full guide
 $check(bl_t('Skid steer loader', 'es') === 'Minicargadora compacta', 'a saved correction overrides the theme dictionary');
 $GLOBALS['options']['bl_languages'] = [['code' => 'en', 'name' => 'English', 'url' => '/'], ['code' => 'es', 'name' => 'Castellano', 'url' => 'https://elsewhere.test/'], ['code' => 'de', 'name' => 'Deutsch', 'url' => 'https://de.example.test/'], ['code' => 'bad code', 'name' => 'X', 'url' => '/x/']];
 $check(isset($GLOBALS['settings']['bl_languages']['show_in_rest']), 'the older language list setting is still in the REST settings');
-$rows = bl_languages('/about/');
+$rows = bl_languages('/news/');
 $check(array_column($rows, 'code') === ['en', 'es', 'de'] && $rows[1]['name'] === 'Español' && $rows[2]['url'] === 'https://de.example.test/' && !$rows[2]['current'], 'saved languages the theme does not translate still show, after its own: ' . json_encode($rows));
 $check($rows[1]['url'] === 'https://elsewhere.test/', 'a saved destination on another website for a theme language is kept: ' . $rows[1]['url']);
 $GLOBALS['options']['bl_languages'][1]['url'] = 'https://example.test/es/old/';
@@ -39,19 +39,19 @@ foreach (['https://example.test/latam/' => 'https://example.test/latam/', '/span
     $check($row['url'] === $expected && !$row['same_page'], 'a custom Spanish section on this site is kept: ' . $saved . ' -> ' . json_encode($row));
 }
 $GLOBALS['options']['bl_languages'][2]['url'] = '/de/';
-$check(bl_languages('/about/')[2]['url'] === (bl_is_wordpress() ? 'https://example.test/de/' : '/de/'), 'a saved language at a path on this site is resolved against the site');
+$check(bl_languages('/news/')[2]['url'] === (bl_is_wordpress() ? 'https://example.test/de/' : '/de/'), 'a saved language at a path on this site is resolved against the site');
 unset($GLOBALS['options']['bl_languages']);
 $_GET = ['product' => '500kg-tracked-mini-dumper', 'utm_source' => 'google', 'gclid' => 'x', 'equipment' => ['x'], 'payload' => '2000', 'bl_i18n_audit' => '1'];
 $switch = bl_languages('/contact/');
 $check(str_ends_with($switch[1]['url'], '/es/contact/?product=500kg-tracked-mini-dumper&payload=2000') && $switch[1]['same_page'], 'the switch keeps the page\'s choices but not tracking tags or admin flags: ' . $switch[1]['url']);
-$check(!bl_languages('/about/')[1]['same_page'] && !str_contains(bl_languages('/about/')[1]['url'], '?'), 'a link to a language\'s home page takes no choices along');
+$check(!bl_languages('/news/')[1]['same_page'] && !str_contains(bl_languages('/news/')[1]['url'], '?'), 'a link to a language\'s home page takes no choices along');
 $_GET = [];
 
 // Pages and paths.
 $check(bl_has_language('/products/mini-dumpers/', 'es') && bl_has_language('/products/mini-dumpers', 'es'), 'the dumper page has Spanish, with or without its slash');
-$check(!bl_has_language('/about/', 'es') && bl_has_language('/about/', 'en'), 'a page not translated yet has no Spanish version');
+$check(!bl_has_language('/news/', 'es') && bl_has_language('/news/', 'en'), 'a page not translated yet has no Spanish version');
 $check(bl_lang_path('/contact/', 'es') === '/es/contact/' && bl_lang_path('/contact/', 'en') === '/contact/', 'language paths');
-$check(bl_i18n_alternates('/about/') === ['en' => '/about/', 'es' => ''], 'an untranslated page has no Spanish alternate');
+$check(bl_i18n_alternates('/news/') === ['en' => '/news/', 'es' => ''], 'an untranslated page has no Spanish alternate');
 $check(bl_i18n_normalize_path('/about') === '/about/' && bl_i18n_normalize_path('/sitemap.html') === '/sitemap.html' && bl_i18n_normalize_path('/x/?a=1#b') === '/x/', 'paths are normalised');
 
 // Links follow the page's language only where that page exists in it.
@@ -59,13 +59,13 @@ $GLOBALS['bl_lang'] = 'es';
 $check(bl_i18n_localize_href('/products/mini-dumpers/#models') === '/es/products/mini-dumpers/#models', 'a translated page keeps its anchor');
 $check(bl_i18n_localize_href('/contact/?equipment=dumper#enquiry') === '/es/contact/?equipment=dumper#enquiry', 'a translated page keeps its query');
 $check(bl_i18n_localize_href('https://example.test/privacy/') === 'https://example.test/es/privacy/', 'an absolute link on this site');
-$check(bl_i18n_localize_href('/about/') === '/about/', 'an untranslated page stays English');
+$check(bl_i18n_localize_href('/news/') === '/news/', 'an untranslated page stays English');
 $check(bl_i18n_localize_href('https://bobliftcrane.com/') === 'https://bobliftcrane.com/', 'another site is left alone');
 $check(bl_i18n_localize_href('/es/contact/') === '/es/contact/', 'a link already in Spanish is not doubled');
 $check(bl_i18n_localize_href('/wp-content/uploads/a.pdf') === '/wp-content/uploads/a.pdf', 'files are left alone');
 $check(bl_i18n_redirect('https://example.test/contact/') === 'https://example.test/es/contact/', 'a WordPress redirect to a translated page stays in Spanish');
-$check(bl_i18n_redirect('https://example.test/about/') === false, 'a WordPress redirect to a page without Spanish is cancelled (the theme answers 404)');
-$check(bl_i18n_redirect('https://other.test/about/') === 'https://other.test/about/' && bl_i18n_redirect('https://example.test/wp-content/x.pdf') === 'https://example.test/wp-content/x.pdf', 'redirects to other sites and files are left alone');
+$check(bl_i18n_redirect('https://example.test/news/') === false, 'a WordPress redirect to a page without Spanish is cancelled (the theme answers 404)');
+$check(bl_i18n_redirect('https://other.test/news/') === 'https://other.test/news/' && bl_i18n_redirect('https://example.test/wp-content/x.pdf') === 'https://example.test/wp-content/x.pdf', 'redirects to other sites and files are left alone');
 $check(bl_url('/thank-you/') === bl_i18n_localize_href(bl_url('/thank-you/')) && str_contains(bl_url('/thank-you/'), '/es/thank-you/'), 'bl_url localises');
 
 // The translator: text runs with inline markup, attributes, meta, structured data and links.
@@ -84,10 +84,19 @@ $check(str_contains($meta, 'content="Carga nominal"'), 'the meta description is 
 $check(str_contains($meta, '"name":"Minidumpers"') && str_contains($meta, 'https:\/\/example.test\/es\/products\/mini-dumpers\/') || str_contains($meta, 'https://example.test/es/products/mini-dumpers/'), 'breadcrumb names and addresses follow the language');
 $gallery = bl_i18n_translate_html('<button data-gallery-alt="Petrol engine"></button><li data-alt="Petrol engine" data-caption="Rated load"></li>', 'es');
 $check(str_contains($gallery, 'data-gallery-alt="Motor de gasolina"') && str_contains($gallery, 'data-alt="Motor de gasolina" data-caption="Carga nominal"'), 'the gallery and lightbox texts are translated');
-$search = bl_i18n_translate_html('<script type="application/json" id="site-search-index">' . json_encode([['kind' => 'Mini dumper', 'title' => 'BL-T500-HD', 'text' => '500 kg Tracked Mini Dumper', 'url' => '/product/500kg-tracked-mini-dumper/'], ['kind' => 'Page', 'title' => 'About us', 'text' => 'Company and factory in Xuzhou', 'url' => '/about/']], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) . '</script>', 'es');
+// Text of one shape with different figures comes from inc/i18n/es-patterns.php; figures and units alone are not missing.
+$check(bl_t('14 Nov 2026', 'es') === '14 nov 2026' && bl_t('3 May 2025', 'es') === '3 may 2025', 'news dates in Spanish');
+$check(bl_t('Show photograph 3 of 11', 'es') === 'Mostrar la fotografía 3 de 11' && bl_t('+4 more', 'es') === '+4 más', 'gallery counters in Spanish');
+$check(str_contains(bl_i18n_translate_html('<p>12 <span>machines</span></p>', 'es'), '<p>12 <span>máquinas</span></p>'), 'a pattern keeps the inline markup');
+$check(bl_t('Show photograph 3 of 11', 'en') === 'Show photograph 3 of 11' && bl_t('Show photographs of 11', 'es') === 'Show photographs of 11', 'patterns only for their language and their shape');
+$check(!bl_i18n_has_words('1,500 kg') && !bl_i18n_has_words('17 MPa<t0>2,466 psi</t0>') && !bl_i18n_has_words('0.8 m³<t0>1 yd³</t0>') && bl_i18n_has_words('1,500 kg payload') && bl_i18n_has_words('Bucket'), 'figures and units alone have nothing to translate');
+// A <title> the dictionary has must not lose the keys collected before it (tools/i18n/collect.php).
+$keys = bl_i18n_translate_html('<p>Some text not in the dictionary</p><title>Contact</title><p>More text not in it</p>', 'es', true);
+$check(in_array('Some text not in the dictionary', $keys, true) && in_array('More text not in it', $keys, true), 'collecting keeps every key: ' . json_encode($keys));
+$search = bl_i18n_translate_html('<script type="application/json" id="site-search-index">' . json_encode([['kind' => 'Mini dumper', 'title' => 'BL-T500-HD', 'text' => '500 kg Tracked Mini Dumper', 'url' => '/product/500kg-tracked-mini-dumper/'], ['kind' => 'Page', 'title' => 'News and guides', 'text' => 'Guides for buyers of compact equipment', 'url' => '/news/']], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) . '</script>', 'es');
 $index = json_decode(preg_replace('~^<script[^>]*>|</script>$~', '', $search), true);
 $check(($index[0]['kind'] ?? '') === 'Minidumper' && ($index[0]['text'] ?? '') === bl_t('500 kg Tracked Mini Dumper', 'es') && ($index[0]['url'] ?? '') === '/es/product/500kg-tracked-mini-dumper/' && ($index[0]['en']['text'] ?? '') === '500 kg Tracked Mini Dumper' && !isset($index[0]['en']['title']), 'a search result for a Spanish page is translated and links to it: ' . $search);
-$check(($index[1]['url'] ?? '') === '/about/' && !in_array('Company and factory in Xuzhou', bl_i18n_missing(), true), 'a search result for an English-only page keeps its address and is not reported as missing');
+$check(($index[1]['url'] ?? '') === '/news/' && !in_array('Guides for buyers of compact equipment', bl_i18n_missing(), true), 'a search result for an English-only page keeps its address and is not reported as missing');
 $wa = bl_i18n_translate_html('<a href="https://wa.me/8615852499415?text=' . rawurlencode('Hello BOB-LIFT, I am interested in your mini dumpers.') . '">WhatsApp</a>', 'es');
 $check(str_contains($wa, rawurlencode('Hola, BOB-LIFT. Me interesan sus minidumpers.')), 'the WhatsApp message is translated');
 $check(sprintf(bl_t('Hello BOB-LIFT, I am interested in the %1$s (%2$s).'), bl_t('500 kg Tracked Mini Dumper'), 'BL-T500-HD') === 'Hola, BOB-LIFT. Me interesa el Minidumper sobre orugas de 500 kg (BL-T500-HD).', 'the product WhatsApp line');

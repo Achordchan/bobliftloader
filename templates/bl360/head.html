@@ -38,7 +38,7 @@
     function show(f) {
       shown = f; root.style.setProperty('--load', f.toFixed(3));
       var meter = document.querySelector('.exp-hero-meter span'), n = Math.round(f * 100);
-      if (meter) meter.textContent = window.I18N ? I18N.t('正在载入三维模型 {n}%', { n: n }) : 'Loading 3D model ' + n + '%';
+      if (meter) meter.textContent = window.I18N ? I18N.t('正在载入三维模型 {n}%', { n: n }) : {{LOADING}} + ' ' + n + '%';
     }
     window.__heroLoad = function (f) { // never backwards
       if (f <= shown && f < 1) return; show(f);

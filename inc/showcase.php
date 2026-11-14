@@ -140,6 +140,29 @@ function bl_showcase_contact_html(array $products): string
 }
 
 /**
+ * Corrections saved in the settings (bl_i18n_<lang>_strings) for text the page's scripts write, as English => the
+ * page's language. The scripts carry the theme dictionary as it was when the page was built (assets/bl360/i18n/strings.js),
+ * so a correction saved later reaches them only through this, keyed by the English as the scripts have it
+ * (templates/bl360/script-strings.json); templates/bl360.php hands it to them as window.BL360_I18N_SAVED.
+ */
+function bl_showcase_script_corrections(?string $lang = null): array
+{
+    $lang ??= bl_lang();
+    if ($lang === 'en' || !function_exists('get_option')) return [];
+    $saved = get_option('bl_i18n_' . $lang . '_strings');
+    if (!is_array($saved) || !$saved) return [];
+    $keys = [];
+    foreach ($saved as $original => $text) if (is_string($text) && trim($text) !== '') $keys[bl_i18n_key((string) $original)] = true;
+    $file = __DIR__ . '/../templates/bl360/script-strings.json';
+    $english = is_file($file) ? json_decode((string) file_get_contents($file), true) : null;
+    $corrections = [];
+    foreach (is_array($english) ? $english : [] as $text) {
+        if (is_string($text) && isset($keys[bl_i18n_key($text)])) $corrections[$text] = bl_t($text, $lang);
+    }
+    return $corrections;
+}
+
+/**
  * The built markup with the theme's parts filled in: the site header above the page's own chapter bar ($siteHeader),
  * and the model names, figures and contact details from the product records and company settings.
  */
@@ -156,6 +179,8 @@ function bl_showcase_markup(string $file, array $products = [], string $siteHead
     $names = $products ? ['BL-T360-H' => bl_escape($products[0]['model'] ?? 'BL-T360-H'), 'BL-T460-H' => bl_escape($products[1]['model'] ?? 'BL-T460-H')] : [];
     return strtr($markup, $names + [
         '{{BASE}}' => $base,
+        // The model's progress caption before the page's translation script has loaded, in the page's language.
+        '{{LOADING}}' => json_encode(bl_t('Loading the 3D model'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
         // The site's own header first, so the page leads back to the rest of the site; the chapter bar stays below it.
         '<header class="exp-header">' => $siteHeader . '<header class="exp-header">',
         '{{IMPORTMAP}}' => '<script type="importmap">' . json_encode(['imports' => $imports + $siteMap], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) . '</script>',

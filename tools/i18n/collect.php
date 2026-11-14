@@ -23,9 +23,9 @@ $missing = [];
 foreach (array_slice($argv, 2) as $file) {
     foreach (bl_i18n_translate_html((string) file_get_contents($file), $lang, true) as $key) {
         $key = (string) $key;
-        if (isset($dictionary[$key]) || isset($keep[$key]) || isset($missing[$key])) continue;
-        // Nothing to translate: no word of two letters or more (figures, units, codes), an address, a URL.
-        if (!preg_match('/\p{Ll}{2}|\p{Lu}\p{Ll}|\p{Lu}{3,}/u', $key) || preg_match('~^(https?://\S+|[\w.+-]+@[\w-]+(\.[\w-]+)+)$~', $key)) continue;
+        if (bl_i18n_get($dictionary, $key) !== null || isset($keep[$key]) || isset($missing[$key])) continue;
+        // Nothing to translate: figures and units, codes, an address, a URL.
+        if (!bl_i18n_has_words($key)) continue;
         $missing[$key] = '';
     }
 }

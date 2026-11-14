@@ -16,12 +16,14 @@ ob_start(); ?>
 <?php $siteHeader = (string) ob_get_clean();
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="<?= bl_escape(BL_I18N_LANGUAGES[bl_lang()]['hreflang']) ?>">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#121314">
   <?php bl_render_seo($route); ?>
+  <?= bl_i18n_script_dictionary() ?>
+  <?php if ($scriptCorrections = bl_showcase_script_corrections()): ?><script>window.BL360_I18N_SAVED = <?= json_encode($scriptCorrections, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script><?php endif; ?>
   <link rel="icon" href="<?= bl_escape(bl_brand_icon('images/icons/favicon.ico', 48)) ?>" sizes="48x48">
   <link rel="icon" href="<?= bl_escape(bl_brand_icon('images/icons/icon-32.png', 32)) ?>" type="image/png" sizes="32x32">
   <link rel="apple-touch-icon" href="<?= bl_escape(bl_brand_icon('images/icons/apple-touch-icon.png', 180)) ?>">

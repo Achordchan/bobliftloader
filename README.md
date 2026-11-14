@@ -74,8 +74,8 @@ scripts/setup-local-wordpress.sh   # 首次安装；重复运行只补缺，不�
 默认永远是英语，不按浏览器语言跳转（页面缓存不区分语言）。浏览器首选西班牙语、本页又有西语版时，左下角弹一张可关闭的小卡片推荐西语版（反过来西语页对英语浏览器推荐英文版），和起重机站一致：`assets/js/language-suggest.js`，选择记在 localStorage `blLanguageChoice`，Cookie 提示打开时先让位，GA4 事件 `language_suggestion`（accept / dismiss），爬虫看不到。
 
 - 原理（`inc/i18n.php`）：`/es/…` 的请求在主题加载时去掉 `/es` 当作英文页处理，记下语言；页面照常按英文渲染，输出前逐段查词典替换（正文、按钮、alt / aria-label / placeholder、title / description / OG、JSON-LD 的文字和面包屑地址、WhatsApp 预填句），站内链接若该页有西语版就改成 `/es/…`。词典里没有的文字保持英文。
-- 哪些页有西语：默认 `BL_I18N_DEFAULT_PAGES`（首页、翻斗车分类、T500-HD、联系、感谢、隐私）；保存选项 `bl_i18n_es_pages`（REST `/wp/v2/settings` 可写）后以它为准。只有列出的页面有 `/es/` 网址、hreflang、站点地图条目，其余 `/es/…` 返回 404。
-- 词典：`inc/i18n/es.php`（键 = 页面上看到的英文，行内标签写 `<t0>…</t0>`、换行写 `<br>`）；线上修正可写选项 `bl_i18n_es_strings`（同样的键，覆盖主题词典，不用发版）。
+- 哪些页有西语：默认 `BL_I18N_DEFAULT_PAGES`（除新闻列表和文章外的全部页面：首页、关于、两个分类、应用、支持、经销商、联系、感谢、隐私、全部产品页和 3D 展示页）；保存选项 `bl_i18n_es_pages`（REST `/wp/v2/settings` 可写）后以它为准。只有列出的页面有 `/es/` 网址、hreflang、站点地图条目，其余 `/es/…` 返回 404。
+- 词典：`inc/i18n/es.php`（键 = 页面上看到的英文，行内标签写 `<t0>…</t0>`、换行写 `<br>`）；同一句式只差数字的文字（日期、图集计数、载重等）写在 `inc/i18n/es-patterns.php`，词典里没有时才用；线上修正可写选项 `bl_i18n_es_strings`（同样的键，覆盖主题词典，不用发版）。
 - 加新页面：先把英文页存下来，`php tools/i18n/collect.php es page.html > missing.json` 列出词典还缺的文字（`tools/i18n/keep.txt` 里是不译的型号、品牌、数字），DeepL 翻译校对后补进词典，再把路径加进页面清单。管理员访问西语页加 `?bl_i18n_audit=1`，页尾注释列出本页还没翻的文字。
 - 脚本文字：`assets/js/i18n.js` 的 `t()` 读页面里的 `#bl-i18n` JSON（`BL_I18N_SCRIPT_STRINGS` 列出的那些），英文页不输出。
 - 询盘：表单带上页面语言，西语页提交后去 `/es/thank-you/`，插件提示语走词典，钉钉第一行写「语言：西班牙语（ES）」，邮件里有「页面语言」。

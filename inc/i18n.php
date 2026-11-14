@@ -23,7 +23,44 @@ const BL_I18N_LANGUAGES = [
 
 /** The pages each language has until the option bl_i18n_<lang>_pages is saved. */
 const BL_I18N_DEFAULT_PAGES = [
-    'es' => ['/', '/products/mini-dumpers/', '/product/500kg-tracked-mini-dumper/', '/contact/', '/thank-you/', '/privacy/'],
+    'es' => [
+        '/',
+        '/about/',
+        '/products/skid-steer-loaders/',
+        '/products/mini-dumpers/',
+        '/applications/',
+        '/support/',
+        '/dealers/',
+        '/contact/',
+        '/privacy/',
+        '/applications/landscaping/',
+        '/applications/site-preparation/',
+        '/applications/material-transport/',
+        '/applications/gardens-and-homesteads/',
+        '/applications/farms-and-orchards/',
+        '/applications/building-sites/',
+        '/product/bl-t360-h-mini-skid-steer-loader/',
+        '/product/bl-t460-h-mini-skid-steer-loader/',
+        '/product/bl-t750-h-mini-skid-steer-loader/',
+        '/product/bl-s750-h-mini-skid-steer-loader/',
+        '/product/bl-t1000-h-mini-skid-steer-loader/',
+        '/product/bl-s390-c-mini-skid-steer-loader/',
+        '/product/bl-t390-c-mini-skid-steer-loader/',
+        '/product/bl-s490-c-mini-skid-steer-loader/',
+        '/product/bl-t490-c-mini-skid-steer-loader/',
+        '/product/500kg-tracked-mini-dumper/',
+        '/product/1-ton-mini-dumper/',
+        '/product/1-5-ton-mini-dumper/',
+        '/product/2-ton-mini-dumper/',
+        '/product/3-ton-mini-dumper/',
+        '/product/4-ton-mini-dumper/',
+        '/product/5-ton-mini-dumper/',
+        '/product/2-ton-2wd-mini-dumper/',
+        '/product/3-ton-mini-dumper-with-bucket/',
+        '/product/tracked-mini-mixer-truck/',
+        '/bl-t360-t460/',
+        '/thank-you/',
+    ],
 ];
 
 /** Elements that sit inside a run of text: a sentence keeps them and is translated as one piece. */
@@ -190,7 +227,49 @@ function bl_i18n_dictionary(string $lang): array
     if (is_array($saved)) foreach ($saved as $original => $text) if (is_string($text) && trim($text) !== '') $entries[(string) $original] = $text;
     $dictionary = [];
     foreach ($entries as $original => $text) $dictionary[bl_i18n_key((string) $original)] = (string) $text;
+    $dictionary[BL_I18N_LANG_KEY] = $lang; // which patterns (bl_i18n_patterns) fill in what the entries do not have
     return $dictionaries[$lang] = $dictionary;
+}
+
+/** The key under which a dictionary records its language; no text on a page can be it. */
+const BL_I18N_LANG_KEY = "\0lang";
+
+/**
+ * Text that follows one shape with different figures (dates, photo counters: "Show photograph 3 of 11"), from
+ * inc/i18n/{lang}-patterns.php: a list of [regular expression on the key, translation with $1… or a function of the
+ * match]. They are tried, in order, only for a key the dictionary does not have.
+ */
+function bl_i18n_patterns(string $lang): array
+{
+    static $patterns = [];
+    if (isset($patterns[$lang])) return $patterns[$lang];
+    $file = __DIR__ . '/i18n/' . $lang . '-patterns.php';
+    return $patterns[$lang] = bl_i18n_language($lang) && is_file($file) ? array_values(array_filter((array) require $file, 'is_array')) : [];
+}
+
+/** A key's translation: the dictionary's entry, else the first pattern that fits it, else null. */
+function bl_i18n_get(array $dictionary, string $key): ?string
+{
+    if ($key === BL_I18N_LANG_KEY) return null;
+    if (isset($dictionary[$key])) return $dictionary[$key];
+    foreach (bl_i18n_patterns((string) ($dictionary[BL_I18N_LANG_KEY] ?? '')) as [$pattern, $translation]) {
+        if (!preg_match($pattern, $key, $match)) continue;
+        $text = is_callable($translation) ? $translation($match) : preg_replace($pattern, (string) $translation, $key);
+        if (is_string($text) && $text !== '') return $text;
+    }
+    return null;
+}
+
+/**
+ * Whether a piece has words to translate: not only figures and units ("1,500 kg", "17 MPa<t0>2,466 psi</t0>"), an
+ * address or a web link.
+ */
+function bl_i18n_has_words(string $key): bool
+{
+    if (preg_match('~^(https?://\S*|[\w.+-]+@[\w-]+(\.[\w-]+)+)$~', $key)) return false;
+    $text = (string) preg_replace('~</?t\d+>|<br>~', ' ', $key);
+    $text = (string) preg_replace('~(?<![\p{L}])(kg|lb|lbs|mm|cm|in|ft|km/h|mph|kW|hp|m³|yd³|ft³|MPa|psi|bar|rpm|cc|Ah|gal|L|l|m|t|V|h)(?![\p{L}])~u', ' ', $text);
+    return (bool) preg_match('/\p{Ll}{2}|\p{Lu}\p{Ll}|\p{Lu}{3,}/u', $text);
 }
 
 /** Text as a dictionary key: entities decoded, any run of white space (a no-break space too) one space, no space around <br>. */
@@ -211,14 +290,14 @@ function bl_t(string $text, ?string $lang = null): string
 {
     $lang ??= bl_lang();
     if ($lang === 'en') return $text;
-    return bl_i18n_dictionary($lang)[bl_i18n_key($text)] ?? $text;
+    return bl_i18n_get(bl_i18n_dictionary($lang), bl_i18n_key($text)) ?? $text;
 }
 
 /** Pieces the dictionary did not have on this request (read by tools/i18n and the audit comment). */
 function bl_i18n_missing(?string $key = null): array
 {
     static $missing = [];
-    if ($key !== null && preg_match('/\p{Ll}{2}|\p{Lu}{3}/u', $key) && !preg_match('~^(https?://|[\w.+-]+@[\w-]+\.)~', $key)) $missing[$key] = true;
+    if ($key !== null && bl_i18n_has_words($key)) $missing[$key] = true;
     return array_keys($missing);
 }
 
@@ -278,7 +357,7 @@ function bl_i18n_translate_html(string $html, string $lang, bool $collect = fals
             elseif ($name === 'script' && preg_match('~\sid\s*=\s*["\']site-search-index["\']~i', $token)) $inner = bl_i18n_translate_search_index($inner, $lang, $dictionary, $note);
             elseif (in_array($name, ['textarea', 'title'], true) && trim($inner) !== '') {
                 $key = bl_i18n_key($inner);
-                if (isset($dictionary[$key])) $inner = bl_escape($dictionary[$key]);
+                if (($translation = bl_i18n_get($dictionary, $key)) !== null) $inner = bl_escape($translation);
                 else $note($key);
             }
             $out .= bl_i18n_translate_tag($token, $name, $lang, $dictionary, $note) . $inner . $end;
@@ -390,7 +469,7 @@ function bl_i18n_translate_run(array $run, array $dictionary, callable $note): s
     if ($core[0][0] === 'text') $lead = (string) preg_replace('/^([\s\x{00A0}]*).*$/su', '$1', $core[0][1]);
     $end = $core[count($core) - 1];
     if ($end[0] === 'text') $trail = (string) preg_replace('/^.*?([\s\x{00A0}]*)$/su', '$1', $end[1]);
-    $translation = $dictionary[$key] ?? null;
+    $translation = bl_i18n_get($dictionary, $key);
     if ($translation !== null && ($rebuilt = bl_i18n_rebuild($translation, $tags)) !== null) {
         return $raw(array_slice($run, 0, $first)) . $lead . $rebuilt . $trail . $raw(array_slice($run, $last + 1));
     }
@@ -428,9 +507,9 @@ function bl_i18n_translate_nodes(array $run, array $dictionary, callable $note):
     foreach ($run as $token) {
         if ($token[0] !== 'text' || trim($token[1]) === '') { $html .= $token[1]; continue; }
         $key = bl_i18n_key($token[1]);
-        if (!isset($dictionary[$key])) { $note($key); $html .= $token[1]; continue; }
+        if (($found = bl_i18n_get($dictionary, $key)) === null) { $note($key); $html .= $token[1]; continue; }
         preg_match('/^([\s\x{00A0}]*)(.*?)([\s\x{00A0}]*)$/su', $token[1], $match);
-        $html .= $match[1] . bl_escape($dictionary[$key]) . $match[3];
+        $html .= $match[1] . bl_escape($found) . $match[3];
     }
     return $html;
 }
@@ -460,8 +539,8 @@ function bl_i18n_translate_tag(string $tag, string $name, string $lang, array $d
         }
         if (!in_array($attribute, $translate, true) || trim($value) === '') return $match[0];
         $key = bl_i18n_key($value);
-        if (!isset($dictionary[$key])) { $note($key); return $match[0]; }
-        return $match[1] . $match[2] . $match[3] . '"' . bl_escape($dictionary[$key]) . '"';
+        if (($found = bl_i18n_get($dictionary, $key)) === null) { $note($key); return $match[0]; }
+        return $match[1] . $match[2] . $match[3] . '"' . bl_escape($found) . '"';
     }, $tag);
 }
 
@@ -470,7 +549,7 @@ function bl_i18n_whatsapp_text(string $href, array $dictionary): string
 {
     if (!preg_match('~^https://(wa\.me|api\.whatsapp\.com)/~', $href) || !preg_match('~([?&]text=)([^&#]*)~', $href, $match)) return $href;
     $key = bl_i18n_key(rawurldecode(str_replace('+', '%20', $match[2])));
-    return isset($dictionary[$key]) ? str_replace($match[0], $match[1] . rawurlencode($dictionary[$key]), $href) : $href;
+    return ($found = bl_i18n_get($dictionary, $key)) !== null ? str_replace($match[0], $match[1] . rawurlencode($found), $href) : $href;
 }
 
 /** Structured data with its text translated and its breadcrumb addresses in the page's language. */
@@ -487,7 +566,7 @@ function bl_i18n_translate_json(string $json, string $lang, array $dictionary, c
         if ($key === 'item') return bl_i18n_localize_href($value, $lang);
         if (!in_array($key, BL_I18N_JSON_TEXT, true) || trim($value) === '') return $value;
         $k = bl_i18n_key($value);
-        if (isset($dictionary[$k])) return html_entity_decode($dictionary[$k], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (($found = bl_i18n_get($dictionary, $k)) !== null) return html_entity_decode($found, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $note($k);
         return $value;
     };
@@ -506,7 +585,7 @@ function bl_i18n_translate_search_index(string $json, string $lang, array $dicti
     $translate = static function (string $text, bool $report) use ($dictionary, $note): string {
         if (trim($text) === '') return $text;
         $key = bl_i18n_key($text);
-        if (isset($dictionary[$key])) return html_entity_decode($dictionary[$key], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (($found = bl_i18n_get($dictionary, $key)) !== null) return html_entity_decode($found, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         if ($report && !in_array($key, $dictionary, true)) $note($key); // text the template already wrote in the language is not missing
         return $text;
     };
