@@ -469,7 +469,7 @@ class WebsiteTests(unittest.TestCase):
         self.assertLess(nav.index('bl-search-toggle'), nav.index('bl-lang-switch'))
         self.assertLess(nav.index('bl-lang-switch'), nav.index('bl-nav-contact'))
         self.assertIn('class="bl-lang-current" aria-current="true"><b>English</b>', nav)
-        self.assertRegex(nav, r'href="[^"]*/es/products/mini-dumpers/" hreflang="es" data-bl-lang="es"><b>Español</b>')
+        self.assertRegex(nav, r'href="[^"]*/es/products/mini-dumpers/" hreflang="es" data-bl-lang="es" data-bl-same-page><b>Español</b>')
         self.assertNotIn('bl-lang-switch-single', nav)
         # A page with no Spanish version offers the Spanish home page instead.
         _, html, _ = fetch('/about/')
