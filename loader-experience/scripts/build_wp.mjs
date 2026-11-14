@@ -130,7 +130,9 @@ const head = html.slice(html.indexOf('<link rel="preload"'), html.indexOf('</hea
 let headOut = prefixScript(head)
   .replace(/<script type="importmap">[\s\S]*?<\/script>/, '{{IMPORTMAP}}')
   .replace(/(href|src)="(?!https?:|\/|\{\{)([^"]+)"/g, '$1="{{BASE}}$2"');
-headOut = replaceOnce(headOut, "'正在载入三维模型 ' + n + '%'", "'Loading 3D model ' + n + '%'", 'index.html head');
+// The progress caption written before i18n.js has loaded: the theme fills in {{LOADING}} in the page's language, from
+// its dictionary with any saved correction (bl_showcase_markup), the same words i18n.js writes later.
+headOut = replaceOnce(headOut, "'正在载入三维模型 ' + n + '%'", "{{LOADING}} + ' ' + n + '%'", 'index.html head');
 mkdirSync(TPL, { recursive: true });
 writeFileSync(join(TPL, 'head.html'), headOut.trim() + '\n');
 writeFileSync(join(TPL, 'body.html'), body.trim() + '\n');

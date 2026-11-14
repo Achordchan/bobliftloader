@@ -179,6 +179,8 @@ function bl_showcase_markup(string $file, array $products = [], string $siteHead
     $names = $products ? ['BL-T360-H' => bl_escape($products[0]['model'] ?? 'BL-T360-H'), 'BL-T460-H' => bl_escape($products[1]['model'] ?? 'BL-T460-H')] : [];
     return strtr($markup, $names + [
         '{{BASE}}' => $base,
+        // The model's progress caption before the page's translation script has loaded, in the page's language.
+        '{{LOADING}}' => json_encode(bl_t('Loading the 3D model'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
         // The site's own header first, so the page leads back to the rest of the site; the chapter bar stays below it.
         '<header class="exp-header">' => $siteHeader . '<header class="exp-header">',
         '{{IMPORTMAP}}' => '<script type="importmap">' . json_encode(['imports' => $imports + $siteMap], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) . '</script>',

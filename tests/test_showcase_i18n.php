@@ -22,6 +22,13 @@ $GLOBALS['bl_lang'] = 'es';
 $corrections = bl_showcase_script_corrections();
 $check($corrections === ['Bucket' => 'Cazo'], 'only saved corrections of the scripts\' own text, empty ones left out: ' . json_encode($corrections, JSON_UNESCAPED_UNICODE));
 
+// The progress caption written before the translation script loads is in the page's language too.
+$head = bl_showcase_markup('head.html');
+$check(!str_contains($head, '{{LOADING}}') && str_contains($head, ': "Cargando el modelo 3D" + \' \' + n + \'%\''), 'the early loading caption is in Spanish');
+$GLOBALS['bl_lang'] = 'en';
+$check(str_contains(bl_showcase_markup('head.html'), ': "Loading the 3D model" + \' \' + n + \'%\''), 'and in English on the English page');
+$GLOBALS['bl_lang'] = 'es';
+
 // The page's translator leaves the script that carries them alone.
 $island = '<script>window.BL360_I18N_SAVED = ' . json_encode($corrections, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';</script>';
 $check(str_contains(bl_i18n_translate_html($island . '<p>Bucket</p>', 'es'), $island . '<p>Cazo</p>'), 'the corrections reach the page as written');
