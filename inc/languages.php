@@ -13,7 +13,7 @@ function bl_languages(string $path = '/'): array
     $current = bl_lang();
     $rows = [];
     foreach (BL_I18N_LANGUAGES as $code => $language) {
-        $url = bl_has_language($path, $code) ? bl_lang_path($path, $code) : (bl_has_language('/', $code) ? bl_lang_path('/', $code) : '');
+        $url = bl_has_language($path, $code) ? bl_lang_path($path, $code) . bl_i18n_switch_query() : (bl_has_language('/', $code) ? bl_lang_path('/', $code) : '');
         $row = ['code' => $code, 'name' => $language['name'], 'url' => $url === '' ? '' : (bl_is_wordpress() ? home_url($url) : $url), 'current' => $code === $current];
         if ($code === $current) array_unshift($rows, $row); else $rows[] = $row;
     }
@@ -23,9 +23,26 @@ function bl_languages(string $path = '/'): array
         $code = strtolower(trim((string) ($language['code'] ?? '')));
         $name = trim((string) ($language['name'] ?? ''));
         if (!preg_match('/^[a-z]{2,3}(-[a-z0-9]{2,8})?$/', $code) || $name === '' || isset(BL_I18N_LANGUAGES[$code]) || in_array($code, array_column($rows, 'code'), true)) continue;
-        $rows[] = ['code' => $code, 'name' => $name, 'url' => trim((string) ($language['url'] ?? '')), 'current' => false];
+        $url = trim((string) ($language['url'] ?? ''));
+        if (str_starts_with($url, '/') && !str_starts_with($url, '//') && bl_is_wordpress()) $url = home_url($url); // a path on this site, as a subfolder install has it
+        $rows[] = ['code' => $code, 'name' => $name, 'url' => $url, 'current' => false];
     }
     return $rows;
+}
+
+/**
+ * The choices a page was opened with that its counterpart should keep: the enquiry's product and equipment, and the
+ * catalogue's filters and search. Anything else (tracking tags, say) stays with the address it came on.
+ */
+function bl_i18n_switch_query(): string
+{
+    $keep = [];
+    foreach (['product', 'equipment', 'application', 'topic', 'category', 'load', 'ground', 'width', 'q'] as $name) {
+        $value = $_GET[$name] ?? null;
+        if (is_string($value) && function_exists('wp_unslash')) $value = wp_unslash($value);
+        if (is_string($value) && $value !== '') $keep[$name] = $value;
+    }
+    return $keep ? '?' . http_build_query($keep, '', '&', PHP_QUERY_RFC3986) : '';
 }
 
 if (function_exists('add_action')) add_action('init', static function (): void {

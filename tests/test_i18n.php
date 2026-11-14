@@ -26,7 +26,13 @@ $GLOBALS['options']['bl_languages'] = [['code' => 'en', 'name' => 'English', 'ur
 $check(isset($GLOBALS['settings']['bl_languages']['show_in_rest']), 'the older language list setting is still in the REST settings');
 $rows = bl_languages('/about/');
 $check(array_column($rows, 'code') === ['en', 'es', 'de'] && $rows[1]['name'] === 'Español' && $rows[2]['url'] === 'https://de.example.test/' && !$rows[2]['current'], 'saved languages the theme does not translate still show, after its own: ' . json_encode($rows));
+$GLOBALS['options']['bl_languages'][2]['url'] = '/de/';
+$check(bl_languages('/about/')[2]['url'] === (bl_is_wordpress() ? 'https://example.test/de/' : '/de/'), 'a saved language at a path on this site is resolved against the site');
 unset($GLOBALS['options']['bl_languages']);
+$_GET = ['product' => '500kg-tracked-mini-dumper', 'utm_source' => 'google', 'equipment' => ['x']];
+$switch = array_column(bl_languages('/contact/'), 'url', 'code');
+$check(str_ends_with($switch['es'], '/es/contact/?product=500kg-tracked-mini-dumper'), 'the switch keeps the enquiry product but not tracking tags: ' . $switch['es']);
+$_GET = [];
 
 // Pages and paths.
 $check(bl_has_language('/products/mini-dumpers/', 'es') && bl_has_language('/products/mini-dumpers', 'es'), 'the dumper page has Spanish, with or without its slash');
@@ -64,7 +70,7 @@ $gallery = bl_i18n_translate_html('<button data-gallery-alt="Petrol engine"></bu
 $check(str_contains($gallery, 'data-gallery-alt="Motor de gasolina"') && str_contains($gallery, 'data-alt="Motor de gasolina" data-caption="Carga nominal"'), 'the gallery and lightbox texts are translated');
 $search = bl_i18n_translate_html('<script type="application/json" id="site-search-index">' . json_encode([['kind' => 'Mini dumper', 'title' => 'BL-T500-HD', 'text' => '500 kg Tracked Mini Dumper', 'url' => '/product/500kg-tracked-mini-dumper/'], ['kind' => 'Page', 'title' => 'About us', 'text' => 'Company and factory in Xuzhou', 'url' => '/about/']], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) . '</script>', 'es');
 $index = json_decode(preg_replace('~^<script[^>]*>|</script>$~', '', $search), true);
-$check(($index[0]['kind'] ?? '') === 'Minidumper' && ($index[0]['text'] ?? '') === bl_t('500 kg Tracked Mini Dumper', 'es') && ($index[0]['url'] ?? '') === '/es/product/500kg-tracked-mini-dumper/' && str_contains($index[0]['terms'] ?? '', 'Tracked Mini Dumper'), 'a search result for a Spanish page is translated and links to it: ' . $search);
+$check(($index[0]['kind'] ?? '') === 'Minidumper' && ($index[0]['text'] ?? '') === bl_t('500 kg Tracked Mini Dumper', 'es') && ($index[0]['url'] ?? '') === '/es/product/500kg-tracked-mini-dumper/' && ($index[0]['en']['text'] ?? '') === '500 kg Tracked Mini Dumper' && !isset($index[0]['en']['title']), 'a search result for a Spanish page is translated and links to it: ' . $search);
 $check(($index[1]['url'] ?? '') === '/about/' && !in_array('Company and factory in Xuzhou', bl_i18n_missing(), true), 'a search result for an English-only page keeps its address and is not reported as missing');
 $wa = bl_i18n_translate_html('<a href="https://wa.me/8615852499415?text=' . rawurlencode('Hello BOB-LIFT, I am interested in your mini dumpers.') . '">WhatsApp</a>', 'es');
 $check(str_contains($wa, rawurlencode('Hola, BOB-LIFT. Me interesan sus minidumpers.')), 'the WhatsApp message is translated');

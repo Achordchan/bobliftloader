@@ -493,13 +493,15 @@ function bl_i18n_translate_search_index(string $json, string $lang, array $dicti
         $entry['url'] = $localized;
         $translated = $localized !== $url;
         if (is_string($entry['kind'] ?? null)) $entry['kind'] = $translate($entry['kind'], true);
+        // The English words still find and rank the result: assets/js/search.js matches and scores en.title and en.text
+        // as it does the title and text.
         $english = [];
         foreach (['title', 'text'] as $field) if (is_string($entry[$field] ?? null)) {
-            $english[] = $entry[$field];
-            $entry[$field] = $translate($entry[$field], $translated);
+            $original = $entry[$field];
+            $entry[$field] = $translate($original, $translated);
+            if ($entry[$field] !== $original) $english[$field] = $original;
         }
-        // The English words still find the result (assets/js/search.js searches the terms too).
-        $entry['terms'] = trim((is_string($entry['terms'] ?? null) ? $entry['terms'] : '') . ' ' . implode(' ', $english));
+        if ($english) $entry['en'] = $english;
     }
     unset($entry);
     return (string) json_encode($entries, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);

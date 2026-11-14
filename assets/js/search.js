@@ -22,8 +22,11 @@ export function initializeSearch() {
   const entries = JSON.parse(source.textContent).map((entry) => ({
     ...entry,
     key: normalize(entry.title),
+    // A translated page (inc/i18n.php) keeps each result's English title and text in entry.en, so English queries rank alike.
+    keys: [entry.title, entry.en?.title].filter(Boolean).map(normalize),
+    texts: [entry.text, entry.en?.text].filter(Boolean).map(normalize),
     legacyKeys: (entry.legacy || []).map(normalize),
-    haystack: normalize([entry.title, entry.text, entry.meta, entry.kind, entry.terms, ...(entry.legacy || [])].filter(Boolean).join(' ')),
+    haystack: normalize([entry.title, entry.text, entry.en?.title, entry.en?.text, entry.meta, entry.kind, entry.terms, ...(entry.legacy || [])].filter(Boolean).join(' ')),
   }));
   let results = [];
   let active = -1;
@@ -31,14 +34,13 @@ export function initializeSearch() {
 
   const score = (entry, whole, tokens) => {
     if (!tokens.every((token) => entry.haystack.includes(token))) return 0;
-    if (entry.key === whole) return 100;
+    if (entry.keys.includes(whole)) return 100;
     if (entry.legacyKeys.includes(whole)) return 90;
-    if (entry.key.startsWith(whole)) return 60;
+    if (entry.keys.some((key) => key.startsWith(whole))) return 60;
     if (entry.legacyKeys.some((key) => key.startsWith(whole))) return 55;
-    if (entry.key.includes(whole)) return 40;
-    const text = normalize(entry.text || '');
-    if (text.startsWith(whole)) return 30; // "5 ton" puts the 5 Ton dumper ahead of the 1.5 Ton one
-    if (text.includes(whole)) return 20;
+    if (entry.keys.some((key) => key.includes(whole))) return 40;
+    if (entry.texts.some((text) => text.startsWith(whole))) return 30; // "5 ton" puts the 5 Ton dumper ahead of the 1.5 Ton one
+    if (entry.texts.some((text) => text.includes(whole))) return 20;
     return entry.legacy ? 12 : 10; // loose matches: models (the only entries with a legacy list) before pages
   };
 
