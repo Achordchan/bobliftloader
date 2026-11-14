@@ -11,6 +11,16 @@ const MESSAGES = {
   es: { text: 'Esta página también está disponible en español.', action: 'Ver en español', close: 'Cerrar' },
 };
 const primary = (tag) => String(tag || '').trim().toLowerCase().split(/[-_]/)[0];
+// The choices a page was opened with that its counterpart keeps (inc/languages.php, bl_i18n_switch_query), and the place on
+// the page. The hreflang links stay bare for search engines; only the visitor's link carries them.
+const KEEP = ['product', 'equipment', 'application', 'topic', 'category', 'load', 'ground', 'width', 'q'];
+const withContext = (href) => {
+  const url = new URL(href, location.href);
+  const current = new URLSearchParams(location.search);
+  KEEP.forEach((name) => { if (current.get(name)) url.searchParams.set(name, current.get(name)); });
+  if (location.hash) url.hash = location.hash;
+  return url.href;
+};
 
 const remember = (language) => {
   try { localStorage.setItem(STORAGE_KEY, language); } catch { /* storage blocked: asked again on the next page */ }
@@ -40,7 +50,7 @@ const suggestion = () => {
   if (!wanted || wanted === current) return null;
   const href = copies()[wanted];
   if (!href || new URL(href, location.href).pathname === location.pathname) return null;
-  return { current, language: wanted, href };
+  return { current, language: wanted, href: withContext(href) };
 };
 
 const show = ({ current, language, href }) => {

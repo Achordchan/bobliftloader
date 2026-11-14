@@ -5,7 +5,8 @@
  * form submits to the catalogue, which searches the same way.
  */
 const MAX_RESULTS = 8;
-const normalize = (text) => text.toLowerCase().replace(/[^a-z0-9]/g, '');
+// Accents fold to their letters (Aplicación, aplicacion), so a Spanish page's index finds unaccented queries.
+const normalize = (text) => String(text).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 // BL-T360 keeps the running-gear letter and drops only the operator suffix (as at the fair); BL-390 predates both.
 const isShortForm = (name) => /^BL-[TS]\d/.test(name);
 

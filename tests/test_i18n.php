@@ -26,6 +26,9 @@ $GLOBALS['options']['bl_languages'] = [['code' => 'en', 'name' => 'English', 'ur
 $check(isset($GLOBALS['settings']['bl_languages']['show_in_rest']), 'the older language list setting is still in the REST settings');
 $rows = bl_languages('/about/');
 $check(array_column($rows, 'code') === ['en', 'es', 'de'] && $rows[1]['name'] === 'Español' && $rows[2]['url'] === 'https://de.example.test/' && !$rows[2]['current'], 'saved languages the theme does not translate still show, after its own: ' . json_encode($rows));
+$check($rows[1]['url'] === 'https://elsewhere.test/', 'a saved destination on another website for a theme language is kept: ' . $rows[1]['url']);
+$GLOBALS['options']['bl_languages'][1]['url'] = 'https://example.test/es/old/';
+$check(bl_languages('/contact/')[1]['url'] === 'https://example.test/es/contact/', 'a saved destination on this site gives way to the theme pages');
 $GLOBALS['options']['bl_languages'][2]['url'] = '/de/';
 $check(bl_languages('/about/')[2]['url'] === (bl_is_wordpress() ? 'https://example.test/de/' : '/de/'), 'a saved language at a path on this site is resolved against the site');
 unset($GLOBALS['options']['bl_languages']);

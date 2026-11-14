@@ -98,7 +98,7 @@ python3 tests/test_site.py http://127.0.0.1:4173
 python3 tests/test_site.py http://127.0.0.1:9402
 ```
 
-另外对 PHP 文件执行 `php -l`，对四个 JS 模块执行 `node --check`，并运行 `php tests/test_dumper_models.php`（翻斗车适用场景里的型号新旧写法都能找到产品）、`php tests/test_i18n.php`（西语路径、链接、翻译器和词典占位符 / 不含价格）和 `php tests/test_i18n_inquiry.php`（西语询盘的感谢页、提示语和钉钉语言行）。WordPress Blueprint 会验证初始化幂等、产品保存 / 读出、新闻正文编辑读出、权限 / nonce 拒绝和草稿隐藏，最后恢复测试数据；仅在隔离实例中移除 WordPress 自带示例内容。
+另外对 PHP 文件执行 `php -l`，对四个 JS 模块执行 `node --check`，并运行 `php tests/test_dumper_models.php`（翻斗车适用场景里的型号新旧写法都能找到产品）、`php tests/test_i18n.php`（西语路径、链接、翻译器和词典占位符 / 不含价格）、`php tests/test_i18n_inquiry.php`（西语询盘的感谢页、提示语和钉钉语言行）和 `node tests/test_spanish_js.cjs`（西语页站内搜索的排序和去重音、浏览器语言推荐卡片带上询盘参数）。WordPress Blueprint 会验证初始化幂等、产品保存 / 读出、新闻正文编辑读出、权限 / nonce 拒绝和草稿隐藏，最后恢复测试数据；仅在隔离实例中移除 WordPress 自带示例内容。
 
 详见 `design-qa.md`、`docs/design-2k.md`、`docs/qa-2k/`、`docs/qa-multipage/`、`docs/content-verification.md` 和 `docs/file-changes.md`。
 
