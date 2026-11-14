@@ -234,8 +234,9 @@ export function initializeInquiry() {
       const row = document.createElement('div');
       const term = document.createElement('dt');
       const detail = document.createElement('dd');
-      term.textContent = label;
-      detail.textContent = value;
+      // The review shows the page's language; the email itself stays in English for the sales team.
+      term.textContent = t(label);
+      detail.textContent = label === 'Equipment' ? t(value) : value;
       row.append(term, detail);
       summary.append(row);
     });
@@ -252,9 +253,9 @@ export function initializeInquiry() {
   document.querySelector('#copy-inquiry').addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(emailBody);
-      copyStatus.textContent = `Enquiry copied. Paste it into an email to ${recipient}.`;
+      copyStatus.textContent = t('Enquiry copied. Paste it into an email to {email}.', { email: recipient });
     } catch {
-      copyStatus.textContent = `Your browser could not copy automatically. Select and copy the details above, then email ${recipient}.`;
+      copyStatus.textContent = t('Your browser could not copy automatically. Select and copy the details above, then email {email}.', { email: recipient });
     }
   });
 }

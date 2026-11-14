@@ -575,6 +575,9 @@ const BL_I18N_SCRIPT_STRINGS = [
     'The enquiry could not be sent. Please check your connection and try again, or email us directly.',
     'Please enter a value, not only spaces.', 'Please complete the verification and send again.',
     'Move the slider to the load you carry per trip.', '{hits} of {total} {noun} are rated for {limit} kg or more', 'Any', 'dumpers', 'loaders', 'models', 'model',
+    // The email-draft form used while the inquiry plugin is off (templates/partials/inquiry-form.php, assets/js/inquiry.js).
+    'Equipment', 'Model', 'Name', 'Email', 'Country', 'Company', 'Project', 'Skid steer loader', 'Mini dumper', 'Help choosing equipment', 'Parts & service',
+    'Enquiry copied. Paste it into an email to {email}.', 'Your browser could not copy automatically. Select and copy the details above, then email {email}.',
 ];
 
 /** The script dictionary as a JSON island; empty in English. */

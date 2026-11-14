@@ -111,6 +111,22 @@ $check(substr_count($comment, '-->') === 1 && str_ends_with($comment, '-->') && 
 $searchText = bl_product_search_text(['name' => '500 kg Tracked Mini Dumper', 'model' => 'BL-T500-HD']);
 $check(str_contains($searchText, 'sobre orugas') && str_contains($searchText, 'tracked') && bl_search_fold('CUCHARÓN Año') === 'cucharon ano', 'the catalogue searches Spanish and English names, accents folded: ' . $searchText);
 
+// The email-draft enquiry form (inquiry plugin off) and its review dialog have Spanish for every text and control.
+if (!bl_inquiry_live()) {
+    $selectedRecord = ['name' => '500 kg Tracked Mini Dumper', 'model' => 'BL-T500-HD']; $selectedFamily = 'dumper'; $prefillMessage = '';
+    ob_start();
+    require __DIR__ . '/../templates/partials/inquiry-form.php';
+    eval('?>' . strstr((string) file_get_contents(__DIR__ . '/../templates/dialogs.php'), '<?php require', true)); // the review dialog, without the search after it
+    $fallback = (string) ob_get_clean();
+    $before = bl_i18n_missing();
+    $spanish = bl_i18n_translate_html($fallback, 'es');
+    $left = array_values(array_filter(array_diff(bl_i18n_missing(), $before), static fn($k) => !str_contains($k, 'Tracked Mini Dumper')));
+    $check(str_contains($spanish, 'Preparar consulta') && str_contains($spanish, 'placeholder="¿Dónde usará el equipo?"') && str_contains($spanish, 'País / región'), 'the email-draft form is in Spanish');
+    $check(!$left, 'nothing of the email-draft form or its review is left in English: ' . implode(' | ', $left));
+} else {
+    $check(false, 'the fixture should have the inquiry plugin off');
+}
+
 $GLOBALS['bl_lang'] = 'en';
 $check(bl_i18n_script_dictionary() === '' && bl_i18n_localize_href('/contact/') === '/contact/', 'English pages are untouched');
 
