@@ -472,12 +472,14 @@ class WebsiteTests(unittest.TestCase):
         self.assertRegex(nav, r'href="[^"]*/es/products/mini-dumpers/" hreflang="es" data-bl-lang="es" data-bl-same-page><b>Español</b>')
         self.assertNotIn('bl-lang-switch-single', nav)
         # A page with no Spanish version offers the Spanish home page instead.
-        _, html, _ = fetch('/about/')
+        _, html, _ = fetch('/news/')
         nav = html.split('id="main-navigation"', 1)[1].split('</nav>', 1)[0]
         self.assertRegex(nav, r'href="[^"]*/es/" hreflang="es"')
 
     def test_spanish_pages(self):
-        for path in ('/es/', '/es/products/mini-dumpers/', '/es/product/500kg-tracked-mini-dumper/', '/es/contact/', '/es/thank-you/', '/es/privacy/'):
+        for path in ('/es/', '/es/products/mini-dumpers/', '/es/product/500kg-tracked-mini-dumper/', '/es/contact/', '/es/thank-you/', '/es/privacy/',
+                     '/es/about/', '/es/support/', '/es/dealers/', '/es/applications/', '/es/applications/landscaping/', '/es/bl-t360-t460/',
+                     '/es/products/skid-steer-loaders/', '/es/product/bl-t360-h-mini-skid-steer-loader/', '/es/product/3-ton-mini-dumper-with-bucket/'):
             status, html, _ = fetch(path)
             self.assertEqual(status, 200, path)
             self.assertIn('<html lang="es">', html, path)
@@ -503,9 +505,9 @@ class WebsiteTests(unittest.TestCase):
         _, html, _ = fetch('/es/products/mini-dumpers/?q=cami%C3%B3n')
         self.assertEqual(visible_cards(html), [], 'a word no model has finds nothing')
         # Pages not translated yet are not found under /es/, and have no Spanish alternate.
-        status, _, _ = fetch('/es/about/')
+        status, _, _ = fetch('/es/news/')
         self.assertEqual(status, 404)
-        _, html, _ = fetch('/about/')
+        _, html, _ = fetch('/news/')
         self.assertNotIn('hreflang="es"', html.split('</head>', 1)[0])
         with open('inc/i18n/es.php') as source: self.assertIn("'Rated load' => 'Carga nominal'", source.read())
 

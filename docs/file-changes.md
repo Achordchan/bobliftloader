@@ -111,3 +111,14 @@
 | `assets/js/i18n.js` 与 main / hero / catalog / ruler / inquiry | 脚本里显示的文字走 `t()` |
 | `tools/i18n/collect.php`、`tools/i18n/keep.txt` | 列出页面上词典还缺的文字 |
 | `tests/test_i18n.php`、`tests/test_i18n_inquiry.php`、`tests/test_site.py` | 西语路径、翻译、词典、询盘语言和整站 `/es/` 页面测试 |
+
+第二期（补齐其余页面）：
+
+| 文件 | 改动 |
+| --- | --- |
+| `inc/i18n.php` | 页面清单从 6 页加到 36 页（新增关于、滑移装载机分类、应用 7 页、支持、经销商、其余 18 个产品页、3D 展示页；新闻列表和文章仍只有英文）；词典查不到时按句式模板翻译（`bl_i18n_get()`），只有数字、单位、网址的文字不算缺译（`bl_i18n_has_words()`）；修复 title / textarea 分支覆盖收集结果、导致收集脚本漏条的问题 |
+| `inc/i18n/es-patterns.php` | 新增：同一句式不同数字的文字（新闻日期、图集计数、载重 / 高度等），一条规则覆盖全部 |
+| `inc/i18n/es.php` | 词典从 752 条扩到 2,409 条（DeepL ES-419 + 人工校对 usted 和术语） |
+| `index.php`、`templates/bl360.php` | 3D 展示页 `/es/bl-t360-t460/` 也在输出前翻译，`<html lang>` 跟语言，输出脚本词典 |
+| `loader-experience/scripts/build_wp.mjs`、`assets/bl360/i18n/` | 展示页脚本按页面语言出字：带上西语行（优先取主题词典的译法，与服务端一致），重新构建 |
+| `tools/i18n/collect.php`、`tests/test_i18n.php`、`tests/test_site.py` | 收集脚本用句式模板和「无文字」判断；句式、收集回归和新增西语页测试 |
