@@ -220,6 +220,10 @@ add_filter('achord_inquiry_fields', static fn(): array => [
     // Not asked on the form: the country the sender's IP address belongs to, for the list's 国家 column.
     'country' => ['label' => '国家（按 IP）', 'short' => '', 'admin' => '国家（按 IP）', 'type' => 'text', 'mail' => false],
     'message' => ['label' => '留言', 'short' => '留言', 'admin' => '项目详情', 'type' => 'textarea', 'long' => true, 'mail' => false],
+    // Asked only on the dealer application (/dealers/); empty on an ordinary enquiry, so the mail and DingTalk leave them out.
+    'business' => ['label' => '业务类型', 'short' => '业务类型', 'admin' => '业务类型', 'type' => 'text'],
+    'market' => ['label' => '经营国家/地区', 'short' => '经营地区', 'admin' => '经营国家/地区', 'type' => 'text'],
+    'website' => ['label' => '公司网站', 'short' => '网站', 'admin' => '公司网站', 'type' => 'url'],
 ]);
 
 /**
@@ -228,6 +232,20 @@ add_filter('achord_inquiry_fields', static fn(): array => [
  */
 function bl_wp_inquiry_submission_fields(array $fields): array
 {
+    // The dealer application (inc/dealers.php): its own lead type, so the mail, DingTalk and the 询盘 list name it; what the
+    // applicant would sell and their kind of business in Chinese. A value the form does not offer is dropped.
+    if (sanitize_key((string) wp_unslash($_POST['bl_lead'] ?? '')) === 'dealer') {
+        $fields['lead_type'] = 'dealer';
+        $fields['product'] = BL_DEALER_INTERESTS[(string) ($fields['product'] ?? '')] ?? '';
+        $fields['business'] = BL_DEALER_BUSINESSES[(string) ($fields['business'] ?? '')] ?? '';
+        $fields['model'] = '';
+        $ip = function_exists('achord_inquiry_client_ip') ? achord_inquiry_client_ip() : '';
+        $fields['country'] = $ip !== '' && function_exists('achord_inquiry_ip_country') ? achord_inquiry_ip_country($ip) : '';
+        if (($fields['language'] ?? '') === '') $fields['language'] = 'en';
+        return $fields;
+    }
+    // Asked only on the dealer form: an ordinary enquiry never carries them.
+    $fields['business'] = $fields['market'] = $fields['website'] = '';
     $family = (string) ($fields['product'] ?? '');
     $fields['product'] = BL_ENQUIRY_FAMILIES_ZH[$family] ?? (in_array($family, BL_ENQUIRY_FAMILIES_ZH, true) ? $family : '');
     $model = trim((string) ($fields['model'] ?? ''));
@@ -239,6 +257,24 @@ function bl_wp_inquiry_submission_fields(array $fields): array
     return $fields;
 }
 add_filter('achord_inquiry_submission_fields', 'bl_wp_inquiry_submission_fields');
+
+// A dealer application: its own headline, subject and DingTalk title, so the sales team tells it from an enquiry at a glance.
+add_filter('achord_inquiry_lead_types', static fn(array $types): array => $types + ['dealer' => [
+    'headline' => '新经销商申请',
+    'intro' => '装载设备站收到一条经销商申请，内容如下，请及时跟进。',
+    'subject' => '【装载设备站】经销商申请，请及时跟进：',
+    'kind' => '经销商申请',
+    'section' => '意向产品',
+    'form_name' => '经销商申请表',
+    'dingtalk_title' => '🤝 装载设备站经销商申请',
+    'title' => 'Dealer application from %s - %s',
+]]);
+
+// DingTalk lists what a dealer would sell first (an enquiry's equipment type shows in its mail card instead).
+add_filter('achord_inquiry_dingtalk_rows', static function (array $rows, array $fields): array {
+    if (($fields['lead_type'] ?? '') !== 'dealer' || trim((string) ($fields['product'] ?? '')) === '') return $rows;
+    return [['label' => '意向产品', 'value' => (string) $fields['product'], 'long' => false], ...$rows];
+}, 10, 2);
 
 // The mail's 产品信息: the model's photo, name and link when the sender wrote from a product page, else the equipment type.
 add_filter('achord_inquiry_mail_products_html', static fn($html, array $fields): string => bl_wp_inquiry_product_card((string) ($fields['product'] ?? ''), (string) ($fields['model'] ?? '')), 10, 2);
@@ -518,6 +554,51 @@ function bl_wp_thanks_page(): void
     }
 }
 add_action('init', 'bl_wp_thanks_page', 20);
+
+/**
+ * The dealer page (/dealers/; words in 网站内容 → 经销商). WordPress needs a page at that address so the theme can answer it;
+ * it is made once and, unlike the thank-you page, stays in the sitemaps. A draft or private page an editor already keeps at
+ * that address is never published from here, and a media file holding the slug "dealers" is not touched either: it is left
+ * as it is, the editor is told in the dashboard, and the check runs again an hour later (or as soon as the page is published
+ * or deleted, or the file renamed or deleted, and the notice is gone).
+ */
+function bl_wp_dealers_page(): void
+{
+    if (get_option('bl_dealers_page') || get_transient('bl_dealers_page_conflict') || !($token = bl_lock_acquire('dealers_page', 1))) return;
+    try {
+        // Pages only: given a single type, get_page_by_path() also returns a media file whose slug is "dealers".
+        $page = get_page_by_path('dealers', OBJECT, ['page']);
+        if ($page && $page->post_status !== 'publish') { set_transient('bl_dealers_page_conflict', (int) $page->ID, HOUR_IN_SECONDS); return; }
+        if (!$page) {
+            // A media file named "dealers" reserves the slug against new pages wherever it is attached, so look it up by name
+            // alone rather than by path; WordPress would otherwise give the new page /dealers-2/.
+            $media = get_posts(['name' => 'dealers', 'post_type' => 'attachment', 'post_status' => 'inherit', 'posts_per_page' => 1, 'fields' => 'ids', 'suppress_filters' => true]);
+            if ($media) { set_transient('bl_dealers_page_conflict', (int) $media[0], HOUR_IN_SECONDS); return; }
+        }
+        $id = $page ? $page->ID : wp_insert_post(['post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Become a dealer', 'post_name' => 'dealers'], true);
+        if (is_wp_error($id) || !$id) return;
+        if (get_post_field('post_name', (int) $id) !== 'dealers') {
+            // Something else still holds the slug: take the stray page away and try again later instead of giving up for good.
+            wp_delete_post((int) $id, true);
+            set_transient('bl_dealers_page_conflict', -1, HOUR_IN_SECONDS);
+            return;
+        }
+        update_option('bl_dealers_page', (int) $id);
+    } finally {
+        bl_lock_release('dealers_page', $token);
+    }
+}
+add_action('init', 'bl_wp_dealers_page', 20);
+add_action('admin_notices', static function (): void {
+    if (!current_user_can('edit_pages') || !($id = (int) get_transient('bl_dealers_page_conflict'))) return;
+    if ($id < 0) { echo '<div class="notice notice-warning"><p>经销商页的网址 /dealers/ 已被网站里的其他内容占用，暂时建不了，网站上的「Become a dealer」链接打不开。请在页面、文章和媒体库里找到别名为 dealers 的内容，改掉别名或删除；系统每小时会再试一次。</p></div>'; return; }
+    $media = get_post_type($id) === 'attachment';
+    // Resolved: the page was published or deleted, or the media file was deleted or given another slug. The next load retries.
+    if (!get_post_status($id) || get_post_field('post_name', $id) !== 'dealers' || (!$media && get_post_status($id) === 'publish')) { delete_transient('bl_dealers_page_conflict'); return; }
+    $what = $media ? '媒体库里的一个文件（别名同为 dealers）' : '一个未发布的页面（草稿或私密）';
+    $fix = $media ? '把这个文件的别名改掉或删除这个文件' : '发布或删除这个页面';
+    echo '<div class="notice notice-warning"><p>经销商页的网址 /dealers/ 被' . $what . '占用，网站上的「Become a dealer」链接现在打不开。请<a href="' . esc_url((string) get_edit_post_link($id)) . '">' . $fix . '</a>，处理后系统会自动建好经销商页。</p></div>';
+});
 
 add_filter('wp_sitemaps_posts_query_args', static function (array $args, string $postType): array {
     if ($postType === 'page' && ($id = (int) get_option('bl_thanks_page')) > 0) $args['post__not_in'] = array_merge($args['post__not_in'] ?? [], [$id]);

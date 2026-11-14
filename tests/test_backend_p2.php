@@ -124,7 +124,7 @@ $check(str_contains($capture(static fn() => bl_news_event_box($GLOBALS['posts'][
 // Parent slug and callbacks survive menu reordering; raw scripts remain separately permission-gated.
 $GLOBALS['pagenow'] = 'admin.php';
 run_hook('admin_menu');
-$expectedOrder = ['bl-content-global', 'bl-content-home', 'bl-content-loaders', 'bl-content-dumpers', 'bl-content-applications', 'bl-content-support', 'bl-content-about', 'bl-content-news', 'bl-content-contact', 'bl-content-thanks', 'bl-content-privacy', 'bl-content-404', 'bl-downloads', 'bl-content-tracking'];
+$expectedOrder = ['bl-content-global', 'bl-content-home', 'bl-content-loaders', 'bl-content-dumpers', 'bl-content-applications', 'bl-content-support', 'bl-content-dealers', 'bl-content-about', 'bl-content-news', 'bl-content-contact', 'bl-content-thanks', 'bl-content-privacy', 'bl-content-404', 'bl-downloads', 'bl-content-tracking'];
 $check(BL_CONTENT_MENU_ORDER === $expectedOrder, 'content menu order omits or misplaces a screen');
 $check($GLOBALS['menu_slug'] === 'bl-content-home' && array_column($GLOBALS['submenu']['bl-content-home'], 2) === $expectedOrder, 'menu order or parent slug changed');
 $dashboard = $capture('bl_dashboard_widget');

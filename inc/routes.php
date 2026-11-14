@@ -22,6 +22,7 @@ function bl_resolve_route(?string $requestPath = null): array
         '/products/mini-dumpers/' => ['products', bl_editable('dumpers')['seo']['title'], bl_editable('dumpers')['seo']['description']],
         '/applications/' => ['applications', bl_editable('applications')['seo']['title'], bl_editable('applications')['seo']['description']],
         '/support/' => ['support', bl_editable('support')['seo']['title'], bl_editable('support')['seo']['description']],
+        '/dealers/' => ['dealers', bl_editable('dealers')['seo']['title'], bl_editable('dealers')['seo']['description']],
         '/news/' => ['news', bl_editable('news')['seo']['title'], bl_editable('news')['seo']['description']],
         '/contact/' => ['contact', bl_editable('contact')['seo']['title'], bl_editable('contact')['seo']['description']],
         '/thank-you/' => ['thanks', bl_editable('thanks')['seo']['title'], bl_editable('thanks')['seo']['description']],
@@ -89,7 +90,7 @@ function bl_public_base(): string
 
 function bl_sitemap_paths(): array
 {
-    $paths = ['/', '/about/', '/products/skid-steer-loaders/', '/products/mini-dumpers/', '/applications/', '/support/', '/news/', '/contact/', '/privacy/'];
+    $paths = ['/', '/about/', '/products/skid-steer-loaders/', '/products/mini-dumpers/', '/applications/', '/support/', '/dealers/', '/news/', '/contact/', '/privacy/'];
     // Resolved here rather than read from the template's global: WordPress answers /sitemap.xml before any template runs.
     foreach (bl_apply_application_content($GLOBALS['bl_application_base'] ?? []) as $app) $paths[] = '/applications/' . bl_application_slug($app) . '/';
     foreach (bl_products() as $product) $paths[] = '/product/' . $product['slug'] . '/';

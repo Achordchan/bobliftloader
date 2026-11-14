@@ -64,6 +64,7 @@ function bl_llms_txt(): string
         'Company' => [
             bl_llms_txt_link('About BOB-LIFT Loader', '/about/', 'The company, factory and team behind the machines'),
             bl_llms_txt_link('Support', '/support/', 'Ordering, shipping, warranty, parts and after-delivery service'),
+            bl_llms_txt_link('Dealers', '/dealers/', 'Buying direct from the factory to resell: first order, own-logo orders, warranty and parts, and the dealer application form'),
             bl_llms_txt_link('Contact', '/contact/', 'Enquiry form for quotations and specifications'),
             '- Company name: ' . bl_llms_txt_company_name(bl_company('name'), bl_company('name_zh')),
             '- Email: ' . bl_company('email'),

@@ -52,6 +52,9 @@ function bl_structured_data(array $route): array
         $items[] = ['@type' => 'ListItem', 'position' => count($items) + 1, 'name' => $route['title'], 'item' => $base . $route['path']];
         $graph[] = ['@type' => 'BreadcrumbList', 'itemListElement' => $items];
     }
+    if ($route['type'] === 'dealers' && ($dealerFaq = bl_dealer_faq())) {
+        $graph[] = ['@type' => 'FAQPage', 'mainEntity' => array_map(static fn($item) => ['@type' => 'Question', 'name' => $item['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $item['a']]], $dealerFaq), 'isPartOf' => ['@id' => $base . '/#website']];
+    }
     if ($route['type'] === 'support') {
         $questions = [];
         foreach (bl_support_faq() as $group) foreach ($group['items'] as $item) $questions[] = ['@type' => 'Question', 'name' => $item['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $item['a']]];

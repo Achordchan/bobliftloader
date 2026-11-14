@@ -10,6 +10,7 @@ $pages = [
     ...(($showcase = bl_showcase_products()) ? [['label' => implode(' & ', array_column($showcase, 'model')) . ' in 3D', 'url' => BL_SHOWCASE_PATH]] : []),
     ['label' => bl_content_value('global', 'footer.applications_label'), 'url' => '/applications/'],
     ['label' => bl_content_value('global', 'footer.support_label'), 'url' => '/support/'],
+    ['label' => bl_content_value('global', 'footer.dealers_label'), 'url' => '/dealers/'],
     ['label' => bl_content_value('global', 'footer.about_label'), 'url' => '/about/'],
     ['label' => bl_content_value('global', 'footer.news_label'), 'url' => '/news/'],
     ['label' => bl_content_value('global', 'footer.contact_label'), 'url' => '/contact/'],

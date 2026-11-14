@@ -20,6 +20,7 @@ const BL_CONTENT_PAGES = [
     'news' => ['title' => '新闻列表', 'menu' => '新闻列表', 'path' => '/news/'],
     '404' => ['title' => '未找到页面', 'menu' => '未找到页面', 'path' => '/404/'],
     'thanks' => ['title' => '询盘成功页内容', 'menu' => '询盘成功页', 'path' => '/thank-you/'],
+    'dealers' => ['title' => '经销商页内容', 'menu' => '经销商', 'path' => '/dealers/'],
 ];
 
 /**
@@ -819,6 +820,7 @@ function bl_content_page_for_post(?WP_Post $post): string
     if ($post->post_name === 'support' && !$post->post_parent) return 'support';
     if ($post->post_name === 'applications' && !$post->post_parent) return 'applications';
     if ($post->post_name === 'thank-you' && !$post->post_parent) return 'thanks';
+    if ($post->post_name === 'dealers' && !$post->post_parent) return 'dealers';
     // The three application pages sit under Applications and are edited on the same screen.
     $parent = $post->post_parent ? get_post($post->post_parent) : null;
     return $parent && $parent->post_name === 'applications' && !$parent->post_parent ? 'applications' : '';

@@ -482,10 +482,15 @@
 .bl-site .bl-model-decode a{margin-left:4px;color:var(--ink);font-weight:700;border-bottom:1px solid currentColor}
 @media(hover:hover){.bl-site .bl-model-decode a:hover{color:var(--blue)}}
 .bl-site .bl-product-excerpt{font-size:var(--fs-lead);line-height:1.75;color:var(--muted);max-width:620px}
-.bl-site .bl-product-key-specs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(16px,1.4vw,32px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:clamp(22px,1.8vw,40px) 0;margin:clamp(26px,2vw,44px) 0}
+.bl-site .bl-product-key-specs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,1.6vw,36px) clamp(16px,1.4vw,32px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:clamp(22px,1.8vw,40px) 0;margin:clamp(26px,2vw,44px) 0}
 .bl-site .bl-product-key-specs dt{font-size:var(--fs-label);color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:700}
-.bl-site .bl-product-key-specs dd{font:600 clamp(30px,2.4vw,60px)/1 var(--display);margin:10px 0 0;white-space:nowrap}
+.bl-site .bl-product-key-specs dd{font:600 clamp(30px,2.1vw,52px)/1 var(--display);margin:10px 0 0;white-space:nowrap}
+/* The imperial equivalent sits under the metric figure, quieter, in the text face. */
+.bl-site .bl-product-key-specs dd small{display:block;margin-top:6px;font:500 var(--fs-small)/1.2 var(--sans);color:var(--muted);letter-spacing:0}
 .bl-site .bl-product-actions{display:flex;align-items:center;gap:clamp(20px,1.8vw,40px);flex-wrap:wrap;margin-top:clamp(22px,1.8vw,40px)}
+/* Become a dealer: the quote button's shape in outline, so the quote stays the first choice. */
+.bl-site .bl-product-dealer{min-height:clamp(54px,2.7vw,70px);display:inline-flex;align-items:center;gap:clamp(16px,1.2vw,28px);padding:15px clamp(20px,1.1vw,28px);border:1px solid var(--ink);color:var(--ink);font-size:var(--fs-small);font-weight:700;line-height:1.4;transition:background .2s,color .2s}
+@media(hover:hover){.bl-site .bl-product-dealer:hover{background:var(--ink);color:#fff}.bl-site .bl-product-dealer:hover .bl-icon{filter:invert(1)}}
 .bl-site .bl-product-direct{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px clamp(16px,1.4vw,32px);margin-top:clamp(20px,1.6vw,36px);font-size:var(--fs-small)}
 .bl-site .bl-product-direct span{font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .bl-site .bl-product-direct a{font-weight:600;border-bottom:1px solid var(--line);transition:border-color .2s,color .2s}

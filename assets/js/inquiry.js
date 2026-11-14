@@ -133,8 +133,8 @@ function initializeSentInquiry(wrap) {
         return;
       }
     }
-    // What was chosen, read now: the visitor may change the form while it is sending.
-    const sent = { product: form.querySelector('input[name="product"]:checked')?.value || '', model: model?.value || '' };
+    // What was chosen, read now: the visitor may change the form while it is sending. A dealer application reports form 'dealer'.
+    const sent = { form: wrap.dataset.form || 'enquiry', product: form.querySelector('input[name="product"]:checked')?.value || '', model: model?.value || '' };
     form.dataset.sending = '1';
     form.setAttribute('aria-busy', 'true');
     if (button) button.disabled = true;
@@ -175,12 +175,12 @@ function reportSentInquiry() {
   } catch { return; }
   if (!sent) return;
   window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({ event: 'generate_lead', form: 'enquiry', enquiry_product: sent.product || '', enquiry_model: sent.model || '' });
+  window.dataLayer.push({ event: 'generate_lead', form: sent.form || 'enquiry', enquiry_product: sent.product || '', enquiry_model: sent.model || '' });
   // With the theme's own Google tag (inc/consent.php, bl_google_tag_markup, which sets blGoogleTag) the same enquiry is reported
   // to GA4 and, when a conversion is set, to Google Ads; Consent Mode decides whether that goes with cookies or as a cookieless
   // ping. A gtag from pasted code is left alone: that setup reports the dataLayer event above in its own way.
   if (!window.blGoogleTag || typeof window.gtag !== 'function') return;
-  window.gtag('event', 'generate_lead', { form: 'enquiry', enquiry_product: sent.product || '', enquiry_model: sent.model || '' });
+  window.gtag('event', 'generate_lead', { form: sent.form || 'enquiry', enquiry_product: sent.product || '', enquiry_model: sent.model || '' });
   if (window.blGoogleConversion) window.gtag('event', 'conversion', { send_to: window.blGoogleConversion });
 }
 
