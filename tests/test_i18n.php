@@ -98,6 +98,13 @@ foreach ($entries as $key => $text) {
     $check(!preg_match('~(US\$|USD|€|\$\s?\d|precio desde)~i', $text), "a price in: $text");
 }
 
+// The audit comment (?bl_i18n_audit=1) cannot be closed or broken out of by the page text it lists.
+$_GET['bl_i18n_audit'] = '1';
+$audited = bl_i18n_output('<p>&#45;&#45;&#45;&gt;&lt;img src=x onerror=alert(1)&gt; and --!&gt; too</p>');
+unset($_GET['bl_i18n_audit']);
+$comment = substr($audited, (int) strpos($audited, '<!-- bl-i18n-missing'));
+$check(substr_count($comment, '-->') === 1 && str_ends_with($comment, '-->') && !str_contains($comment, '--!>') && !str_contains($comment, '<img'), 'the audit comment escapes what it lists: ' . $comment);
+
 $GLOBALS['bl_lang'] = 'en';
 $check(bl_i18n_script_dictionary() === '' && bl_i18n_localize_href('/contact/') === '/contact/', 'English pages are untouched');
 

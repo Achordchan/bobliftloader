@@ -540,7 +540,8 @@ function bl_i18n_output(string $html): string
     $translated = (string) bl_i18n_translate_html($html, $lang);
     // An administrator (or a local run) can see what is still English: ?bl_i18n_audit=1 lists it in a comment at the end.
     $audit = isset($_GET['bl_i18n_audit']) && (!function_exists('current_user_can') || current_user_can('manage_options'));
-    if ($audit) $translated .= "\n<!-- bl-i18n-missing\n" . str_replace('--', '- -', implode("\n", bl_i18n_missing())) . "\n-->";
+    // Each line escaped: decoded page text may hold "-->" or "<", which must not end the comment or start markup.
+    if ($audit) $translated .= "\n<!-- bl-i18n-missing\n" . implode("\n", array_map(static fn(string $line): string => str_replace('-', '&#45;', bl_escape($line)), bl_i18n_missing())) . "\n-->";
     return $translated;
 }
 

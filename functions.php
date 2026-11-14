@@ -54,7 +54,7 @@ add_action('wp', static function (): void {
     $related = Jetpack_RelatedPosts::init();
     remove_filter('the_content', [$related, 'filter_add_target_to_dom'], 40);
 }, 20);
-add_filter('jetpack_stats_footer_js_data', static fn($data) => bl_stats_view_data((array) $data, is_post_type_archive(['bl_product', 'bl_news']), (string) wp_unslash($_SERVER['REQUEST_URI'] ?? '')));
+add_filter('jetpack_stats_footer_js_data', static fn($data) => bl_stats_view_data((array) $data, is_post_type_archive(['bl_product', 'bl_news']), (string) wp_unslash($GLOBALS['bl_i18n_original_uri'] ?? $_SERVER['REQUEST_URI'] ?? ''))); // the address as visited: /es/products/… counts apart from /products/… (inc/i18n.php routes on the English one)
 add_filter('wpas_submit_post?', static fn($submit, $post_id) => bl_social_share_allowed((bool) $submit, (string) get_post_type((int) $post_id), get_post_meta((int) $post_id, '_bl_social_share', true)), 10, 2);
 // inc/seo.php writes every page's Open Graph tags; Jetpack Social would add a second set.
 add_filter('jetpack_enable_open_graph', '__return_false');
