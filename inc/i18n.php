@@ -30,7 +30,7 @@ const BL_I18N_DEFAULT_PAGES = [
 const BL_I18N_INLINE = ['a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd', 'mark', 'q', 's', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'time', 'u', 'var'];
 
 /** Attributes whose text people read or hear. */
-const BL_I18N_ATTRIBUTES = ['alt', 'title', 'aria-label', 'placeholder'];
+const BL_I18N_ATTRIBUTES = ['alt', 'title', 'aria-label', 'placeholder', 'data-alt', 'data-caption', 'data-gallery-alt']; // data-*: the product gallery's lightbox (assets/js/lightbox.js) shows them
 
 /** Meta tags whose content is page text (search results and link previews). */
 const BL_I18N_META = ['description', 'og:title', 'og:description', 'og:image:alt', 'twitter:title', 'twitter:description'];
@@ -251,6 +251,7 @@ function bl_i18n_translate_html(string $html, string $lang, bool $collect = fals
                 $inner .= $tokens[$j];
             }
             if ($name === 'script' && preg_match('~type\s*=\s*["\']application/ld\+json~i', $token)) $inner = bl_i18n_translate_json($inner, $lang, $dictionary, $note);
+            elseif ($name === 'script' && preg_match('~\sid\s*=\s*["\']site-search-index["\']~i', $token)) $inner = bl_i18n_translate_search_index($inner, $lang, $dictionary, $note);
             elseif (in_array($name, ['textarea', 'title'], true) && trim($inner) !== '') {
                 $key = bl_i18n_key($inner);
                 if (isset($dictionary[$key])) $inner = bl_escape($dictionary[$key]);
@@ -467,6 +468,60 @@ function bl_i18n_translate_json(string $json, string $lang, array $dictionary, c
         return $value;
     };
     return (string) json_encode($walk($data), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
+}
+
+/**
+ * The header search's index (templates/partials/site-search.php): what each result says, in the page's language, and
+ * its address in that language where the page has one. Only pages that exist in the language report missing text, so
+ * the audit is not flooded by the English-only news.
+ */
+function bl_i18n_translate_search_index(string $json, string $lang, array $dictionary, callable $note): string
+{
+    $entries = json_decode(trim($json), true);
+    if (!is_array($entries)) return $json;
+    $translate = static function (string $text, bool $report) use ($dictionary, $note): string {
+        if (trim($text) === '') return $text;
+        $key = bl_i18n_key($text);
+        if (isset($dictionary[$key])) return html_entity_decode($dictionary[$key], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if ($report && !in_array($key, $dictionary, true)) $note($key); // text the template already wrote in the language is not missing
+        return $text;
+    };
+    foreach ($entries as &$entry) {
+        if (!is_array($entry)) continue;
+        $url = is_string($entry['url'] ?? null) ? $entry['url'] : '';
+        $localized = bl_i18n_localize_href($url, $lang);
+        $entry['url'] = $localized;
+        $translated = $localized !== $url;
+        if (is_string($entry['kind'] ?? null)) $entry['kind'] = $translate($entry['kind'], true);
+        foreach (['title', 'text'] as $field) if (is_string($entry[$field] ?? null)) $entry[$field] = $translate($entry[$field], $translated);
+    }
+    unset($entry);
+    return (string) json_encode($entries, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+}
+
+/**
+ * A saved translation or its key (option bl_i18n_{code}_strings), safe and in the dictionary's own form: plain text
+ * with only the placeholders <t0>…</t19> and <br>, which keep no attributes.
+ */
+function bl_i18n_clean_markup(string $text): string
+{
+    $placeholders = array_merge(['br'], array_map(static fn(int $n): string => 't' . $n, range(0, 19)));
+    $text = strip_tags($text, $placeholders);
+    $text = (string) preg_replace_callback('~<(/?)(t\d+|br)\b[^>]*>~i', static fn(array $m): string => strtolower($m[2]) === 'br' ? '<br>' : '<' . $m[1] . strtolower($m[2]) . '>', $text);
+    return trim($text);
+}
+
+/** The option bl_i18n_{code}_strings as saved: English original => translation, both cleaned, empty ones dropped. */
+function bl_i18n_sanitize_strings($value): array
+{
+    $clean = [];
+    foreach (is_array($value) ? $value : [] as $original => $text) {
+        if (!is_string($text)) continue;
+        $key = bl_i18n_key(bl_i18n_clean_markup((string) $original));
+        $text = bl_i18n_clean_markup($text);
+        if ($key !== '' && $text !== '') $clean[$key] = $text;
+    }
+    return $clean;
 }
 
 /** The page buffer's callback on a page in another language. */

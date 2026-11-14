@@ -9,6 +9,25 @@ $check = static function (bool $ok, string $what) use (&$failures): void {
     if (!$ok) { fwrite(STDERR, "FAIL: $what\n"); $failures++; }
 };
 
+// Corrections saved in the settings (REST /wp/v2/settings) keep their placeholders and lose any other markup.
+run_hook('init');
+$sanitize = $GLOBALS['settings']['bl_i18n_es_strings']['sanitize_callback'] ?? null;
+$check(is_callable($sanitize), 'the Spanish corrections setting is registered with a sanitizer');
+$saved = $sanitize([
+    'Read the <t0 class="x">full   guide</t0> today<br />now' => 'Lea la <T0 onclick="x()">guía completa</t0> hoy<br/>ya<img src=x onerror="alert(1)">',
+    'Skid steer loader' => 'Minicargadora compacta',
+    '<b>Bold</b> only' => '',
+]);
+$check($saved === ['Read the <t0>full guide</t0> today<br>now' => 'Lea la <t0>guía completa</t0> hoy<br>ya', 'Skid steer loader' => 'Minicargadora compacta'], 'saved corrections keep <tN> and <br>, drop attributes, other markup and empty ones: ' . json_encode($saved, JSON_UNESCAPED_UNICODE));
+$GLOBALS['options']['bl_i18n_es_strings'] = $saved;
+$check(str_contains(bl_i18n_translate_html('<p>Read the <a href="/x/">full guide</a> today<br>now</p>', 'es'), '<p>Lea la <a href="/x/">guía completa</a> hoy<br>ya</p>'), 'a saved correction with a placeholder is used on the page');
+$check(bl_t('Skid steer loader', 'es') === 'Minicargadora compacta', 'a saved correction overrides the theme dictionary');
+$GLOBALS['options']['bl_languages'] = [['code' => 'en', 'name' => 'English', 'url' => '/'], ['code' => 'es', 'name' => 'Castellano', 'url' => 'https://elsewhere.test/'], ['code' => 'de', 'name' => 'Deutsch', 'url' => 'https://de.example.test/'], ['code' => 'bad code', 'name' => 'X', 'url' => '/x/']];
+$check(isset($GLOBALS['settings']['bl_languages']['show_in_rest']), 'the older language list setting is still in the REST settings');
+$rows = bl_languages('/about/');
+$check(array_column($rows, 'code') === ['en', 'es', 'de'] && $rows[1]['name'] === 'Español' && $rows[2]['url'] === 'https://de.example.test/' && !$rows[2]['current'], 'saved languages the theme does not translate still show, after its own: ' . json_encode($rows));
+unset($GLOBALS['options']['bl_languages']);
+
 // Pages and paths.
 $check(bl_has_language('/products/mini-dumpers/', 'es') && bl_has_language('/products/mini-dumpers', 'es'), 'the dumper page has Spanish, with or without its slash');
 $check(!bl_has_language('/about/', 'es') && bl_has_language('/about/', 'en'), 'a page not translated yet has no Spanish version');
@@ -41,6 +60,12 @@ $check(str_contains($out, 'A sentence the dictionary does not have.') && in_arra
 $meta = bl_i18n_translate_html('<meta name="description" content="Rated load"><script type="application/ld+json">{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","name":"Mini dumpers","item":"https://example.test/products/mini-dumpers/"}]}</script>', 'es');
 $check(str_contains($meta, 'content="Carga nominal"'), 'the meta description is translated');
 $check(str_contains($meta, '"name":"Minidumpers"') && str_contains($meta, 'https:\/\/example.test\/es\/products\/mini-dumpers\/') || str_contains($meta, 'https://example.test/es/products/mini-dumpers/'), 'breadcrumb names and addresses follow the language');
+$gallery = bl_i18n_translate_html('<button data-gallery-alt="Petrol engine"></button><li data-alt="Petrol engine" data-caption="Rated load"></li>', 'es');
+$check(str_contains($gallery, 'data-gallery-alt="Motor de gasolina"') && str_contains($gallery, 'data-alt="Motor de gasolina" data-caption="Carga nominal"'), 'the gallery and lightbox texts are translated');
+$search = bl_i18n_translate_html('<script type="application/json" id="site-search-index">' . json_encode([['kind' => 'Mini dumper', 'title' => 'BL-T500-HD', 'text' => '500 kg Tracked Mini Dumper', 'url' => '/product/500kg-tracked-mini-dumper/'], ['kind' => 'Page', 'title' => 'About us', 'text' => 'Company and factory in Xuzhou', 'url' => '/about/']], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) . '</script>', 'es');
+$index = json_decode(preg_replace('~^<script[^>]*>|</script>$~', '', $search), true);
+$check(($index[0]['kind'] ?? '') === 'Minidumper' && ($index[0]['text'] ?? '') === bl_t('500 kg Tracked Mini Dumper', 'es') && ($index[0]['url'] ?? '') === '/es/product/500kg-tracked-mini-dumper/', 'a search result for a Spanish page is translated and links to it: ' . $search);
+$check(($index[1]['url'] ?? '') === '/about/' && !in_array('Company and factory in Xuzhou', bl_i18n_missing(), true), 'a search result for an English-only page keeps its address and is not reported as missing');
 $wa = bl_i18n_translate_html('<a href="https://wa.me/8615852499415?text=' . rawurlencode('Hello BOB-LIFT, I am interested in your mini dumpers.') . '">WhatsApp</a>', 'es');
 $check(str_contains($wa, rawurlencode('Hola, BOB-LIFT. Me interesan sus minidumpers.')), 'the WhatsApp message is translated');
 $check(sprintf(bl_t('Hello BOB-LIFT, I am interested in the %1$s (%2$s).'), bl_t('500 kg Tracked Mini Dumper'), 'BL-T500-HD') === 'Hola, BOB-LIFT. Me interesa el Minidumper sobre orugas de 500 kg (BL-T500-HD).', 'the product WhatsApp line');

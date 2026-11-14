@@ -11,7 +11,7 @@ if ($route['type'] === 'products' && $route['category'] === '' && bl_query('q') 
 if (!bl_is_wordpress() && $route['status'] === 200) {
     $requested = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
     if ($requested !== $route['path'] && !str_contains($requested, '%')) {
-        header('Location: ' . $route['path'] . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''), true, 301);
+        header('Location: ' . bl_lang_path($route['path'], bl_lang()) . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''), true, 301);
         exit;
     }
 }

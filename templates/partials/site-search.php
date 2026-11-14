@@ -15,14 +15,14 @@ foreach ($searchProducts as $p) {
         'kind' => $p['category'] === 'mini-dumpers' ? 'Mini dumper' : 'Skid steer loader',
         'title' => $p['model'],
         'text' => trim(preg_replace('/^' . preg_quote($p['model'], '/') . '\s*/', '', $p['name'])),
-        'meta' => $spec ? array_key_first($spec) . ' ' . reset($spec) : '',
+        'meta' => $spec ? bl_t((string) array_key_first($spec)) . ' ' . reset($spec) : '',
         'url' => bl_product_url($p),
         'image' => $p['image'],
         'legacy' => $legacy,
     ];
 }
 foreach (['skid-steer-loaders' => ['Mini skid steer loaders', 'loader bucket'], 'mini-dumpers' => ['Mini dumpers', 'dumper tipper transport mixer']] as $key => [$label, $terms]) {
-    $searchIndex[] = ['kind' => 'Range', 'title' => $label, 'text' => count(array_filter($searchProducts, static fn($p) => $p['category'] === $key)) . ' models', 'url' => bl_url('/products/' . $key . '/'), 'terms' => $terms];
+    $searchIndex[] = ['kind' => 'Range', 'title' => $label, 'text' => sprintf(bl_t('%1$s models'), count(array_filter($searchProducts, static fn($p) => $p['category'] === $key))), 'url' => bl_url('/products/' . $key . '/'), 'terms' => $terms];
 }
 foreach ($applications as $app) {
     $searchIndex[] = ['kind' => 'Application', 'title' => $app['title'], 'text' => $app['description'], 'url' => bl_url('/applications/' . bl_application_slug($app) . '/')];
