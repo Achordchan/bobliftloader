@@ -25,8 +25,11 @@ $GLOBALS['posts'] = [
     502 => new WP_Post(502, 'bl_news', 'mini-skid-steer-specs', 'Mini Skid Steer Specs Explained'),
     503 => new WP_Post(503, 'bl_news', 'draft-story', 'Draft', 'draft'),
 ];
-$GLOBALS['meta'][501][BL_I18N_NEWS_META] = ['es' => ['Mini Dumper Specs Explained' => 'Especificaciones del minidumper explicadas', 'Rated load comes first.' => 'La carga nominal va primero.']];
+$GLOBALS['posts'][501]->post_excerpt = 'How to read a dumper spec sheet.';
+$GLOBALS['posts'][504] = new WP_Post(504, 'bl_news', 'mini-loader-guide', 'Mini Loader Guide');
+$GLOBALS['meta'][501][BL_I18N_NEWS_META] = ['es' => ['Mini Dumper Specs Explained' => 'Especificaciones del minidumper explicadas', 'How to read a dumper spec sheet.' => 'Cómo leer una ficha técnica de minidumper.', 'Rated load comes first.' => 'La carga nominal va primero.', 'Width' => 'Anchura del dumper', 'Overview' => 'Resumen del dumper']];
 $GLOBALS['meta'][502][BL_I18N_NEWS_META] = ['es' => ['Only blank' => '  ']];
+$GLOBALS['meta'][504][BL_I18N_NEWS_META] = ['es' => ['Mini Loader Guide' => 'Guía de minicargadoras', 'Width' => 'Ancho de la cargadora']];
 $GLOBALS['meta'][503][BL_I18N_NEWS_META] = ['es' => ['Draft' => 'Borrador']];
 
 $check(bl_has_language('/news/mini-dumper-specs/', 'es') && bl_has_language('/news/mini-dumper-specs', 'es'), 'a story with Spanish entries has a Spanish page');
@@ -38,10 +41,24 @@ $check(bl_i18n_alternates('/news/mini-dumper-specs/') === ['en' => '/news/mini-d
 $check(in_array('/es/news/mini-dumper-specs/', bl_sitemap_paths(), true) && !in_array('/es/news/mini-skid-steer-specs/', bl_sitemap_paths(), true), 'the Spanish story is in the sitemap, an untranslated one is not');
 
 $GLOBALS['bl_lang'] = 'es';
-$out = bl_i18n_translate_html('<main><h1>Mini Dumper Specs Explained</h1><p>Rated load comes first.</p><a href="/news/mini-dumper-specs/">Mini Dumper Specs Explained</a><a href="/news/mini-skid-steer-specs/">x</a></main>', 'es');
+$_SERVER['REQUEST_URI'] = '/news/mini-dumper-specs/';
+$out = bl_i18n_translate_html('<main><h1>Mini Dumper Specs Explained</h1><p>Rated load comes first.</p><th>Width</th><h2>Overview</h2><a href="/news/mini-dumper-specs/">Mini Dumper Specs Explained</a><a href="/news/mini-skid-steer-specs/">x</a><a href="/news/mini-loader-guide/">Mini Loader Guide</a></main>', 'es');
 $check(str_contains($out, '<h1>Especificaciones del minidumper explicadas</h1>') && str_contains($out, '<p>La carga nominal va primero.</p>'), 'the story\'s own entries translate its page: ' . $out);
-$check(str_contains($out, '<a href="/es/news/mini-dumper-specs/">Especificaciones del minidumper explicadas</a>'), 'a link to the translated story goes to its Spanish page, with its title translated on cards elsewhere');
+$check(str_contains($out, '<th>Anchura del dumper</th>'), 'on its own page a story\'s entry wins over another story\'s entry for the same text');
+$check(str_contains($out, '<h2>Descripción general</h2>'), 'a story never overrides the theme\'s own dictionary entry');
+$check(str_contains($out, '<a href="/es/news/mini-dumper-specs/">Especificaciones del minidumper explicadas</a>'), 'a link to the translated story goes to its Spanish page');
+$check(str_contains($out, '<a href="/es/news/mini-loader-guide/">Guía de minicargadoras</a>'), 'another translated story\'s title is translated on cards');
 $check(str_contains($out, '<a href="/news/mini-skid-steer-specs/">'), 'a link to an untranslated story stays English');
+
+$_SERVER['REQUEST_URI'] = '/news/mini-loader-guide/';
+$out = bl_i18n_translate_html('<main><th>Width</th><p>Rated load comes first.</p><p>How to read a dumper spec sheet.</p></main>', 'es');
+$check(str_contains($out, '<th>Ancho de la cargadora</th>'), 'each story page uses its own entry for shared text: ' . $out);
+$check(str_contains($out, '<p>Rated load comes first.</p>'), 'another story\'s body entries stay on that story\'s page');
+$check(str_contains($out, '<p>Cómo leer una ficha técnica de minidumper.</p>'), 'another story\'s summary is translated where cards show it');
+
+$_SERVER['REQUEST_URI'] = '/products/mini-dumpers/';
+$out = bl_i18n_translate_html('<main><th>Width</th><a href="/news/mini-dumper-specs/">Mini Dumper Specs Explained</a></main>', 'es');
+$check(!str_contains($out, 'Anchura del dumper') && !str_contains($out, 'Ancho de la cargadora') && str_contains($out, 'Especificaciones del minidumper explicadas'), 'other pages get the story titles but none of the stories\' body entries: ' . $out);
 $GLOBALS['options']['bl_i18n_es_strings'] = ['Rated load comes first.' => 'Primero, la carga nominal.'];
 $check(bl_t('Rated load comes first.', 'es') !== '' , 'lookups still work with settings corrections present');
 
