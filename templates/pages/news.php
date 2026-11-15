@@ -3,9 +3,10 @@
  * News: one list, pinned stories first and then newest first, with a tab per section and a filter per product family.
  * A section tab appears once it has a story; a story without a section is listed under Company news, so the tabs add up
  * to All. The machine filter files each story under the product families of the products it names (a story naming none
- * is in All only). The layout switch (list or grid) works in the browser (assets/js/news-view.js) and is remembered there.
+ * is in All only). Under a language folder (/es/news/) only the stories translated into that language are listed. The layout switch (list or grid) works in the browser (assets/js/news-view.js) and is remembered there.
  */
-$allArticles = bl_news_order(bl_articles());
+// In another language the list holds only the stories translated into it (/es/news/), each linked to its own page there.
+$allArticles = bl_news_order(bl_i18n_news_in_language(bl_articles(), bl_lang()));
 $currentProduct = isset(BL_NEWS_PRODUCT_FILTERS[bl_query('product')]) ? bl_query('product') : '';
 $inFamily = static fn(array $list, string $family): array => $family === '' ? $list : array_values(array_filter($list, static fn($a) => in_array($family, bl_news_families($a), true)));
 $pool = $inFamily($allArticles, $currentProduct);
