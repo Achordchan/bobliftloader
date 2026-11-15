@@ -33,7 +33,7 @@ function bl_structured_data(array $route): array
     }
     if ($route['type'] === 'article') {
         $a = $route['record'];
-        $graph[] = ['@type' => 'Article', 'headline' => $a['title'], 'description' => $a['excerpt'], 'image' => bl_absolute_asset($a['image']), 'datePublished' => $a['date'], 'dateModified' => $a['updated'] ?? null, 'author' => bl_article_author($a, $organization['@id']), 'publisher' => ['@id' => $organization['@id']], 'mainEntityOfPage' => ['@id' => $base . $route['path'] . '#webpage'], 'citation' => $a['source'] ?: null];
+        $graph[] = ['@type' => 'Article', 'headline' => $a['title'], 'description' => $a['excerpt'], 'image' => bl_absolute_asset($a['image']), 'datePublished' => $a['date'], 'dateModified' => $a['updated'] ?? null, 'author' => bl_article_author($a, $organization['@id']), 'publisher' => ['@id' => $organization['@id']], 'mainEntityOfPage' => ['@id' => $base . bl_lang_path($route['path'], bl_lang()) . '#webpage'], 'citation' => $a['source'] ?: null, 'inLanguage' => BL_I18N_LANGUAGES[bl_lang()]['hreflang']];
         $graph[count($graph) - 1] = array_filter($graph[count($graph) - 1], static fn($value) => $value !== null);
         foreach (bl_article_videos((string) ($a['content_html'] ?? '')) as $video) $graph[] = $video;
         if (!empty($a['event']['start'])) {

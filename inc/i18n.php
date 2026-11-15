@@ -129,7 +129,10 @@ function bl_i18n_normalize_path(string $path): string
     return $path === '/' || str_contains(basename($path), '.') ? $path : $path . '/';
 }
 
-/** The pages a language has: the saved list (Settings → bl_i18n_<lang>_pages), else the defaults. */
+/**
+ * The pages a language has: the saved list (Settings → bl_i18n_<lang>_pages), else the defaults, plus every published
+ * news story that carries its own translation into that language (bl_i18n_news()).
+ */
 function bl_i18n_pages(string $lang): array
 {
     if ($lang === 'en') return [];
@@ -137,7 +140,70 @@ function bl_i18n_pages(string $lang): array
     if (isset($pages[$lang])) return $pages[$lang];
     $saved = function_exists('get_option') ? get_option('bl_i18n_' . $lang . '_pages') : null;
     $list = is_array($saved) && $saved ? $saved : (BL_I18N_DEFAULT_PAGES[$lang] ?? []);
-    return $pages[$lang] = array_values(array_unique(array_map('bl_i18n_normalize_path', array_map('strval', $list))));
+    $news = bl_i18n_news($lang);
+    $list = array_values(array_unique(array_map('bl_i18n_normalize_path', array_map('strval', array_merge($list, array_keys($news ?? []))))));
+    // Before WordPress has registered its post types the stories cannot be read yet, so that answer is not kept.
+    if ($news === null) return $list;
+    return $pages[$lang] = $list;
+}
+
+/** The post meta in which a news story keeps its own translations: language => [English text => translation]. */
+const BL_I18N_NEWS_META = '_bl_i18n';
+
+/**
+ * The published news stories translated into a language, each as its English path => its entries (English text as the
+ * reader sees it => translation, the same keys as the theme dictionary: title, summary, search title, every paragraph,
+ * heading, table cell and picture text of the story). A story without entries in that language has no page in it.
+ * Null while WordPress cannot be asked yet (before init); an empty list outside WordPress.
+ */
+function bl_i18n_news(string $lang): ?array
+{
+    $read = bl_i18n_news_read($lang);
+    return $read === null ? null : $read['pages'];
+}
+
+/**
+ * The entries of the translated stories that other pages show too: each story's title and summary, as they appear on
+ * the news cards, related-story lists and search. Every other entry of a story is used on that story's page only.
+ */
+function bl_i18n_news_cards(string $lang): ?array
+{
+    $read = bl_i18n_news_read($lang);
+    return $read === null ? null : $read['cards'];
+}
+
+/** bl_i18n_news and bl_i18n_news_cards, read once per request: ['pages' => …, 'cards' => …], or null before init. */
+function bl_i18n_news_read(string $lang): ?array
+{
+    if (!bl_i18n_language($lang) || !function_exists('bl_is_wordpress') || !bl_is_wordpress()) return ['pages' => [], 'cards' => []];
+    if (function_exists('did_action') && !did_action('init')) return null;
+    static $news = [];
+    if (isset($news[$lang])) return $news[$lang];
+    $pages = [];
+    $cards = [];
+    $posts = get_posts(['post_type' => 'bl_news', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'date', 'order' => 'DESC', 'meta_query' => [['key' => BL_I18N_NEWS_META, 'compare' => 'EXISTS']]]);
+    foreach ($posts as $post) {
+        $saved = get_post_meta($post->ID, BL_I18N_NEWS_META, true);
+        $entries = is_array($saved) && is_array($saved[$lang] ?? null) ? array_filter($saved[$lang], static fn($text) => is_string($text) && trim($text) !== '') : [];
+        if (!$entries) continue;
+        $pages['/news/' . $post->post_name . '/'] = $entries;
+        // The summary as cards show it: the saved excerpt, else the same opening words bl_wp_article_record() takes from the story.
+        $summary = (string) $post->post_excerpt;
+        if ($summary === '' && function_exists('wp_trim_words') && function_exists('wp_strip_all_tags')) $summary = (string) wp_trim_words(wp_strip_all_tags((string) $post->post_content), 35);
+        $shown = array_filter([bl_i18n_key((string) $post->post_title), bl_i18n_key($summary)], 'strlen');
+        foreach ($entries as $original => $text) if (in_array(bl_i18n_key((string) $original), $shown, true)) $cards[(string) $original] = (string) $text;
+    }
+    return $news[$lang] = ['pages' => $pages, 'cards' => $cards];
+}
+
+/** The English path of the page being served (the language folder already taken out by bl_i18n_detect), or '' outside a request. */
+function bl_i18n_current_path(): string
+{
+    if (!isset($_SERVER['REQUEST_URI'])) return '';
+    $path = (string) (parse_url((string) $_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/');
+    $base = bl_i18n_base();
+    if ($base !== '' && str_starts_with($path, $base . '/')) $path = substr($path, strlen($base));
+    return bl_i18n_normalize_path(rawurldecode($path));
 }
 
 /** Whether a page (its English path) has a version in this language; every page has an English one. */
@@ -215,20 +281,33 @@ function bl_i18n_localize_href(string $href, ?string $lang = null): string
     return $prefix . $localized . (isset($parts['query']) ? '?' . $parts['query'] : '') . (isset($parts['fragment']) ? '#' . $parts['fragment'] : '');
 }
 
-/** The dictionary of a language: the theme's file, with corrections saved in the option bl_i18n_<lang>_strings laid over it. */
+/**
+ * The dictionary of a language: the theme's file; then the titles and summaries of the translated stories, and on a
+ * translated story's own page all of that story's entries, where the file has no entry of its own (a story never
+ * changes how the shared interface reads); then the corrections saved in the option bl_i18n_<lang>_strings over all.
+ */
 function bl_i18n_dictionary(string $lang): array
 {
     static $dictionaries = [];
-    if (isset($dictionaries[$lang])) return $dictionaries[$lang];
-    if (!bl_i18n_language($lang)) return $dictionaries[$lang] = [];
+    $story = bl_i18n_news($lang)[bl_i18n_current_path()] ?? [];
+    $cacheKey = $lang . ($story ? "\0" . bl_i18n_current_path() : '');
+    if (isset($dictionaries[$cacheKey])) return $dictionaries[$cacheKey];
+    if (!bl_i18n_language($lang)) return $dictionaries[$cacheKey] = [];
     $file = __DIR__ . '/i18n/' . $lang . '.php';
-    $entries = is_file($file) ? (array) require $file : [];
+    $entries = [];
+    foreach (is_file($file) ? (array) require $file : [] as $original => $text) $entries[bl_i18n_key((string) $original)] = (string) $text;
+    $cards = bl_i18n_news_cards($lang);
+    $bundled = $entries;
+    foreach ([$cards ?? [], $story] as $layer) foreach ($layer as $original => $text) {
+        $key = bl_i18n_key((string) $original);
+        if (!isset($bundled[$key])) $entries[$key] = (string) $text;
+    }
     $saved = function_exists('get_option') ? get_option('bl_i18n_' . $lang . '_strings') : null;
-    if (is_array($saved)) foreach ($saved as $original => $text) if (is_string($text) && trim($text) !== '') $entries[(string) $original] = $text;
-    $dictionary = [];
-    foreach ($entries as $original => $text) $dictionary[bl_i18n_key((string) $original)] = (string) $text;
+    if (is_array($saved)) foreach ($saved as $original => $text) if (is_string($text) && trim($text) !== '') $entries[bl_i18n_key((string) $original)] = $text;
+    $dictionary = $entries;
     $dictionary[BL_I18N_LANG_KEY] = $lang; // which patterns (bl_i18n_patterns) fill in what the entries do not have
-    return $dictionaries[$lang] = $dictionary;
+    if ($cards === null) return $dictionary; // read again once WordPress can list the translated stories
+    return $dictionaries[$cacheKey] = $dictionary;
 }
 
 /** The key under which a dictionary records its language; no text on a page can be it. */
