@@ -131,7 +131,8 @@ function bl_i18n_normalize_path(string $path): string
 
 /**
  * The pages a language has: the saved list (Settings → bl_i18n_<lang>_pages), else the defaults, plus every published
- * news story that carries its own translation into that language (bl_i18n_news()).
+ * news story that carries its own translation into that language (bl_i18n_news()), and the news list once there is one
+ * (it then lists those stories only, bl_i18n_news_in_language()).
  */
 function bl_i18n_pages(string $lang): array
 {
@@ -141,7 +142,7 @@ function bl_i18n_pages(string $lang): array
     $saved = function_exists('get_option') ? get_option('bl_i18n_' . $lang . '_pages') : null;
     $list = is_array($saved) && $saved ? $saved : (BL_I18N_DEFAULT_PAGES[$lang] ?? []);
     $news = bl_i18n_news($lang);
-    $list = array_values(array_unique(array_map('bl_i18n_normalize_path', array_map('strval', array_merge($list, array_keys($news ?? []))))));
+    $list = array_values(array_unique(array_map('bl_i18n_normalize_path', array_map('strval', array_merge($list, $news ? ['/news/'] : [], array_keys($news ?? []))))));
     // Before WordPress has registered its post types the stories cannot be read yet, so that answer is not kept.
     if ($news === null) return $list;
     return $pages[$lang] = $list;
@@ -194,6 +195,14 @@ function bl_i18n_news_read(string $lang): ?array
         foreach ($entries as $original => $text) if (in_array(bl_i18n_key((string) $original), $shown, true)) $cards[(string) $original] = (string) $text;
     }
     return $news[$lang] = ['pages' => $pages, 'cards' => $cards];
+}
+
+/** The news stories (article records) that have a page in a language: all of them in English, the translated ones in another. */
+function bl_i18n_news_in_language(array $articles, string $lang): array
+{
+    if ($lang === 'en') return $articles;
+    $pages = bl_i18n_news($lang) ?? [];
+    return array_values(array_filter($articles, static fn($article) => isset($pages['/news/' . (string) ($article['slug'] ?? '') . '/'])));
 }
 
 /** The English path of the page being served (the language folder already taken out by bl_i18n_detect), or '' outside a request. */

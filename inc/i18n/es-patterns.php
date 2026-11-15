@@ -14,6 +14,8 @@ return [
     // Counts.
     ['~^(\d+) <t0>machines</t0>$~', '$1 <t0>máquinas</t0>'],
     ['~^Watch it work <t0>(\d+) videos</t0>$~', 'Mire cómo funciona <t0>$1 videos</t0>'],
+    // News tabs and machine chips with their story count: Guides <t0>2</t0> → Guías <t0>2</t0>.
+    ['~^(All|Product news|Exhibition news|Customer stories|Guides|Company news|Skid steer loaders|Mini dumpers) <t0>(\d+)</t0>$~', static fn(array $m): string => ['All' => 'Todas', 'Product news' => 'Novedades de productos', 'Exhibition news' => 'Noticias de ferias', 'Customer stories' => 'Historias de clientes', 'Guides' => 'Guías', 'Company news' => 'Noticias de la empresa', 'Skid steer loaders' => 'Minicargadoras', 'Mini dumpers' => 'Minidumpers'][$m[1]] . ' <t0>' . $m[2] . '</t0>'],
     // Figures with a word.
     ['~^Rated load ([\d,.]+) kg$~', 'Carga nominal de $1 kg'],
     ['~^([\d,.]+) kg payload$~', '$1 kg de carga útil'],
