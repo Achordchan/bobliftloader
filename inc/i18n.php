@@ -129,7 +129,10 @@ function bl_i18n_normalize_path(string $path): string
     return $path === '/' || str_contains(basename($path), '.') ? $path : $path . '/';
 }
 
-/** The pages a language has: the saved list (Settings → bl_i18n_<lang>_pages), else the defaults. */
+/**
+ * The pages a language has: the saved list (Settings → bl_i18n_<lang>_pages), else the defaults, plus every published
+ * news story that carries its own translation into that language (bl_i18n_news()).
+ */
 function bl_i18n_pages(string $lang): array
 {
     if ($lang === 'en') return [];
@@ -137,7 +140,36 @@ function bl_i18n_pages(string $lang): array
     if (isset($pages[$lang])) return $pages[$lang];
     $saved = function_exists('get_option') ? get_option('bl_i18n_' . $lang . '_pages') : null;
     $list = is_array($saved) && $saved ? $saved : (BL_I18N_DEFAULT_PAGES[$lang] ?? []);
-    return $pages[$lang] = array_values(array_unique(array_map('bl_i18n_normalize_path', array_map('strval', $list))));
+    $news = bl_i18n_news($lang);
+    $list = array_values(array_unique(array_map('bl_i18n_normalize_path', array_map('strval', array_merge($list, array_keys($news ?? []))))));
+    // Before WordPress has registered its post types the stories cannot be read yet, so that answer is not kept.
+    if ($news === null) return $list;
+    return $pages[$lang] = $list;
+}
+
+/** The post meta in which a news story keeps its own translations: language => [English text => translation]. */
+const BL_I18N_NEWS_META = '_bl_i18n';
+
+/**
+ * The published news stories translated into a language, each as its English path => its entries (English text as the
+ * reader sees it => translation, the same keys as the theme dictionary: title, summary, search title, every paragraph,
+ * heading, table cell and picture text of the story). A story without entries in that language has no page in it.
+ * Null while WordPress cannot be asked yet (before init); an empty list outside WordPress.
+ */
+function bl_i18n_news(string $lang): ?array
+{
+    if (!bl_i18n_language($lang) || !function_exists('bl_is_wordpress') || !bl_is_wordpress()) return [];
+    if (function_exists('did_action') && !did_action('init')) return null;
+    static $news = [];
+    if (isset($news[$lang])) return $news[$lang];
+    $found = [];
+    $posts = get_posts(['post_type' => 'bl_news', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'date', 'order' => 'DESC', 'meta_query' => [['key' => BL_I18N_NEWS_META, 'compare' => 'EXISTS']]]);
+    foreach ($posts as $post) {
+        $saved = get_post_meta($post->ID, BL_I18N_NEWS_META, true);
+        $entries = is_array($saved) && is_array($saved[$lang] ?? null) ? array_filter($saved[$lang], static fn($text) => is_string($text) && trim($text) !== '') : [];
+        if ($entries) $found['/news/' . $post->post_name . '/'] = $entries;
+    }
+    return $news[$lang] = $found;
 }
 
 /** Whether a page (its English path) has a version in this language; every page has an English one. */
@@ -223,11 +255,15 @@ function bl_i18n_dictionary(string $lang): array
     if (!bl_i18n_language($lang)) return $dictionaries[$lang] = [];
     $file = __DIR__ . '/i18n/' . $lang . '.php';
     $entries = is_file($file) ? (array) require $file : [];
+    // A translated story's own entries (its title also shows on cards elsewhere), then the corrections saved in the settings.
+    $news = bl_i18n_news($lang);
+    foreach ($news ?? [] as $story) foreach ($story as $original => $text) $entries[(string) $original] = (string) $text;
     $saved = function_exists('get_option') ? get_option('bl_i18n_' . $lang . '_strings') : null;
     if (is_array($saved)) foreach ($saved as $original => $text) if (is_string($text) && trim($text) !== '') $entries[(string) $original] = $text;
     $dictionary = [];
     foreach ($entries as $original => $text) $dictionary[bl_i18n_key((string) $original)] = (string) $text;
     $dictionary[BL_I18N_LANG_KEY] = $lang; // which patterns (bl_i18n_patterns) fill in what the entries do not have
+    if ($news === null) return $dictionary; // read again once WordPress can list the translated stories
     return $dictionaries[$lang] = $dictionary;
 }
 

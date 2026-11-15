@@ -69,7 +69,7 @@ class WP_Post {
 }
 function get_post($id) { return $GLOBALS['posts'][$id] ?? null; }
 function get_post_type($id) { return get_post($id)->post_type; }
-function get_posts($query) { return array_values(array_filter($GLOBALS['posts'], fn($p) => $p->post_type === $query['post_type'] && ($query['post_status'] === 'any' || in_array($p->post_status, (array) $query['post_status'], true)))); }
+function get_posts($query) { return array_values(array_filter($GLOBALS['posts'] ?? [], fn($p) => $p->post_type === $query['post_type'] && ($query['post_status'] === 'any' || in_array($p->post_status, (array) $query['post_status'], true)))); }
 function get_page_by_path($slug, $output, $type) { foreach ($GLOBALS['posts'] as $post) if ($post->post_type === $type && $post->post_name === $slug) return $post; return null; }
 function get_post_meta($id, $key, $single) { return $GLOBALS['meta'][$id][$key] ?? []; }
 function update_post_meta($id, $key, $value) {

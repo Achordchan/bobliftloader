@@ -49,6 +49,24 @@ add_action('init', static function (): void {
 });
 
 add_action('init', static function (): void {
+    // A story's own translation into each of the site's other languages (inc/i18n.php): language => English text => translation.
+    // The keys are the text as the page shows it (title, summary, search title, each paragraph, heading, table cell,
+    // caption and alt text), inline markup written as <t0>…</t0>; a story with entries in a language gets its page there.
+    $languages = array_values(array_filter(array_keys(BL_I18N_LANGUAGES), static fn($code) => $code !== 'en'));
+    register_post_meta('bl_news', BL_I18N_NEWS_META, [
+        'type' => 'object', 'single' => true, 'default' => [],
+        'description' => '这篇新闻的其他语言译文：语言代码（如 es）=> {英文原文 => 译文}。键是页面上看到的英文（标题、摘要、搜索标题、每段正文、小标题、表格格子、图片说明和 alt），行内标签写成 <t0>…</t0>。写了某语言的译文，这篇就出现在该语言目录下（如 /es/news/<slug>/）并带 hreflang；不写则该语言没有这篇。',
+        'show_in_rest' => ['schema' => ['type' => 'object', 'properties' => array_fill_keys($languages, ['type' => 'object', 'additionalProperties' => ['type' => 'string']]), 'additionalProperties' => false]],
+        'sanitize_callback' => static function ($value) use ($languages): array {
+            $clean = [];
+            foreach ($languages as $code) if (is_array($value[$code] ?? null) && ($strings = bl_i18n_sanitize_strings($value[$code]))) $clean[$code] = $strings;
+            return $clean;
+        },
+        'auth_callback' => static fn(bool $allowed, string $key, int $postId): bool => current_user_can('edit_post', $postId),
+    ]);
+});
+
+add_action('init', static function (): void {
     register_meta('user', 'bl_title', [
         'type' => 'string', 'single' => true, 'show_in_rest' => true,
         'description' => '新闻作者职位，显示在文章署名中。',
