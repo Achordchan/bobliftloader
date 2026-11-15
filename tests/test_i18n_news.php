@@ -7,6 +7,7 @@ require __DIR__ . '/../inc/wp-content-editor.php';
 require __DIR__ . '/../inc/wp-rest.php';
 function bl_wp_application_cases(): array { return []; }
 function wp_insert_post($post) { return 0; }
+function wp_trim_words($text, $num = 55, $more = '&hellip;') { $words = preg_split('/\s+/', trim(strip_tags($text)), -1, PREG_SPLIT_NO_EMPTY); return count($words) > $num ? implode(' ', array_slice($words, 0, $num)) . $more : implode(' ', $words); }
 function bl_wp_articles(): array { return [['slug' => 'mini-dumper-specs'], ['slug' => 'mini-skid-steer-specs']]; }
 
 $failures = 0;
@@ -27,9 +28,10 @@ $GLOBALS['posts'] = [
 ];
 $GLOBALS['posts'][501]->post_excerpt = 'How to read a dumper spec sheet.';
 $GLOBALS['posts'][504] = new WP_Post(504, 'bl_news', 'mini-loader-guide', 'Mini Loader Guide');
+$GLOBALS['posts'][504]->post_content = '<p>Compact loaders   for tight sites.</p>'; // no saved excerpt: cards show the opening words
 $GLOBALS['meta'][501][BL_I18N_NEWS_META] = ['es' => ['Mini Dumper Specs Explained' => 'Especificaciones del minidumper explicadas', 'How to read a dumper spec sheet.' => 'Cómo leer una ficha técnica de minidumper.', 'Rated load comes first.' => 'La carga nominal va primero.', 'Width' => 'Anchura del dumper', 'Overview' => 'Resumen del dumper']];
 $GLOBALS['meta'][502][BL_I18N_NEWS_META] = ['es' => ['Only blank' => '  ']];
-$GLOBALS['meta'][504][BL_I18N_NEWS_META] = ['es' => ['Mini Loader Guide' => 'Guía de minicargadoras', 'Width' => 'Ancho de la cargadora']];
+$GLOBALS['meta'][504][BL_I18N_NEWS_META] = ['es' => ['Mini Loader Guide' => 'Guía de minicargadoras', 'Compact loaders for tight sites.' => 'Cargadoras compactas para obras estrechas.', 'Width' => 'Ancho de la cargadora']];
 $GLOBALS['meta'][503][BL_I18N_NEWS_META] = ['es' => ['Draft' => 'Borrador']];
 
 $check(bl_has_language('/news/mini-dumper-specs/', 'es') && bl_has_language('/news/mini-dumper-specs', 'es'), 'a story with Spanish entries has a Spanish page');
@@ -58,6 +60,7 @@ $check(str_contains($out, '<p>Cómo leer una ficha técnica de minidumper.</p>')
 
 $_SERVER['REQUEST_URI'] = '/products/mini-dumpers/';
 $out = bl_i18n_translate_html('<main><th>Width</th><a href="/news/mini-dumper-specs/">Mini Dumper Specs Explained</a></main>', 'es');
+$check(str_contains(bl_i18n_translate_html('<p>Compact loaders for tight sites.</p>', 'es'), 'Cargadoras compactas para obras estrechas.'), 'a story without a saved excerpt has the summary cards show translated elsewhere');
 $check(!str_contains($out, 'Anchura del dumper') && !str_contains($out, 'Ancho de la cargadora') && str_contains($out, 'Especificaciones del minidumper explicadas'), 'other pages get the story titles but none of the stories\' body entries: ' . $out);
 $GLOBALS['options']['bl_i18n_es_strings'] = ['Rated load comes first.' => 'Primero, la carga nominal.'];
 $check(bl_t('Rated load comes first.', 'es') !== '' , 'lookups still work with settings corrections present');

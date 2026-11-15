@@ -187,7 +187,10 @@ function bl_i18n_news_read(string $lang): ?array
         $entries = is_array($saved) && is_array($saved[$lang] ?? null) ? array_filter($saved[$lang], static fn($text) => is_string($text) && trim($text) !== '') : [];
         if (!$entries) continue;
         $pages['/news/' . $post->post_name . '/'] = $entries;
-        $shown = array_filter([bl_i18n_key((string) $post->post_title), bl_i18n_key((string) $post->post_excerpt)], 'strlen');
+        // The summary as cards show it: the saved excerpt, else the same opening words bl_wp_article_record() takes from the story.
+        $summary = (string) $post->post_excerpt;
+        if ($summary === '' && function_exists('wp_trim_words') && function_exists('wp_strip_all_tags')) $summary = (string) wp_trim_words(wp_strip_all_tags((string) $post->post_content), 35);
+        $shown = array_filter([bl_i18n_key((string) $post->post_title), bl_i18n_key($summary)], 'strlen');
         foreach ($entries as $original => $text) if (in_array(bl_i18n_key((string) $original), $shown, true)) $cards[(string) $original] = (string) $text;
     }
     return $news[$lang] = ['pages' => $pages, 'cards' => $cards];
