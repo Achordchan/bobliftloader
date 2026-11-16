@@ -1,13 +1,24 @@
-// Getting in touch outside the enquiry form: a click on a WhatsApp link, a click on an email address (mailto:), or copying an
-// email address (selecting it and copying, or the "copy enquiry" button of the email fallback, whose text goes to that
-// address). The conversation itself then happens in the salesperson's WhatsApp or mailbox, where the site never sees it,
+// Getting in touch outside the enquiry form: a click on a WhatsApp link, a click on an email address (mailto:), or copying one
+// of this site's own email addresses (selecting it and copying, or the "copy enquiry" button of the email fallback, whose
+// text goes to that address). The conversation itself then happens in the salesperson's WhatsApp or mailbox, where the site never sees it,
 // so the step is reported: one event in the dataLayer for whatever tracking code is added later ("whatsapp_click",
 // "email_click", "email_copy"), and with the theme's own Google tag (inc/consent.php, bl_google_tag_markup) the same event
 // to GA4 and, when the matching conversion is saved on the tracking screen (blGoogleWhatsApp, blGoogleEmail), a Google
 // Ads conversion. Consent Mode decides, as for an enquiry, whether that goes with cookies or as a cookieless ping.
 // Nothing waits for the report: the link opens and the text is copied as before.
 const WHATSAPP = /^https?:\/\/(?:wa\.me|api\.whatsapp\.com|(?:web\.)?whatsapp\.com)\//i;
-const EMAIL = /[^\s@<>()"',;:]+@[^\s@<>()"',;:]+\.[a-z]{2,}/i;
+
+// This site's addresses: every mailto: link on the page (the side bar, the footer, the contact page) and the enquiry form's
+// recipient. Only copying one of these counts; the visitor's own address in the enquiry summary, or any other, does not.
+function siteAddresses() {
+  const addresses = new Set();
+  document.querySelectorAll('a[href^="mailto:" i]').forEach((link) => {
+    try { addresses.add(decodeURIComponent(link.getAttribute('href').slice(7).split('?')[0]).trim().toLowerCase()); } catch { /* malformed */ }
+  });
+  document.querySelectorAll('[data-email]').forEach((element) => addresses.add(String(element.dataset.email || '').trim().toLowerCase()));
+  addresses.delete('');
+  return addresses;
+}
 
 function report(event, conversion, details) {
   window.dataLayer = window.dataLayer || [];
@@ -23,8 +34,9 @@ export function initializeContactClicks() {
   const onClick = (event) => {
     if (event.type === 'auxclick' && event.button !== 1) return;
     const target = event.target instanceof Element ? event.target : null;
+    // The copy button copies only on a plain click (inquiry.js), so only that counts.
     if (target?.closest('#copy-inquiry')) {
-      report('email_copy', window.blGoogleEmail, { copied: 'enquiry' });
+      if (event.type === 'click') report('email_copy', window.blGoogleEmail, { copied: 'enquiry' });
       return;
     }
     const link = target?.closest('a[href]');
@@ -34,9 +46,12 @@ export function initializeContactClicks() {
   };
   document.addEventListener('click', onClick, true);
   document.addEventListener('auxclick', onClick, true);
-  // Copying a selection that holds an email address (the side bar, the footer, the contact page all show it as text).
+  // Copying a short selection that holds one of this site's addresses (shown as text in the side bar, footer and contact page).
   document.addEventListener('copy', () => {
-    const text = String(window.getSelection?.() || '');
-    if (text.length <= 500 && EMAIL.test(text)) report('email_copy', window.blGoogleEmail, { copied: 'address' });
+    const text = String(window.getSelection?.() || '').toLowerCase();
+    if (!text.includes('@') || text.length > 500) return;
+    for (const address of siteAddresses()) {
+      if (text.includes(address)) { report('email_copy', window.blGoogleEmail, { copied: 'address' }); return; }
+    }
   }, true);
 }

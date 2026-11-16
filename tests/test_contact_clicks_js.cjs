@@ -13,7 +13,12 @@ const { pathToFileURL } = require('url');
     }
   }
   global.Element = El;
-  global.document = { addEventListener: (type, fn, capture) => { assert.strictEqual(capture, true); listeners[type] = fn; } };
+  const mailLinks = [{ getAttribute: () => 'mailto:Sales@BobliftLoader.com?subject=Hi' }];
+  const dataEmails = [{ dataset: { email: 'export@bobliftloader.com' } }];
+  global.document = {
+    addEventListener: (type, fn, capture) => { assert.strictEqual(capture, true); listeners[type] = fn; },
+    querySelectorAll: (sel) => (sel === 'a[href^="mailto:" i]' ? mailLinks : sel === '[data-email]' ? dataEmails : []),
+  };
   global.window = global;
   let selection = '';
   window.getSelection = () => selection;
@@ -48,6 +53,17 @@ const { pathToFileURL } = require('url');
     ['email_copy', undefined], ['conversion', 'AW-1/mail'],
     ['email_copy', undefined], ['conversion', 'AW-1/mail'],
   ]);
+
+  // The form recipient counts too; the visitor's own address (the enquiry summary) or a middle click on the copy button does not.
+  sent.length = 0;
+  selection = 'export@bobliftloader.com';
+  listeners.copy();
+  assert.strictEqual(sent.length, 2, 'form recipient copy not reported');
+  sent.length = 0;
+  selection = 'Name: Jo\nEmail: jo@example.co.za\nProduct: Mini skid steer';
+  listeners.copy();
+  fire('auxclick', undefined, 1, 'copy-inquiry');
+  assert.strictEqual(sent.length, 0, 'visitor address or middle-clicked copy button reported');
 
   // Other links and copies, a right click and a click on nothing report nothing; a middle click counts.
   sent.length = 0;
