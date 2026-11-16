@@ -30,7 +30,7 @@ if ($scenario === 'saved') {
     $check(!array_key_exists('checks_wheeled', bl_product_factory($wheeled)), 'the wheeled list leaks into the block');
 } elseif ($scenario === 'none') {
     $check($titles($wheeled) === $shared && $titles($tracked) === $shared, 'without a wheeled list every dumper shows the family checks');
-    $check($titles($loader) === ['Check before start-up', 'Run and travel test', 'Leaks, cooling and final check'], 'loader checks changed');
+    $check($titles($loader) === ['Build check on the line', 'Fluids, hoses, tracks and electrics', 'Run test and sign-off'], 'loader checks changed');
     $fields = array_merge(...array_map(static fn($section) => array_column($section['fields'] ?? [], 'key'), bl_content_schema('dumpers')));
     $check(in_array('product.factory.checks_wheeled', $fields, true) && !in_array('product.factory.checks_wheeled', array_merge(...array_map(static fn($section) => array_column($section['fields'] ?? [], 'key'), bl_content_schema('loaders'))), true), 'editor field belongs to the dumper page only');
 } else {

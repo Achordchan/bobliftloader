@@ -2432,4 +2432,10 @@ return [
     'Customer stories' => 'Historias de clientes',
     'No stories yet.' => 'Aún no hay noticias.',
     'News from the BOB-LIFT Loader team will appear here.' => 'Aquí se publicarán las noticias del equipo de BOB-LIFT Loader.',
+    'Build check on the line' => 'Revisión de ensamblaje en la línea',
+    'On the assembly line, a team leader and an inspector check panels, welds and every part against the build list, and mark each hydraulic fitting once it is tightened to torque.' => 'En la línea de ensamblaje, un jefe de equipo y un inspector revisan los paneles, las soldaduras y cada pieza comparándolas con la lista de ensamblaje, y marcan cada conexión hidráulica una vez que se ha apretado al par especificado.',
+    'Fluids, hoses, tracks and electrics' => 'Fluidos, mangueras, orugas y sistema eléctrico',
+    'We check engine oil, fuel and hydraulic oil levels, hose routing and guards, track tension, and every connector, light, gauge and hour meter.' => 'Revisamos los niveles de aceite del motor, combustible y aceite hidráulico; el trazado de las mangueras y sus protecciones; la tensión de las orugas; y cada conector, luz, medidor y contador de horas.',
+    'Run test and sign-off' => 'Prueba de funcionamiento y firma',
+    'We start the machine, travel and lift to confirm smooth controls and no leaks, check colour, attachments and options against the order, record the serial number, and the inspector and factory manager sign the report.' => 'Arrancamos la máquina, la desplazamos y accionamos la elevación para verificar que los controles funcionen con suavidad y que no haya fugas; comparamos el color, los accesorios y las opciones con lo indicado en el pedido; registramos el número de serie; y el inspector y el gerente de planta firman el informe.',
 ];
