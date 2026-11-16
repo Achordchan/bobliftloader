@@ -1,4 +1,5 @@
 import { t } from './i18n.js';
+import { reportEnquiryCopied } from './contact-clicks.js';
 import { openDialog } from './dialogs.js';
 
 const SENT_KEY = 'bl-enquiry-sent';
@@ -253,6 +254,7 @@ export function initializeInquiry() {
   document.querySelector('#copy-inquiry').addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(emailBody);
+      reportEnquiryCopied();
       copyStatus.textContent = t('Enquiry copied. Paste it into an email to {email}.', { email: recipient });
     } catch {
       copyStatus.textContent = t('Your browser could not copy automatically. Select and copy the details above, then email {email}.', { email: recipient });
