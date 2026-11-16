@@ -154,4 +154,23 @@ $check(str_contains($js, "window.gtag('consent', 'update'"), 'banner choice does
 $inquiry = file_get_contents(__DIR__ . '/../assets/js/inquiry.js');
 $check(str_contains($inquiry, "if (!window.blGoogleTag || typeof window.gtag !== 'function') return;") && str_contains($inquiry, "window.gtag('event', 'generate_lead'") && str_contains($inquiry, "send_to: window.blGoogleConversion"), 'enquiry not reported to the Google tag');
 
+// A WhatsApp click is reported like an enquiry: GA4 always, Google Ads only when its own conversion is saved and well formed.
+$save(['google_tag' => 'G-ABC1234XYZ, AW-123456789', 'google_conversion' => 'AW-123456789/AbC-dEf_9', 'google_conversion_whatsapp' => 'AW-123456789/WhAts_App-1', 'google_regional' => '1']);
+$check(str_contains(bl_google_tag_markup(), 'window.blGoogleConversion="AW-123456789/AbC-dEf_9";window.blGoogleWhatsApp="AW-123456789/WhAts_App-1";'), 'WhatsApp conversion not printed');
+$save(['google_tag' => 'AW-123456789', 'google_conversion_whatsapp' => 'AW-1/x"onload']);
+$check(!str_contains(bl_google_tag_markup(), 'blGoogleWhatsApp'), 'malformed WhatsApp conversion printed');
+$save(['google_tag' => 'AW-123456789', 'google_conversion_whatsapp' => 'AW-123456789/WhAts_App-1']);
+$check(str_contains(bl_google_tag_markup(), 'if((window.blConsentRan||{})["advertising"])window.blGoogleWhatsApp='), 'unconfirmed WhatsApp conversion not gated by advertising consent');
+$GLOBALS['caps'] = ['manage_options' => true, 'unfiltered_html' => true];
+$check(str_contains($capture('bl_tracking_screen'), 'name="bl_content[google_conversion_whatsapp]"'), 'WhatsApp conversion field missing from the tracking screen');
+$GLOBALS['caps'] = [];
+$check(array_key_exists('google_conversion_whatsapp', bl_content_defaults('tracking')) && array_key_exists('google_conversion_email', bl_content_defaults('tracking')), 'contact conversions missing from defaults');
+$save(['google_tag' => 'AW-123456789', 'google_conversion_email' => 'AW-123456789/EmAil_1', 'google_regional' => '1']);
+$check(str_contains(bl_google_tag_markup(), 'window.blGoogleEmail="AW-123456789/EmAil_1";') && !str_contains(bl_google_tag_markup(), 'blGoogleWhatsApp'), 'email conversion not printed on its own');
+$GLOBALS['caps'] = ['manage_options' => true, 'unfiltered_html' => true];
+$check(str_contains($capture('bl_tracking_screen'), 'name="bl_content[google_conversion_email]"'), 'email conversion field missing from the tracking screen');
+$GLOBALS['caps'] = [];
+$main = file_get_contents(__DIR__ . '/../assets/js/main.js');
+$check(str_contains($main, "import { initializeContactClicks } from './contact-clicks.js';") && str_contains($main, 'initializeContactClicks();'), 'WhatsApp clicks not reported');
+
 echo "ok ($checks checks)\n";

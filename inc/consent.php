@@ -110,12 +110,16 @@ function bl_google_tag_ids(): array
     return array_values(array_unique(array_filter($ids, static fn(string $id): bool => (bool) preg_match('~^(?:G|AW)-[A-Z0-9]{4,20}$~', $id))));
 }
 
-/** The Google Ads conversion that a sent enquiry reports ("AW-123456789/AbC-dEf"), or '' when none or malformed. */
-function bl_google_conversion(): string
+/**
+ * A Google Ads conversion saved on the tracking screen ("AW-123456789/AbC-dEf"), or '' when none or malformed:
+ * 'google_conversion' is reported by a sent enquiry, 'google_conversion_whatsapp' by a click on a WhatsApp link, 'google_conversion_email' by a click
+ * on an email address or copying one (assets/js/contact-clicks.js).
+ */
+function bl_google_conversion(string $key = 'google_conversion'): string
 {
     if (!function_exists('get_option')) return '';
     $saved = get_option('bl_content_tracking', []);
-    $value = trim((string) (is_array($saved) ? ($saved['google_conversion'] ?? '') : ''));
+    $value = trim((string) (is_array($saved) ? ($saved[$key] ?? '') : ''));
     return preg_match('~^AW-\d{6,15}/[A-Za-z0-9_-]{4,64}$~', $value) ? $value : '';
 }
 
@@ -163,6 +167,10 @@ function bl_google_tag_markup(): string
     foreach ($ids as $id) $script .= $allowed(str_starts_with($id, 'G-') ? 'analytics' : 'advertising') . 'gtag("config",' . $json($id) . ');';
     $conversion = bl_google_conversion();
     if ($conversion !== '') $script .= $allowed('advertising') . 'window.blGoogleConversion=' . $json($conversion) . ';';
+    $whatsapp = bl_google_conversion('google_conversion_whatsapp');
+    if ($whatsapp !== '') $script .= $allowed('advertising') . 'window.blGoogleWhatsApp=' . $json($whatsapp) . ';';
+    $email = bl_google_conversion('google_conversion_email');
+    if ($email !== '') $script .= $allowed('advertising') . 'window.blGoogleEmail=' . $json($email) . ';';
     $markup = '<script>' . $script . '</script><script async src="https://www.googletagmanager.com/gtag/js?id=' . rawurlencode($ids[0]) . '"></script>';
     if ($confirmed) return $markup;
     // Not confirmed: inert until the visitor's cookie agrees to a category the tags serve, then written in as the page is read

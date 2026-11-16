@@ -54,6 +54,8 @@ function bl_tracking_screen(): void
     $google = [
         'google_tag' => ['Google 标签 ID', '填 GA4 的衡量 ID（G- 开头）和 Google Ads 的转化 ID（AW- 开头），多个用逗号隔开；其他开头的 ID（GT-、DC- 等）不会生效，请按工具给的代码贴到下面的格子。主题会自动加载 Google 标签并开启同意模式 v2：欧洲经济区、英国、瑞士的访客在同意前默认拒绝（只发不带 Cookie 的匿名信号），其他地区默认允许；访客在横幅里的选择随时更新。填了这里就不要再把 GA4 或 Google Ads 的代码贴进下面的格子，否则会重复计数。'],
         'google_conversion' => ['询盘转化（Google Ads）', '在 Google Ads 建好「提交潜在客户表单」转化后，填它的 send_to 值，形如 AW-123456789/AbCdEfGh。访客发出询盘、到达成功页时上报一次；同时总会上报 GA4 的 generate_lead 事件。'],
+        'google_conversion_whatsapp' => ['WhatsApp 点击转化（Google Ads）', '在 Google Ads 建好「联系」类转化后，填它的 send_to 值，形如 AW-123456789/AbCdEfGh。访客点网站上任何一个 WhatsApp 按钮或链接时上报一次（谷歌按每次广告点击只计一次）；同时总会上报 GA4 的 whatsapp_click 事件。留空只上报 GA4。'],
+        'google_conversion_email' => ['邮件点击/复制转化（Google Ads）', '在 Google Ads 建好「联系」类转化后，填它的 send_to 值，形如 AW-123456789/AbCdEfGh。访客点网站上的邮箱地址、复制邮箱地址，或在邮件发送方式里点「复制询盘」时上报一次（谷歌按每次广告点击只计一次）；同时总会上报 GA4 的 email_click 或 email_copy 事件。留空只上报 GA4。'],
     ];
     echo '<h2 class="bl-ce-heading">Google 标签（同意模式）</h2>';
     $confirmed = ($values['google_regional'] ?? '') === '1';
