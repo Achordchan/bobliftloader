@@ -18,7 +18,7 @@ $wheeled = ['category' => 'mini-dumpers', 'model' => 'FY30', 'slug' => 'fy30', '
 $tracked = ['category' => 'mini-dumpers', 'model' => 'BL-T500-HD', 'slug' => 't500', 'specs' => ['Running gear' => 'Rubber tracks']];
 $loader = ['category' => 'skid-steer-loaders', 'model' => 'BL-T360-H', 'slug' => 't360', 'specs' => ['Running gear' => 'Rubber tracks']];
 $titles = static fn(array $product): array => array_column(bl_product_factory($product)['checks'] ?? [], 'title');
-$shared = ['Check before start-up', 'Run and travel test', 'Leaks, cooling and final check'];
+$shared = ['Build check on the line', 'Fluids, hoses, tracks and electrics', 'Run test and sign-off'];
 
 $scenario = $argv[1] ?? '';
 if ($scenario === 'saved') {

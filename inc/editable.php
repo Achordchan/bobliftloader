@@ -352,9 +352,9 @@ function bl_product_page_defaults(string $family): array
             'link' => 'About BOB-LIFT',
             'images' => [],
             'checks' => [
-                ['title' => 'Check before start-up', 'text' => 'Before starting the engine, we inspect the fuel tank and all pipework.'],
-                ['title' => 'Run and travel test', 'text' => 'We run the engine and operate every movement, then drive the machine to test the travel system.'],
-                ['title' => 'Leaks, cooling and final check', 'text' => 'We look for oil leaks, shut the machine down, inspect the cooling and finish with a last pipework check.'],
+                ['title' => 'Build check on the line', 'text' => 'On the assembly line, a team leader and an inspector check panels, welds and every part against the build list, and mark each hydraulic fitting once it is tightened to torque.'],
+                ['title' => 'Fluids, hoses, tracks and electrics', 'text' => 'We check engine oil, fuel and hydraulic oil levels, hose routing and guards, track tension, and every connector, light, gauge and hour meter.'],
+                ['title' => 'Run test and sign-off', 'text' => 'We start the machine, travel and tip the hopper or turn the mixing drum to confirm smooth controls and no leaks, check colour and options against the order, record the serial number, and the inspector and factory manager sign the report.'],
             ],
             // The wheeled site dumpers are tested to their own list; empty means they show the checks above like the tracked models.
             'checks_wheeled' => [],
