@@ -44,7 +44,7 @@ const { pathToFileURL } = require('url');
   sent.length = 0;
   fire('click', 'https://wa.me/1');
   fire('click', 'mailto:sales@bobliftloader.com');
-  fire('click', undefined, 0, 'copy-inquiry');
+  mod.reportEnquiryCopied();
   selection = 'Email: sales@bobliftloader.com';
   listeners.copy();
   assert.deepStrictEqual(events(), [
@@ -62,8 +62,9 @@ const { pathToFileURL } = require('url');
   sent.length = 0;
   selection = 'Name: Jo\nEmail: jo@example.co.za\nProduct: Mini skid steer';
   listeners.copy();
+  fire('click', undefined, 0, 'copy-inquiry');
   fire('auxclick', undefined, 1, 'copy-inquiry');
-  assert.strictEqual(sent.length, 0, 'visitor address or middle-clicked copy button reported');
+  assert.strictEqual(sent.length, 0, 'visitor address or a click on the copy button itself reported');
 
   // Other links and copies, a right click and a click on nothing report nothing; a middle click counts.
   sent.length = 0;

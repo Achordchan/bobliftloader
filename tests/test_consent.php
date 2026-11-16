@@ -172,5 +172,6 @@ $check(str_contains($capture('bl_tracking_screen'), 'name="bl_content[google_con
 $GLOBALS['caps'] = [];
 $main = file_get_contents(__DIR__ . '/../assets/js/main.js');
 $check(str_contains($main, "import { initializeContactClicks } from './contact-clicks.js';") && str_contains($main, 'initializeContactClicks();'), 'WhatsApp clicks not reported');
+$check(preg_match('~writeText\(emailBody\);\s*reportEnquiryCopied\(\);~', $inquiry) === 1 && str_contains($inquiry, "import { reportEnquiryCopied } from './contact-clicks.js';"), 'enquiry copy not reported after the clipboard write');
 
 echo "ok ($checks checks)\n";

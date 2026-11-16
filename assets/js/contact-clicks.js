@@ -28,17 +28,18 @@ function report(event, conversion, details) {
   if (conversion) window.gtag('event', 'conversion', { send_to: conversion, transport_type: 'beacon' });
 }
 
+// The email fallback's "copy enquiry" button (inquiry.js) calls this once the text is actually on the clipboard; a denied or
+// unavailable clipboard reports nothing.
+export function reportEnquiryCopied() {
+  report('email_copy', window.blGoogleEmail, { copied: 'enquiry' });
+}
+
 export function initializeContactClicks() {
   // Captured on the document, so links drawn later (dialogs, the quick enquiry, translated pages) count too, and before any
   // other handler can stop the click. A middle click still opens the link, so it counts; a right click does not.
   const onClick = (event) => {
     if (event.type === 'auxclick' && event.button !== 1) return;
     const target = event.target instanceof Element ? event.target : null;
-    // The copy button copies only on a plain click (inquiry.js), so only that counts.
-    if (target?.closest('#copy-inquiry')) {
-      if (event.type === 'click') report('email_copy', window.blGoogleEmail, { copied: 'enquiry' });
-      return;
-    }
     const link = target?.closest('a[href]');
     if (!link) return;
     if (WHATSAPP.test(link.href)) report('whatsapp_click', window.blGoogleWhatsApp, { link_url: link.href });
