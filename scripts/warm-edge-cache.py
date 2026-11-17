@@ -61,9 +61,23 @@ def fetch(url: str, encoding: str | None) -> tuple[int, bytes, str]:
     return 0, b"", ""
 
 
+def fetch_current(url: str) -> tuple[int, bytes]:
+    """A sitemap as it is now. A STALE answer is an old copy the edge kept from before sitemaps were sent no-store (or
+    from any other cache in between); that request also makes the edge fetch the current one, so ask again for it."""
+    status, body, cache = fetch(url, None)
+    for _ in range(2):
+        if cache != "STALE":
+            break
+        time.sleep(PAUSE + 3)
+        status, body, cache = fetch(url, None)
+    if cache == "STALE":
+        print(f"{url} was still an old copy after two more requests; its list may be out of date")
+    return status, body
+
+
 def sitemap_entries(site: str) -> tuple[list[tuple[str, str]], int]:
     """(url, lastmod) for every page the sitemaps list, in sitemap order without repeats, and the unreadable sitemap count."""
-    status, index, _ = fetch(f"{site}/sitemap.xml", None)
+    status, index = fetch_current(f"{site}/sitemap.xml")
     if status != 200:
         raise SystemExit(f"sitemap index returned {status}")
     text = index.decode("utf-8", "replace")
@@ -72,7 +86,7 @@ def sitemap_entries(site: str) -> tuple[list[tuple[str, str]], int]:
     bodies, failed = ([text] if not children else []), 0
     for child in children:
         time.sleep(PAUSE)
-        status, body, _ = fetch(child, None)
+        status, body = fetch_current(child)
         if status == 200:
             bodies.append(body.decode("utf-8", "replace"))
         else:
