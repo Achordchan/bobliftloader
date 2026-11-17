@@ -8,7 +8,9 @@
 if (in_array($route['type'], ['contact', 'thanks'], true)) return;
 $quickRecord = $route['type'] === 'product' ? $route['record'] : null;
 $quickFamily = $quickRecord ? ($quickRecord['category'] === 'mini-dumpers' ? 'dumper' : 'loader') : (($route['category'] ?? '') === 'mini-dumpers' ? 'dumper' : (($route['category'] ?? '') === 'skid-steer-loaders' ? 'loader' : 'help'));
-$quickForm = bl_inquiry_live() ? bl_wp_inquiry_form(['product' => $quickFamily, 'model' => $quickRecord['model'] ?? '', 'message' => '', 'source' => 'Quick enquiry']) : '';
+// On a range page the visitor has not picked a model yet: the form lists that range's models to choose from (optional).
+$quickModels = !$quickRecord && $route['type'] === 'products' && in_array($route['category'] ?? '', ['mini-dumpers', 'skid-steer-loaders'], true) ? array_values(array_filter(bl_products(), static fn(array $p): bool => $p['category'] === $route['category'])) : [];
+$quickForm = bl_inquiry_live() ? bl_wp_inquiry_form(['product' => $quickFamily, 'model' => $quickRecord['model'] ?? '', 'models' => $quickModels, 'message' => '', 'source' => 'Quick enquiry']) : '';
 ?>
 <aside class="bl-quick" aria-label="Quick enquiry">
   <button class="bl-quick-toggle" type="button" aria-expanded="false" aria-controls="quick-enquiry"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" d="M4 5h16v11H9l-5 4z"/><path fill="none" stroke="currentColor" stroke-width="1.6" d="M8 9.5h8M8 12.5h5"/></svg><span>Quote or question?</span></button>

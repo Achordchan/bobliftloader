@@ -169,7 +169,11 @@
 /* An odd last field (Company, once Country left the form) takes the whole row. */
 .bl-site .bl-form-grid>label:last-child:nth-child(odd){grid-column:1/-1}
 .bl-site .bl-form-grid label,.bl-site .bl-message-label{display:block;font-size:var(--fs-small);font-weight:600;line-height:1.5}
-.bl-site .bl-form-grid label>span{color:var(--blue)}
+.bl-site .bl-form-grid label>span,.bl-site .bl-message-label>span{color:var(--blue)}
+.bl-site .bl-model-pick{display:block;margin-top:14px;font-size:var(--fs-small);font-weight:600;line-height:1.5}
+.bl-site .bl-model-pick>span{color:var(--muted);font-weight:400}
+.bl-site .bl-model-pick select{display:block;width:100%;padding:11px 28px 11px 0;border:0;border-bottom:1px solid #abb7c0;border-radius:0;background:transparent url(../icons/arrow-down.svg) right 2px center/16px no-repeat;color:var(--ink);font:inherit;font-size:16px;font-weight:400;-webkit-appearance:none;appearance:none;text-overflow:ellipsis}
+.bl-site .bl-model-pick select:focus{border-color:var(--blue);outline:0;box-shadow:0 1px var(--blue)}
 .bl-site .bl-inquiry-form input:not([type=radio]),.bl-site .bl-inquiry-form textarea{border:0;border-bottom:1px solid #abb7c0;background:transparent;border-radius:0;padding:13px 0;width:100%;font-size:var(--fs-body);color:var(--ink);font-weight:400;transition:border-color .2s}
 .bl-site .bl-inquiry-form input::placeholder,.bl-site .bl-inquiry-form textarea::placeholder{color:#61717f;opacity:1;font-size:var(--fs-label)}
 .bl-site .bl-inquiry-form input:not([type=radio]):focus,.bl-site .bl-inquiry-form textarea:focus{border-color:var(--blue);outline:0;box-shadow:0 1px var(--blue)}

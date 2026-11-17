@@ -40,8 +40,22 @@ if ($fields['phone']['label'] !== 'WhatsApp' || $fields['product']['mail'] !== f
 
 // The submission: the family in Chinese, a model only if the site sells it, the country from the IP.
 $model = (string) bl_products()[0]['model'];
-$clean = apply('achord_inquiry_submission_fields', ['product' => 'Mini dumper', 'model' => strtolower($model), 'country' => 'Narnia', 'language' => '']);
-if ($clean['product'] !== '迷你翻斗车' || $clean['model'] !== $model || $clean['country'] !== '加拿大' || $clean['language'] !== 'en') $fail(3, 'submission ' . json_encode($clean, JSON_UNESCAPED_UNICODE));
+$clean = apply('achord_inquiry_submission_fields', ['product' => 'Skid steer loader', 'model' => strtolower($model), 'country' => 'Narnia', 'language' => '', 'message' => 'Two units for a farm.']);
+if ($clean['product'] !== '滑移装载机' || $clean['model'] !== $model || $clean['country'] !== '加拿大' || $clean['language'] !== 'en' || $clean['message'] !== 'Two units for a farm.') $fail(3, 'submission ' . json_encode($clean, JSON_UNESCAPED_UNICODE));
+// A model is kept only under its own equipment: the loader's model sent with 迷你翻斗车 is dropped.
+$clean = apply('achord_inquiry_submission_fields', ['product' => 'Mini dumper', 'model' => $model]);
+if ($clean['product'] !== '迷你翻斗车' || $clean['model'] !== '') $fail(70, 'model kept under another equipment ' . json_encode($clean, JSON_UNESCAPED_UNICODE));
+// The parts & service prompt lines alone are an empty message; anything written after them is kept.
+$prompt = "Model:\nSerial number:\nWhat I need (part, fault or question):\n";
+if (apply('achord_inquiry_submission_fields', ['product' => 'Parts & service', 'message' => $prompt])['message'] !== '') $fail(71, 'bare service prompt counted as a message');
+if (apply('achord_inquiry_submission_fields', ['product' => 'Parts & service', 'message' => "Model: T360\nSerial number:\n"])['message'] === '') $fail(72, 'filled service prompt dropped');
+// An enquiry must carry a message; the dealer application keeps its own required fields.
+$required = apply('achord_inquiry_config', ['required' => ['name', 'email']])['required'];
+if ($required !== ['name', 'email', 'message']) $fail(73, 'message not required on an enquiry ' . json_encode($required));
+$_POST['bl_lead'] = 'dealer';
+$required = apply('achord_inquiry_config', ['required' => ['name', 'email']])['required'];
+unset($_POST['bl_lead']);
+if ($required !== ['name', 'email']) $fail(74, 'message required on a dealer application ' . json_encode($required));
 $clean = apply('achord_inquiry_submission_fields', ['product' => '<script>', 'model' => 'NOT-A-MODEL']);
 if ($clean['product'] !== '' || $clean['model'] !== '') $fail(4, 'unknown family or model kept');
 

@@ -25,7 +25,10 @@ if ($fitWidth >= 500 && $fitWidth <= 5000) $siteNotes[] = 'The narrowest opening
 if ($fitLoad > 0 && $fitLoad <= 10000) $siteNotes[] = 'My heaviest load is about ' . number_format($fitLoad) . ' kg.';
 if (bl_query('ground') === 'soft') $siteNotes[] = 'The ground is soft or sloped.';
 if ($siteNotes) $prefillMessage .= ($prefillMessage ? ' ' : '') . implode(' ', $siteNotes);
-if ($selectedFamily === 'service') $prefillMessage = "Model:\nSerial number:\nWhat I need (part, fault or question):\n";
+// The site's form leaves out the stock quotation sentence (the model travels on its own): what the visitor chose on the
+// range charts or the applications page stays, and the visitor writes the rest.
+$prefillLive = trim(($applicationName ? 'My application is ' . strtolower($applicationName) . '. ' : '') . implode(' ', $siteNotes));
+if ($selectedFamily === 'service') $prefillMessage = $prefillLive = "Model:\nSerial number:\nWhat I need (part, fault or question):\n";
 ?>
 <?php $prepare = bl_editable('applications')['send']['items']; ?>
 <section class="bl-contact-main bl-shell" id="enquiry">

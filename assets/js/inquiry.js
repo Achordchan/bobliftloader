@@ -3,6 +3,10 @@ import { reportEnquiryCopied } from './contact-clicks.js';
 import { openDialog } from './dialogs.js';
 
 const SENT_KEY = 'bl-enquiry-sent';
+// The parts & service message starts with these prompt lines (templates/pages/contact.php); with nothing written after them
+// the message is still empty. The server reads them the same way (BL_ENQUIRY_PROMPT_LINES, inc/wp-inquiry.php).
+const PROMPT_LINES = /^[ \t]*(?:Model|Serial number|What I need \(part, fault or question\)):/gim;
+const saysNothing = (text) => !text.replace(PROMPT_LINES, '').trim();
 
 // A message written for the model the visitor came from ("…a quotation for the FY-30") only fits that model's family:
 // it clears when they choose another family and comes back if they return, unless they have written their own.
@@ -91,6 +95,7 @@ function initializeSentInquiry(wrap) {
   if (!form) return;
   const note = wrap.querySelector('.bl-selected-model');
   const model = form.querySelector('input[name="model"]');
+  const pick = form.querySelector('.bl-model-pick');
   const status = form.querySelector('.bl-form-status');
   const button = form.querySelector('[type="submit"]');
   const sync = () => {
@@ -99,6 +104,11 @@ function initializeSentInquiry(wrap) {
     if (note) note.hidden = !matches;
     if (model) model.value = matches ? wrap.dataset.model : '';
     if (wrap.dataset.model) syncPrefill(wrap, matches);
+    // A range page's list of models (optional) only fits that range: hidden, and not sent, while another equipment is chosen.
+    if (pick) {
+      pick.hidden = chosen !== pick.dataset.family;
+      pick.querySelector('select').disabled = pick.hidden;
+    }
   };
   form.querySelectorAll('input[name="product"]').forEach((radio) => radio.addEventListener('change', sync));
   sync();
@@ -109,7 +119,7 @@ function initializeSentInquiry(wrap) {
     status.dataset.state = state;
     status.hidden = !text;
   };
-  const requiredText = [...form.querySelectorAll('input[required]:not([type="email"])')];
+  const requiredText = [...form.querySelectorAll('input[required]:not([type="email"]), textarea[required]')];
   requiredText.forEach((input) => input.addEventListener('input', () => input.setCustomValidity('')));
   const ready = () => {
     delete form.dataset.sending;
@@ -129,6 +139,11 @@ function initializeSentInquiry(wrap) {
     event.preventDefault();
     if (form.dataset.sending) return;
     for (const input of requiredText) {
+      if (input.tagName === 'TEXTAREA' && input.value.trim() && saysNothing(input.value)) {
+        input.setCustomValidity(t('Please tell us a little about what you need.'));
+        input.reportValidity();
+        return;
+      }
       if (!input.value.trim()) {
         input.setCustomValidity(t('Please enter a value, not only spaces.'));
         input.reportValidity();
@@ -136,7 +151,7 @@ function initializeSentInquiry(wrap) {
       }
     }
     // What was chosen, read now: the visitor may change the form while it is sending. A dealer application reports form 'dealer'.
-    const sent = { form: wrap.dataset.form || 'enquiry', product: form.querySelector('input[name="product"]:checked')?.value || '', model: model?.value || '' };
+    const sent = { form: wrap.dataset.form || 'enquiry', product: form.querySelector('input[name="product"]:checked')?.value || '', model: form.querySelector('[name="model"]:not(:disabled)')?.value || '' };
     form.dataset.sending = '1';
     form.setAttribute('aria-busy', 'true');
     if (button) button.disabled = true;

@@ -193,6 +193,9 @@ add_action('after_setup_theme', static function (): void {
 // Addresses need the site's routes, so they are worked out when the plugin asks.
 add_filter('achord_inquiry_config', static function (array $config): array {
     if (!current_theme_supports('achord-inquiry')) return $config;
+    // An enquiry must say what the visitor needs (owner, 2026-11-17: name and email alone told the sales team nothing); the
+    // dealer application keeps its own required fields and an optional note.
+    if (!bl_wp_inquiry_is_dealer_post() && !in_array('message', (array) $config['required'], true)) $config['required'] = [...(array) $config['required'], 'message'];
     // The thank-you and contact pages in the language the form was sent from, where that language has them.
     $config['success_url'] = home_url(bl_has_language('/thank-you/', bl_lang()) ? bl_lang_path('/thank-you/', bl_lang()) : '/thank-you/');
     $config['fallback_url'] = home_url(bl_has_language('/contact/', bl_lang()) ? bl_lang_path('/contact/', bl_lang()) : '/contact/');
@@ -209,6 +212,21 @@ function bl_wp_inquiry_ready(): bool
 // The theme's own script (assets/js/attribution.js) fills in the ad source, following the site's cookie banner; the
 // plugin's script would do the same a second time.
 add_action('wp_enqueue_scripts', static fn() => wp_dequeue_script('achord-inquiry'), 20);
+
+/** Whether the form being sent is the dealer application (inc/dealers.php), which has its own required fields. */
+function bl_wp_inquiry_is_dealer_post(): bool
+{
+    return sanitize_key((string) wp_unslash($_POST['bl_lead'] ?? '')) === 'dealer';
+}
+
+// The prompt lines of the parts & service message (templates/pages/contact.php), as assets/js/inquiry.js also knows them.
+const BL_ENQUIRY_PROMPT_LINES = '/^[ \t]*(?:Model|Serial number|What I need \(part, fault or question\)):/mi';
+
+/** Whether an enquiry's message is empty once the parts & service prompt lines are taken out. */
+function bl_wp_inquiry_message_blank(string $message): bool
+{
+    return trim((string) preg_replace(BL_ENQUIRY_PROMPT_LINES, '', $message)) === '';
+}
 
 /** The fields the form sends, as the sales team reads them (the mail, DingTalk and the 询盘 list). */
 add_filter('achord_inquiry_fields', static fn(): array => [
@@ -235,7 +253,7 @@ function bl_wp_inquiry_submission_fields(array $fields): array
 {
     // The dealer application (inc/dealers.php): its own lead type, so the mail, DingTalk and the 询盘 list name it; what the
     // applicant would sell and their kind of business in Chinese. A value the form does not offer is dropped.
-    if (sanitize_key((string) wp_unslash($_POST['bl_lead'] ?? '')) === 'dealer') {
+    if (bl_wp_inquiry_is_dealer_post()) {
         $fields['lead_type'] = 'dealer';
         $fields['product'] = BL_DEALER_INTERESTS[(string) ($fields['product'] ?? '')] ?? '';
         $fields['business'] = BL_DEALER_BUSINESSES[(string) ($fields['business'] ?? '')] ?? '';
@@ -251,7 +269,14 @@ function bl_wp_inquiry_submission_fields(array $fields): array
     $fields['product'] = BL_ENQUIRY_FAMILIES_ZH[$family] ?? (in_array($family, BL_ENQUIRY_FAMILIES_ZH, true) ? $family : '');
     $model = trim((string) ($fields['model'] ?? ''));
     $fields['model'] = '';
-    if ($model !== '') foreach (bl_products() as $record) if (strcasecmp((string) $record['model'], $model) === 0) { $fields['model'] = (string) $record['model']; break; }
+    // A model is kept only with the equipment it belongs to (a dumper's model under 滑移装载机 would mislead the mail).
+    if ($model !== '') foreach (bl_products() as $record) if (strcasecmp((string) $record['model'], $model) === 0) {
+        if ($fields['product'] === BL_ENQUIRY_FAMILIES_ZH[($record['category'] ?? '') === 'mini-dumpers' ? 'Mini dumper' : 'Skid steer loader']) $fields['model'] = (string) $record['model'];
+        break;
+    }
+    // The parts & service form's prompt lines ("Model:", "Serial number:" …) with nothing written after them say nothing,
+    // so they count as an empty message (the plugin then asks for project details).
+    if (bl_wp_inquiry_message_blank((string) ($fields['message'] ?? ''))) $fields['message'] = '';
     $ip = function_exists('achord_inquiry_client_ip') ? achord_inquiry_client_ip() : '';
     $fields['country'] = $ip !== '' && function_exists('achord_inquiry_ip_country') ? achord_inquiry_ip_country($ip) : '';
     if (($fields['language'] ?? '') === '') $fields['language'] = 'en';
@@ -400,17 +425,33 @@ function bl_wp_inquiry_form(array $atts): string
     }
     $privacy = esc_url(wp_make_link_relative(bl_url('/privacy/')));
     $field = static fn(string $label, string $input): string => '<label>' . $label . $input . '</label>';
+    // The model the visitor came from travels hidden; a range page with no model chosen offers its models instead (optional,
+    // shown only while that range's equipment is chosen, assets/js/inquiry.js), so the sales team still sees which one.
+    $model = (string) ($atts['model'] ?? '');
+    $modelField = '<input type="hidden" name="model" value="' . esc_attr($model) . '">';
+    $models = $model === '' ? array_values(array_filter((array) ($atts['models'] ?? []), static fn($record): bool => is_array($record) && trim((string) ($record['model'] ?? '')) !== '')) : [];
+    if ($models) {
+        $options = '<option value="">Not sure yet</option>';
+        foreach ($models as $record) {
+            // The product's name, led by its model where the name does not already say it.
+            $code = (string) $record['model'];
+            $name = trim((string) ($record['name'] ?? ''));
+            $text = $name === '' ? $code : (stripos($name, $code) === false ? $code . ' · ' . $name : $name);
+            $options .= '<option value="' . esc_attr($code) . '">' . esc_html($text) . '</option>';
+        }
+        $modelField = '<label class="bl-model-pick" data-family="' . esc_attr($chosen) . '">Model <span>(optional)</span><select name="model">' . $options . '</select></label>';
+    }
     $hidden = achord_inquiry_hidden_fields(['source' => (string) ($atts['source'] ?? ''), 'language' => bl_lang()]);
     $turnstile = achord_inquiry_turnstile_widget('bl-turnstile', true);
     return '<form class="bl-inquiry-form" method="post" action="' . esc_url(achord_inquiry_action_url()) . '" data-nonce-url="' . esc_url(admin_url('admin-ajax.php?action=bl_inquiry_nonce')) . '">'
         . '<fieldset><legend>01 / YOUR EQUIPMENT</legend><span class="bl-radio">' . $choices . '</span>'
-        . '<input type="hidden" name="model" value="' . esc_attr((string) ($atts['model'] ?? '')) . '"></fieldset>'
+        . $modelField . '</fieldset>'
         . '<fieldset><legend>02 / A LITTLE ABOUT YOU</legend><div class="bl-form-grid">'
         . $field('Your name <span>*</span>', '<input name="name" required maxlength="100" autocomplete="name" placeholder="Full name">')
         . $field('Business email <span>*</span>', '<input type="email" name="email" required maxlength="200" autocomplete="email" placeholder="you@company.com">')
         . $field('WhatsApp', '<input type="tel" name="phone" maxlength="40" autocomplete="tel" inputmode="tel" placeholder="+ country code and number">')
         . $field('Company', '<input name="company" maxlength="150" autocomplete="organization" placeholder="Company name">')
-        . '</div><label class="bl-message-label">Your project<textarea name="message" rows="3" maxlength="2000" placeholder="What work do you need to get done?">' . esc_textarea((string) ($atts['message'] ?? '')) . '</textarea></label>'
+        . '</div><label class="bl-message-label">Your project <span>*</span><textarea name="message" required rows="3" maxlength="2000" placeholder="What work do you need to get done?">' . esc_textarea((string) ($atts['message'] ?? '')) . '</textarea></label>'
         . $hidden . '</fieldset>' . $turnstile
         . '<div class="bl-form-bottom"><p>Your details are used only to answer this enquiry. <br>See our <a href="' . $privacy . '">privacy information</a>.</p><input class="bl-inquiry-submit bl-button bl-button-blue" type="submit" value="Send enquiry"></div>'
         . '<p class="bl-form-status" role="status" aria-live="polite" hidden></p></form>';
