@@ -138,7 +138,12 @@ function bl_serve_sitemap(string $path): void
     if (bl_is_wordpress()) status_header(200);
     header('Content-Type: application/xml; charset=utf-8');
     header('X-Robots-Tag: noindex');
-    header('Cache-Control: public, max-age=3600');
+    // Built for every request, never stored. The WordPress.com edge keeps a copy per compression (br, gzip, none) and,
+    // once a copy is five minutes old, answers the next request with it while fetching a fresh one; a sitemap is asked
+    // for every few hours or days, so each visit got the one before. On 2026-11-17 a copy listed 109 of 171 pages
+    // (no Spanish pages, no /dealers/, none of the newest articles). Batcache would keep a copy in front of PHP too.
+    if (function_exists('batcache_cancel')) batcache_cancel();
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private');
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') echo bl_sitemap_xml();
     exit;
 }

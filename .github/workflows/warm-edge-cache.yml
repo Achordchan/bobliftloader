@@ -1,0 +1,49 @@
+name: Warm Edge Cache
+
+# The WordPress.com edge cache answers a page's first request after five minutes with its old copy, and keeps one copy per
+# compression (br, gzip, none), so a page nobody visits keeps an old copy for its next visitor: on 2026-11-17 the English
+# pages were served without their Spanish hreflang links for a while after the Spanish pages went live
+# (scripts/warm-edge-cache.py).
+# - After a deploy: every sitemap page, as br and gzip. WordPress.com fetches the deploy package once the deploy run has
+#   finished, so this runs as its own workflow after it and first waits for the deploy.
+# - Every three hours, and by hand after articles are published (recent_hours): the home, range and news list pages in
+#   both languages, which takes about a minute. The sitemap has no <lastmod>, and a new article's page has no old copy.
+on:
+  workflow_run:
+    workflows: ["Deploy theme to WordPress.com"]
+    types: [completed]
+  schedule:
+    - cron: "41 */3 * * *"
+  workflow_dispatch:
+    inputs:
+      recent_hours:
+        description: "Only the list pages (any number; empty = every sitemap page)"
+        required: false
+        default: ""
+jobs:
+  Warm-Edge-Cache:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    # One run at a time keeps the requests under the host's rate limit (429). A deploy's full run replaces a run in
+    # progress; a scheduled or by-hand run waits for it instead.
+    concurrency:
+      group: warm-edge-cache
+      cancel-in-progress: ${{ github.event_name == 'workflow_run' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for the deploy
+        if: github.event_name == 'workflow_run'
+        run: sleep 600
+      - name: Request the pages
+        env:
+          RECENT: ${{ github.event_name == 'schedule' && '4' || github.event.inputs.recent_hours }}
+        run: |
+          lists='^/(?:es/)?(?:news/|products/[a-z-]+/)?$'
+          if [ -n "$RECENT" ]; then
+            python3 scripts/warm-edge-cache.py https://bobliftloader.com --recent "$RECENT" --lists "$lists"
+          else
+            python3 scripts/warm-edge-cache.py https://bobliftloader.com
+          fi
