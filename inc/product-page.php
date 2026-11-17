@@ -64,6 +64,40 @@ function bl_product_gallery(array $product): array
     return $images;
 }
 
+/** A dimension drawing put in the gallery: its file name or its alternative text says so. */
+function bl_product_is_drawing(array $image): bool
+{
+    return (bool) preg_match('/drawing/i', basename((string) parse_url($image['src'], PHP_URL_PATH))) || (bool) preg_match('/\bdimension drawing\b/i', $image['alt']);
+}
+
+/**
+ * The gallery shared out over the page: a few photographs beside the heading (the main image always among them), the
+ * rest at the head of the Photos section, and any dimension drawing in the overview, never at the top.
+ * Returns ['hero' => images, 'more' => photos, 'drawings' => photos], the last two shaped as bl_product_photos() rows.
+ */
+function bl_product_gallery_parts(array $product): array
+{
+    $drawings = [];
+    $pictures = [];
+    foreach (bl_product_gallery($product) as $image) {
+        if (bl_product_is_drawing($image)) $drawings[] = ['src' => $image['src'], 'alt' => $image['alt'], 'caption' => '', 'group' => 'drawing'];
+        else $pictures[] = $image;
+    }
+    $limit = BL_CONTENT_LIMITS['hero'];
+    $main = bl_product_main_index($product, $pictures);
+    // A main image further down the set takes the last place at the top, so the page still opens on it.
+    if ($main !== null && $main >= $limit) array_splice($pictures, $limit - 1, 0, array_splice($pictures, $main, 1));
+    $more = array_map(static fn(array $image): array => ['src' => $image['src'], 'alt' => $image['alt'], 'caption' => '', 'group' => 'views'], array_slice($pictures, $limit));
+    $drawings = array_slice([...$drawings, ...bl_product_photos($product, ['drawing'])], 0, BL_CONTENT_LIMITS['drawing']);
+    return ['hero' => array_slice($pictures, 0, $limit), 'more' => $more, 'drawings' => $drawings];
+}
+
+/** The name of a kind of photograph; "views" are the gallery photographs that did not fit at the top of the page. */
+function bl_photo_group_label(string $group): string
+{
+    return $group === 'views' ? 'Other views' : BL_PHOTO_GROUPS[$group];
+}
+
 /** Where the main image sits in the gallery, matched by path (WordPress serves sized copies such as name-1024x768.webp beside the file). */
 function bl_product_main_index(array $product, array $images): ?int
 {

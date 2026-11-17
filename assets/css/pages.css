@@ -96,7 +96,6 @@
    the second of 4 would squeeze the heading into a quarter and stretch the notes over three. */
 .bl-site .bl-specifications-sheet{--spec-gap:clamp(24px,2.4vw,56px);--spec-lead:calc((100% - var(--spec-gap)) / 2)}
 .bl-site .bl-specifications-sheet[data-spec-layout="3"]{--spec-lead:calc((100% - 2 * var(--spec-gap)) / 3)}
-.bl-site .bl-specifications-sheet[data-spec-layout="drawing"]{--spec-lead:calc(((100% - var(--spec-gap)) * 2.2 / 3.2 - var(--spec-gap)) / 2)}
 .bl-site .bl-spec-head{display:grid;grid-template-columns:var(--spec-lead) minmax(0,1fr);gap:var(--spec-gap);align-items:end}
 .bl-site .bl-spec-notes{display:grid;justify-items:start;gap:14px;font-size:var(--fs-small);line-height:1.7;color:var(--muted)}
 .bl-site .bl-spec-notes>p{justify-self:stretch;text-wrap:pretty}
