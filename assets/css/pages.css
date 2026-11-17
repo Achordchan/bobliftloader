@@ -906,7 +906,9 @@
 .bl-site .bl-quick-form .bl-radio{gap:6px}
 .bl-site .bl-quick-form .bl-radio-label{padding:8px 10px;font-size:var(--fs-micro)}
 .bl-site .bl-quick-form .bl-form-grid{display:grid;grid-template-columns:1fr;gap:4px;margin-top:6px}
-.bl-site .bl-quick-form .bl-form-grid label,.bl-site .bl-quick-form .bl-message-label{font-size:var(--fs-micro)}
+.bl-site .bl-quick-form .bl-form-grid label,.bl-site .bl-quick-form .bl-message-label,.bl-site .bl-quick-form .bl-model-pick{font-size:var(--fs-micro)}
+.bl-site .bl-quick-form .bl-model-pick{margin-top:10px}
+.bl-site .bl-quick-form .bl-model-pick select{padding-block:9px}
 .bl-site .bl-quick-form .bl-inquiry-form input:not([type=radio]),.bl-site .bl-quick-form .bl-inquiry-form textarea{padding:9px 0;font-size:16px}
 .bl-site .bl-quick-form .bl-inquiry-form textarea{min-height:64px;height:64px}
 .bl-site .bl-quick-form .bl-form-bottom{display:flex;flex-direction:column-reverse;align-items:stretch;gap:12px}

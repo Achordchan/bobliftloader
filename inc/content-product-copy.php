@@ -82,7 +82,7 @@ function bl_product_copy_fields(bool $loader): array
         'enquiry_label' => ['询价眉题', 'Request a quote for the {model}', '常见问题、询价与相关产品', 'text'],
         'enquiry_title' => ['询价标题', 'LET’S FIND<br><span class="bl-blue-text">YOUR FIT.</span>', '常见问题、询价与相关产品', 'html'],
         'enquiry_intro' => ['询价介绍', 'Tell us where the machine will work and what it needs to do. We reply with a quotation, the configuration we suggest and the shipping plan.', '常见问题、询价与相关产品', 'text'],
-        'enquiry_message' => ['表单预填内容', 'I would like information and a quotation for the {name}.', '常见问题、询价与相关产品', 'text'],
+        'enquiry_message' => ['表单预填内容（仅邮件草稿表单用；站内询盘表单不预填，留言由客户自己写）', 'I would like information and a quotation for the {name}.', '常见问题、询价与相关产品', 'text'],
         'related_label' => ['相关产品眉题', 'EXPLORE YOUR OPTIONS', '常见问题、询价与相关产品', 'text'],
         'related_title' => ['相关产品标题', 'MORE FROM THE RANGE.', '常见问题、询价与相关产品', 'text'],
         'related_link' => ['系列链接', 'View the range', '常见问题、询价与相关产品', 'text'],

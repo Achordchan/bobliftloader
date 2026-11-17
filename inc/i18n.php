@@ -740,7 +740,7 @@ function bl_i18n_output(string $html): string
 const BL_I18N_SCRIPT_STRINGS = [
     'Open navigation', 'Close navigation', 'Pause the slideshow', 'Play the slideshow', 'Show all specs', 'Show fewer specs', 'result', 'results',
     'The enquiry could not be sent. Please check your connection and try again, or email us directly.',
-    'Please enter a value, not only spaces.', 'Please complete the verification and send again.',
+    'Please enter a value, not only spaces.', 'Please complete the verification and send again.', 'Please tell us a little about what you need.',
     'Move the slider to the load you carry per trip.', '{hits} of {total} {noun} are rated for {limit} kg or more', 'Any', 'dumpers', 'loaders', 'models', 'model',
     // The email-draft form used while the inquiry plugin is off (templates/partials/inquiry-form.php, assets/js/inquiry.js).
     'Equipment', 'Model', 'Name', 'Email', 'Country', 'Company', 'Project', 'Skid steer loader', 'Mini dumper', 'Help choosing equipment', 'Parts & service',

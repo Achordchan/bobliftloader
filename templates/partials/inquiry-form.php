@@ -1,12 +1,14 @@
 <?php
 // With the inquiry plugin active the enquiry is sent and stored by the site; otherwise the form below prepares an email draft.
+// The site's form starts from $prefillLive when the page sets one: the visitor writes the message themselves (it is required),
+// so the stock "I would like a quotation for the …" sentence is left to the email draft, which the visitor edits anyway.
 if (bl_inquiry_live()):
     $inquiryModel = !empty($selectedRecord) ? (string) $selectedRecord['model'] : '';
     $inquiryFamily = $selectedFamily ?? 'loader';
 ?>
     <div class="bl-inquiry-live" data-thanks="<?= bl_escape(bl_url('/thank-you/')) ?>" data-model="<?= bl_escape($inquiryModel) ?>" data-model-family="<?= bl_escape($inquiryFamily) ?>">
       <?php if (!empty($selectedRecord)): ?><p class="bl-selected-model">Enquiring about: <strong><?= bl_escape($selectedRecord['name']) ?></strong></p><?php endif; ?>
-      <?= bl_wp_inquiry_form(['product' => $inquiryFamily, 'model' => $inquiryModel, 'message' => $prefillMessage ?? '', 'source' => $inquiryModel !== '' ? 'Product page form' : 'Enquiry form']) ?>
+      <?= bl_wp_inquiry_form(['product' => $inquiryFamily, 'model' => $inquiryModel, 'message' => $prefillLive ?? $prefillMessage ?? '', 'source' => $inquiryModel !== '' ? 'Product page form' : 'Enquiry form']) ?>
     </div>
 <?php return; endif; ?>
     <form class="bl-inquiry-form" id="inquiry-form" data-email="<?= bl_escape(bl_inquiry_fallback_email()) ?>">
