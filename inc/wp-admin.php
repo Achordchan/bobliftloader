@@ -171,7 +171,7 @@ function bl_product_images_box(WP_Post $post): void
     $control = '<ul class="bl-gallery" data-bl-gallery data-bl-max="' . BL_CONTENT_LIMITS['gallery'] . '" data-bl-base="' . esc_url(get_template_directory_uri() . '/assets/') . '">' . $items . '</ul>'
         . '<template data-bl-template="gallery">' . bl_product_gallery_item('') . '</template>'
         . '<div class="bl-gallery-add"><button type="button" class="button" data-bl="media-gallery"><span class="dashicons dashicons-images-alt2" aria-hidden="true"></span> 从媒体库添加</button></div>';
-    bl_admin_field('图库', '', $control, '图库有两张及以上时，产品页大图旁显示缩略图，点击切换；通常把主图也放在第一张。最多 12 张，可用箭头调整顺序或拖动排序。每张图下方填英文替代文字，描述画面（如 BL-T1000-H loader lifting a pallet），供谷歌图片和读屏软件使用；留空时自动用产品名。');
+    bl_admin_field('图库', '', $control, '图库有两张及以上时，产品页大图旁显示缩略图，点击切换；通常把主图也放在第一张。最多 12 张，可用箭头调整顺序或拖动排序。产品页首屏只放前 5 张（主图始终在内），其余照片自动排到下方「Photos」照片区；文件名或替代文字写明 dimension drawing 的尺寸图不进首屏，放在 Overview 概述里。每张图下方填英文替代文字，描述画面（如 BL-T1000-H loader lifting a pallet），供谷歌图片和读屏软件使用；留空时自动用产品名。');
 }
 
 function bl_product_source_box(WP_Post $post): void

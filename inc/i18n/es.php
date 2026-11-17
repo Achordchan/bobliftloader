@@ -813,6 +813,7 @@ return [
     'Decide how it tips and loads' => 'Decida cómo vuelca y cómo se carga',
     'Describe the site surface and the entrance. Loose or wet ground favours tracks; an entrance narrower than the bucket rules a model out.' => 'Describa la superficie de la obra y la entrada. El terreno suelto o húmedo favorece las orugas; una entrada más angosta que el cucharón descarta un modelo.',
     'Details' => 'Detalles',
+    'photos' => 'fotos', // the tile after the product thumbnails: +7 photos
     'Diesel' => 'Diésel',
     'Diesel engine bay' => 'Compartimento del motor diésel',
     'Differences only' => 'Solo diferencias',

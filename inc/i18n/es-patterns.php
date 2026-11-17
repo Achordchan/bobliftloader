@@ -11,6 +11,20 @@ return [
     ['~^View larger · (\d+) photos$~', 'Ver más grande · $1 fotos'],
     ['~^(\d+) photographs\. Select one to view it larger\.$~', '$1 fotografías. Seleccione una para verla más grande.'],
     ['~^\+(\d+) more$~', '+$1 más'],
+    // The Photos section of a product page names its kinds of photograph: "7 photographs: other views, details. …".
+    ['~^(\d+) photographs: ([a-z &,]+)\. Select one to view it larger\.$~', static function (array $m): ?string {
+        $names = ['other views' => 'otras vistas', 'at work' => 'en el trabajo', 'details' => 'detalles', 'in the factory' => 'en la fábrica', 'packing & delivery' => 'empaque y entrega'];
+        $groups = [];
+        foreach (explode(', ', $m[2]) as $group) {
+            if (!isset($names[$group])) return null;
+            $groups[] = $names[$group];
+        }
+        $last = array_pop($groups);
+        return $m[1] . ' fotografías: ' . ($groups ? implode(', ', $groups) . ' y ' : '') . $last . '. Seleccione una para verla más grande.';
+    }],
+    ['~^Dimension drawing, (.+)$~', 'Plano de dimensiones del $1'],
+    // The tile after the product thumbnails, should it ever be read as one run ("+7 photos").
+    ['~^(<t0>)?\+(\d+)(</t0>)? (<t1>)?photos(</t1>)?$~', '$1+$2$3 $4fotos$5'],
     // Counts.
     ['~^(\d+) <t0>machines</t0>$~', '$1 <t0>máquinas</t0>'],
     ['~^Watch it work <t0>(\d+) videos</t0>$~', 'Mire cómo funciona <t0>$1 videos</t0>'],
