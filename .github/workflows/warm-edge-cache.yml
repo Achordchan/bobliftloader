@@ -41,7 +41,7 @@ jobs:
         env:
           RECENT: ${{ github.event_name == 'schedule' && '4' || github.event.inputs.recent_hours }}
         run: |
-          lists='^/(?:es/)?(?:news/|products/[a-z-]+/)?$'
+          lists='/,news/,products/skid-steer-loaders/,products/mini-dumpers/'
           if [ -n "$RECENT" ]; then
             python3 scripts/warm-edge-cache.py https://bobliftloader.com --recent "$RECENT" --lists "$lists"
           else

@@ -98,12 +98,24 @@ def is_recent(lastmod: str, hours: float) -> bool:
     return when >= dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=hours)
 
 
+def list_urls(site: str, paths: str, listed: set[str]) -> list[str]:
+    """Each list path in the default language and under every language folder found among the sitemap URLs."""
+    folders = sorted({m.group(1) for url in listed if (m := re.match(r"/([a-z]{2})/", urllib.parse.urlsplit(url).path))})
+    out = []
+    for path in [p.strip() for p in paths.split(",") if p.strip()]:
+        path = "/" + path.lstrip("/")
+        out.append(site + path)
+        out.extend(f"{site}/{folder}{path}" for folder in folders)
+    return out
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("site")
     parser.add_argument("--recent", type=float, help="only list pages and pages changed in the last HOURS")
-    parser.add_argument("--lists", default=r"^/(?:[a-z]{2}/)?$",
-                        help="regular expression for the paths of list pages that change with every new post")
+    parser.add_argument("--lists", default="/",
+                        help="comma-separated paths of the list pages that change with every new post, in the default "
+                             "language; each is also requested under every language folder the sitemaps show (/es/...)")
     parser.add_argument("--pause", type=float, default=PAUSE, help="seconds between requests")
     args = parser.parse_args()
     globals()["PAUSE"] = max(args.pause, PAUSE)
@@ -112,11 +124,14 @@ def main() -> int:
     try:
         entries, failed_sitemaps = sitemap_entries(site)
         if args.recent is not None:
-            lists = re.compile(args.lists)
-            urls = [url for url, lastmod in entries
-                    if lists.search(urllib.parse.urlsplit(url).path) or is_recent(lastmod, args.recent)]
+            # The list pages are added whether or not a sitemap names them (core sitemaps leave out post-type archives).
+            listed = {url for url, _ in entries}
+            lists = list_urls(site, args.lists, listed)
+            # Only a list page no sitemap names may be missing in some language (a 404 there is skipped, not a failure).
+            optional = {url for url in lists if url not in listed}
+            urls = list(dict.fromkeys(lists + [url for url, lastmod in entries if is_recent(lastmod, args.recent)]))
         else:
-            urls = [url for url, _ in entries]
+            urls, optional = [url for url, _ in entries], set()
         print(f"{len(urls)} pages to warm, {len(ENCODINGS)} compressions each")
         failed = 0
         for url in urls:
@@ -124,6 +139,10 @@ def main() -> int:
                 time.sleep(PAUSE)
                 status, _, cache = fetch(url, encoding)
                 stats["statuses"][cache or "?"] = stats["statuses"].get(cache or "?", 0) + 1
+                if status == 404 and url in optional:
+                    # A list page a language does not have; nothing to warm.
+                    print(f"{url} returned 404 (no such list page in this language), skipped")
+                    break
                 if status != 200:
                     failed += 1
                     print(f"{url} ({encoding}) returned {status}")
