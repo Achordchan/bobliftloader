@@ -143,6 +143,10 @@ function bl_serve_sitemap(string $path): void
     // for every few hours or days, so each visit got the one before. On 2026-11-17 a copy listed 109 of 171 pages
     // (no Spanish pages, no /dealers/, none of the newest articles). Batcache would keep a copy in front of PHP too.
     if (function_exists('batcache_cancel')) batcache_cancel();
+    // A copy Batcache stored before this rule kept being served (still on 2026-11-17, 90 minutes after the deploy and an
+    // edge purge), because a request that would replace it now stores nothing. Retire it: any request that reaches here,
+    // such as /sitemap.xml?any=1 or the plain URL once that copy is gone, bumps the URL's version so Batcache drops it.
+    if (function_exists('batcache_clear_url')) batcache_clear_url(home_url('/sitemap.xml'));
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private');
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') echo bl_sitemap_xml();
     exit;
