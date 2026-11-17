@@ -131,7 +131,7 @@ export function initializeEquipment() {
     const stack = !lead.querySelector('video');
     const put = (inLead) => {
       if (inLead) lead.append(points);
-      else body.insertBefore(points, body.querySelector('.bl-product-overview-drawing')); // the drawing stays last
+      else body.insertBefore(points, body.querySelector('.bl-product-overview-drawings')); // the drawings stay last
       points.classList.toggle('bl-product-highlights-stacked', inLead && stack);
       return Math.abs(lead.offsetHeight - body.offsetHeight);
     };

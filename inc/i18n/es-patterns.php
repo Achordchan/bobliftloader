@@ -23,6 +23,8 @@ return [
         return $m[1] . ' fotografías: ' . ($groups ? implode(', ', $groups) . ' y ' : '') . $last . '. Seleccione una para verla más grande.';
     }],
     ['~^Dimension drawing, (.+)$~', 'Plano de dimensiones del $1'],
+    // The tile after the product thumbnails, should it ever be read as one run ("+7 photos").
+    ['~^(<t0>)?\+(\d+)(</t0>)? (<t1>)?photos(</t1>)?$~', '$1+$2$3 $4fotos$5'],
     // Counts.
     ['~^(\d+) <t0>machines</t0>$~', '$1 <t0>máquinas</t0>'],
     ['~^Watch it work <t0>(\d+) videos</t0>$~', 'Mire cómo funciona <t0>$1 videos</t0>'],

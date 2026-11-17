@@ -9,7 +9,7 @@ declare(strict_types=1);
  * template leaves its section out.
  */
 
-/** Kinds of photograph a product can carry below its specification; a drawing sits beside the specification instead. */
+/** Kinds of photograph a product can carry below its specification; a drawing sits in the overview instead. */
 const BL_PHOTO_GROUPS = ['at-work' => 'At work', 'detail' => 'Details', 'factory' => 'In the factory', 'delivery' => 'Packing & delivery', 'drawing' => 'Dimension drawing'];
 
 function bl_product_family_key(array $product): string
@@ -72,15 +72,19 @@ function bl_product_is_drawing(array $image): bool
 
 /**
  * The gallery shared out over the page: a few photographs beside the heading (the main image always among them), the
- * rest at the head of the Photos section, and any dimension drawing in the overview, never at the top.
+ * rest at the head of the Photos section, and the dimension drawings in the overview, never at the top (unless one is the
+ * main image, which always opens the page).
  * Returns ['hero' => images, 'more' => photos, 'drawings' => photos], the last two shaped as bl_product_photos() rows.
  */
 function bl_product_gallery_parts(array $product): array
 {
     $drawings = [];
     $pictures = [];
-    foreach (bl_product_gallery($product) as $image) {
-        if (bl_product_is_drawing($image)) $drawings[] = ['src' => $image['src'], 'alt' => $image['alt'], 'caption' => '', 'group' => 'drawing'];
+    $gallery = bl_product_gallery($product);
+    $mainAt = bl_product_main_index($product, $gallery);
+    foreach ($gallery as $i => $image) {
+        // The main image stays at the top whatever it shows: the page opens on it.
+        if ($i !== $mainAt && bl_product_is_drawing($image)) $drawings[] = ['src' => $image['src'], 'alt' => $image['alt'], 'caption' => '', 'group' => 'drawing'];
         else $pictures[] = $image;
     }
     $limit = BL_CONTENT_LIMITS['hero'];
@@ -88,8 +92,8 @@ function bl_product_gallery_parts(array $product): array
     // A main image further down the set takes the last place at the top, so the page still opens on it.
     if ($main !== null && $main >= $limit) array_splice($pictures, $limit - 1, 0, array_splice($pictures, $main, 1));
     $more = array_map(static fn(array $image): array => ['src' => $image['src'], 'alt' => $image['alt'], 'caption' => '', 'group' => 'views'], array_slice($pictures, $limit));
-    $drawings = array_slice([...$drawings, ...bl_product_photos($product, ['drawing'])], 0, BL_CONTENT_LIMITS['drawing']);
-    return ['hero' => array_slice($pictures, 0, $limit), 'more' => $more, 'drawings' => $drawings];
+    // Every drawing is kept: the gallery's (at most its own limit) and the one a product may add under 产品页模块.
+    return ['hero' => array_slice($pictures, 0, $limit), 'more' => $more, 'drawings' => [...$drawings, ...bl_product_photos($product, ['drawing'])]];
 }
 
 /** The name of a kind of photograph; "views" are the gallery photographs that did not fit at the top of the page. */

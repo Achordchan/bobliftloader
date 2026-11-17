@@ -53,12 +53,15 @@
 .bl-site .bl-product-highlights-stacked{grid-template-columns:1fr}
 .bl-site .bl-product-highlights p{font-size:var(--fs-small);line-height:1.65;color:var(--muted)}
 
-/* The dimension drawing closes the overview, under the description: white like the photographs, opening larger on click. */
-.bl-site .bl-product-overview-drawing{margin:clamp(28px,2.4vw,48px) 0 0;display:grid;gap:10px}
-.bl-site .bl-product-overview-drawing button{display:block;width:100%;background:#fff;padding:0;cursor:zoom-in;border:1px solid var(--line);transition:border-color .2s}
-.bl-site .bl-product-overview-drawing img{display:block;width:100%;height:auto}
-@media(hover:hover){.bl-site .bl-product-overview-drawing button:hover{border-color:var(--ink)}}
-.bl-site .bl-product-overview-drawing figcaption{font-size:var(--fs-label);color:var(--muted)}
+/* The dimension drawings close the overview, under the description: white like the photographs, opening larger on click;
+   two or more sit two to a row. */
+.bl-site .bl-product-overview-drawings{margin:clamp(28px,2.4vw,48px) 0 0;display:grid;gap:clamp(12px,1vw,20px)}
+.bl-site .bl-product-overview-drawings[data-count="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+.bl-site .bl-product-overview-drawings figure{margin:0;display:grid;gap:10px;align-content:start}
+.bl-site .bl-product-overview-drawings button{display:block;width:100%;background:#fff;padding:0;cursor:zoom-in;border:1px solid var(--line);transition:border-color .2s}
+.bl-site .bl-product-overview-drawings img{display:block;width:100%;height:auto}
+@media(hover:hover){.bl-site .bl-product-overview-drawings button:hover{border-color:var(--ink)}}
+.bl-site .bl-product-overview-drawings figcaption{font-size:var(--fs-label);color:var(--muted)}
 /* After the thumbnails, a tile of the same size counts the photographs further down and leads to them. */
 .bl-site .bl-gallery-more{flex:none;width:100%;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#fff;border:1px solid transparent;color:var(--ink);text-decoration:none;line-height:1;transition:border-color .2s,background .2s}
 .bl-site .bl-gallery-more b{font-family:var(--display);font-size:clamp(22px,1.6vw,30px);font-weight:700}
@@ -386,7 +389,7 @@
 }
 /* Touch screens: the cards and buttons that only answered a hover now answer a tap. */
 @media(hover:none){
-  .bl-site :is(.bl-product-apps a,.bl-product-docs a,.bl-product-docs button,.bl-product-overview-drawing button,.bl-gallery-more):active{border-color:var(--ink);background:#f4f6f7}
+  .bl-site :is(.bl-product-apps a,.bl-product-docs a,.bl-product-docs button,.bl-product-overview-drawings button,.bl-gallery-more):active{border-color:var(--ink);background:#f4f6f7}
   .bl-site .bl-product-photo-grid button:active img{opacity:.85}
 }
 @media(prefers-reduced-motion:reduce){
