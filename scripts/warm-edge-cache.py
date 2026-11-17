@@ -75,31 +75,32 @@ def fetch_current(url: str) -> tuple[int, bytes]:
     return status, body
 
 
-def sitemap_entries(site: str) -> tuple[list[tuple[str, str]], int]:
-    """(url, lastmod) for every page the sitemaps list, in sitemap order without repeats, and the unreadable sitemap count."""
+def sitemap_entries(site: str) -> tuple[list[tuple[str, str, str]], int]:
+    """(url, lastmod, sitemap it came from) for every page the sitemaps list, in sitemap order without repeats, and the
+    unreadable sitemap count."""
     status, index = fetch_current(f"{site}/sitemap.xml")
     if status != 200:
         raise SystemExit(f"sitemap index returned {status}")
     text = index.decode("utf-8", "replace")
     # A sitemap index lists child sitemaps; a single sitemap (bobliftloader.com) lists pages directly.
     children = re.findall(r"<sitemap>\s*<loc>([^<]+)</loc>", text)
-    bodies, failed = ([text] if not children else []), 0
+    bodies, failed = ([(f"{site}/sitemap.xml", text)] if not children else []), 0
     for child in children:
         time.sleep(PAUSE)
         status, body = fetch_current(child)
         if status == 200:
-            bodies.append(body.decode("utf-8", "replace"))
+            bodies.append((child, body.decode("utf-8", "replace")))
         else:
             failed += 1
             print(f"{child} returned {status}")
-    seen: dict[str, str] = {}
-    for body in bodies:
+    seen: dict[str, tuple[str, str]] = {}
+    for source, body in bodies:
         for block in re.findall(r"<url>(.*?)</url>", body, re.S):
             loc = re.search(r"<loc>([^<]+)</loc>", block)
             lastmod = re.search(r"<lastmod>([^<]+)</lastmod>", block)
             if loc and loc.group(1) not in seen:
-                seen[loc.group(1)] = lastmod.group(1) if lastmod else ""
-    return list(seen.items()), failed
+                seen[loc.group(1)] = (lastmod.group(1) if lastmod else "", source)
+    return [(url, lastmod, source) for url, (lastmod, source) in seen.items()], failed
 
 
 def is_recent(lastmod: str, hours: float) -> bool:
@@ -130,6 +131,9 @@ def main() -> int:
     parser.add_argument("--lists", default="/",
                         help="comma-separated paths of the list pages that change with every new post, in the default "
                              "language; each is also requested under every language folder the sitemaps show (/es/...)")
+    parser.add_argument("--list-sitemaps", default="",
+                        help="comma-separated parts of sitemap file names whose pages are all treated as list pages "
+                             "(archives such as news categories carry no <lastmod>), e.g. taxonomies-category")
     parser.add_argument("--pause", type=float, default=PAUSE, help="seconds between requests")
     args = parser.parse_args()
     globals()["PAUSE"] = max(args.pause, PAUSE)
@@ -139,13 +143,15 @@ def main() -> int:
         entries, failed_sitemaps = sitemap_entries(site)
         if args.recent is not None:
             # The list pages are added whether or not a sitemap names them (core sitemaps leave out post-type archives).
-            listed = {url for url, _ in entries}
-            lists = list_urls(site, args.lists, listed)
+            listed = {url for url, _, _ in entries}
+            sitemap_parts = [part.strip() for part in args.list_sitemaps.split(",") if part.strip()]
+            lists = list_urls(site, args.lists, listed) + [
+                url for url, _, source in entries if any(part in source for part in sitemap_parts)]
             # Only a list page no sitemap names may be missing in some language (a 404 there is skipped, not a failure).
             optional = {url for url in lists if url not in listed}
-            urls = list(dict.fromkeys(lists + [url for url, lastmod in entries if is_recent(lastmod, args.recent)]))
+            urls = list(dict.fromkeys(lists + [url for url, lastmod, _ in entries if is_recent(lastmod, args.recent)]))
         else:
-            urls, optional = [url for url, _ in entries], set()
+            urls, optional = [url for url, _, _ in entries], set()
         print(f"{len(urls)} pages to warm, {len(ENCODINGS)} compressions each")
         failed = 0
         for url in urls:
