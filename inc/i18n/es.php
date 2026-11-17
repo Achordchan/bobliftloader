@@ -857,6 +857,8 @@ return [
     'Dumper with Cab: Roof Canopy, Simple Cab or Enclosed Cab?' => 'Minidumper con cabina: ¿techo, cabina simple o cabina cerrada?',
     'dumpers' => 'minidumpers',
     'Dumpers packed on racks' => 'Minidumpers embalados en bastidores',
+    'Wrapped and blocked for the container' => 'Embalados y calzados para el contenedor',
+    'Wheeled mini dumpers wrapped in bubble wrap and stretch film, front wheels off and each front axle resting on timber blocks set on its own tyres, in a factory hall' => 'Minidumpers sobre ruedas envueltos en plástico de burbujas y película extensible, sin las ruedas delanteras y con cada eje delantero apoyado en tacos de madera sobre sus propios neumáticos, en una nave de fábrica',
     'Edit details' => 'Editar datos',
     'Electric start' => 'Arranque eléctrico',
     'Email' => 'Correo',
