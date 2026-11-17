@@ -67,6 +67,11 @@ function bl_content_schema_fields(string $page, ?array $content = null): array
             'title' => ['label' => '名称', 'type' => 'text'],
             'text' => ['label' => '说明', 'type' => 'textarea'],
         ]],
+        ...($family === 'dumper' ? [['key' => 'product.factory.images_wheeled', 'group' => '工厂与出厂检查', 'label' => '轮式翻斗车照片', 'type' => 'list', 'add' => '添加照片', 'summary' => ['caption'], 'help' => '轮式翻斗车（FC、FY、FJZ 各型号）显示这一组照片；留空则和履带车一样显示上面的照片。', 'fields' => [
+            'image' => ['label' => '图片', 'type' => 'image', 'help' => '真实的工厂照片，3:2 横图。最多显示 3 张。'],
+            'alt' => ['label' => '替代文字', 'type' => 'text', 'help' => $alt],
+            'caption' => ['label' => '图下说明', 'type' => 'text'],
+        ]]] : []),
         ...($family === 'dumper' ? [['key' => 'product.factory.checks_wheeled', 'group' => '工厂与出厂检查', 'label' => '轮式翻斗车出厂检查', 'type' => 'list', 'add' => '添加检查项', 'summary' => ['title'], 'help' => '轮式翻斗车（FC、FY、FJZ 各型号）显示这一组；留空则和履带车一样显示上面的出厂检查。', 'fields' => [
             'title' => ['label' => '名称', 'type' => 'text'],
             'text' => ['label' => '说明', 'type' => 'textarea'],

@@ -49,7 +49,7 @@ function bl_content_editor_schema(string $page, array $sections): array
             $field['type'] = 'models';
             $field['help'] = '勾选并按推荐顺序排列；前台仅显示所属系列的机型；留空时按场景自动推荐。未找到的旧值保留，可主动取消。';
         }
-        if ($key === 'product.factory.images') $field['max'] = BL_CONTENT_LIMITS['factory'];
+        if ($key === 'product.factory.images' || $key === 'product.factory.images_wheeled') $field['max'] = BL_CONTENT_LIMITS['factory'];
         if ($key === 'product.faq') $field['max'] = BL_CONTENT_LIMITS['faq'];
         if ($key === 'terms') $section['note'] = '统一业务值：质保月数、交期、起订量。首页与本页文案可引用 {warranty_months}、{lead_time}、{minimum_order}；英文格式可用 {warranty_months_upper}、{lead_time_words}、{minimum_order_words}、{minimum_order_sentence}。自定义文案若仍写固定数字，请复核并换成变量。';
 

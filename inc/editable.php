@@ -358,6 +358,8 @@ function bl_product_page_defaults(string $family): array
             ],
             // The wheeled site dumpers are tested to their own list; empty means they show the checks above like the tracked models.
             'checks_wheeled' => [],
+            // Photographs for the wheeled site dumpers only; empty means they show the photographs above like the tracked models.
+            'images_wheeled' => [],
         ],
         'faq' => [
             $faq('Two-wheel or four-wheel drive?', 'For loose ground and ramps, the FY20-4, FY30, FY40, FY50 and FJZ30 drive all four wheels. Tell us about your site and we confirm the drive of the model we quote.'),

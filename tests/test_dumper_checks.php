@@ -1,6 +1,6 @@
 <?php
 /**
- * The wheeled site dumpers show their own factory checks once a list is saved; the tracked models and any page without
+ * The wheeled site dumpers show their own factory checks and photographs once a list is saved; the tracked models and any page without
  * that list keep the family's checks. Each saved-content scenario runs in its own process (bl_editable() caches per
  * request). Run: php tests/test_dumper_checks.php
  */
@@ -22,16 +22,24 @@ $shared = ['Build check on the line', 'Fluids, hoses, tracks and electrics', 'Ru
 
 $scenario = $argv[1] ?? '';
 if ($scenario === 'saved') {
+    $GLOBALS['options']['bl_content_dumpers']['product']['factory']['images'] = [['image' => '/racks.webp', 'alt' => 'racks'], ['image' => '/frame.webp', 'alt' => 'frame']];
+    $GLOBALS['options']['bl_content_dumpers']['product']['factory']['images_wheeled'] = [['image' => '/packed.webp', 'alt' => 'packed'], ['image' => '', 'alt' => 'a row with no image is dropped'], ['image' => '/a.webp'], ['image' => '/b.webp'], ['image' => '/c.webp']];
     $GLOBALS['options']['bl_content_dumpers']['product']['factory']['checks_wheeled'] = [
         ['title' => 'Appearance check', 'text' => 'We inspect the machine.'], ['title' => '', 'text' => 'a row with no name is dropped'], ['title' => 'Tyre pressure', 'text' => ''],
     ];
     $check($titles($wheeled) === ['Appearance check', 'Tyre pressure'], 'wheeled dumper does not show its own checks: ' . json_encode($titles($wheeled)));
     $check($titles($tracked) === $shared, 'tracked dumper lost the family checks');
     $check(!array_key_exists('checks_wheeled', bl_product_factory($wheeled)), 'the wheeled list leaks into the block');
+    $images = static fn(array $product): array => array_column(bl_product_factory($product)['images'] ?? [], 'image');
+    $check($images($wheeled) === ['/packed.webp', '/a.webp', '/b.webp'], 'wheeled dumper does not show its own photographs, three at most: ' . json_encode($images($wheeled)));
+    $check($images($tracked) === ['/racks.webp', '/frame.webp'], 'tracked dumper lost the family photographs');
+    $check($images($loader) !== ['/packed.webp', '/a.webp', '/b.webp'], 'loader picked up the wheeled dumper photographs');
+    $check(!array_key_exists('images_wheeled', bl_product_factory($wheeled)), 'the wheeled photographs leak into the block');
 } elseif ($scenario === 'none') {
     $check($titles($wheeled) === $shared && $titles($tracked) === $shared, 'without a wheeled list every dumper shows the family checks');
     $check($titles($loader) === ['Build check on the line', 'Fluids, hoses, tracks and electrics', 'Run test and sign-off'], 'loader checks changed');
     $fields = array_merge(...array_map(static fn($section) => array_column($section['fields'] ?? [], 'key'), bl_content_schema('dumpers')));
+    $check(in_array('product.factory.images_wheeled', $fields, true) && !in_array('product.factory.images_wheeled', array_merge(...array_map(static fn($section) => array_column($section['fields'] ?? [], 'key'), bl_content_schema('loaders'))), true), 'photo field belongs to the dumper page only');
     $check(in_array('product.factory.checks_wheeled', $fields, true) && !in_array('product.factory.checks_wheeled', array_merge(...array_map(static fn($section) => array_column($section['fields'] ?? [], 'key'), bl_content_schema('loaders'))), true), 'editor field belongs to the dumper page only');
 } else {
     foreach (['saved', 'none'] as $name) {

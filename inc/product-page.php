@@ -138,12 +138,17 @@ function bl_product_factory(array $product): array
 {
     $factory = bl_product_shared($product)['factory'] ?? [];
     if (!is_array($factory)) return [];
-    $factory['images'] = array_slice(array_values(array_filter((array) ($factory['images'] ?? []), static fn($image): bool => is_array($image) && ($image['image'] ?? '') !== '')), 0, BL_CONTENT_LIMITS['factory']);
+    $photos = static fn($list): array => array_slice(array_values(array_filter((array) $list, static fn($image): bool => is_array($image) && ($image['image'] ?? '') !== '')), 0, BL_CONTENT_LIMITS['factory']);
+    $factory['images'] = $photos($factory['images'] ?? []);
     $valid = static fn($list): array => array_values(array_filter((array) $list, static fn($check): bool => is_array($check) && ($check['title'] ?? '') !== ''));
     $factory['checks'] = $valid($factory['checks'] ?? []);
-    // The wheeled site dumpers are checked to a list of their own (tyres, lights, horn and gauges) once one is saved.
-    if ($product['category'] === 'mini-dumpers' && bl_product_facets($product, 'mini-dumpers')['gear'] === 'wheeled' && ($wheeled = $valid($factory['checks_wheeled'] ?? []))) $factory['checks'] = $wheeled;
-    unset($factory['checks_wheeled']);
+    // The wheeled site dumpers are checked to a list of their own (tyres, lights, horn and gauges) and can show
+    // photographs of their own (wheeled machines packed for the container) once either list is saved.
+    if ($product['category'] === 'mini-dumpers' && bl_product_facets($product, 'mini-dumpers')['gear'] === 'wheeled') {
+        if ($wheeled = $valid($factory['checks_wheeled'] ?? [])) $factory['checks'] = $wheeled;
+        if ($wheeled = $photos($factory['images_wheeled'] ?? [])) $factory['images'] = $wheeled;
+    }
+    unset($factory['checks_wheeled'], $factory['images_wheeled']);
     return ($factory['text'] ?? '') === '' && !$factory['checks'] ? [] : $factory;
 }
 
