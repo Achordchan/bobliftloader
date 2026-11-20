@@ -17,6 +17,7 @@ if (!bl_is_wordpress() && $route['status'] === 200) {
 }
 // WordPress has already sent its own status (200 for a post it found, even one this theme will not show); status_header() replaces it.
 if (bl_is_wordpress()) status_header($route['status']); else http_response_code($route['status']);
+bl_promo_cache_rules($route);
 // A page in another language is drawn in English and translated on the way out (inc/i18n.php), the 3D showcase too.
 if (bl_lang() !== 'en') ob_start('bl_i18n_output');
 // The 3D showcase is a page of its own (its own header, chapters and styles), not inside the site's header and footer.
@@ -45,7 +46,7 @@ if ($route['type'] === 'showcase') {
   <script type="importmap"><?= bl_script_import_map() ?></script>
   <script type="module" src="<?= bl_escape(bl_asset_versioned('js/main.js')) ?>"></script>
   <?php if (bl_is_wordpress()) wp_head(); ?>
-  <?php /* Support page, and the parts of it that product and family pages share (attachments, videos, spec-sheet print). */ if (in_array($route['type'], ['support', 'products', 'product', 'dealers'], true)): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset_versioned('css/support.css')) ?>"><?php endif; ?>
+  <?php /* Support page, and the parts of it that product and family pages share (attachments, videos, spec-sheet print). */ if (in_array($route['type'], ['support', 'products', 'product', 'dealers', 'promo'], true)): ?><link rel="stylesheet" href="<?= bl_escape(bl_asset_versioned('css/support.css')) ?>"><?php endif; ?>
 </head>
 <body class="bl-site bl-page-<?= bl_escape($route['type']) ?><?= bl_is_wordpress() && is_admin_bar_showing() ? ' bl-wp-admin-bar' : '' ?>">
   <?php if (bl_is_wordpress()) wp_body_open(); ?>

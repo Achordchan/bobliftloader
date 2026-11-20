@@ -243,6 +243,8 @@ add_filter('achord_inquiry_fields', static fn(): array => [
     'business' => ['label' => '业务类型', 'short' => '业务类型', 'admin' => '业务类型', 'type' => 'text'],
     'market' => ['label' => '经营国家/地区', 'short' => '经营地区', 'admin' => '经营国家/地区', 'type' => 'text'],
     'website' => ['label' => '公司网站', 'short' => '网站', 'admin' => '公司网站', 'type' => 'url'],
+    // Sent only from the year-end offers page while they run (inc/promo.php); empty otherwise, so the mail and DingTalk leave it out.
+    'promo' => ['label' => '参加活动', 'short' => '参加活动', 'admin' => '参加活动', 'type' => 'text'],
 ]);
 
 /**
@@ -253,7 +255,10 @@ function bl_wp_inquiry_submission_fields(array $fields): array
 {
     // The dealer application (inc/dealers.php): its own lead type, so the mail, DingTalk and the 询盘 list name it; what the
     // applicant would sell and their kind of business in Chinese. A value the form does not offer is dropped.
+    // The offer mark: only the offers page's own value, and only while the offers run.
+    $fields['promo'] = bl_promo_enquiry_mark((string) ($fields['promo'] ?? ''));
     if (bl_wp_inquiry_is_dealer_post()) {
+        $fields['promo'] = '';
         $fields['lead_type'] = 'dealer';
         $fields['product'] = BL_DEALER_INTERESTS[(string) ($fields['product'] ?? '')] ?? '';
         $fields['business'] = BL_DEALER_BUSINESSES[(string) ($fields['business'] ?? '')] ?? '';
@@ -442,6 +447,8 @@ function bl_wp_inquiry_form(array $atts): string
         $modelField = '<label class="bl-model-pick" data-family="' . esc_attr($chosen) . '">Model <span>(optional)</span><select name="model">' . $options . '</select></label>';
     }
     $hidden = achord_inquiry_hidden_fields(['source' => (string) ($atts['source'] ?? ''), 'language' => bl_lang()]);
+    // The year-end offers page (inc/promo.php) marks its enquiries; the mark is checked again when the form arrives.
+    if (($atts['promo'] ?? '') !== '') $hidden .= '<input type="hidden" name="promo" value="' . esc_attr((string) $atts['promo']) . '">';
     $turnstile = achord_inquiry_turnstile_widget('bl-turnstile', true);
     return '<form class="bl-inquiry-form" method="post" action="' . esc_url(achord_inquiry_action_url()) . '" data-nonce-url="' . esc_url(admin_url('admin-ajax.php?action=bl_inquiry_nonce')) . '">'
         . '<fieldset><legend>01 / YOUR EQUIPMENT</legend><span class="bl-radio">' . $choices . '</span>'

@@ -116,7 +116,10 @@ $marks = static function (string $text): array { preg_match_all('~</?t\d+>|<br>|
 foreach ($entries as $key => $text) {
     $check(trim($text) !== '', "empty translation: $key");
     $check($marks((string) $key) === $marks($text), "placeholders differ: $key");
-    $check(!preg_match('~(US\$|USD|€|\$\s?\d|precio desde)~i', $text), "a price in: $text");
+    // The year-end offers' coupon and deposit amounts (inc/content-promo.php) are discounts, not prices: those figures
+    // alone may follow US$; any other amount, or a word for price, still fails.
+    $withoutOffers = (string) preg_replace('~US\$\s?(?:500|700|1,000|1,400|1,500|2,000|2,500|5,000|10,000|15,00[01]|30,000|50,000)(?![\d,])~', '', strip_tags(str_replace('</t0>', '', $text)));
+    $check(!preg_match('~(US\$|USD|€|\$\s?\d|precio desde)~i', $withoutOffers), "a price in: $text");
 }
 
 // The audit comment (?bl_i18n_audit=1) cannot be closed or broken out of by the page text it lists.
