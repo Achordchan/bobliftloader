@@ -58,6 +58,7 @@ foreach (['loader' => 'skid-steer-loaders', 'dumper' => 'mini-dumpers'] as $key 
   </div>
 </section>
 
+<?php require __DIR__ . '/partials/promo-banner.php'; ?>
 <section class="bl-range" id="equipment" aria-labelledby="range-title">
   <div class="bl-section-top bl-shell bl-reveal">
     <div><p class="bl-eyebrow"><?= bl_escape($content['range']['eyebrow']) ?></p><h2 class="bl-display" id="range-title"><?= bl_heading($content['range']['title'], 'bl-blue-text', true) ?></h2></div>

@@ -194,6 +194,7 @@ function bl_dashboard_widget(): void
             ['首页内容', 'admin.php?page=bl-content-home', 'edit_pages', '首屏、产品、应用和联系区的文字与图片'],
             ['采购与售后', 'admin.php?page=bl-content-support', 'edit_pages', '采购流程、质保、配件和常见问题'],
             ['经销商', 'admin.php?page=bl-content-dealers', 'edit_pages', '经销商页文字、图片、常见问题和申请表旁的说明'],
+            ['年终活动', 'admin.php?page=bl-content-promo', 'edit_pages', '年终活动页、首页活动横幅的文字和活动日期'],
             ['应用场景', 'admin.php?page=bl-content-applications', 'edit_pages', '应用列表页和 ' . count(bl_editable('applications')['jobs']) . ' 个应用详情页'],
             ['全站设置', 'admin.php?page=bl-content-global', 'edit_pages', '公司与联系方式、页眉页脚、品牌图片'],
             ['滑移装载机', 'admin.php?page=bl-content-loaders', 'edit_pages', '栏目与产品公共模块、搜索信息'],

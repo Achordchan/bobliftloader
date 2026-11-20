@@ -31,6 +31,7 @@ const BL_I18N_DEFAULT_PAGES = [
         '/applications/',
         '/support/',
         '/dealers/',
+        '/year-end-specials/',
         '/contact/',
         '/privacy/',
         '/applications/landscaping/',

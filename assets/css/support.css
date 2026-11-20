@@ -386,3 +386,58 @@
   .bl-site .bl-product-overview{display:none}
   .bl-site.bl-motion .bl-reveal{opacity:1;transform:none}
 }
+
+/* ---------- Year-end offers (/year-end-specials/, templates/pages/promo.php): the support page's hero, heads and plate,
+   with the coupon tiers, the deposit table and the terms. ---------- */
+.bl-site .bl-promo-plate{grid-template-columns:repeat(4,minmax(0,1fr))}
+.bl-site .bl-promo-plate dd small:first-child{margin:0 .12em 0 0}
+.bl-site .bl-promo-ended{font-weight:600;color:var(--ink)!important}
+.bl-site .bl-promo-ended-cta{margin-top:clamp(18px,1.4vw,30px)}
+.bl-site .bl-promo-coupons,.bl-site .bl-promo-terms{padding-top:var(--sp-section);padding-bottom:var(--sp-section)}
+.bl-site .bl-promo-tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(16px,1.4vw,36px);margin:0;padding:0;list-style:none}
+.bl-site .bl-promo-tiers li{display:flex;flex-direction:column;gap:clamp(10px,.8vw,18px);padding:clamp(24px,2vw,52px);background:#fff;border-top:4px solid var(--blue)}
+.bl-site .bl-promo-tier-index{font:700 var(--fs-h5)/1 var(--display);color:var(--blue)}
+.bl-site .bl-promo-tier-save{font:700 clamp(56px,5vw,128px)/.9 var(--display);letter-spacing:-.01em;color:var(--ink)}
+.bl-site .bl-promo-tier-save small,.bl-site .bl-promo-tier-save span{font-size:.36em;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.bl-site .bl-promo-tier-over{font-size:var(--fs-body);font-weight:600}
+.bl-site .bl-promo-deposit{padding:var(--sp-section) 0;background:var(--ink);color:var(--paper)}
+.bl-site .bl-promo-deposit .bl-eyebrow{color:var(--night-blue)}
+.bl-site .bl-promo-deposit .bl-sup-head>p,.bl-site .bl-promo-points p{color:var(--night-text)}
+.bl-site .bl-promo-deposit h2 span{color:var(--night-blue)}
+.bl-site .bl-promo-deposit-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(40px,5vw,140px);align-items:start}
+.bl-site .bl-promo-table{width:100%;border-collapse:collapse}
+.bl-site .bl-promo-table th,.bl-site .bl-promo-table td{padding:clamp(16px,1.2vw,28px) 0;border-bottom:1px solid var(--night-line);text-align:left;vertical-align:baseline}
+.bl-site .bl-promo-table thead th{padding-top:0;font-size:var(--fs-micro);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--night-muted);border-bottom:2px solid var(--paper)}
+.bl-site .bl-promo-table tbody th{font-size:var(--fs-body);font-weight:600}
+.bl-site .bl-promo-table td,.bl-site .bl-promo-table thead th+th{text-align:right;white-space:nowrap}
+.bl-site .bl-promo-table td{font:700 var(--fs-h4)/1 var(--display)}
+.bl-site .bl-promo-table td:last-child{color:var(--night-blue)}
+.bl-site .bl-promo-points{margin:0;padding:0;list-style:none}
+.bl-site .bl-promo-points li{padding:0 0 clamp(18px,1.3vw,28px);margin-bottom:clamp(18px,1.3vw,28px);border-bottom:1px solid var(--night-line)}
+.bl-site .bl-promo-points li:last-child{margin-bottom:0;border-bottom:0}
+.bl-site .bl-promo-points h3{margin:0 0 8px;font:600 var(--fs-h5)/1.1 var(--display);color:#fff}
+.bl-site .bl-promo-points p{font-size:var(--fs-small);line-height:1.8;text-wrap:pretty}
+.bl-site .bl-promo-terms .bl-sup-head{grid-template-columns:minmax(0,1fr)}
+.bl-site .bl-promo-rules{margin:0;padding:0;list-style:none;border-top:2px solid var(--ink)}
+.bl-site .bl-promo-rules li{display:grid;grid-template-columns:clamp(48px,4vw,96px) minmax(0,1fr);gap:clamp(12px,1.4vw,32px);padding:clamp(18px,1.4vw,32px) 0;border-bottom:1px solid var(--line)}
+.bl-site .bl-promo-rules span{font:700 var(--fs-h5)/1 var(--display);color:var(--blue)}
+.bl-site .bl-promo-rules p{max-width:58em;font-size:var(--fs-body);line-height:1.75;text-wrap:pretty}
+.bl-site .bl-promo-claim-links{display:flex;flex-wrap:wrap;align-items:center;gap:14px clamp(20px,1.6vw,36px);margin-top:clamp(24px,1.8vw,40px)}
+@media(max-width:1100px){
+  .bl-site .bl-promo-deposit-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:800px){
+  .bl-site .bl-promo-plate{position:static;grid-template-columns:repeat(2,minmax(0,1fr));padding:0}
+  .bl-site .bl-promo-plate>div:nth-child(3){border-left:0}
+  .bl-site .bl-promo-plate>div:nth-child(n+3){border-top:1px solid var(--night-line)}
+  .bl-site .bl-promo-plate dd{font-size:clamp(34px,10vw,48px)}
+  .bl-site .bl-promo-tiers{grid-template-columns:minmax(0,1fr)}
+  .bl-site .bl-promo-tier-save{font-size:clamp(52px,16vw,72px)}
+  .bl-site .bl-promo-table td{font-size:clamp(22px,6.4vw,30px)}
+  .bl-site .bl-promo-table tbody th{font-size:var(--fs-small)}
+}
+/* The offers page keeps its claim button beside the intro on every screen (the support pages show theirs on phones only). */
+@media(min-width:801px){.bl-site .bl-promo-hero .bl-sup-hero-side>.bl-sup-hero-cta{display:inline-flex;margin:clamp(18px,1.4vw,30px) clamp(16px,1.4vw,32px) 0 0;vertical-align:middle}}
+.bl-site .bl-promo-claim-links .bl-button{color:var(--ink);border-color:var(--ink)}
+.bl-site .bl-promo-claim-links .bl-button .bl-icon{filter:none}
+@media(hover:hover){.bl-site .bl-promo-claim-links .bl-button:hover{background:var(--ink);color:#fff}.bl-site .bl-promo-claim-links .bl-button:hover .bl-icon{filter:invert(1)}}

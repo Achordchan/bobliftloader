@@ -9,6 +9,7 @@ require_once __DIR__ . '/consent.php';
 $applications = bl_apply_application_content($applications);
 require_once __DIR__ . '/support.php';
 require_once __DIR__ . '/dealers.php';
+require_once __DIR__ . '/promo.php';
 require_once __DIR__ . '/product-page.php';
 require_once __DIR__ . '/showcase.php';
 require_once __DIR__ . '/routes.php';

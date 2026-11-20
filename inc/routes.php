@@ -23,6 +23,7 @@ function bl_resolve_route(?string $requestPath = null): array
         '/applications/' => ['applications', bl_editable('applications')['seo']['title'], bl_editable('applications')['seo']['description']],
         '/support/' => ['support', bl_editable('support')['seo']['title'], bl_editable('support')['seo']['description']],
         '/dealers/' => ['dealers', bl_editable('dealers')['seo']['title'], bl_editable('dealers')['seo']['description']],
+        BL_PROMO_PATH => ['promo', bl_editable('promo')['seo']['title'], bl_editable('promo')['seo']['description']],
         '/news/' => ['news', bl_editable('news')['seo']['title'], bl_editable('news')['seo']['description']],
         '/contact/' => ['contact', bl_editable('contact')['seo']['title'], bl_editable('contact')['seo']['description']],
         '/thank-you/' => ['thanks', bl_editable('thanks')['seo']['title'], bl_editable('thanks')['seo']['description']],
@@ -71,8 +72,8 @@ function bl_resolve_route(?string $requestPath = null): array
         $post = get_queried_object();
         $route = array_replace($route, ['type' => 'page', 'title' => bl_plain_title(get_the_title($post)), 'description' => $post->post_excerpt ?: wp_trim_words(wp_strip_all_tags($post->post_content), 35), 'status' => 200]);
     }
-    // WordPress finds no post at the showcase address (the page is the theme's own, not a WordPress page), so its 404 does not apply there.
-    if (bl_is_wordpress() && is_404() && $route['type'] !== 'showcase') $route['status'] = 404;
+    // WordPress finds no post at the showcase or offers address (the theme's own pages, not WordPress pages), so its 404 does not apply there.
+    if (bl_is_wordpress() && is_404() && !in_array($route['type'], ['showcase', 'promo'], true)) $route['status'] = 404;
     // Under a language folder only the pages translated into that language exist (inc/i18n.php).
     if ($route['status'] === 200 && !bl_has_language($route['path'], bl_lang()) && empty($route['preview'])) $route['status'] = 404;
     if ($route['status'] === 404) $route['type'] = '404';
@@ -97,6 +98,8 @@ function bl_sitemap_paths(): array
     foreach (bl_apply_application_content($GLOBALS['bl_application_base'] ?? []) as $app) $paths[] = '/applications/' . bl_application_slug($app) . '/';
     foreach (bl_products() as $product) $paths[] = '/product/' . $product['slug'] . '/';
     if (bl_showcase_products()) $paths[] = BL_SHOWCASE_PATH;
+    // The offers page while they run; after the last day it is noindex, so it leaves the list.
+    if (!bl_promo_ended()) $paths[] = BL_PROMO_PATH;
     foreach (bl_application_cases() as $case) $paths[] = '/application/' . $case['slug'] . '/';
     foreach (bl_articles() as $article) $paths[] = '/news/' . $article['slug'] . '/';
     // Each page translated into another language, at its address in that language's folder.

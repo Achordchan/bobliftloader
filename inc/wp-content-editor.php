@@ -21,6 +21,7 @@ const BL_CONTENT_PAGES = [
     '404' => ['title' => '未找到页面', 'menu' => '未找到页面', 'path' => '/404/'],
     'thanks' => ['title' => '询盘成功页内容', 'menu' => '询盘成功页', 'path' => '/thank-you/'],
     'dealers' => ['title' => '经销商页内容', 'menu' => '经销商', 'path' => '/dealers/'],
+    'promo' => ['title' => '年终活动页内容', 'menu' => '年终活动', 'path' => BL_PROMO_PATH],
 ];
 
 /**

@@ -9,6 +9,7 @@ require_once __DIR__ . '/inc/editable.php';
 require_once __DIR__ . '/inc/consent.php';
 require_once __DIR__ . '/inc/support.php';
 require_once __DIR__ . '/inc/dealers.php';
+require_once __DIR__ . '/inc/promo.php';
 require_once __DIR__ . '/inc/product-page.php';
 require_once __DIR__ . '/inc/showcase.php';
 require_once __DIR__ . '/inc/seo.php';
@@ -67,6 +68,8 @@ add_filter('redirect_canonical', 'bl_i18n_redirect', 99);
 add_filter('old_slug_redirect_url', 'bl_i18n_redirect', 99);
 add_action('template_redirect', 'bl_wp_application_route', 0);
 add_action('template_redirect', 'bl_wp_sitemap_page', 0);
+add_action('template_redirect', 'bl_wp_promo_page', 0);
+add_action('init', 'bl_promo_add_spanish_page', 99); // after the i18n settings are registered (init 10)
 // /llms.txt for AI assistants (inc/llms.php); its opening text is a setting editable over REST.
 add_action('init', static function (): void {
     register_setting('bl_llms', BL_LLMS_TXT_INTRO_OPTION, ['type' => 'string', 'description' => 'llms.txt 开头的介绍（Markdown），留空用主题默认文字。', 'sanitize_callback' => 'sanitize_textarea_field', 'default' => '', 'show_in_rest' => true]);

@@ -35,7 +35,7 @@ $fail = static function (int $code, string $what): void { echo $what . "\n"; exi
 
 // The fields: WhatsApp is asked, the country is not (it comes from the IP), the product is shown in the mail's card.
 $fields = apply('achord_inquiry_fields', []);
-if (array_keys($fields) !== ['product', 'model', 'name', 'email', 'phone', 'company', 'country', 'message', 'business', 'market', 'website']) $fail(1, 'fields');
+if (array_keys($fields) !== ['product', 'model', 'name', 'email', 'phone', 'company', 'country', 'message', 'business', 'market', 'website', 'promo']) $fail(1, 'fields');
 if ($fields['phone']['label'] !== 'WhatsApp' || $fields['product']['mail'] !== false || $fields['country']['mail'] !== false) $fail(2, 'field labels');
 
 // The submission: the family in Chinese, a model only if the site sells it, the country from the IP.
@@ -56,6 +56,10 @@ $_POST['bl_lead'] = 'dealer';
 $required = apply('achord_inquiry_config', ['required' => ['name', 'email']])['required'];
 unset($_POST['bl_lead']);
 if ($required !== ['name', 'email']) $fail(74, 'message required on a dealer application ' . json_encode($required));
+// The year-end offer mark: only the offers page's own value, only while the offers run (inc/promo.php), never on a dealer application.
+$clean = apply('achord_inquiry_submission_fields', ['product' => 'Skid steer loader', 'promo' => BL_PROMO_CODE]);
+if ($clean['promo'] !== (bl_promo_live() ? BL_PROMO_LABEL : '')) $fail(75, 'offer mark ' . json_encode($clean, JSON_UNESCAPED_UNICODE));
+if (apply('achord_inquiry_submission_fields', ['product' => 'Skid steer loader', 'promo' => 'free-machine'])['promo'] !== '') $fail(76, 'unknown offer mark kept');
 $clean = apply('achord_inquiry_submission_fields', ['product' => '<script>', 'model' => 'NOT-A-MODEL']);
 if ($clean['product'] !== '' || $clean['model'] !== '') $fail(4, 'unknown family or model kept');
 
