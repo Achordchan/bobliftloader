@@ -17,7 +17,10 @@ const BL_CRANE_LINE_PROFILES = [
 function bl_structured_data(array $route): array
 {
     $base = bl_public_base();
-    $logo = bl_absolute_asset(bl_asset('images/logo-square-600.png'));
+    // 全站设置 → 品牌标志 is shared with the structured data when one is saved; otherwise the square theme logo (600 × 600 on
+    // white) stands in, since Google needs at least 112 px on each side and the header logo is 91 px tall.
+    $savedLogo = trim(bl_content_value('global', 'brand.logo'));
+    $logo = bl_absolute_asset($savedLogo !== '' ? $savedLogo : bl_asset('images/logo-square-600.png'));
     $organization = [
         // One company, one entity: the crane site and this site describe the same Organization (same @id, name, official
         // website, logo and profile list), so search engines can tie both sites and the group site to one brand.
@@ -27,8 +30,7 @@ function bl_structured_data(array $route): array
         'alternateName' => array_values(array_filter([bl_company('name'), bl_company('name_zh'), 'BOBLIFT'])),
         'description' => 'BOB-LIFT (' . bl_company('name') . ') is a Chinese manufacturer of ' . (bl_sister_site() ? 'truck mounted cranes, marine cranes and loader equipment' : 'skid steer loaders and mini dumpers') . ' in Xuzhou, Jiangsu.',
         'url' => bl_company('website'), 'email' => bl_company('email'), 'telephone' => bl_company('phone_seo'),
-        // Square, 600 × 600 on white: Google needs at least 112 px on each side, and the header logo is 91 px tall.
-        'logo' => ['@type' => 'ImageObject', '@id' => bl_company('website') . '#logo', 'url' => $logo, 'contentUrl' => $logo, 'width' => 600, 'height' => 600, 'caption' => 'BOB-LIFT'],
+        'logo' => ['@type' => 'ImageObject', '@id' => bl_company('website') . '#logo', 'url' => $logo, 'contentUrl' => $logo, 'caption' => 'BOB-LIFT'] + ($savedLogo !== '' ? [] : ['width' => 600, 'height' => 600]),
         'image' => ['@id' => bl_company('website') . '#logo'],
         // Unified social credit code from the national enterprise credit register (business licence, checked 2026-11-12).
         'identifier' => ['@type' => 'PropertyValue', 'propertyID' => 'Unified Social Credit Code', 'value' => '91320300078204097G'],

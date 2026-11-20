@@ -42,6 +42,7 @@ $check(bl_company('sales_whatsapp_label') === '+44123456', 'sales label still di
 $route = ['type' => 'contact', 'path' => '/contact/', 'status' => 200, 'title' => 'Contact', 'description' => 'Contact'];
 $graph = bl_structured_data($route)['@graph'][0];
 $check($graph['email'] === 'sales@example.test' && $graph['telephone'] === '+44123456' && $graph['legalName'] === 'Example Machinery' && in_array('Example Machinery', $graph['alternateName'], true), 'SEO company data not shared');
+$check(($graph['logo']['url'] ?? '') === 'https://cdn.example.test/logo.png' && !isset($graph['logo']['width']), 'the saved brand logo no longer reaches the structured data');
 $check(str_contains(bl_privacy_body('intro'), 'sales@example.test') && str_contains(bl_privacy_body('intro'), 'Example Machinery'), 'privacy placeholders not shared');
 $check(str_contains(bl_privacy_body('submitted'), 'ipinfo.io') && str_contains(bl_privacy_body('draft'), 'not stored in a website database'), 'privacy modes not distinct');
 $check(!isset(BL_CONTENT_PAGES['tracking']) && bl_page_content_key(3) === '', 'tracking exposed as REST content item');
