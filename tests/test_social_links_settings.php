@@ -22,7 +22,7 @@ $check(!is_wp_error($save(['youtube_url' => 'https://', 'facebook_url' => 'https
 $check(array_keys(bl_social_links()) === ['facebook'], 'an unfinished address became a social link: ' . implode(',', array_keys(bl_social_links())));
 $footer = $capture(static fn() => require __DIR__ . '/../templates/footer.php');
 $check(!str_contains($footer, 'youtube') && !str_contains($footer, 'href="https://"') && str_contains($footer, 'https://www.facebook.com/example'), 'footer does not follow the settings');
-$check(count($sameAs()) === 3 && in_array('https://www.facebook.com/example', $sameAs(), true), 'sameAs does not follow the settings');
+$check(in_array('https://www.facebook.com/example', $sameAs(), true) && !in_array('https://www.facebook.com/@bobliftloader', $sameAs(), true) && !array_filter($sameAs(), static fn(string $url): bool => str_contains($url, '@bobliftloader')), 'sameAs does not follow the settings');
 
 if ($failures) { fwrite(STDERR, implode("\n", $failures) . "\n"); exit(1); }
 echo "social link settings ok\n";

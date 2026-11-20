@@ -1,18 +1,41 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * The company's crane-line profiles, the same as the crane site lists: its YouTube and Facebook and its B2B directory
+ * listings (each names Xuzhou BOB-LIFT, checked 2026-10-23).
+ */
+const BL_CRANE_LINE_PROFILES = [
+    'https://www.youtube.com/@bobliftcrane',
+    'https://www.facebook.com/bobliftconstruction',
+    'https://bobliftcrane.en.made-in-china.com/',
+    'https://boblift.en.made-in-china.com/',
+    'https://www.directindustry.com/prod/bob-lift-241919.html',
+    'https://www.exporthub.com/boblift/profile.html',
+];
+
 function bl_structured_data(array $route): array
 {
     $base = bl_public_base();
+    $logo = bl_absolute_asset(bl_asset('images/logo-square-600.png'));
     $organization = [
+        // One company, one entity: the crane site and this site describe the same Organization (same @id, name, official
+        // website, logo and profile list), so search engines can tie both sites and the group site to one brand.
         '@type' => 'Organization', '@id' => bl_company('website') . '#organization',
-        'name' => bl_company('name'), 'legalName' => bl_company('name'),
+        'name' => 'BOB-LIFT', 'legalName' => bl_company('name'),
         // The Chinese registered name lets search engines and AI assistants match Chinese-language queries to the same company.
-        'alternateName' => bl_company('name_zh') !== '' ? ['BOB-LIFT', bl_company('name_zh')] : 'BOB-LIFT',
+        'alternateName' => array_values(array_filter([bl_company('name'), bl_company('name_zh'), 'BOBLIFT'])),
+        'description' => 'BOB-LIFT (' . bl_company('name') . ') is a Chinese manufacturer of truck mounted cranes, marine cranes and loader equipment in Xuzhou, Jiangsu.',
         'url' => bl_company('website'), 'email' => bl_company('email'), 'telephone' => bl_company('phone_seo'),
-        // The crane website is listed only while 全站设置 → 起重机站推荐 has an address; clearing it takes cranes off this website everywhere.
-        'sameAs' => array_merge(['https://www.boblift.com/'], bl_sister_site() ? [bl_sister_site()['url']] : [], array_column(bl_social_links(), 'url')),
-        'logo' => bl_absolute_asset(bl_brand_logo()),
+        // Square, 600 × 600 on white: Google needs at least 112 px on each side, and the header logo is 91 px tall.
+        'logo' => ['@type' => 'ImageObject', '@id' => bl_company('website') . '#logo', 'url' => $logo, 'contentUrl' => $logo, 'width' => 600, 'height' => 600, 'caption' => 'BOB-LIFT'],
+        'image' => ['@id' => bl_company('website') . '#logo'],
+        // Unified social credit code from the national enterprise credit register (business licence, checked 2026-11-12).
+        'identifier' => ['@type' => 'PropertyValue', 'propertyID' => 'Unified Social Credit Code', 'value' => '91320300078204097G'],
+        'foundingDate' => '2003',
+        'contactPoint' => ['@type' => 'ContactPoint', 'contactType' => 'sales', 'email' => bl_company('email'), 'telephone' => bl_company('phone_seo'), 'availableLanguage' => ['English', 'Chinese']],
+        // The crane website and the crane line's profiles are listed only while 全站设置 → 起重机站推荐 has an address; clearing it takes cranes off this website everywhere.
+        'sameAs' => array_values(array_unique(array_merge(['https://bobliftloader.com/'], bl_sister_site() ? array_merge([bl_sister_site()['url']], BL_CRANE_LINE_PROFILES) : [], array_column(bl_social_links(), 'url')))),
         'address' => ['@type' => 'PostalAddress', 'streetAddress' => bl_company('street'), 'addressLocality' => bl_company('city'), 'addressRegion' => bl_company('region'), 'addressCountry' => bl_company('country_code')],
     ];
     // The registered address stays the organisation's address; the factory and the office are places of the same organisation.

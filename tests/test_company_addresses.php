@@ -25,7 +25,7 @@ $places = array_column($organization['location'] ?? [], 'address', 'name');
 $check(($places['Main factory']['streetAddress'] ?? '') === 'S324 Provincial Road, Zhangji Town, Tongshan District' && ($places['Office']['streetAddress'] ?? '') === '13F, Building A, Yongjia New Town Center, Yunlong District', 'factory and office are not listed as places');
 
 // The Chinese registered name is an alternate name of the same organisation and appears beside the English name.
-$check(($organization['legalName'] ?? '') === 'Xuzhou BOB-LIFT Construction Machinery Co., Ltd.' && in_array('徐州巴布工程机械有限公司', (array) ($organization['alternateName'] ?? []), true) && in_array('BOB-LIFT', (array) ($organization['alternateName'] ?? []), true), 'organisation names: ' . json_encode([$organization['legalName'] ?? null, $organization['alternateName'] ?? null], JSON_UNESCAPED_UNICODE));
+$check(($organization['legalName'] ?? '') === 'Xuzhou BOB-LIFT Construction Machinery Co., Ltd.' && in_array('徐州巴布工程机械有限公司', (array) ($organization['alternateName'] ?? []), true) && ($organization['name'] ?? '') === 'BOB-LIFT', 'organisation names: ' . json_encode([$organization['name'] ?? null, $organization['legalName'] ?? null, $organization['alternateName'] ?? null], JSON_UNESCAPED_UNICODE));
 $check(str_contains($llms, '- Company name: Xuzhou BOB-LIFT Construction Machinery Co., Ltd. (徐州巴布工程机械有限公司)'), 'llms.txt Company section misses the Chinese company name');
 $check(str_contains($llms, 'line of Xuzhou BOB-LIFT Construction Machinery Co., Ltd. (徐州巴布工程机械有限公司), a manufacturer'), 'llms.txt opening misses the Chinese company name');
 // Both lines follow 全站设置: a changed Chinese name replaces the old one, an empty one leaves the brackets out.
