@@ -22,4 +22,12 @@ foreach (['Claim an offer', 'Order value', 'You pay', 'Counts as', 'See the offe
 if (!bl_has_language(BL_PROMO_PATH, 'es')) $fail('page not listed in Spanish');
 $route = bl_resolve_route(BL_PROMO_PATH);
 if ($route['type'] !== 'promo' || $route['status'] !== 200) $fail('route');
+// The cache never keeps a copy past a change of the offers: cut before the first day and before the last, never stored on
+// the last day, left alone once the offers have ended and on other pages (times China time).
+$at = static fn(string $time): int => (new DateTimeImmutable($time, new DateTimeZone('Asia/Shanghai')))->getTimestamp();
+$home = ['type' => 'home'];
+foreach (['2026-11-19 23:59:00' => 'max-age=60', '2026-12-01 10:00:00' => 'max-age=300', '2026-12-30 23:58:00' => 'max-age=120', '2026-12-31 00:00:00' => 'no-store', '2026-12-31 23:59:59' => 'no-store', '2027-01-01 00:00:00' => ''] as $time => $rule) {
+    if (bl_promo_cache_rules($home, $at($time)) !== $rule) $fail('cache rule at ' . $time);
+}
+if (bl_promo_cache_rules(['type' => 'contact'], $at('2026-12-31 12:00:00')) !== '') $fail('cache rule on another page');
 echo "promo: ok\n";
