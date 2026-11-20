@@ -24,6 +24,7 @@ $check(in_array('https://bobliftloader.com/', $sameAs, true) && in_array('https:
 $crane = ['https://www.bobliftcrane.com/', 'https://www.youtube.com/@bobliftcrane', 'https://www.facebook.com/bobliftconstruction', 'https://boblift.en.made-in-china.com/'];
 if ($empty) {
     $check(!array_intersect($crane, $sameAs), 'the crane line stays in sameAs with no crane website address: ' . implode(', ', array_intersect($crane, $sameAs)));
+    $check(!str_contains((string) ($organization['description'] ?? ''), 'crane'), 'the description still names cranes with no crane website address');
 } else {
     $check(count(array_intersect($crane, $sameAs)) === count($crane), 'sameAs misses the crane line: ' . implode(', ', array_diff($crane, $sameAs)));
 }

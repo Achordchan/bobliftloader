@@ -25,7 +25,7 @@ function bl_structured_data(array $route): array
         'name' => 'BOB-LIFT', 'legalName' => bl_company('name'),
         // The Chinese registered name lets search engines and AI assistants match Chinese-language queries to the same company.
         'alternateName' => array_values(array_filter([bl_company('name'), bl_company('name_zh'), 'BOBLIFT'])),
-        'description' => 'BOB-LIFT (' . bl_company('name') . ') is a Chinese manufacturer of truck mounted cranes, marine cranes and loader equipment in Xuzhou, Jiangsu.',
+        'description' => 'BOB-LIFT (' . bl_company('name') . ') is a Chinese manufacturer of ' . (bl_sister_site() ? 'truck mounted cranes, marine cranes and loader equipment' : 'skid steer loaders and mini dumpers') . ' in Xuzhou, Jiangsu.',
         'url' => bl_company('website'), 'email' => bl_company('email'), 'telephone' => bl_company('phone_seo'),
         // Square, 600 × 600 on white: Google needs at least 112 px on each side, and the header logo is 91 px tall.
         'logo' => ['@type' => 'ImageObject', '@id' => bl_company('website') . '#logo', 'url' => $logo, 'contentUrl' => $logo, 'width' => 600, 'height' => 600, 'caption' => 'BOB-LIFT'],
