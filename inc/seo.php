@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+/** The company's Wikidata item (created 2026-11-20), the same one the crane site lists. */
+const BL_COMPANY_WIKIDATA = 'https://www.wikidata.org/wiki/Q142220180';
+
 /**
  * The company's crane-line profiles, the same as the crane site lists: its YouTube and Facebook and its B2B directory
  * listings (each names Xuzhou BOB-LIFT, checked 2026-10-23).
@@ -37,7 +40,7 @@ function bl_structured_data(array $route): array
         'foundingDate' => '2003',
         'contactPoint' => ['@type' => 'ContactPoint', 'contactType' => 'sales', 'email' => bl_company('email'), 'telephone' => bl_company('phone_seo'), 'availableLanguage' => ['English', 'Chinese']],
         // The crane website and the crane line's profiles are listed only while 全站设置 → 起重机站推荐 has an address; clearing it takes cranes off this website everywhere.
-        'sameAs' => array_values(array_unique(array_merge(['https://bobliftloader.com/'], bl_sister_site() ? array_merge([bl_sister_site()['url']], BL_CRANE_LINE_PROFILES) : [], array_column(bl_social_links(), 'url')))),
+        'sameAs' => array_values(array_unique(array_merge(['https://bobliftloader.com/', BL_COMPANY_WIKIDATA], bl_sister_site() ? array_merge([bl_sister_site()['url']], BL_CRANE_LINE_PROFILES) : [], array_column(bl_social_links(), 'url')))),
         'address' => ['@type' => 'PostalAddress', 'streetAddress' => bl_company('street'), 'addressLocality' => bl_company('city'), 'addressRegion' => bl_company('region'), 'addressCountry' => bl_company('country_code')],
     ];
     // The registered address stays the organisation's address; the factory and the office are places of the same organisation.

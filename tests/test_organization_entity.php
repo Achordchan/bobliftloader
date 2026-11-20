@@ -20,7 +20,7 @@ $check(is_array($size) && $size[0] === 600 && $size[1] === 600, 'the square logo
 $check(($organization['identifier']['value'] ?? '') === '91320300078204097G', 'the unified social credit code is missing');
 $sameAs = (array) ($organization['sameAs'] ?? []);
 $check(!in_array('https://www.boblift.com/', $sameAs, true), 'sameAs repeats the organisation url');
-$check(in_array('https://bobliftloader.com/', $sameAs, true) && in_array('https://www.youtube.com/@bobliftloader', $sameAs, true), 'sameAs lost this site or its own profiles');
+$check(in_array('https://bobliftloader.com/', $sameAs, true) && in_array('https://www.youtube.com/@bobliftloader', $sameAs, true) && in_array('https://www.wikidata.org/wiki/Q142220180', $sameAs, true), 'sameAs lost this site, its own profiles or the Wikidata item');
 $crane = ['https://www.bobliftcrane.com/', 'https://www.youtube.com/@bobliftcrane', 'https://www.facebook.com/bobliftconstruction', 'https://boblift.en.made-in-china.com/'];
 if ($empty) {
     $check(!array_intersect($crane, $sameAs), 'the crane line stays in sameAs with no crane website address: ' . implode(', ', array_intersect($crane, $sameAs)));
