@@ -23,7 +23,7 @@ $check($links['youtube']['url'] === 'https://www.youtube.com/@bobliftloader' && 
 $footer = $capture(static fn() => require __DIR__ . '/../templates/footer.php');
 $check(str_contains($footer, 'href="https://www.youtube.com/@bobliftloader" target="_blank" rel="noopener noreferrer"') && str_contains($footer, 'href="https://www.facebook.com/@bobliftloader" target="_blank" rel="noopener noreferrer"'), 'footer social links missing or not opening safely in a new tab');
 $check(str_contains($footer, 'aria-label="BOB-LIFT Loader on YouTube (opens in a new tab)"') && str_contains($footer, '>Follow us<'), 'footer social links have no accessible name');
-$check(count(array_intersect($sameAs(), ['https://www.youtube.com/@bobliftloader', 'https://www.facebook.com/@bobliftloader'])) === 2 && in_array('https://www.boblift.com/', $sameAs(), true), 'sameAs lost a profile or the sister sites');
+$check(count(array_intersect($sameAs(), ['https://www.youtube.com/@bobliftloader', 'https://www.facebook.com/@bobliftloader'])) === 2 && in_array('https://bobliftloader.com/', $sameAs(), true) && !in_array('https://www.boblift.com/', $sameAs(), true), 'sameAs lost a profile, or lists the group site that is already the organisation url');
 
 if ($failures) { fwrite(STDERR, implode("\n", $failures) . "\n"); exit(1); }
 echo "social links ok\n";
