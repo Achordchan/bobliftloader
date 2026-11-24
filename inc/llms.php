@@ -46,6 +46,27 @@ function bl_llms_txt_link(string $title, string $path, string $description = '')
     return $description !== '' ? $line . ': ' . $description : $line;
 }
 
+/**
+ * The pages that have a Spanish version, at their /es/ address: the ranges, products and every translated story, each
+ * under its Spanish title where the translation has one. Spanish readers in Latin America are the largest buyer group,
+ * and an assistant answering in Spanish can then cite the Spanish page rather than the English one.
+ */
+function bl_llms_txt_spanish(): array
+{
+    if (!bl_i18n_language('es')) return [];
+    $titles = ['/products/skid-steer-loaders/' => 'Skid Steer Loaders', '/products/mini-dumpers/' => 'Mini Dumpers'];
+    foreach (bl_products() as $product) $titles['/product/' . $product['slug'] . '/'] = bl_product_page_title($product);
+    foreach (bl_articles() as $article) $titles['/news/' . $article['slug'] . '/'] = $article['title'];
+    $stories = bl_i18n_news('es') ?? [];
+    $lines = [];
+    foreach ($titles as $path => $title) {
+        if (!bl_has_language($path, 'es')) continue;
+        $spanish = (string) ($stories[$path][$title] ?? bl_t($title, 'es'));
+        $lines[] = bl_llms_txt_link($spanish, bl_lang_path($path, 'es'));
+    }
+    return $lines;
+}
+
 function bl_llms_txt(): string
 {
     $applications = bl_apply_application_content($GLOBALS['bl_application_base'] ?? []);
@@ -61,6 +82,7 @@ function bl_llms_txt(): string
         'Applications' => array_map(static fn($app) => bl_llms_txt_link($app['title'], '/applications/' . bl_application_slug($app) . '/', $app['description']), $applications),
         'Application examples' => array_map(static fn($case) => bl_llms_txt_link($case['title'], '/application/' . $case['slug'] . '/', $case['excerpt']), bl_application_cases()),
         'News' => array_map(static fn($article) => bl_llms_txt_link($article['title'], '/news/' . $article['slug'] . '/', $article['excerpt']), bl_articles()),
+        'En español' => bl_llms_txt_spanish(),
         'Company' => [
             bl_llms_txt_link('About BOB-LIFT Loader', '/about/', 'The company, factory and team behind the machines'),
             bl_llms_txt_link('Support', '/support/', 'Ordering, shipping, warranty, parts and after-delivery service'),

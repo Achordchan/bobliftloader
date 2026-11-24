@@ -15,6 +15,7 @@ require_once __DIR__ . '/inc/showcase.php';
 require_once __DIR__ . '/inc/seo.php';
 require_once __DIR__ . '/inc/routes.php';
 require_once __DIR__ . '/inc/llms.php';
+require_once __DIR__ . '/inc/indexnow.php';
 require_once __DIR__ . '/inc/wordpress.php';
 require_once __DIR__ . '/inc/wp-admin.php';
 require_once __DIR__ . '/inc/wp-import.php';

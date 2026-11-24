@@ -106,6 +106,7 @@ python3 tests/test_site.py http://127.0.0.1:9402
 
 - 线上已部署到 `bobliftloader.com`（WordPress.com），目前仍是「即将上线」模式（noindex）；正式公开前不开收录。收录开关由 WordPress.com「设置 → 隐私」控制。
 - 站点名为 **BOB-LIFT Loader**（与兄弟站 bobliftcrane.com 对应）；标签页图标是主题自带的一套（`assets/images/icons/`），不依赖后台的站点图标。
+- IndexNow（inc/indexnow.php）：只在 bobliftloader.com 且允许搜索引擎时启用。每小时一次（发布新闻、产品、应用案例后 2 分钟再加跑一次），把站点地图里新增、改过或已删除的网址（含 /es/）提交给 Bing 等引擎；密钥存在选项 `bl_indexnow_key`，文件在 `/<密钥>.txt`；提交失败下次重发。llms.txt 另有「En español」一节，列出西语版的分类页、产品和新闻（`php tests/test_indexnow.php`）。
 - robots.txt 允许 AI 爬虫：主题在 `bl_allow_ai_crawlers()` 里去掉平台默认加的 GPTBot / ClaudeBot 等屏蔽段（`php tests/test_robots.php`）。
 - Jetpack 统计：新闻列表和两个产品分类页不是文章，Jetpack 默认把它们记成同一个无名归档；主题在 `bl_stats_view_data()` 里按网址路径分别上报（`php tests/test_stats_view_data.php`）。
 - Jetpack Social：新闻支持分享到已连接的社媒主页，但只有文章元数据 `_bl_social_share` 为真才会在发布时分享，默认不发；Jetpack 的 Open Graph 标签关闭，由 inc/seo.php 统一输出（`php tests/test_social_share.php`）。
