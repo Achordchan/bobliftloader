@@ -7,8 +7,9 @@ declare(strict_types=1);
  *
  * Every page of this site is in bl_sitemap_paths(), including the Spanish copies, and most of them are not WordPress
  * posts, so this does not hang off post hooks. An hourly cron run compares each sitemap page's version (the stored
- * modification time of the post behind it, or of the site's content as a whole for the pages built from many records)
- * with the version last submitted, and sends the pages that are new, changed or gone. Publishing a story or product
+ * modification time of the post behind it, or a fingerprint of every record for the pages built from many records, plus
+ * the saved translation corrections on pages in another language) with the version last submitted, and sends the pages
+ * that are new, changed or gone. Publishing a story or product
  * also asks for a run two minutes later. A failed POST changes nothing, so the next run sends the same pages again.
  *
  * Only the live site submits: WordPress on bobliftloader.com with search engines allowed (blog_public '1'; a private
@@ -74,34 +75,60 @@ function bl_indexnow_serve_key(string $path): void
     exit;
 }
 
+/** The language folder of a sitemap path ('es' for /es/news/x/), 'en' for a path without one. */
+function bl_indexnow_language(string $path): string
+{
+    foreach (array_keys(BL_I18N_LANGUAGES) as $code) {
+        if ($code !== 'en' && str_starts_with($path, '/' . $code . '/')) return (string) $code;
+    }
+    return 'en';
+}
+
 /** A sitemap path without its language folder (/es/news/x/ → /news/x/). */
 function bl_indexnow_english_path(string $path): string
 {
-    foreach (array_keys(BL_I18N_LANGUAGES) as $code) {
-        if ($code !== 'en' && str_starts_with($path, '/' . $code . '/')) return substr($path, strlen($code) + 1);
-    }
-    return $path;
+    $code = bl_indexnow_language($path);
+    return $code === 'en' ? $path : substr($path, strlen($code) + 1);
 }
 
 /**
- * Each path's version: the modification time of the story, product or application case behind it, in every language;
- * any other page (home, ranges, applications, support, the news list…) is built from many records, so it takes the
- * newest modification of all of them. $modified is [post type => [slug => time]].
+ * Each path's version. A story, product or application case takes the modification time of the post behind it, in
+ * every language. Any other page (home, ranges, applications, support, the news list…) is built from many records, so
+ * it takes a fingerprint of every record and its time: an edit, a new record and a removed one all change it, even
+ * when the newest time stays the same. A page in another language also carries the fingerprint of that language's
+ * saved translation corrections ($strings, [language => fingerprint]), which change the page without touching a post.
+ * $modified is [post type => [slug => time]].
  */
-function bl_indexnow_versions(array $paths, array $modified): array
+function bl_indexnow_versions(array $paths, array $modified, array $strings = []): array
 {
-    $site = '';
-    foreach ($modified as $times) foreach ($times as $time) if ((string) $time > $site) $site = (string) $time;
+    ksort($modified);
+    foreach ($modified as &$times) ksort($times);
+    unset($times);
+    $site = md5((string) json_encode($modified));
     $types = ['news' => 'bl_news', 'product' => 'bl_product', 'application' => 'bl_application'];
     $versions = [];
     foreach ($paths as $path) {
         $version = $site;
-        if (preg_match('~^/(news|product|application)/([^/]+)/\z~', bl_indexnow_english_path($path), $match)) {
-            $version = (string) ($modified[$types[$match[1]]][$match[2]] ?? $site);
+        if (preg_match('~^/(news|product|application)/([^/]+)/\z~', bl_indexnow_english_path($path), $match) && isset($modified[$types[$match[1]]][$match[2]])) {
+            $version = (string) $modified[$types[$match[1]]][$match[2]];
         }
+        $lang = bl_indexnow_language($path);
+        if ($lang !== 'en' && ($strings[$lang] ?? '') !== '') $version .= '|' . $strings[$lang];
         $versions[$path] = $version;
     }
     return $versions;
+}
+
+/** [language => fingerprint] of the translation corrections saved in the options bl_i18n_<language>_strings. */
+function bl_indexnow_strings(): array
+{
+    $strings = [];
+    foreach (array_keys(BL_I18N_LANGUAGES) as $code) {
+        if ($code === 'en') continue;
+        $saved = get_option('bl_i18n_' . $code . '_strings', []);
+        $strings[$code] = is_array($saved) && $saved ? md5(serialize($saved)) : '';
+    }
+    return $strings;
 }
 
 /** Paths whose version differs from the one last sent, new paths, and paths that have left the sitemap. */
@@ -171,7 +198,7 @@ function bl_indexnow_run(): void
         if ($key === '' || !bl_indexnow_key_file_ok($key)) return;
         $sent = get_option(BL_INDEXNOW_SENT_OPTION, []);
         if (!is_array($sent)) $sent = [];
-        $now = bl_indexnow_versions(bl_sitemap_paths(), bl_indexnow_modified());
+        $now = bl_indexnow_versions(bl_sitemap_paths(), bl_indexnow_modified(), bl_indexnow_strings());
         foreach (bl_indexnow_payloads(bl_indexnow_changed($sent, $now), bl_public_base(), $key) as $payload) {
             $response = wp_remote_post(BL_INDEXNOW_ENDPOINT, ['timeout' => 15, 'headers' => ['Content-Type' => 'application/json; charset=utf-8'], 'body' => wp_json_encode($payload['body'])]);
             $code = (int) wp_remote_retrieve_response_code($response);

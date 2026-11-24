@@ -26,8 +26,23 @@ $paths = ['/', '/news/', '/news/fob-vs-cif/', '/es/news/fob-vs-cif/', '/product/
 $versions = bl_indexnow_versions($paths, $modified);
 $check($versions['/news/fob-vs-cif/'] === '2026-11-21 10:00:00' && $versions['/es/news/fob-vs-cif/'] === '2026-11-21 10:00:00', 'story version wrong');
 $check($versions['/product/fy30/'] === '2026-11-01 00:00:00' && $versions['/es/product/fy30/'] === '2026-11-01 00:00:00', 'product version wrong');
-$check($versions['/'] === '2026-11-23 08:00:00' && $versions['/news/'] === '2026-11-23 08:00:00', 'a shared page does not take the newest time');
-$check($versions['/news/unknown/'] === '2026-11-23 08:00:00', 'a story with no post does not fall back to the site time');
+$check($versions['/'] === $versions['/news/'] && strlen($versions['/']) === 32, 'shared pages do not share the site fingerprint');
+$check($versions['/news/unknown/'] === $versions['/'], 'a story with no post does not fall back to the site fingerprint');
+
+// The order of the records does not change the fingerprint; removing an older one, editing one or adding one does.
+$check(bl_indexnow_versions(['/'], array_reverse($modified, true))['/'] === $versions['/'], 'record order changes the fingerprint');
+$removed = $modified;
+unset($removed['bl_product']['fy30']);
+$check(bl_indexnow_versions(['/news/'], $removed)['/news/'] !== $versions['/news/'], 'removing an older record leaves shared pages unchanged');
+$edited = $modified;
+$edited['bl_news']['fob-vs-cif'] = '2026-11-21 11:00:00';
+$check(bl_indexnow_versions(['/'], $edited)['/'] !== $versions['/'], 'editing a record leaves shared pages unchanged');
+
+// Saved translation corrections change the pages in that language only.
+$withStrings = bl_indexnow_versions($paths, $modified, ['es' => 'abc']);
+$check($withStrings['/es/news/fob-vs-cif/'] === '2026-11-21 10:00:00|abc' && $withStrings['/news/fob-vs-cif/'] === '2026-11-21 10:00:00', 'translation corrections not in the Spanish version only');
+$check(bl_indexnow_versions(['/es/'], $modified, ['es' => 'abd'])['/es/'] !== bl_indexnow_versions(['/es/'], $modified, ['es' => 'abc'])['/es/'], 'a changed correction leaves the Spanish page unchanged');
+$check(bl_indexnow_language('/es/news/x/') === 'es' && bl_indexnow_language('/escalators/') === 'en', 'language folder misread');
 
 // New, changed and removed pages are sent; unchanged ones are not.
 $sent = ['/' => 'a', '/news/' => 'b', '/old/' => 'c'];
