@@ -77,6 +77,7 @@ $llms = bl_llms_txt();
 $spanish = substr($llms, (int) strpos($llms, '## En español'));
 $check(str_contains($llms, '## En español'), 'llms.txt has no Spanish section');
 $check(str_contains($spanish, '(https://bobliftloader.com/es/products/mini-dumpers/)'), 'Spanish mini dumper range missing');
+$check(str_contains($spanish, '[Minicargadoras](https://bobliftloader.com/es/products/skid-steer-loaders/)') && str_contains($spanish, '[Minidumpers](https://bobliftloader.com/es/products/mini-dumpers/)'), 'range names not in Spanish');
 $check(str_contains($spanish, 'minicargadora') && str_contains($spanish, '/es/product/'), 'Spanish product titles or addresses missing');
 $check(strpos($spanish, '/es/products/') < strpos($spanish, '/es/product/'), 'ranges are not listed first');
 $check(!preg_match('~\]\(https://bobliftloader\.com/(product|news)/~', substr($spanish, 0, (int) (strpos($spanish, '## Company') ?: strlen($spanish)))), 'an English address in the Spanish section');
