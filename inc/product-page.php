@@ -190,7 +190,7 @@ function bl_product_factory(array $product): array
     return ($factory['text'] ?? '') === '' && !$factory['checks'] ? [] : $factory;
 }
 
-/** The questions on the page: the product's own first, then the family's, five at most, no question twice. */
+/** The questions on the page: the product's own first, then the family's, BL_CONTENT_LIMITS['faq'] at most, no question twice. */
 function bl_product_faq(array $product): array
 {
     $items = [];
