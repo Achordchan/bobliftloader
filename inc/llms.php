@@ -54,7 +54,8 @@ function bl_llms_txt_link(string $title, string $path, string $description = '')
 function bl_llms_txt_spanish(): array
 {
     if (!bl_i18n_language('es')) return [];
-    $titles = ['/products/skid-steer-loaders/' => 'Skid Steer Loaders', '/products/mini-dumpers/' => 'Mini Dumpers'];
+    // The range names as the Spanish dictionary keys them (sentence case), so they come out as Minicargadoras and Minidumpers.
+    $titles = ['/products/skid-steer-loaders/' => 'Skid steer loaders', '/products/mini-dumpers/' => 'Mini dumpers'];
     foreach (bl_products() as $product) $titles['/product/' . $product['slug'] . '/'] = bl_product_page_title($product);
     foreach (bl_articles() as $article) $titles['/news/' . $article['slug'] . '/'] = $article['title'];
     $stories = bl_i18n_news('es') ?? [];
