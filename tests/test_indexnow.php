@@ -23,25 +23,34 @@ $modified = [
     'bl_page_content' => ['home' => '2026-11-23 08:00:00'],
 ];
 $paths = ['/', '/news/', '/news/fob-vs-cif/', '/es/news/fob-vs-cif/', '/product/fy30/', '/es/product/fy30/', '/news/unknown/'];
-$versions = bl_indexnow_versions($paths, $modified);
-$check($versions['/news/fob-vs-cif/'] === '2026-11-21 10:00:00' && $versions['/es/news/fob-vs-cif/'] === '2026-11-21 10:00:00', 'story version wrong');
-$check($versions['/product/fy30/'] === '2026-11-01 00:00:00' && $versions['/es/product/fy30/'] === '2026-11-01 00:00:00', 'product version wrong');
-$check($versions['/'] === $versions['/news/'] && strlen($versions['/']) === 32, 'shared pages do not share the site fingerprint');
-$check($versions['/news/unknown/'] === $versions['/'], 'a story with no post does not fall back to the site fingerprint');
+$versions = bl_indexnow_versions($paths, $modified, 'S', ['es' => 'E']);
+$own = static fn(string $version): string => explode('|', $version)[0];
+$check($own($versions['/news/fob-vs-cif/']) === '2026-11-21 10:00:00' && $own($versions['/es/news/fob-vs-cif/']) === '2026-11-21 10:00:00', 'story version wrong');
+$check($own($versions['/product/fy30/']) === '2026-11-01 00:00:00' && $own($versions['/es/product/fy30/']) === '2026-11-01 00:00:00', 'product version wrong');
+$check($versions['/'] === $versions['/news/'] && strlen($own($versions['/'])) === 32, 'shared pages do not share the record fingerprint');
+$check($versions['/news/unknown/'] === $versions['/'], 'a story with no post does not fall back to the record fingerprint');
 
 // The order of the records does not change the fingerprint; removing an older one, editing one or adding one does.
-$check(bl_indexnow_versions(['/'], array_reverse($modified, true))['/'] === $versions['/'], 'record order changes the fingerprint');
+$check(bl_indexnow_versions(['/'], array_reverse($modified, true), 'S')['/'] === $versions['/'], 'record order changes the fingerprint');
 $removed = $modified;
 unset($removed['bl_product']['fy30']);
-$check(bl_indexnow_versions(['/news/'], $removed)['/news/'] !== $versions['/news/'], 'removing an older record leaves shared pages unchanged');
+$check(bl_indexnow_versions(['/news/'], $removed, 'S')['/news/'] !== $versions['/news/'], 'removing an older record leaves shared pages unchanged');
 $edited = $modified;
-$edited['bl_news']['fob-vs-cif'] = '2026-11-21 11:00:00';
-$check(bl_indexnow_versions(['/'], $edited)['/'] !== $versions['/'], 'editing a record leaves shared pages unchanged');
+$edited['bl_news']['tt-payment'] = '2026-11-22 02:00:00';
+$check(bl_indexnow_versions(['/', '/news/fob-vs-cif/'], $edited, 'S') !== bl_indexnow_versions(['/', '/news/fob-vs-cif/'], $modified, 'S'), 'editing a record leaves shared pages unchanged');
+$check(bl_indexnow_versions(['/news/fob-vs-cif/'], $edited, 'S') === bl_indexnow_versions(['/news/fob-vs-cif/'], $modified, 'S'), 'editing one story changes another story');
 
-// Saved translation corrections change the pages in that language only.
-$withStrings = bl_indexnow_versions($paths, $modified, ['es' => 'abc']);
-$check($withStrings['/es/news/fob-vs-cif/'] === '2026-11-21 10:00:00|abc' && $withStrings['/news/fob-vs-cif/'] === '2026-11-21 10:00:00', 'translation corrections not in the Spanish version only');
-$check(bl_indexnow_versions(['/es/'], $modified, ['es' => 'abd'])['/es/'] !== bl_indexnow_versions(['/es/'], $modified, ['es' => 'abc'])['/es/'], 'a changed correction leaves the Spanish page unchanged');
+// Shared content (bl_page_content posts and content options) changes every page, stories and products included.
+$sharedEdit = $modified;
+$sharedEdit['bl_page_content']['home'] = '2026-11-24 08:00:00';
+foreach (['/', '/news/fob-vs-cif/', '/product/fy30/'] as $path) {
+    $check(bl_indexnow_versions([$path], $sharedEdit, 'S')[$path] !== bl_indexnow_versions([$path], $modified, 'S')[$path], 'a shared-content post leaves ' . $path . ' unchanged');
+    $check(bl_indexnow_versions([$path], $modified, 'T')[$path] !== bl_indexnow_versions([$path], $modified, 'S')[$path], 'a content option leaves ' . $path . ' unchanged');
+}
+
+// The language fingerprint changes the pages in that language only.
+$check(bl_indexnow_versions(['/es/', '/es/news/fob-vs-cif/'], $modified, 'S', ['es' => 'F']) !== bl_indexnow_versions(['/es/', '/es/news/fob-vs-cif/'], $modified, 'S', ['es' => 'E']), 'a dictionary change leaves Spanish pages unchanged');
+$check(bl_indexnow_versions(['/', '/news/fob-vs-cif/'], $modified, 'S', ['es' => 'F']) === bl_indexnow_versions(['/', '/news/fob-vs-cif/'], $modified, 'S', ['es' => 'E']), 'a dictionary change moves English pages');
 $check(bl_indexnow_language('/es/news/x/') === 'es' && bl_indexnow_language('/escalators/') === 'en', 'language folder misread');
 
 // New, changed and removed pages are sent; unchanged ones are not.

@@ -8,8 +8,8 @@ declare(strict_types=1);
  * Every page of this site is in bl_sitemap_paths(), including the Spanish copies, and most of them are not WordPress
  * posts, so this does not hang off post hooks. An hourly cron run compares each sitemap page's version (the stored
  * modification time of the post behind it, or a fingerprint of every record for the pages built from many records, plus
- * the saved translation corrections on pages in another language) with the version last submitted, and sends the pages
- * that are new, changed or gone. Publishing a story or product
+ * the shared content every page can show and, on pages in another language, that language's dictionary and corrections)
+ * with the version last submitted, and sends the pages that are new, changed or gone. Publishing a story or product
  * also asks for a run two minutes later. A failed POST changes nothing, so the next run sends the same pages again.
  *
  * Only the live site submits: WordPress on bobliftloader.com with search engines allowed (blog_public '1'; a private
@@ -92,43 +92,60 @@ function bl_indexnow_english_path(string $path): string
 }
 
 /**
- * Each path's version. A story, product or application case takes the modification time of the post behind it, in
- * every language. Any other page (home, ranges, applications, support, the news list…) is built from many records, so
- * it takes a fingerprint of every record and its time: an edit, a new record and a removed one all change it, even
- * when the newest time stays the same. A page in another language also carries the fingerprint of that language's
- * saved translation corrections ($strings, [language => fingerprint]), which change the page without touching a post.
+ * Each path's version, from three parts:
+ * - the record behind the page: a story, product or application case takes the modification time of its own post, in
+ *   every language; any other page (home, ranges, applications, support, the news list…) is built from many records,
+ *   so it takes a fingerprint of every record and its time, which an edit, a new record and a removed one all change;
+ * - $shared, the fingerprint of the content every page can show (the 全站设置 and section items kept as bl_page_content
+ *   posts, and the content saved in options), so an edit there sends every page again;
+ * - on a page in another language, $languages[code], the fingerprint of that language's dictionary and corrections.
  * $modified is [post type => [slug => time]].
  */
-function bl_indexnow_versions(array $paths, array $modified, array $strings = []): array
+function bl_indexnow_versions(array $paths, array $modified, string $shared = '', array $languages = []): array
 {
     ksort($modified);
     foreach ($modified as &$times) ksort($times);
     unset($times);
-    $site = md5((string) json_encode($modified));
+    $records = md5((string) json_encode($modified));
+    $shared = md5((string) json_encode($modified['bl_page_content'] ?? []) . '|' . $shared);
     $types = ['news' => 'bl_news', 'product' => 'bl_product', 'application' => 'bl_application'];
     $versions = [];
     foreach ($paths as $path) {
-        $version = $site;
+        $version = $records;
         if (preg_match('~^/(news|product|application)/([^/]+)/\z~', bl_indexnow_english_path($path), $match) && isset($modified[$types[$match[1]]][$match[2]])) {
             $version = (string) $modified[$types[$match[1]]][$match[2]];
         }
+        $version .= '|' . $shared;
         $lang = bl_indexnow_language($path);
-        if ($lang !== 'en' && ($strings[$lang] ?? '') !== '') $version .= '|' . $strings[$lang];
+        if ($lang !== 'en') $version .= '|' . ($languages[$lang] ?? '');
         $versions[$path] = $version;
     }
     return $versions;
 }
 
-/** [language => fingerprint] of the translation corrections saved in the options bl_i18n_<language>_strings. */
-function bl_indexnow_strings(): array
+/** Fingerprint of the page content kept in options: every bl_content_* section (not its edit history) and the downloads. */
+function bl_indexnow_shared(): string
 {
-    $strings = [];
+    global $wpdb;
+    $rows = $wpdb->get_results("SELECT option_name, option_value FROM {$wpdb->options} WHERE (option_name LIKE 'bl\\_content\\_%' AND option_name NOT LIKE 'bl\\_content\\_snapshots\\_%') OR option_name IN ('bl_page_content_items', 'bl_catalogue_url', 'bl_catalogue_size', 'bl_downloads', 'bl_languages') ORDER BY option_name", ARRAY_A);
+    return md5(serialize((array) $rows));
+}
+
+/**
+ * [language => fingerprint] of what turns a page into that language: the theme's dictionary files (inc/i18n/<code>*.php,
+ * so a deployed translation fix counts) and the corrections and page list saved in bl_i18n_<code>_strings and _pages.
+ */
+function bl_indexnow_languages(): array
+{
+    $languages = [];
     foreach (array_keys(BL_I18N_LANGUAGES) as $code) {
         if ($code === 'en') continue;
-        $saved = get_option('bl_i18n_' . $code . '_strings', []);
-        $strings[$code] = is_array($saved) && $saved ? md5(serialize($saved)) : '';
+        $parts = [];
+        foreach (glob(__DIR__ . '/i18n/' . $code . '*.php') ?: [] as $file) $parts[] = basename($file) . ':' . md5_file($file);
+        foreach (['strings', 'pages'] as $kind) $parts[] = serialize(get_option('bl_i18n_' . $code . '_' . $kind, null));
+        $languages[$code] = md5(implode('|', $parts));
     }
-    return $strings;
+    return $languages;
 }
 
 /** Paths whose version differs from the one last sent, new paths, and paths that have left the sitemap. */
@@ -198,7 +215,7 @@ function bl_indexnow_run(): void
         if ($key === '' || !bl_indexnow_key_file_ok($key)) return;
         $sent = get_option(BL_INDEXNOW_SENT_OPTION, []);
         if (!is_array($sent)) $sent = [];
-        $now = bl_indexnow_versions(bl_sitemap_paths(), bl_indexnow_modified(), bl_indexnow_strings());
+        $now = bl_indexnow_versions(bl_sitemap_paths(), bl_indexnow_modified(), bl_indexnow_shared(), bl_indexnow_languages());
         foreach (bl_indexnow_payloads(bl_indexnow_changed($sent, $now), bl_public_base(), $key) as $payload) {
             $response = wp_remote_post(BL_INDEXNOW_ENDPOINT, ['timeout' => 15, 'headers' => ['Content-Type' => 'application/json; charset=utf-8'], 'body' => wp_json_encode($payload['body'])]);
             $code = (int) wp_remote_retrieve_response_code($response);
