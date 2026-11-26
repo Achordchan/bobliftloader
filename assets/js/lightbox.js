@@ -134,14 +134,23 @@ function initializeStoryPhotos(dialog) {
     return found;
   };
   // The largest copy the page knows of: the original upload the server wrote in data-full-src (a media-library picture,
-  // inc/helpers.php bl_content_image_full), else the largest srcset entry (the theme's srcset ends with the picture as it was
-  // inserted), else the address shown. No file name is guessed. If it fails, the copy the page shows is used.
+  // inc/helpers.php bl_content_image_full), else the widest srcset entry (the theme's srcset ends with the picture as it was
+  // inserted), else for a srcset by pixel density (1x, 2x) its densest entry, else the address shown. No file name is
+  // guessed. If it fails, the copy the page shows is used.
   const largest = (img) => {
     if (img.dataset.fullSrc) return img.dataset.fullSrc;
-    const set = srcsetCandidates(img.getAttribute('srcset') || '')
+    const src = img.getAttribute('src') || img.currentSrc || '';
+    const candidates = srcsetCandidates(img.getAttribute('srcset') || '');
+    const widths = candidates
       .filter(([url, size]) => url && /^\d+w$/.test(size || ''))
       .sort((a, b) => parseInt(b[1], 10) - parseInt(a[1], 10));
-    return set.length ? set[0][0] : (img.getAttribute('src') || img.currentSrc || '');
+    if (widths.length) return widths[0][0];
+    // A candidate without a descriptor is 1x, as is the src itself.
+    const densities = [...candidates, ...(src ? [[src, '1x']] : [])]
+      .filter(([url, size]) => url && /^(\d+(\.\d+)?|\.\d+)x$|^$/.test(size || ''))
+      .map(([url, size]) => [url, size ? parseFloat(size) : 1])
+      .sort((a, b) => b[1] - a[1]);
+    return densities.length ? densities[0][0] : src;
   };
   const captionOf = (img) => textOf(img.closest('figure')?.querySelector('figcaption')?.textContent || img.alt);
   const entryOf = (element) => {
