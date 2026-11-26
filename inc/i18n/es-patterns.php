@@ -4,6 +4,11 @@
 // (es.php) does not have, so an entry there still wins. Wording from DeepL (ES-419), edited for "usted"; figures stay as
 // the page writes them (1,500 kg), as everywhere else on the Spanish pages.
 return [
+    // Story bylines and the Published / Updated dates: 26 November 2026 → 26 de noviembre de 2026. May is left to the
+    // short form below (3 may 2026), because a byline in May reads the same as a news card's date.
+    ['~^(\d{1,2}) (January|February|March|April|June|July|August|September|October|November|December) (\d{4})$~', static fn(array $m): string => $m[1] . ' de ' . ['January' => 'enero', 'February' => 'febrero', 'March' => 'marzo', 'April' => 'abril', 'June' => 'junio', 'July' => 'julio', 'August' => 'agosto', 'September' => 'septiembre', 'October' => 'octubre', 'November' => 'noviembre', 'December' => 'diciembre'][$m[2]] . ' de ' . $m[3]],
+    // The contents box of a story: "In this article · 10 sections".
+    ['~^(\d+) sections$~', '$1 secciones'],
     // News and guide dates: 14 Nov 2026 → 14 nov 2026.
     ['~^(\d{1,2}) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4})$~', static fn(array $m): string => $m[1] . ' ' . ['Jan' => 'ene', 'Feb' => 'feb', 'Mar' => 'mar', 'Apr' => 'abr', 'May' => 'may', 'Jun' => 'jun', 'Jul' => 'jul', 'Aug' => 'ago', 'Sep' => 'sept', 'Oct' => 'oct', 'Nov' => 'nov', 'Dec' => 'dic'][$m[2]] . ' ' . $m[3]],
     // Galleries.

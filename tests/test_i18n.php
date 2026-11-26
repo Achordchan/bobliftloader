@@ -86,6 +86,7 @@ $gallery = bl_i18n_translate_html('<button data-gallery-alt="Petrol engine"></bu
 $check(str_contains($gallery, 'data-gallery-alt="Motor de gasolina"') && str_contains($gallery, 'data-alt="Motor de gasolina" data-caption="Carga nominal"'), 'the gallery and lightbox texts are translated');
 // Text of one shape with different figures comes from inc/i18n/es-patterns.php; figures and units alone are not missing.
 $check(bl_t('14 Nov 2026', 'es') === '14 nov 2026' && bl_t('3 May 2025', 'es') === '3 may 2025', 'news dates in Spanish');
+$check(bl_t('26 November 2026', 'es') === '26 de noviembre de 2026' && bl_t('10 sections', 'es') === '10 secciones', 'story dates and the contents count in Spanish');
 $check(bl_t('Show photograph 3 of 11', 'es') === 'Mostrar la fotografía 3 de 11' && bl_t('+4 more', 'es') === '+4 más', 'gallery counters in Spanish');
 $check(str_contains(bl_i18n_translate_html('<p>12 <span>machines</span></p>', 'es'), '<p>12 <span>máquinas</span></p>'), 'a pattern keeps the inline markup');
 $check(bl_t('Show photograph 3 of 11', 'en') === 'Show photograph 3 of 11' && bl_t('Show photographs of 11', 'es') === 'Show photographs of 11', 'patterns only for their language and their shape');
