@@ -908,6 +908,7 @@ return [
     'ENQUIRY RECEIVED' => 'CONSULTA RECIBIDA',
     'Enquiry:' => 'Consulta:',
     'EPA Tier 4 / EU Stage V' => 'EPA Tier 4 / UE Fase V',
+    'EPA Phase 3 (petrol) / EPA Tier 4 (diesel) / EU Stage V' => 'EPA Phase 3 (gasolina) / EPA Tier 4 (diésel) / UE Fase V',
     'EQUIPMENT' => 'EQUIPOS',
     'Equipment' => 'Equipo',
     'Equipment dealer' => 'Distribuidor de equipos',
