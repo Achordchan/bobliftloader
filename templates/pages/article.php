@@ -20,8 +20,9 @@ $older = $all[$index + 1] ?? null;
 // An editor can mark a cover as cut from the story's stand artwork ('hide_cover'): the story then leads with the artwork
 // alone, since showing both repeats the picture. A featured image chosen in WordPress is a picture of its own and still leads.
 $leadFigure = !$poster || empty($article['hide_cover']) || !empty($article['image_id']);
-// The lead picture and the stand artwork open larger in the lightbox (assets/js/lightbox.js), lead picture first. The
-// button over each picture stays hidden until the script runs, so without it the pictures are plain images.
+// The lead picture, the stand artwork and the pictures in the text open full screen in the zoom viewer at the foot of the
+// page (assets/js/lightbox.js), in page order. The button over the lead picture and the artwork stays hidden until the script
+// runs, so without it the pictures are plain images.
 $zoom = static fn(int $index, string $src, string $alt, string $caption): string => '<button class="bl-story-zoom" type="button" data-lightbox-open="' . $index . '" hidden>' . bl_icon('magnifying-glass') . '<span class="bl-visually-hidden">View larger</span></button><span hidden data-lightbox-item="' . $index . '" data-src="' . bl_escape($src) . '" data-alt="' . bl_escape($alt) . '" data-caption="' . bl_escape($caption) . '"></span>';
 $posterIndex = $leadFigure ? 1 : 0;
 // A featured image comes in the media library's widths (the image CDN's, on WordPress.com), so a phone downloads a picture its
@@ -30,7 +31,7 @@ $coverSrcset = !empty($article['image_id']) && function_exists('wp_get_attachmen
 $posterFigure = static fn(array $poster): string => '<figure class="bl-story-poster"><span class="bl-story-zoom-frame"><img src="' . bl_escape($poster['image']) . '" alt="' . bl_escape($poster['alt']) . '" width="889" height="2000" loading="lazy">' . $zoom($posterIndex, $poster['image'], $poster['alt'], $poster['caption']) . '</span><figcaption>' . bl_escape($poster['caption']) . '</figcaption></figure>';
 // Text written in WordPress places the artwork as imported sections do: at the head of section 'after' (floated beside it
 // on wide screens), or after the text when that section does not exist. Sections start at each <h2>.
-$contentHtml = !empty($article['content_html']) ? bl_content_image_srcset(wp_kses_post($article['content_html']), ['(max-width: 1000px)' => '100vw', '' => '70vw']) : '';
+$contentHtml = !empty($article['content_html']) ? bl_content_image_srcset(bl_content_image_full(wp_kses_post($article['content_html'])), ['(max-width: 1000px)' => '100vw', '' => '70vw']) : '';
 // The contents list (side column on wide screens, a fold-out above the text on phones) takes the text's <h2> headings, from
 // WordPress text or from imported sections alike, and shows from three headings up.
 $contents = bl_story_contents($contentHtml !== '' ? $contentHtml : (!empty($article['_bl_body_managed']) ? '' : implode('', array_map(static fn(array $s): string => '<h2>' . bl_escape($s['heading']) . '</h2>', $article['sections'] ?? []))));
@@ -141,5 +142,28 @@ if ($contentHtml !== '' && $poster) {
   </div><?php endif; ?>
   <a class="bl-story-pager-all" href="<?= bl_escape(bl_url('/news/')) ?>"><?= bl_icon('arrow-left') ?> All news</a>
 </nav>
-<?php if ($leadFigure || $poster): ?><dialog class="bl-lightbox" id="story-lightbox" aria-label="<?= bl_escape($article['title']) ?>"><figure><img alt=""><figcaption><span data-lightbox-caption></span><small data-lightbox-count></small></figcaption></figure><button class="bl-lightbox-close bl-circle-button" type="button" data-lightbox-close aria-label="Close"><?= bl_icon('x') ?></button><button class="bl-lightbox-step bl-lightbox-prev bl-circle-button" type="button" data-lightbox-step="-1" aria-label="Previous photograph"><?= bl_icon('arrow-left') ?></button><button class="bl-lightbox-step bl-lightbox-next bl-circle-button" type="button" data-lightbox-step="1" aria-label="Next photograph"><?= bl_icon('arrow-left') ?></button></dialog><?php endif; ?>
+<?php /* The story's pictures full screen: pinch, the mouse wheel, a double tap or the buttons zoom inside the frame (the page
+   itself never scales), a drag moves the zoomed picture, and a swipe, the arrows or the arrow keys go through the pictures.
+   Nothing loads until a picture is opened; the script sets the picture, its caption, the count and the arrows. */ ?>
+<?php if ($leadFigure || $poster || stripos($contentHtml, '<img') !== false): ?><dialog class="bl-photo-viewer" id="story-lightbox" aria-label="<?= bl_escape($article['title']) ?>" data-open-label="View larger">
+  <div class="bl-photo-viewer-stage" tabindex="0" role="group" aria-label="<?= bl_escape($article['title']) ?>" aria-keyshortcuts="+ - 0 ArrowUp ArrowDown ArrowLeft ArrowRight" data-viewer-stage>
+    <img class="bl-photo-viewer-image" alt="" draggable="false" decoding="async" data-viewer-image>
+    <span class="bl-photo-viewer-spinner" aria-hidden="true"></span>
+    <p class="bl-visually-hidden" role="status" aria-live="polite" data-viewer-loading data-loading-text="Loading photograph…"></p>
+    <p class="bl-photo-viewer-error" role="alert" data-viewer-error hidden>This picture could not be loaded.</p>
+    <button class="bl-photo-viewer-step bl-photo-viewer-prev bl-circle-button" type="button" data-lightbox-step="-1" data-zoom-hide aria-label="Previous photograph" hidden><?= bl_icon('arrow-left') ?></button>
+    <button class="bl-photo-viewer-step bl-photo-viewer-next bl-circle-button" type="button" data-lightbox-step="1" data-zoom-hide aria-label="Next photograph" hidden><?= bl_icon('arrow-left') ?></button>
+    <p class="bl-photo-viewer-tip" data-viewer-tip data-tip-swipe="Pinch to zoom. Swipe for the next picture.">Pinch or use the mouse wheel to zoom. Drag to move.</p>
+  </div>
+  <div class="bl-photo-viewer-bar">
+    <p class="bl-photo-viewer-caption" role="status" aria-live="polite" aria-atomic="true"><small data-lightbox-count></small><span data-lightbox-caption></span></p>
+    <div class="bl-photo-viewer-tools" role="group" aria-label="Zoom">
+      <button class="bl-photo-viewer-tool" type="button" data-viewer-zoom="out" aria-label="Zoom out"><?= bl_icon('minus') ?></button>
+      <span class="bl-photo-viewer-level" data-viewer-level aria-live="polite">100%</span>
+      <button class="bl-photo-viewer-tool" type="button" data-viewer-zoom="in" aria-label="Zoom in"><?= bl_icon('plus') ?></button>
+      <button class="bl-photo-viewer-tool" type="button" data-viewer-zoom="fit" aria-label="Fit to screen"><?= bl_icon('corners-out') ?></button>
+    </div>
+  </div>
+  <button class="bl-photo-viewer-close bl-circle-button" type="button" data-lightbox-close aria-label="Close"><?= bl_icon('x') ?></button>
+</dialog><?php endif; ?>
 <?php require __DIR__ . '/../partials/page-cta.php'; ?>
