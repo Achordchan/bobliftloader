@@ -135,12 +135,39 @@ function initializeStoryPhotos(dialog) {
   };
   // The largest copy the page knows of: the original upload the server wrote in data-full-src (a media-library picture,
   // inc/helpers.php bl_content_image_full), else the widest srcset entry (the theme's srcset ends with the picture as it was
-  // inserted), else for a srcset by pixel density (1x, 2x) its densest entry, else the address shown. No file name is
-  // guessed. If it fails, the copy the page shows is used.
+  // inserted), else for a srcset by pixel density (1x, 2x) its densest entry, else the address shown. In a <picture> the
+  // srcset read is that of the source showing. No file name is guessed. If it fails, the copy the page shows is used.
+  const absolute = (url) => {
+    try {
+      return new URL(url, document.baseURI).href;
+    } catch {
+      return url;
+    }
+  };
+  // In a <picture> the browser may show a <source> (a tall chart for phones, say) rather than the <img> fallback: the source
+  // whose candidates hold the picture showing now, else the first whose media query matches this screen. null: the <img>.
+  const activeSource = (img) => {
+    if (img.parentElement?.tagName !== 'PICTURE') return null;
+    const sources = [...img.parentElement.querySelectorAll(':scope > source[srcset]')];
+    if (!sources.length) return null;
+    const shown = img.currentSrc;
+    if (shown) {
+      const own = [img.getAttribute('src') || '', ...srcsetCandidates(img.getAttribute('srcset') || '').map(([url]) => url)];
+      if (own.some((url) => url && absolute(url) === shown)) return null;
+      const showing = sources.find((source) => srcsetCandidates(source.getAttribute('srcset')).some(([url]) => absolute(url) === shown));
+      if (showing) return showing;
+    }
+    return sources.find((source) => {
+      const media = source.getAttribute('media');
+      return !media || window.matchMedia(media).matches;
+    }) || null;
+  };
   const largest = (img) => {
     if (img.dataset.fullSrc) return img.dataset.fullSrc;
-    const src = img.getAttribute('src') || img.currentSrc || '';
-    const candidates = srcsetCandidates(img.getAttribute('srcset') || '');
+    const source = activeSource(img);
+    // A <source> has no src of its own: its candidates are all there is, with the picture showing as a last resort.
+    const src = source ? (img.currentSrc || '') : (img.getAttribute('src') || img.currentSrc || '');
+    const candidates = srcsetCandidates((source || img).getAttribute('srcset') || '');
     const widths = candidates
       .filter(([url, size]) => url && /^\d+w$/.test(size || ''))
       .sort((a, b) => parseInt(b[1], 10) - parseInt(a[1], 10));
