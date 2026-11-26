@@ -6,8 +6,10 @@
 //
 // dialog: the <dialog>; stage: the frame the picture moves in (touch-action: none in news.css); image: the <img> in it;
 // level, zoomIn, zoomOut, fitButton: the zoom readout and buttons; loadingStatus: a polite live region announcing a slow load.
+// canStep: whether there is another picture to step to now (a lone picture is not swiped, so it never slides off and stays
+// there); onSurroundTap: a plain tap or click beside the picture (or while none shows), which closes the viewer.
 // Returns show(event) to open, load() after changing the image's src, and endSwipe() before stepping to another picture.
-export const zoomViewer = ({ dialog, stage, image, level, zoomIn, zoomOut, fitButton, nativeMax = 1.5, loadTimeout = 0, loadingStatus = null, onStep = null, onLoad = null, onError = null, onClose = null }) => {
+export const zoomViewer = ({ dialog, stage, image, level, zoomIn, zoomOut, fitButton, nativeMax = 1.5, loadTimeout = 0, loadingStatus = null, onStep = null, canStep = null, onSurroundTap = null, onLoad = null, onError = null, onClose = null }) => {
   let fit = 1;
   let max = 2;
   let scale = 1;
@@ -41,6 +43,11 @@ export const zoomViewer = ({ dialog, stage, image, level, zoomIn, zoomOut, fitBu
     return { x: event.clientX - rect.left, y: event.clientY - rect.top };
   };
   const limit = (value) => Math.min(max, Math.max(fit, value));
+  // Whether a point of the stage lies beside the picture as it shows now.
+  const outside = (point) => {
+    const [width, height] = size();
+    return point.x < x || point.y < y || point.x > x + width * scale || point.y > y + height * scale;
+  };
   const atFit = () => scale <= fit * 1.001;
   // A button disabled while it has the focus would drop the focus to the page and out of reach of the shortcuts, so the
   // focus moves to the picture first.
@@ -132,7 +139,7 @@ export const zoomViewer = ({ dialog, stage, image, level, zoomIn, zoomOut, fitBu
   const startDrag = (point) => {
     // dx: the finger's own sideways travel, kept apart from the picture's offset, which a load resets.
     // pending: put down before the picture was ready, so there was nothing yet to pan from.
-    drag = { x: point.x, y: point.y, dx: 0, fromX: x, fromY: y, moved: false, swipe: Boolean(onStep) && (!ready || atFit()), pending: !ready };
+    drag = { x: point.x, y: point.y, dx: 0, fromX: x, fromY: y, moved: false, swipe: Boolean(onStep) && (!canStep || canStep()) && (!ready || atFit()), pending: !ready };
   };
   const settle = () => {
     image.classList.add('is-settling');
@@ -473,7 +480,16 @@ export const zoomViewer = ({ dialog, stage, image, level, zoomIn, zoomOut, fitBu
       else settle();
       return;
     }
-    const tapped = event.type === 'pointerup' && !wasPinch && drag && !drag.moved && ready;
+    // A tap that did not move: beside the picture (the dark surround) or while no picture shows, it closes the viewer; on the
+    // picture it counts toward a double tap.
+    const plain = event.type === 'pointerup' && !wasPinch && drag && !drag.moved;
+    if (plain && onSurroundTap && (!ready || outside(point))) {
+      drag = null;
+      lastTap = null;
+      onSurroundTap();
+      return;
+    }
+    const tapped = plain && ready;
     drag = null;
     if (!tapped) {
       lastTap = null;

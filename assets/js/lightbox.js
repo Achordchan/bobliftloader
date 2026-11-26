@@ -73,7 +73,7 @@ export function initializeLightbox() {
 // A story's pictures full screen in the zoom viewer (zoom-viewer.js), so a visitor can zoom into a chart or a photograph
 // without zooming the whole page: the lead picture and the stand artwork (their buttons in templates/pages/article.php)
 // and the pictures in the text, in page order. A click, a tap, Enter or Space on a picture opens it; a swipe, the arrows or
-// the arrow keys go to the story's other pictures; Esc, the close button or the dark surround close it, and the focus goes
+// the arrow keys go to the story's other pictures; Esc, the close button or a click on the dark surround close it, and the focus goes
 // back to the picture it was opened from. Left as they are: a picture inside a link (it already goes somewhere) or a
 // gallery, WordPress's own "Expand on click" lightbox, a video's cover and small pictures (icons, under 160 px across).
 // A chart drawn twice, wide for computers and tall for phones (news.css shows one), counts once: only the pictures showing
@@ -199,6 +199,8 @@ function initializeStoryPhotos(dialog) {
     onStep: (direction) => {
       if (photos.length > 1) step(direction);
     },
+    canStep: () => photos.length > 1,
+    onSurroundTap: () => dialog.close(),
     // The original cannot be had (or stalls): the copy the page itself shows is tried, then the viewer says so.
     onError: () => {
       const photo = photos[index];
@@ -269,9 +271,7 @@ function initializeStoryPhotos(dialog) {
     });
   });
   dialog.querySelector('[data-lightbox-close]')?.addEventListener('click', () => dialog.close());
-  dialog.addEventListener('click', (event) => {
-    if (event.target === dialog) dialog.close();
-  });
+  // A click beside the picture closes the viewer (onSurroundTap above): the stage and the bar under it fill the whole dialog.
   dialog.addEventListener('close', () => {
     if (opener?.isConnected) opener.focus({ preventScroll: true });
     opener = null;
