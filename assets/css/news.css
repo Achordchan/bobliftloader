@@ -263,44 +263,66 @@
 /* Shown on phones only (below): who wrote the story and when, the event's dates and booth, and a second way back to the list. */
 .bl-site .bl-story-byline,.bl-site .bl-story-when{display:none}
 
-/* The lightbox, as on product pages (product.css), which story pages do not load. */
-.bl-site .bl-lightbox{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:clamp(56px,4vw,96px) clamp(16px,6vw,140px);border:0;background:#03111ceb;color:#fff}
-.bl-site .bl-lightbox[open]{display:grid;place-items:center}
-.bl-site .bl-lightbox::backdrop{background:#03111c99}
-.bl-site .bl-lightbox figure{margin:0;display:grid;gap:14px;justify-items:center;max-width:100%;max-height:100%}
-.bl-site .bl-lightbox figure img{max-width:100%;max-height:calc(100dvh - 200px);object-fit:contain;background:#fff}
-.bl-site .bl-lightbox figcaption{display:flex;gap:18px;align-items:baseline;font-size:var(--fs-small);color:#c9d6df}
-.bl-site .bl-lightbox figcaption small{font-variant-numeric:tabular-nums;color:#8fa3b2}
-.bl-site .bl-lightbox-close{position:absolute;top:clamp(12px,1.4vw,32px);right:clamp(12px,1.4vw,32px)}
-.bl-site .bl-lightbox .bl-circle-button{background:#fff;border-color:#fff;color:var(--ink)}
-.bl-site .bl-lightbox-step{position:absolute;top:50%;transform:translateY(-50%)}
-.bl-site .bl-lightbox-prev{left:clamp(8px,1.4vw,32px)}
-.bl-site .bl-lightbox-next{right:clamp(8px,1.4vw,32px)}
-.bl-site .bl-lightbox-next .bl-icon{transform:rotate(180deg)}
-.bl-site .bl-lightbox-step[hidden]{display:none}
-@media(hover:hover){.bl-site .bl-lightbox-step:hover,.bl-site .bl-lightbox-close:hover{background:var(--blue);border-color:var(--blue)}}
-@media(hover:hover){.bl-site .bl-lightbox-step:hover{transform:translateY(-50%)}}
-@media(max-width:600px){.bl-site .bl-lightbox-step,.bl-site .bl-lightbox-step:hover{top:auto;bottom:16px;transform:none}}
-/* Phones held upright: a tall poster fitted to the screen's height would come out no larger than in the story, so it
-   takes the full width instead and scrolls inside the lightbox, its small print readable; the buttons stay put. */
-@media(max-width:600px) and (orientation:portrait){
-  .bl-site #story-lightbox[open]{display:block;overflow-y:auto;overscroll-behavior:contain;padding:76px 0 88px}
-  .bl-site #story-lightbox figure img{width:100%;max-height:none}
-  .bl-site #story-lightbox figcaption{padding-inline:var(--gutter)}
-  .bl-site #story-lightbox :is(.bl-lightbox-close,.bl-lightbox-step){position:fixed;box-shadow:0 2px 12px #03111c59}
+/* The story's pictures full screen in the zoom viewer (article.php, lightbox.js, zoom-viewer.js): the picture fills the
+   stage, with the caption, the count and the zoom buttons in a bar under it. */
+.bl-site .bl-photo-viewer{width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;overflow:hidden;background:#03111cf2;color:#fff}
+.bl-site .bl-photo-viewer[open]{display:grid;grid-template-rows:minmax(0,1fr) auto}
+.bl-site .bl-photo-viewer::backdrop{background:#03111c99}
+/* A browser without <dialog> (iOS Safari before 15.4) would show the closed viewer at the foot of the story; keep it out. */
+.bl-site .bl-photo-viewer:not([open]){display:none}
+/* The stage handles pinch and drag itself (zoom-viewer.js): no browser panning, page zoom or scroll chaining inside it. */
+.bl-site .bl-photo-viewer-stage{position:relative;min-height:0;overflow:hidden;touch-action:none;overscroll-behavior:contain;cursor:zoom-in;-webkit-user-select:none;user-select:none;outline:0}
+.bl-site .bl-photo-viewer-stage:focus-visible{box-shadow:inset 0 0 0 3px var(--blue)}
+.bl-site .bl-photo-viewer-stage.is-zoomed{cursor:grab}
+.bl-site .bl-photo-viewer-stage.is-dragging{cursor:grabbing}
+.bl-site .bl-photo-viewer-image{position:absolute;top:0;left:0;max-width:none;max-height:none;transform-origin:0 0;visibility:hidden;background:#fff;-webkit-user-drag:none;-webkit-touch-callout:none}
+.bl-site .bl-photo-viewer-image.is-ready{visibility:visible}
+/* A picture let go short of a swipe springs back. */
+.bl-site .bl-photo-viewer-image.is-settling{transition:transform .2s ease-out}
+.bl-site .bl-photo-viewer-spinner{display:none;position:absolute;top:50%;left:50%;width:32px;height:32px;border:2px solid #ffffff4d;border-top-color:#fff;border-radius:50%;pointer-events:none}
+.bl-site .is-loading>.bl-photo-viewer-spinner{display:block;animation:bl-photo-viewer-spin .8s linear infinite}
+@keyframes bl-photo-viewer-spin{from{transform:translate(-50%,-50%)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+.bl-site .bl-photo-viewer-error{position:absolute;inset-inline:16px;top:50%;transform:translateY(-50%);text-align:center;font-size:var(--fs-small);color:#c9d6df;pointer-events:none}
+.bl-site .bl-photo-viewer-error[hidden]{display:none}
+/* How to zoom, for a few seconds or until the first touch, wheel turn or click on the picture. */
+.bl-site .bl-photo-viewer-tip{position:absolute;bottom:16px;left:50%;z-index:1;width:max-content;max-width:calc(100% - 32px);transform:translateX(-50%);padding:6px 14px;border-radius:999px;background:#03111ccc;font-size:var(--fs-label);font-weight:600;color:#fff;text-align:center;pointer-events:none;transition:opacity .3s ease}
+.bl-site .bl-photo-viewer-stage.is-touched .bl-photo-viewer-tip{opacity:0}
+.bl-site .bl-photo-viewer .bl-circle-button{background:#fff;border-color:#fff;color:var(--ink)}
+.bl-site .bl-photo-viewer-close{position:absolute;top:clamp(12px,1.4vw,32px);right:clamp(12px,1.4vw,32px);z-index:2;box-shadow:0 2px 12px #03111c59}
+.bl-site .bl-photo-viewer-step{position:absolute;top:50%;z-index:1;transform:translateY(-50%);box-shadow:0 2px 12px #03111c59}
+.bl-site .bl-photo-viewer-prev{left:clamp(8px,1.4vw,32px)}
+.bl-site .bl-photo-viewer-next{right:clamp(8px,1.4vw,32px)}
+.bl-site .bl-photo-viewer-next .bl-icon{transform:rotate(180deg)}
+.bl-site .bl-photo-viewer-step[hidden]{display:none}
+/* Zoomed in, the arrows step aside (zoom-viewer.js) so a tap meant for the detail cannot change pictures; they return at fit. */
+.bl-site .bl-photo-viewer-stage [data-zoom-hide]{transition:opacity .15s ease,visibility .15s}
+.bl-site .bl-photo-viewer-stage.is-zoomed [data-zoom-hide]{opacity:0;visibility:hidden;pointer-events:none}
+@media(hover:hover){.bl-site .bl-photo-viewer :is(.bl-photo-viewer-step,.bl-photo-viewer-close):hover{background:var(--blue);border-color:var(--blue)}}
+@media(hover:hover){.bl-site .bl-photo-viewer-step:hover{transform:translateY(-50%)}}
+.bl-site .bl-photo-viewer-bar{display:flex;align-items:center;justify-content:space-between;gap:12px 24px;padding:12px clamp(16px,2vw,40px) max(12px,env(safe-area-inset-bottom,0px));border-top:1px solid #ffffff1f}
+.bl-site .bl-photo-viewer-caption{display:flex;gap:14px;align-items:baseline;min-width:0;margin:0;font-size:var(--fs-small);line-height:1.4;color:#c9d6df}
+.bl-site .bl-photo-viewer-caption span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bl-site .bl-photo-viewer-caption small{flex-shrink:0;font-variant-numeric:tabular-nums;color:#8fa3b2}
+.bl-site .bl-photo-viewer-caption small:empty{display:none}
+.bl-site .bl-photo-viewer-tools{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.bl-site .bl-photo-viewer-tool{display:grid;place-items:center;width:40px;height:40px;border:1px solid #ffffff40;border-radius:50%;transition:background .2s,border-color .2s}
+.bl-site .bl-photo-viewer-tool .bl-icon{width:18px;height:18px;filter:invert(1)}
+.bl-site .bl-photo-viewer-tool:disabled{opacity:.4;cursor:default}
+@media(hover:hover){.bl-site .bl-photo-viewer-tool:not(:disabled):hover{background:var(--blue);border-color:var(--blue)}}
+.bl-site .bl-photo-viewer-tool:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.bl-site .bl-photo-viewer-level{min-width:48px;text-align:center;font-size:var(--fs-label);font-weight:600;font-variant-numeric:tabular-nums;color:#c9d6df}
+/* Phones: the arrows sit at the foot of the picture, clear of the detail, and the caption wraps over two lines at most. */
+@media(max-width:600px){
+  .bl-site .bl-photo-viewer-step,.bl-site .bl-photo-viewer-step:hover{top:auto;bottom:16px;transform:none}
+  .bl-site .bl-photo-viewer-tip{bottom:84px}
+  .bl-site .bl-photo-viewer-caption span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;white-space:normal}
 }
-@media(max-width:1000px) and (max-height:500px){
-  /* Three boxes in two columns: the event box runs down the right beside the other two, so none sits alone by an empty gap.
-     Where only one column fits, the boxes stack in order as before. */
-  .bl-site .bl-lightbox{padding:12px 76px}
-  .bl-site .bl-lightbox figure{gap:8px}
-  .bl-site .bl-lightbox figure img{max-height:calc(100dvh - 88px)}
-  .bl-site .bl-lightbox figcaption{line-height:1.4}
-}
+/* Pictures in a story's text open in the viewer (lightbox.js marks them): the zoom pointer, and a focus ring for the keyboard. */
+.bl-site .bl-wp-article-content img.bl-story-photo{cursor:zoom-in}
+.bl-site .bl-wp-article-content img.bl-story-photo:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
 
 /* Phones, upright or on their side. */
 @media(max-width:600px),(max-width:1000px) and (max-height:500px){
-  .bl-site .bl-lightbox figcaption small{white-space:nowrap}
   /* Author and date in one line under the lede; the Written by box then leaves out the repeated date. */
   .bl-site .bl-story-byline{display:flex;flex-wrap:wrap;align-items:center;margin-top:14px;font-size:var(--fs-label);font-weight:700;line-height:1.5}
   .bl-site .bl-story-byline time{font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}

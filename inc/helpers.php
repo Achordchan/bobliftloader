@@ -110,6 +110,37 @@ function bl_content_image_srcset(string $html, array $slots): string
     return $tags->get_updated_html();
 }
 
+/*
+ * The original upload of each media-library picture in a story's text, in data-full-src, for the story's zoom viewer
+ * (assets/js/lightbox.js): a picture placed at a smaller size (Large, 1024 px) is shown full size there. Read from the media
+ * library by the picture's wp-image-{id} class, so no file name is guessed; a picture placed by address has no such class
+ * and the viewer takes the address it was placed at.
+ */
+function bl_content_image_full(string $html): string
+{
+    if (!class_exists('WP_HTML_Tag_Processor') || stripos($html, 'wp-image-') === false) return $html;
+    $tags = new WP_HTML_Tag_Processor($html);
+    while ($tags->next_tag('img')) {
+        if (!preg_match('/(?:^|\s)wp-image-(\d+)(?:\s|$)/', (string) $tags->get_attribute('class'), $match)) continue;
+        $url = bl_attachment_full_url((int) $match[1]);
+        if ($url !== '') $tags->set_attribute('data-full-src', $url);
+    }
+    return $tags->get_updated_html();
+}
+
+/*
+ * The address of a media-library picture as it was uploaded: WordPress keeps a large upload (over 2,560 px) as a reduced
+ * "-scaled" copy, which is the attachment's address, and the upload itself as its original image. Empty when neither is known.
+ */
+function bl_attachment_full_url(int $id): string
+{
+    foreach (['wp_get_original_image_url', 'wp_get_attachment_url'] as $read) {
+        $url = function_exists($read) ? $read($id) : false;
+        if (is_string($url) && $url !== '') return $url;
+    }
+    return '';
+}
+
 /* A picture with Content Credentials under this many bytes is lighter whole than as a re-signed CDN copy (see bl_image_resized). */
 const BL_IMAGE_SIGNED_MIN = 65536;
 
