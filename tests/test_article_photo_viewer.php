@@ -4,7 +4,9 @@
 declare(strict_types=1);
 require __DIR__ . '/../inc/bootstrap.php';
 if (!function_exists('wp_kses_post')) { function wp_kses_post(string $html): string { return $html; } }
-if (!function_exists('wp_get_attachment_url')) { function wp_get_attachment_url(int $id) { return $id === 42 ? 'https://example.test/wp-content/uploads/2026/11/chart.png' : false; } }
+// Attachment 42 is a picture of ordinary size; 43 a large upload WordPress reduced to a -scaled copy, its original kept.
+if (!function_exists('wp_get_attachment_url')) { function wp_get_attachment_url(int $id) { return ['42' => 'https://example.test/wp-content/uploads/2026/11/chart.png', '43' => 'https://example.test/wp-content/uploads/2026/11/plan-scaled.png'][(string) $id] ?? false; } }
+if (!function_exists('wp_get_original_image_url')) { function wp_get_original_image_url(int $id) { return ['42' => 'https://example.test/wp-content/uploads/2026/11/chart.png', '43' => 'https://example.test/wp-content/uploads/2026/11/plan.png'][(string) $id] ?? false; } }
 $failures = [];
 $render = static function (array $changes): string {
     $route = ['record' => array_replace(bl_find_record(bl_articles(), 'canton-fair-2026'), $changes)];
@@ -36,6 +38,11 @@ if (class_exists('WP_HTML_Tag_Processor')) {
     if (substr_count($html, 'data-full-src=') !== 1) $failures[] = 'a picture placed by address was given an original it does not have';
 } elseif (str_contains($html, 'data-full-src=')) $failures[] = 'original named without the tag processor';
 if (!str_contains($html, 'class="bl-chart-wide"') || !str_contains($html, 'class="bl-chart-tall"')) $failures[] = 'chart drawings lost their classes';
+
+// The original upload, not WordPress's reduced -scaled copy of a large one; nothing for an unknown attachment.
+if (bl_attachment_full_url(43) !== 'https://example.test/wp-content/uploads/2026/11/plan.png') $failures[] = 'a scaled upload opens at its reduced copy';
+if (bl_attachment_full_url(42) !== 'https://example.test/wp-content/uploads/2026/11/chart.png') $failures[] = 'an ordinary upload lost its address';
+if (bl_attachment_full_url(99) !== '') $failures[] = 'an unknown attachment was given an address';
 
 // The helper alone: only an exact wp-image-{id} class counts, and an unknown attachment leaves the picture as it was.
 if (function_exists('bl_content_image_full') && class_exists('WP_HTML_Tag_Processor')) {
