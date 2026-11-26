@@ -134,7 +134,7 @@ function initializeStoryPhotos(dialog) {
     return found;
   };
   // The largest copy the page knows of: the original upload the server wrote in data-full-src (a media-library picture,
-  // inc/helpers.php bl_content_image_full), else the widest srcset entry (the theme's srcset ends with the picture as it was
+  // inc/helpers.php bl_content_image_full) unless a <picture> shows one of its sources instead, else the widest srcset entry (the theme's srcset ends with the picture as it was
   // inserted), else for a srcset by pixel density (1x, 2x) its densest entry, else the address shown. In a <picture> the
   // srcset read is that of the source showing. No file name is guessed. If it fails, the copy the page shows is used.
   const absolute = (url) => {
@@ -163,8 +163,9 @@ function initializeStoryPhotos(dialog) {
     }) || null;
   };
   const largest = (img) => {
-    if (img.dataset.fullSrc) return img.dataset.fullSrc;
     const source = activeSource(img);
+    // The original upload belongs to the <img> itself, so it counts only when no <source> is showing in its place.
+    if (!source && img.dataset.fullSrc) return img.dataset.fullSrc;
     // A <source> has no src of its own: its candidates are all there is, with the picture showing as a last resort.
     const src = source ? (img.currentSrc || '') : (img.getAttribute('src') || img.currentSrc || '');
     const candidates = srcsetCandidates((source || img).getAttribute('srcset') || '');
