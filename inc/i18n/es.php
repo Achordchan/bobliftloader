@@ -2525,6 +2525,11 @@ return [
     'Its rated load is 500 kg and its lifting capacity 650 kg, the most of any BOB-LIFT loader, from 20 MPa hydraulics. It also carries the largest bucket in the range, 0.19 m³ and 1,240 mm wide, and dumps at up to 1,522 mm. The machine weighs 1,250 kg and is 960 mm wide across the body.' => 'Su carga nominal es de 500 kg y su capacidad de elevación de 650 kg, la mayor de todas las cargadoras BOB-LIFT, con un sistema hidráulico de 20 MPa. También lleva el cucharón más grande de la gama, de 0.19 m³ y 1,240 mm de ancho, y descarga a hasta 1,522 mm de altura. La máquina pesa 1,250 kg y mide 960 mm de ancho en el cuerpo.',
     'Compare all loaders' => 'Compare todas las cargadoras',
     // Search titles and summaries rewritten 2026-11-26 for four stories with low click-through.
+    // The page <title> and og/twitter titles are translated whole, brand suffix included.
+    'Dumper Dimensions in mm and Feet: 1 to 5 Ton Sizes | BOB-LIFT' => 'Dimensiones de minidumpers en mm y pies: modelos de 1 a 5 t | BOB-LIFT',
+    'How Wide Is a 1 Ton Dumper? FC10 Width, Weight and Specs | BOB-LIFT' => '¿Qué ancho tiene un minidumper de 1 t? Ancho, peso y especificaciones del FC10 | BOB-LIFT',
+    'How Much Can a Mini Skid Steer Lift? Rated vs Tipping Load | BOB-LIFT' => '¿Cuánto puede levantar una minicargadora? Carga nominal frente a carga de vuelco | BOB-LIFT',
+    'Rubber Track Size Chart for Mini Skid Steers: How to Measure | BOB-LIFT' => 'Tabla de medidas de orugas de goma para minicargadoras: cómo medirlas | BOB-LIFT',
     'Dumper Dimensions in mm and Feet: 1 to 5 Ton Sizes' => 'Dimensiones de minidumpers en mm y pies: modelos de 1 a 5 t',
     'Width, length, height and dump height of nine dumpers in mm and feet, from the 880 mm (2 ft 11 in) tracked model to the 1,800 mm (5 ft 11 in) 5 ton, plus gate and trailer checks.' => 'Ancho, largo, alto y altura de descarga de nueve minidumpers en mm y pies, desde el modelo sobre orugas de 880 mm (2 ft 11 in) hasta el de 5 t de 1,800 mm (5 ft 11 in), y cómo revisar portones y remolques.',
     'How Wide Is a 1 Ton Dumper? FC10 Width, Weight and Specs' => '¿Qué ancho tiene un minidumper de 1 t? Ancho, peso y especificaciones del FC10',
