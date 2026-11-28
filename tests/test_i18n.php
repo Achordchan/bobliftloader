@@ -163,6 +163,12 @@ foreach ([
 }
 $check(bl_i18n_get($es_dictionary, 'Held nothing') === null, 'a Held label without event dates is left alone');
 
+// The story photo viewer: its buttons, messages and the data-* texts the scripts show are in Spanish.
+$viewer = bl_i18n_translate_html('<dialog data-open-label="View larger"><p data-loading-text="Loading photograph…"></p><p>This picture could not be loaded.</p><p data-tip-swipe="Pinch to zoom. Swipe for the next picture.">Pinch or use the mouse wheel to zoom. Drag to move.</p><div aria-label="Zoom"><button aria-label="Zoom out"></button><button aria-label="Zoom in"></button><button aria-label="Fit to screen"></button></div></dialog>', 'es');
+foreach (['data-open-label="Ver más grande"', 'data-loading-text="Cargando la fotografía…"', 'No se pudo cargar esta imagen.', 'data-tip-swipe="Pellizque', 'rueda del mouse', 'aria-label="Alejar la imagen"', 'aria-label="Acercar la imagen"', 'aria-label="Ajustar a la pantalla"'] as $needle) {
+    $check(str_contains($viewer, $needle), 'photo viewer in Spanish: ' . $needle);
+}
+
 $GLOBALS['bl_lang'] = 'en';
 $check(bl_i18n_script_dictionary() === '' && bl_i18n_localize_href('/contact/') === '/contact/', 'English pages are untouched');
 

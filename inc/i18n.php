@@ -68,7 +68,7 @@ const BL_I18N_DEFAULT_PAGES = [
 const BL_I18N_INLINE = ['a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd', 'mark', 'q', 's', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'time', 'u', 'var'];
 
 /** Attributes whose text people read or hear. */
-const BL_I18N_ATTRIBUTES = ['alt', 'title', 'aria-label', 'placeholder', 'data-alt', 'data-caption', 'data-gallery-alt']; // data-*: the product gallery's lightbox (assets/js/lightbox.js) shows them
+const BL_I18N_ATTRIBUTES = ['alt', 'title', 'aria-label', 'placeholder', 'data-alt', 'data-caption', 'data-gallery-alt', 'data-open-label', 'data-loading-text', 'data-tip-swipe']; // data-*: the product gallery's lightbox (assets/js/lightbox.js) and the story photo viewer (zoom-viewer.js) show them
 
 /** Meta tags whose content is page text (search results and link previews). */
 const BL_I18N_META = ['description', 'og:title', 'og:description', 'og:image:alt', 'twitter:title', 'twitter:description'];

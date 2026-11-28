@@ -2581,6 +2581,16 @@ return [
     'Tell us about your work and your country, and we will reply with specifications, videos and shipping options.' => 'Cuéntenos sobre su trabajo y su país, y le responderemos con especificaciones, videos y opciones de envío.',
     'To learn more <t0>about us</t0> and our factory in Xuzhou, visit the About page.' => 'Para saber más <t0>sobre nosotros</t0> y nuestra fábrica en Xuzhou, visite la página «Sobre nosotros».',
     'BOB-LIFT showed the BL-T460-H tracked stand-on mini skid steer at bauma CHINA 2026 in Shanghai, 24–27 November, on outdoor stand H.03. Film and photos from the stand.' => 'BOB-LIFT exhibió la minicargadora sobre orugas BL-T460-H con operador de pie en bauma CHINA 2026, en Shanghái, del 24 al 27 de noviembre, en el stand exterior H.03. Video y fotos del stand.',
+    // The story photo viewer (templates/pages/article.php, assets/js/lightbox.js and zoom-viewer.js).
+    'Zoom' => 'Zoom',
+    'Zoom out' => 'Alejar la imagen',
+    'Zoom in' => 'Acercar la imagen',
+    'Fit to screen' => 'Ajustar a la pantalla',
+    'This picture could not be loaded.' => 'No se pudo cargar esta imagen.',
+    'Pinch or use the mouse wheel to zoom. Drag to move.' => 'Pellizque la pantalla o use la rueda del mouse para hacer zoom. Arrastre para mover la imagen.',
+    'Pinch to zoom. Swipe for the next picture.' => 'Pellizque la pantalla para hacer zoom. Deslice el dedo para ver la siguiente imagen.',
+    'View larger' => 'Ver más grande',
+    'Loading photograph…' => 'Cargando la fotografía…',
     // The page <title> and og/twitter titles are translated whole, brand suffix included.
     'Dumper Dimensions in mm and Feet: 1 to 5 Ton Sizes | BOB-LIFT' => 'Dimensiones de minidumpers en mm y pies: modelos de 1 a 5 t | BOB-LIFT',
     'How Wide Is a 1 Ton Dumper? FC10 Width, Weight and Specs | BOB-LIFT' => '¿Qué ancho tiene un minidumper de 1 t? Ancho, peso y especificaciones del FC10 | BOB-LIFT',
