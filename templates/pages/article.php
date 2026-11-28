@@ -117,7 +117,7 @@ if ($contentHtml !== '' && $poster) {
         <h2>Event details</h2>
         <dl>
           <div><dt>Event</dt><dd><?= bl_escape($event['name']) ?></dd></div>
-          <div><dt>Dates</dt><dd><?= bl_escape(bl_event_dates($event)) ?> <span class="bl-news-when bl-news-when-<?= $status['state'] ?>"><?= bl_escape($status['label']) ?></span></dd></div>
+          <div><dt>Dates</dt><dd><?php if ($status['state'] !== 'past'): ?><?= bl_escape(bl_event_dates($event)) ?> <?php endif; ?><span class="bl-news-when bl-news-when-<?= $status['state'] ?>"><?= bl_escape($status['label']) ?></span></dd></div>
           <?php if (!empty($event['venue'])): ?><div><dt>Venue</dt><dd><?= bl_escape($event['venue']) ?><?php if (!empty($event['address'])): ?><small><?= bl_escape($event['address']) ?></small><?php endif; ?></dd></div><?php endif; ?>
           <?php if (!empty($event['booth'])): ?><div><dt>Booth</dt><dd><strong><?= bl_escape($event['booth']) ?></strong><?php if (!empty($event['booth_note'])): ?><small><?= bl_escape($event['booth_note']) ?></small><?php endif; ?></dd></div><?php endif; ?>
         </dl>

@@ -149,6 +149,20 @@ if (!bl_inquiry_live()) {
     $check(false, 'the fixture should have the inquiry plugin off');
 }
 
+// Event dates and status labels from bl_event_dates() / bl_event_status() follow one shape with different dates.
+$es_dictionary = bl_i18n_dictionary('es');
+foreach ([
+    '24–27 November 2026' => '24–27 de noviembre de 2026',
+    '30 October – 2 November 2026' => '30 de octubre – 2 de noviembre de 2026',
+    'Held 24–27 November 2026' => 'Celebrada: 24–27 de noviembre de 2026',
+    'Opens in 5 days' => 'Abre en 5 días',
+    '15–19 October 2026 <t0>On now</t0>' => '15–19 de octubre de 2026 <t0>En curso</t0>',
+    'Booth H.03' => 'Stand H.03',
+] as $english => $spanish) {
+    $check(bl_i18n_get($es_dictionary, $english) === $spanish, 'event label in Spanish: ' . $english);
+}
+$check(bl_i18n_get($es_dictionary, 'Held nothing') === null, 'a Held label without event dates is left alone');
+
 $GLOBALS['bl_lang'] = 'en';
 $check(bl_i18n_script_dictionary() === '' && bl_i18n_localize_href('/contact/') === '/contact/', 'English pages are untouched');
 
