@@ -3,7 +3,32 @@
 // translation with $1…, or a function of the match]. Used by bl_i18n_get() (inc/i18n.php) only for a key the dictionary
 // (es.php) does not have, so an entry there still wins. Wording from DeepL (ES-419), edited for "usted"; figures stay as
 // the page writes them (1,500 kg), as everywhere else on the Spanish pages.
+$bl_es_months = ['January' => 'enero', 'February' => 'febrero', 'March' => 'marzo', 'April' => 'abril', 'May' => 'mayo', 'June' => 'junio', 'July' => 'julio', 'August' => 'agosto', 'September' => 'septiembre', 'October' => 'octubre', 'November' => 'noviembre', 'December' => 'diciembre'];
+// Event dates as bl_event_dates() writes them: "24–27 November 2026" or "30 October – 2 November 2026".
+$bl_es_range = static function (string $range) use ($bl_es_months): ?string {
+    if (preg_match('~^(\d{1,2})–(\d{1,2}) ([A-Z][a-z]+) (\d{4})$~', $range, $m) && isset($bl_es_months[$m[3]])) return $m[1] . '–' . $m[2] . ' de ' . $bl_es_months[$m[3]] . ' de ' . $m[4];
+    if (preg_match('~^(\d{1,2}) ([A-Z][a-z]+) – (\d{1,2}) ([A-Z][a-z]+) (\d{4})$~', $range, $m) && isset($bl_es_months[$m[2]], $bl_es_months[$m[4]])) return $m[1] . ' de ' . $bl_es_months[$m[2]] . ' – ' . $m[3] . ' de ' . $bl_es_months[$m[4]] . ' de ' . $m[5];
+    return null;
+};
+// The event status label from bl_event_status().
+$bl_es_status = static function (string $label) use ($bl_es_range): ?string {
+    if ($label === 'On now') return 'En curso';
+    if ($label === 'Opens tomorrow') return 'Abre mañana';
+    if (preg_match('~^Opens in (\d+) days$~', $label, $m)) return 'Abre en ' . $m[1] . ' días';
+    if (str_starts_with($label, 'Held ') && ($range = $bl_es_range(substr($label, 5))) !== null) return 'Celebrada: ' . $range;
+    return null;
+};
 return [
+    // Event dates, the event status label, and the two together in the Event details box.
+    ['~^\d{1,2}(?: [A-Z][a-z]+)? ?– ?\d{1,2} [A-Z][a-z]+ \d{4}$~', static fn(array $m): ?string => $bl_es_range($m[0])],
+    ['~^(?:On now|Opens tomorrow|Opens in \d+ days|Held .+)$~', static fn(array $m): ?string => $bl_es_status($m[0])],
+    ['~^(.+?) <t0>(On now|Opens tomorrow|Opens in \d+ days|Held .+)</t0>$~', static function (array $m) use ($bl_es_range, $bl_es_status): ?string {
+        $range = $bl_es_range($m[1]);
+        $status = $bl_es_status($m[2]);
+        return $range !== null && $status !== null ? $range . ' <t0>' . $status . '</t0>' : null;
+    }],
+    // The booth on a news card: "Booth H.03".
+    ['~^Booth ([A-Z0-9][A-Z0-9.\-]*)$~', 'Stand $1'],
     // Story bylines and the Published / Updated dates: 26 November 2026 → 26 de noviembre de 2026. May is left to the
     // short form below (3 may 2026), because a byline in May reads the same as a news card's date.
     ['~^(\d{1,2}) (January|February|March|April|June|July|August|September|October|November|December) (\d{4})$~', static fn(array $m): string => $m[1] . ' de ' . ['January' => 'enero', 'February' => 'febrero', 'March' => 'marzo', 'April' => 'abril', 'June' => 'junio', 'July' => 'julio', 'August' => 'agosto', 'September' => 'septiembre', 'October' => 'octubre', 'November' => 'noviembre', 'December' => 'diciembre'][$m[2]] . ' de ' . $m[3]],
